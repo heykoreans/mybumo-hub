@@ -100,8 +100,9 @@ header{display:flex;align-items:center;justify-content:space-between;padding-bot
 .modal p{font-size:13px;color:var(--text-dim);margin-bottom:18px}
 .field{margin-bottom:14px}
 .field label{display:block;font-size:12px;font-weight:700;color:var(--text-dim);margin-bottom:6px}
-.field input,.field textarea{width:100%;font-family:inherit;font-size:14px;background:var(--bg);border:1px solid var(--border-soft);border-radius:10px;padding:11px 13px;color:var(--text);resize:vertical}
-.field input:focus,.field textarea:focus{outline:none;border-color:var(--cyan)}
+.field input,.field textarea,.field select{width:100%;font-family:inherit;font-size:14px;background:var(--bg);border:1px solid var(--border-soft);border-radius:10px;padding:11px 13px;color:var(--text);resize:vertical}
+.field select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%238aa0bd' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 13px center;padding-right:36px}
+.field input:focus,.field textarea:focus,.field select:focus{outline:none;border-color:var(--cyan)}
 .field .count{font-size:11px;color:var(--text-faint);text-align:right;margin-top:4px}
 .modal-err{font-size:13px;color:var(--orange);font-weight:700;margin-bottom:12px;min-height:18px}
 .modal-actions{display:flex;gap:10px;justify-content:flex-end}
@@ -176,7 +177,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding-bot
     <div class="section-label" data-i18n="sectionBoard">Community Board</div>
     <div class="tabs">
       <button class="tab on" id="tabIdea" data-i18n="tabIdeas">Game Ideas</button>
-      <button class="tab" disabled data-i18n="tabBugs">Bug Reports</button>
+      <button class="tab" id="tabBug" data-i18n="tabBugs">Bug Reports</button>
       <button class="tab" disabled data-i18n="tabFeatures">Feature Requests</button>
       <div class="tabs-spacer"></div>
       <button class="btn btn-primary" id="newPostBtn" data-i18n="newIdea">+ New Idea</button>
@@ -221,9 +222,21 @@ header{display:flex;align-items:center;justify-content:space-between;padding-bot
 
 <div class="overlay" id="postOverlay">
   <div class="modal">
-    <h3 data-i18n="postModalTitle">New Idea</h3>
-    <p data-i18n="postModalDesc">What game should we build? Great ideas actually get made.</p>
+    <h3 id="postModalTitle">New Idea</h3>
+    <p id="postModalDesc">What game should we build? Great ideas actually get made.</p>
     <div class="modal-err" id="postErr"></div>
+    <div class="field" id="postGameField" style="display:none">
+      <label data-i18n="bugGameLabel">Game</label>
+      <select id="postGame">
+        <option value="" data-i18n="bugGameSelect">Select a game</option>
+        <option value="stellar">STELLAR DRIVE</option>
+        <option value="petpop">PET POP</option>
+        <option value="waterpop">WATER POP</option>
+        <option value="spellpop">SPELL POP</option>
+        <option value="acornpop">ACORN POP</option>
+        <option value="matchpop">MATCH POP</option>
+      </select>
+    </div>
     <div class="field">
       <label data-i18n="postTitleLabel">Title</label>
       <input id="postTitle" maxlength="80" placeholder="One-line summary" autocomplete="off">
@@ -273,16 +286,18 @@ let isAdmin = false;
 let todayCount = 0;
 let totalPlays = 0;
 let currentLang = localStorage.getItem(LANG_KEY) || 'en';
+let currentTab = 'idea';
 
 const STRINGS = {
   en: {
     sectionGames: 'Games', sectionBoard: 'Community Board',
     sectionUpdates: 'Recent Updates', sectionGuest: 'Guestbook',
     tabIdeas: 'Game Ideas', tabBugs: 'Bug Reports', tabFeatures: 'Feature Requests',
-    newIdea: '+ New Idea', newGuest: '+ Sign Guestbook',
+    newIdea: '+ New Idea', newBug: '+ Bug Report', newGuest: '+ Sign Guestbook',
     voteSlot: 'Vote your favorite below \u2193',
     loading: 'Loading...', loadFail: 'Failed to load.',
     emptyPosts: 'No ideas yet. Be the first!',
+    emptyBugs: 'No bug reports yet. Found something? Let us know!',
     emptyGuest: 'No entries yet. Be the first!',
     emptyUpdates: 'Updates will appear here soon',
     csTitle: 'Create Callsign',
@@ -292,7 +307,11 @@ const STRINGS = {
     csSave: 'Get Started', cancel: 'Cancel', deleteBtn: 'Delete',
     postModalTitle: 'New Idea',
     postModalDesc: 'What game should we build? Great ideas actually get made.',
+    bugModalTitle: 'Bug Report',
+    bugModalDesc: 'Found a bug? Tell us which game and what happened.',
+    bugGameLabel: 'Game', bugGameSelect: 'Select a game',
     postTitleLabel: 'Title', postDescLabel: 'Description', postSubmit: 'Post',
+    postErrGame: 'Please select a game.',
     guestModalTitle: 'Sign Guestbook',
     guestModalDesc: 'Leave a quick hello or game impression.',
     guestMsgLabel: 'Message (max 200 chars)', guestSubmit: 'Leave a Note',
@@ -328,10 +347,11 @@ const STRINGS = {
     sectionGames: 'Games', sectionBoard: '\ucee4\ubba4\ub2c8\ud2f0 \uac8c\uc2dc\ud310',
     sectionUpdates: '\ucd5c\uadfc \uc5c5\ub370\uc774\ud2b8', sectionGuest: '\ubc29\uba85\ub85d',
     tabIdeas: '\uac8c\uc784 \uc544\uc774\ub514\uc5b4', tabBugs: '\ubc84\uadf8 \uc2e0\uace0', tabFeatures: '\uae30\ub2a5 \uc694\uccad',
-    newIdea: '+ \uc0c8 \uc544\uc774\ub514\uc5b4', newGuest: '+ \ubc29\uba85\ub85d \ub0a8\uae30\uae30',
+    newIdea: '+ \uc0c8 \uc544\uc774\ub514\uc5b4', newBug: '+ \ubc84\uadf8 \uc2e0\uace0', newGuest: '+ \ubc29\uba85\ub85d \ub0a8\uae30\uae30',
     voteSlot: '\uc544\ub798\uc5d0\uc11c \ud22c\ud45c\ud558\uc138\uc694 \u2193',
     loading: '\ubd88\ub7ec\uc624\ub294 \uc911...', loadFail: '\ubd88\ub7ec\uc624\uae30 \uc2e4\ud328',
     emptyPosts: '\uc544\uc9c1 \uc544\uc774\ub514\uc5b4\uac00 \uc5c6\uc5b4\uc694. \uccab \ubc88\uc9f8\ub85c \uc62c\ub824\ubcf4\uc138\uc694!',
+    emptyBugs: '\uc544\uc9c1 \ubc84\uadf8 \uc2e0\uace0\uac00 \uc5c6\uc5b4\uc694. \ubc84\uadf8\ub97c \ubc1c\uacac\ud588\ub098\uc694?',
     emptyGuest: '\uc544\uc9c1 \ubc29\uba85\ub85d\uc774 \uc5c6\uc5b4\uc694. \uccab \ubc88\uc9f8\ub85c \ub0a8\uaca8\ubcf4\uc138\uc694!',
     emptyUpdates: '\uae30\uc5ec \ub0b4\uc5ed\uc774 \uace7 \uc5ec\uae30 \ud45c\uc2dc\ub429\ub2c8\ub2e4',
     csTitle: '\ucf5c\uc0ac\uc778 \ub9cc\ub4e4\uae30',
@@ -341,7 +361,11 @@ const STRINGS = {
     csSave: '\uc2dc\uc791\ud558\uae30', cancel: '\ucde8\uc18c', deleteBtn: '\uc0ad\uc81c',
     postModalTitle: '\uc0c8 \uc544\uc774\ub514\uc5b4',
     postModalDesc: '\uc5b4\ub5a4 \uac8c\uc784\uc744 \ub9cc\ub4e4\uba74 \uc88b\uc744\uae4c\uc694? \uc88b\uc740 \uc544\uc774\ub514\uc5b4\ub294 \uc2e4\uc81c\ub85c \ub9cc\ub4e4\uc5b4\uc9d1\ub2c8\ub2e4.',
+    bugModalTitle: '\ubc84\uadf8 \uc2e0\uace0',
+    bugModalDesc: '\ubc84\uadf8\ub97c \ubc1c\uacac\ud588\ub098\uc694? \uac8c\uc784\uacfc \ubb38\uc81c \uc0c1\ud669\uc744 \uc54c\ub824\uc8fc\uc138\uc694.',
+    bugGameLabel: '\uac8c\uc784', bugGameSelect: '\uac8c\uc784 \uc120\ud0dd',
     postTitleLabel: '\uc81c\ubaa9', postDescLabel: '\uc124\uba85', postSubmit: '\uc62c\ub9ac\uae30',
+    postErrGame: '\uac8c\uc784\uc744 \uc120\ud0dd\ud574\uc8fc\uc138\uc694.',
     guestModalTitle: '\ubc29\uba85\ub85d \ub0a8\uae30\uae30',
     guestModalDesc: '\uac04\ub2e8\ud55c \uc778\uc0ac\ub098 \uac8c\uc784 \uc18c\uac10\uc744 \ub0a8\uaca8\uc8fc\uc138\uc694.',
     guestMsgLabel: '\uba54\uc2dc\uc9c0 (\ucd5c\ub300 200\uc790)', guestSubmit: '\ub0a8\uae30\uae30',
@@ -381,6 +405,24 @@ function t(key, v0){
   return s;
 }
 
+function updatePostTabUI(){
+  document.getElementById('tabIdea').classList.toggle('on', currentTab === 'idea');
+  document.getElementById('tabBug').classList.toggle('on', currentTab === 'bug');
+  document.getElementById('newPostBtn').textContent = t(currentTab === 'idea' ? 'newIdea' : 'newBug');
+  document.getElementById('postModalTitle').textContent = t(currentTab === 'idea' ? 'postModalTitle' : 'bugModalTitle');
+  document.getElementById('postModalDesc').textContent = t(currentTab === 'idea' ? 'postModalDesc' : 'bugModalDesc');
+  document.getElementById('postDesc').placeholder = currentTab === 'bug'
+    ? (currentLang === 'ko' ? '\ubc84\uadf8 \uc0c1\ud669\uc744 \uc790\uc138\ud788 \uc801\uc5b4\uc8fc\uc138\uc694' : 'Describe the bug in detail')
+    : (currentLang === 'ko' ? '\uc5b4\ub5a4 \uac8c\uc784\uc778\uc9c0 \uc790\uc138\ud788 \uc801\uc5b4\uc8fc\uc138\uc694' : 'Describe the game in detail');
+}
+
+function switchTab(tab){
+  if(tab === currentTab) return;
+  currentTab = tab;
+  updatePostTabUI();
+  loadPosts();
+}
+
 function toggleLang(){
   currentLang = currentLang === 'en' ? 'ko' : 'en';
   localStorage.setItem(LANG_KEY, currentLang);
@@ -395,10 +437,10 @@ function renderLang(){
   document.querySelectorAll('[data-i18n]').forEach(el => {
     el.textContent = t(el.getAttribute('data-i18n'));
   });
+  updatePostTabUI();
   document.getElementById('csInput').placeholder = currentLang==='ko' ? '\uc608: starhopper' : 'e.g. starhopper';
   document.getElementById('csEmail').placeholder = currentLang==='ko' ? '\uc548 \uc801\uc5b4\ub3c4 \ub429\ub2c8\ub2e4' : 'No need to fill in';
   document.getElementById('postTitle').placeholder = currentLang==='ko' ? '\ud55c \uc904 \uc694\uc57d' : 'One-line summary';
-  document.getElementById('postDesc').placeholder = currentLang==='ko' ? '\uc5b4\ub5a4 \uac8c\uc784\uc778\uc9c0 \uc790\uc138\ud788 \uc801\uc5b4\uc8fc\uc138\uc694' : 'Describe the game in detail';
   document.getElementById('guestMsg').placeholder = currentLang==='ko' ? '\uc548\ub155\ud558\uc138\uc694! \uc7ac\ubc0f\uac8c \ub180\uc558\uc5b4\uc694' : 'Hello! Had a great time playing!';
   renderUserBox();
   document.getElementById('stat-today').textContent = t('statToday', todayCount.toLocaleString());
@@ -495,20 +537,21 @@ async function loadLikes(){
 async function loadPosts(){
   await loadLikes();
   const {data,error}=await db.from('hub_posts')
-    .select('*').eq('type','idea').neq('status','rejected')
+    .select('*').eq('type',currentTab).neq('status','rejected')
     .order('like_count',{ascending:false}).order('created_at',{ascending:false});
   const list=document.getElementById('postList');
   if(error){ list.innerHTML='<div class="empty-state">'+t('loadFail')+'</div>'; return; }
-  if(!data||data.length===0){ list.innerHTML='<div class="empty-state">'+t('emptyPosts')+'</div>'; return; }
+  if(!data||data.length===0){ list.innerHTML='<div class="empty-state">'+t(currentTab==='idea'?'emptyPosts':'emptyBugs')+'</div>'; return; }
   list.innerHTML=data.map(p=>{
     const liked=likedSet.has(p.id)?' liked':'';
+    const gameTag=p.type==='bug'&&p.target_game?' · '+escapeHtml(p.target_game.toUpperCase()):'';
     return '<div class="post">'
       +'<div class="like-box'+liked+'" onclick="toggleLike(\''+p.id+'\')">'
         +'<span class="like-n">'+p.like_count+'</span><span class="like-label">'+t('likeLabel')+'</span></div>'
       +'<div class="post-body">'
         +'<div class="post-head"><span class="post-title">'+escapeHtml(p.title)+'</span>'+statusBadge(p)+'</div>'
         +'<div class="post-desc">'+escapeHtml(p.description||'')+'</div>'
-        +'<div class="post-meta-row"><span class="post-meta">@'+escapeHtml(p.author_callsign)+' · '+timeAgo(p.created_at)+'</span>'
+        +'<div class="post-meta-row"><span class="post-meta">@'+escapeHtml(p.author_callsign)+gameTag+' · '+timeAgo(p.created_at)+'</span>'
           +(isAdmin?'<button class="post-del" onclick="deletePost(\''+p.id+'\')">'+t('deleteBtn')+'</button>':'')
         +'</div>'
       +'</div></div>';
@@ -589,6 +632,9 @@ function openPostModal(){
   document.getElementById('postDesc').value='';
   document.getElementById('titleCount').textContent='0';
   document.getElementById('descCount').textContent='0';
+  document.getElementById('postGameField').style.display = currentTab === 'bug' ? '' : 'none';
+  if(currentTab === 'bug') document.getElementById('postGame').value = '';
+  updatePostTabUI();
   document.getElementById('postOverlay').classList.add('show');
   document.getElementById('postTitle').focus();
 }
@@ -601,10 +647,16 @@ async function submitPost(){
   const err=document.getElementById('postErr');
   if(title.length<3){ err.textContent=t('postErrTitle'); return; }
   if(!isClean(title)||!isClean(desc)){ err.textContent=t('postErrProfanity'); return; }
+  const row={author_callsign:cs,type:currentTab,title,description:desc};
+  if(currentTab==='bug'){
+    const game=document.getElementById('postGame').value;
+    if(!game){ err.textContent=t('postErrGame'); return; }
+    row.target_game=game;
+  }
   const since=new Date(Date.now()-86400000).toISOString();
   const {count}=await db.from('hub_posts').select('*',{count:'exact',head:true}).eq('author_callsign',cs).gte('created_at',since);
   if(count!==null&&count>=5){ err.textContent=t('postErrLimit'); return; }
-  const {error}=await db.from('hub_posts').insert({author_callsign:cs,type:'idea',title,description:desc});
+  const {error}=await db.from('hub_posts').insert(row);
   if(error){ err.textContent=t('postErrFail'); return; }
   closePostModal();
   await loadPosts();
@@ -637,6 +689,8 @@ async function submitGuestbook(){
 }
 
 document.getElementById('newPostBtn').onclick=openPostModal;
+document.getElementById('tabIdea').onclick=()=>switchTab('idea');
+document.getElementById('tabBug').onclick=()=>switchTab('bug');
 document.getElementById('csSave').onclick=saveCallsign;
 document.getElementById('csCancel').onclick=closeCsModal;
 document.getElementById('postSubmit').onclick=submitPost;
