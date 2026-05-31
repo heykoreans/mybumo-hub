@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>mybumo game hub</title>
+
+<meta property="og:title" content="mybumo game hub">
+<meta property="og:description" content="잘 만든 작은 게임 모음 + 커뮤니티 게임 인큐베이터">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://game.mybumo.com">
+<meta property="og:image" content="https://game.mybumo.com/og.png">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#0a1428;
+  --bg-card:#0f1d35;
+  --bg-card-2:#13233f;
+  --cyan:#4dd0ff;
+  --orange:#f78a3a;
+  --border:rgba(77,208,255,0.5);
+  --border-soft:rgba(77,208,255,0.18);
+  --text:#e8f1fb;
+  --text-dim:#8aa0bd;
+  --text-faint:#5a7290;
+  --green:#4ade80;
+  --amber:#fbbf24;
+  --radius:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:'Nunito',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  line-height:1.5;
+  position:relative;
+  overflow-x:hidden;
+}
+body::before{
+  content:'';
+  position:fixed;
+  inset:0;
+  background-image:
+    radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,0.7), transparent),
+    radial-gradient(1px 1px at 60% 70%, rgba(255,255,255,0.5), transparent),
+    radial-gradient(1px 1px at 80% 20%, rgba(255,255,255,0.6), transparent),
+    radial-gradient(1px 1px at 35% 80%, rgba(255,255,255,0.4), transparent),
+    radial-gradient(2px 2px at 90% 60%, rgba(77,208,255,0.5), transparent),
+    radial-gradient(1px 1px at 10% 60%, rgba(255,255,255,0.5), transparent),
+    radial-gradient(1px 1px at 50% 10%, rgba(255,255,255,0.4), transparent);
+  background-size:600px 600px;
+  pointer-events:none;
+  z-index:0;
+}
+.wrap{position:relative;z-index:1;max-width:760px;margin:0 auto;padding:24px 18px 60px}
+
+header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding-bottom:18px;margin-bottom:28px;
+  border-bottom:1px solid var(--border-soft);
+}
+.brand{display:flex;align-items:center;gap:12px}
+.brand-logo{
+  width:38px;height:38px;border-radius:10px;
+  background:linear-gradient(135deg,var(--cyan),var(--orange));
+  display:flex;align-items:center;justify-content:center;
+  font-weight:900;font-size:18px;color:var(--bg);
+}
+.brand-name{font-weight:900;font-size:18px;letter-spacing:-0.3px}
+.brand-sub{font-size:12px;color:var(--text-faint)}
+.user-box{display:flex;align-items:center;gap:10px;font-size:14px}
+.callsign-tag{color:var(--cyan);font-weight:700}
+.btn{
+  font-family:inherit;font-weight:700;cursor:pointer;
+  border:1px solid var(--border);background:transparent;color:var(--cyan);
+  padding:8px 16px;border-radius:10px;font-size:14px;
+  transition:all .15s;
+}
+.btn:hover{background:rgba(77,208,255,0.12)}
+.btn-primary{background:var(--cyan);color:var(--bg);border-color:var(--cyan)}
+.btn-primary:hover{background:#6fdbff}
+
+.section-label{
+  font-size:12px;letter-spacing:0.12em;text-transform:uppercase;
+  color:var(--text-faint);font-weight:700;margin-bottom:14px;
+}
+.section{margin-bottom:36px}
+
+.games-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media(max-width:560px){.games-grid{grid-template-columns:repeat(2,1fr)}}
+.game-card{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:16px;
+  text-decoration:none;color:inherit;display:block;
+  transition:transform .15s,border-color .15s;
+}
+.game-card:hover{transform:translateY(-3px);border-color:var(--cyan)}
+.game-card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.game-title{font-weight:900;font-size:15px}
+.game-desc{font-size:13px;color:var(--text-dim);min-height:36px}
+.game-link{font-size:12px;color:var(--cyan);margin-top:10px}
+.badge{font-size:11px;font-weight:900;padding:3px 9px;border-radius:999px;letter-spacing:0.04em}
+.badge-live{background:rgba(74,222,128,0.18);color:var(--green)}
+.badge-soon{background:rgba(247,138,58,0.18);color:var(--orange)}
+.badge-open{background:rgba(77,208,255,0.16);color:var(--cyan)}
+.badge-building{background:rgba(251,191,36,0.18);color:var(--amber)}
+.badge-shipped{background:rgba(74,222,128,0.18);color:var(--green)}
+.slot{
+  border:1.5px dashed var(--border-soft);border-radius:var(--radius);
+  display:flex;align-items:center;justify-content:center;text-align:center;
+  color:var(--text-faint);font-size:12px;font-weight:700;padding:16px;min-height:100px;
+}
+
+.tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
+.tab{
+  font-family:inherit;font-weight:700;font-size:13px;cursor:pointer;
+  padding:7px 14px;border-radius:10px;border:1px solid var(--border-soft);
+  background:transparent;color:var(--text-dim);transition:all .15s;
+}
+.tab.on{background:rgba(77,208,255,0.16);color:var(--cyan);border-color:var(--border)}
+.tab:disabled{opacity:0.45;cursor:not-allowed}
+.tabs-spacer{flex:1}
+
+.post{
+  background:var(--bg-card);border:1px solid var(--border-soft);
+  border-radius:12px;padding:14px 16px;display:flex;gap:14px;margin-bottom:10px;
+  transition:border-color .15s;
+}
+.post:hover{border-color:var(--border)}
+.like-box{
+  min-width:54px;text-align:center;cursor:pointer;user-select:none;
+  background:var(--bg-card-2);border-radius:10px;padding:8px 0;
+  border:1px solid transparent;transition:all .15s;
+}
+.like-box:hover{border-color:var(--border)}
+.like-box.liked{background:rgba(77,208,255,0.16);border-color:var(--border)}
+.like-n{display:block;font-size:16px;font-weight:900;color:var(--text)}
+.like-label{font-size:10px;color:var(--text-faint);font-weight:700}
+.post-body{flex:1;min-width:0}
+.post-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin-bottom:4px}
+.post-title{font-weight:900;font-size:15px}
+.post-desc{font-size:13px;color:var(--text-dim);margin-bottom:8px;word-break:break-word}
+.post-meta{font-size:11px;color:var(--text-faint);font-weight:700}
+.empty-state{text-align:center;color:var(--text-faint);font-size:14px;padding:36px 0;font-weight:700}
+
+.updates{background:var(--bg-card);border:1px solid var(--border-soft);border-radius:var(--radius);padding:4px 16px}
+.update{display:flex;gap:12px;padding:11px 0;font-size:13px;align-items:baseline;border-top:1px solid var(--border-soft)}
+.update:first-child{border-top:none}
+.update-ver{font-family:monospace;font-size:11px;color:var(--text-faint);min-width:58px}
+.update-cs{color:var(--cyan);font-weight:700}
+
+.overlay{
+  position:fixed;inset:0;background:rgba(5,10,20,0.78);
+  display:none;align-items:center;justify-content:center;z-index:50;padding:20px;
+}
+.overlay.show{display:flex}
+.modal{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:18px;padding:26px;width:100%;max-width:420px;
+}
+.modal h3{font-size:19px;font-weight:900;margin-bottom:6px}
+.modal p{font-size:13px;color:var(--text-dim);margin-bottom:18px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:12px;font-weight:700;color:var(--text-dim);margin-bottom:6px}
+.field input,.field textarea{
+  width:100%;font-family:inherit;font-size:14px;
+  background:var(--bg);border:1px solid var(--border-soft);
+  border-radius:10px;padding:11px 13px;color:var(--text);resize:vertical;
+}
+.field input:focus,.field textarea:focus{outline:none;border-color:var(--cyan)}
+.field .count{font-size:11px;color:var(--text-faint);text-align:right;margin-top:4px}
+.modal-err{font-size:13px;color:var(--orange);font-weight:700;margin-bottom:12px;min-height:18px}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="brand">
+      <div class="brand-logo">m</div>
+      <div>
+        <div class="brand-name">game.mybumo</div>
+        <div class="brand-sub">mybumo game hub</div>
+      </div>
+    </div>
+    <div class="user-box" id="userBox"></div>
+  </header>
+
+  <div class="section">
+    <div class="section-label">Games</div>
+    <div class="games-grid">
+      <a class="game-card" href="https://stellar.mybumo.com">
+        <div class="game-card-head">
+          <span class="game-title">STELLAR DRIVE</span>
+          <span class="badge badge-live">LIVE</span>
+        </div>
+        <div class="game-desc">소행성을 피하며 리더보드에 도전</div>
+        <div class="game-link">stellar.mybumo.com →</div>
+      </a>
+      <a class="game-card" href="https://petpop.mybumo.com">
+        <div class="game-card-head">
+          <span class="game-title">PET POP</span>
+          <span class="badge badge-live">LIVE</span>
+        </div>
+        <div class="game-desc">귀여운 펫과 함께하는 캐주얼 팝 게임</div>
+        <div class="game-link">petpop.mybumo.com →</div>
+      </a>
+      <a class="game-card" href="https://waterpop.mybumo.com">
+        <div class="game-card-head">
+          <span class="game-title">WATER POP</span>
+          <span class="badge badge-live">LIVE</span>
+        </div>
+        <div class="game-desc">물방울을 터뜨리는 캐주얼 팝 게임</div>
+        <div class="game-link">waterpop.mybumo.com →</div>
+      </a>
+      <a class="game-card" href="https://spellpop.mybumo.com">
+        <div class="game-card-head">
+          <span class="game-title">SPELL POP</span>
+          <span class="badge badge-live">LIVE</span>
+        </div>
+        <div class="game-desc">단어 철자를 익히는 스펠링 게임</div>
+        <div class="game-link">spellpop.mybumo.com →</div>
+      </a>
+      <a class="game-card" href="https://acornpop.mybumo.com">
+        <div class="game-card-head">
+          <span class="game-title">ACORN POP</span>
+          <span class="badge badge-live">LIVE</span>
+        </div>
+        <div class="game-desc">도토리를 받고 돌을 피하며 겨울나기</div>
+        <div class="game-link">acornpop.mybumo.com →</div>
+      </a>
+      <a class="game-card" href="https://matchpop.mybumo.com">
+        <div class="game-card-head">
+          <span class="game-title">MATCH POP</span>
+          <span class="badge badge-live">LIVE</span>
+        </div>
+        <div class="game-desc">카드를 뒤집어 짝을 맞추는 메모리 게임</div>
+        <div class="game-link">matchpop.mybumo.com →</div>
+      </a>
+      <div class="game-card" style="cursor:default">
+        <div class="game-card-head">
+          <span class="game-title">WORD POP</span>
+          <span class="badge badge-soon">SOON</span>
+        </div>
+        <div class="game-desc">단어를 입력해 일꾼을 막는 타이핑 게임</div>
+        <div class="game-link" style="color:var(--text-faint)">wordpop.mybumo.com</div>
+      </div>
+      <div class="slot">아래에서 투표하세요 ↓</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Community Board</div>
+    <div class="tabs">
+      <button class="tab on" id="tabIdea">게임 아이디어</button>
+      <button class="tab" disabled title="출시 후 공개">버그 신고</button>
+      <button class="tab" disabled title="출시 후 공개">기능 요청</button>
+      <div class="tabs-spacer"></div>
+      <button class="btn btn-primary" id="newPostBtn">+ 새 아이디어</button>
+    </div>
+    <div id="postList"><div class="empty-state">불러오는 중...</div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Recent Updates</div>
+    <div class="updates" id="updates"><div class="empty-state" style="padding:20px 0">기여 내역이 곧 여기 표시됩니다</div></div>
+  </div>
+
+</div>
+
+<div class="overlay" id="csOverlay">
+  <div class="modal">
+    <h3>콜사인 만들기</h3>
+    <p>글을 쓰거나 좋아요를 누르려면 콜사인이 필요해요. 한 번만 정하면 됩니다.</p>
+    <div class="modal-err" id="csErr"></div>
+    <div class="field">
+      <label>콜사인 (2~20자)</label>
+      <input id="csInput" maxlength="20" placeholder="예: starhopper" autocomplete="off">
+    </div>
+    <div class="field">
+      <label>이메일 (선택 — 기기 변경 시 복구용)</label>
+      <input id="csEmail" type="email" placeholder="안 적어도 됩니다" autocomplete="off">
+    </div>
+    <div class="modal-actions">
+      <button class="btn" id="csCancel">취소</button>
+      <button class="btn btn-primary" id="csSave">시작하기</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="postOverlay">
+  <div class="modal">
+    <h3>새 아이디어</h3>
+    <p>어떤 게임을 만들면 좋을까요? 좋은 아이디어는 실제로 만들어집니다.</p>
+    <div class="modal-err" id="postErr"></div>
+    <div class="field">
+      <label>제목</label>
+      <input id="postTitle" maxlength="80" placeholder="한 줄 요약" autocomplete="off">
+      <div class="count"><span id="titleCount">0</span>/80</div>
+    </div>
+    <div class="field">
+      <label>설명</label>
+      <textarea id="postDesc" maxlength="1000" rows="4" placeholder="어떤 게임인지 자세히 적어주세요"></textarea>
+      <div class="count"><span id="descCount">0</span>/1000</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" id="postCancel">취소</button>
+      <button class="btn btn-primary" id="postSubmit">올리기</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://tlpzztuxttsobhqprosk.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRscHp6dHV4dHRzb2JocXByb3NrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2Mzg2NDQsImV4cCI6MjA5MzIxNDY0NH0.gMP2SO2NCnbWbknHMObs11Z8vWH3Wa6_3bAGobV9_GU';
+
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const CS_KEY = 'mybumo_callsign';
+let likedSet = new Set();
+let pendingAction = null;
+
+const PROFANITY = ['fuck','shit','bitch','asshole','dick','cunt','nigger','faggot','씨발','시발','병신','개새끼','좆','니미'];
+function normalize(s){
+  return s.toLowerCase()
+    .replace(/0/g,'o').replace(/1/g,'i').replace(/3/g,'e')
+    .replace(/4/g,'a').replace(/5/g,'s').replace(/7/g,'t').replace(/@/g,'a').replace(/\$/g,'s');
+}
+function isClean(cs){
+  const n = normalize(cs);
+  return !PROFANITY.some(w => n.includes(w));
+}
+
+function getCallsign(){ return localStorage.getItem(CS_KEY); }
+
+function renderUserBox(){
+  const cs = getCallsign();
+  const box = document.getElementById('userBox');
+  if(cs){ box.innerHTML = '<span class="callsign-tag">@'+escapeHtml(cs)+'</span>'; }
+  else { box.innerHTML = '<button class="btn" id="signinBtn">콜사인 만들기</button>';
+    document.getElementById('signinBtn').onclick = openCsModal; }
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function timeAgo(ts){
+  const d = Math.floor((Date.now() - new Date(ts).getTime())/1000);
+  if(d<60) return '방금';
+  if(d<3600) return Math.floor(d/60)+'분 전';
+  if(d<86400) return Math.floor(d/3600)+'시간 전';
+  return Math.floor(d/86400)+'일 전';
+}
+
+function statusBadge(p){
+  if(p.status==='building') return '<span class="badge badge-building">제작 중</span>';
+  if(p.status==='shipped') return '<span class="badge badge-shipped">출시됨</span>';
+  if(p.status==='rejected') return '';
+  return '<span class="badge badge-open">'+p.like_count+'/'+p.threshold+'</span>';
+}
+
+async function loadLikes(){
+  const cs = getCallsign();
+  likedSet = new Set();
+  if(!cs) return;
+  const { data } = await db.from('hub_likes').select('post_id').eq('user_callsign', cs);
+  if(data) data.forEach(r => likedSet.add(r.post_id));
+}
+
+async function loadPosts(){
+  await loadLikes();
+  const { data, error } = await db.from('hub_posts')
+    .select('*').eq('type','idea').neq('status','rejected')
+    .order('like_count',{ascending:false}).order('created_at',{ascending:false});
+  const list = document.getElementById('postList');
+  if(error){ list.innerHTML = '<div class="empty-state">불러오기 실패</div>'; return; }
+  if(!data || data.length===0){ list.innerHTML = '<div class="empty-state">아직 아이디어가 없어요. 첫 번째로 올려보세요!</div>'; return; }
+  list.innerHTML = data.map(p => {
+    const liked = likedSet.has(p.id) ? ' liked' : '';
+    return '<div class="post">'
+      + '<div class="like-box'+liked+'" onclick="toggleLike(\''+p.id+'\')">'
+        + '<span class="like-n">'+p.like_count+'</span><span class="like-label">좋아요</span></div>'
+      + '<div class="post-body">'
+        + '<div class="post-head"><span class="post-title">'+escapeHtml(p.title)+'</span>'+statusBadge(p)+'</div>'
+        + '<div class="post-desc">'+escapeHtml(p.description||'')+'</div>'
+        + '<div class="post-meta">@'+escapeHtml(p.author_callsign)+' · '+timeAgo(p.created_at)+'</div>'
+      + '</div></div>';
+  }).join('');
+}
+
+async function loadUpdates(){
+  const { data } = await db.from('hub_contributions').select('*').order('shipped_at',{ascending:false}).limit(8);
+  const box = document.getElementById('updates');
+  if(!data || data.length===0) return;
+  box.innerHTML = data.map(c =>
+    '<div class="update"><span class="update-ver">'+escapeHtml(c.version)+'</span>'
+    + '<div>'+escapeHtml(c.game.toUpperCase())+' — '+escapeHtml(c.description)
+    + ' <span style="color:var(--text-faint)">(by <span class="update-cs">@'+escapeHtml(c.contributor_callsign)+'</span>)</span></div></div>'
+  ).join('');
+}
+
+window.toggleLike = async function(postId){
+  const cs = getCallsign();
+  if(!cs){ pendingAction = () => toggleLike(postId); openCsModal(); return; }
+  if(likedSet.has(postId)){
+    await db.from('hub_likes').delete().eq('post_id',postId).eq('user_callsign',cs);
+  } else {
+    await db.from('hub_likes').insert({ post_id:postId, user_callsign:cs });
+  }
+  await loadPosts();
+};
+
+function openCsModal(){ document.getElementById('csErr').textContent=''; document.getElementById('csOverlay').classList.add('show'); document.getElementById('csInput').focus(); }
+function closeCsModal(){ document.getElementById('csOverlay').classList.remove('show'); }
+
+async function saveCallsign(){
+  const cs = document.getElementById('csInput').value.trim();
+  const email = document.getElementById('csEmail').value.trim();
+  const err = document.getElementById('csErr');
+  if(cs.length<2 || cs.length>20){ err.textContent='콜사인은 2~20자여야 합니다.'; return; }
+  if(!isClean(cs)){ err.textContent='사용할 수 없는 단어가 포함되어 있어요.'; return; }
+  const row = { callsign:cs };
+  if(email) row.email = email;
+  const { error } = await db.from('hub_users').insert(row);
+  if(error){
+    if(error.code==='23505') err.textContent = email && error.message.includes('email')
+      ? '이미 등록된 이메일입니다.' : '이미 사용 중인 콜사인입니다.';
+    else err.textContent = '오류가 발생했습니다. 다시 시도해주세요.';
+    return;
+  }
+  localStorage.setItem(CS_KEY, cs);
+  closeCsModal();
+  renderUserBox();
+  const act = pendingAction; pendingAction = null;
+  if(act) act();
+}
+
+function openPostModal(){
+  if(!getCallsign()){ pendingAction = openPostModal; openCsModal(); return; }
+  document.getElementById('postErr').textContent='';
+  document.getElementById('postTitle').value='';
+  document.getElementById('postDesc').value='';
+  document.getElementById('titleCount').textContent='0';
+  document.getElementById('descCount').textContent='0';
+  document.getElementById('postOverlay').classList.add('show');
+  document.getElementById('postTitle').focus();
+}
+function closePostModal(){ document.getElementById('postOverlay').classList.remove('show'); }
+
+async function submitPost(){
+  const cs = getCallsign();
+  const title = document.getElementById('postTitle').value.trim();
+  const desc = document.getElementById('postDesc').value.trim();
+  const err = document.getElementById('postErr');
+  if(title.length<3){ err.textContent='제목을 3자 이상 적어주세요.'; return; }
+  if(!isClean(title) || !isClean(desc)){ err.textContent='사용할 수 없는 단어가 포함되어 있어요.'; return; }
+  const since = new Date(Date.now()-86400000).toISOString();
+  const { count } = await db.from('hub_posts').select('*',{count:'exact',head:true})
+    .eq('author_callsign',cs).gte('created_at',since);
+  if(count!==null && count>=5){ err.textContent='하루 5개까지만 올릴 수 있어요. 내일 다시 시도해주세요.'; return; }
+  const { error } = await db.from('hub_posts').insert({ author_callsign:cs, type:'idea', title, description:desc });
+  if(error){ err.textContent='등록 실패. 다시 시도해주세요.'; return; }
+  closePostModal();
+  await loadPosts();
+}
+
+document.getElementById('newPostBtn').onclick = openPostModal;
+document.getElementById('csSave').onclick = saveCallsign;
+document.getElementById('csCancel').onclick = closeCsModal;
+document.getElementById('postSubmit').onclick = submitPost;
+document.getElementById('postCancel').onclick = closePostModal;
+document.getElementById('csInput').addEventListener('keydown', e=>{ if(e.key==='Enter') saveCallsign(); });
+document.getElementById('postTitle').addEventListener('input', e=>{ document.getElementById('titleCount').textContent=e.target.value.length; });
+document.getElementById('postDesc').addEventListener('input', e=>{ document.getElementById('descCount').textContent=e.target.value.length; });
+[document.getElementById('csOverlay'),document.getElementById('postOverlay')].forEach(o=>{
+  o.addEventListener('click', e=>{ if(e.target===o) o.classList.remove('show'); });
+});
+
+renderUserBox();
+loadPosts();
+loadUpdates();
+</script>
+</body>
+</html>
