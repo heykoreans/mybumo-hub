@@ -79,6 +79,7 @@ a{color:var(--sky)}
 .btn.alt{background:var(--card);color:var(--ink);border:2px solid var(--line)}
 .btn.star{background:var(--star);color:#3a2a00}
 .btn:disabled{opacity:.45;cursor:default}
+.top-bar{position:fixed;top:max(12px,env(safe-area-inset-top));left:max(12px,env(safe-area-inset-left));z-index:15;display:flex;gap:8px;align-items:center}
 .lang-chip{background:var(--card);color:var(--muted);border:1px solid var(--line);border-radius:99px;padding:6px 12px;font-size:13px;min-height:36px}
 .text-btn{background:transparent;color:var(--muted);padding:8px 10px;font-size:14px;min-height:44px}
 
@@ -124,13 +125,18 @@ footer{display:flex;flex-direction:column;align-items:center;gap:4px}
 .burst{position:fixed;left:50%;top:40%;pointer-events:none;z-index:30}
 .burst i{position:absolute;font-style:normal;font-size:26px;color:var(--star);animation:fly .9s ease-out forwards}
 @keyframes fly{from{transform:translate(0,0) scale(.6);opacity:1}to{transform:translate(var(--x),var(--y)) scale(1.2);opacity:0}}
+.lv-pop{position:fixed;left:50%;top:42%;transform:translate(-50%,-50%);z-index:36;pointer-events:none;font-family:var(--display);font-size:clamp(28px,8vw,44px);color:var(--star-ink);background:var(--soft-star);border:3px solid var(--star);border-radius:18px;padding:12px 20px;text-align:center;max-width:calc(100% - 32px);animation:lvpop 1.5s ease forwards}
+@keyframes lvpop{0%{opacity:0}12%{opacity:1}78%{opacity:1}100%{opacity:0}}
 .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:99px;font-family:var(--display);z-index:40;max-width:calc(100% - 32px);text-align:center}
-@media (prefers-reduced-motion:reduce){.burst{display:none}.bar i{transition:none}}
+@media (prefers-reduced-motion:reduce){.burst{display:none}.bar i{transition:none}.lv-pop{animation:none;opacity:1}}
 @media (max-width:420px){.quests{grid-template-columns:1fr}.hero h1{font-size:25px}.bonus-row{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-<button type="button" class="lang-chip" data-lang-toggle style="position:fixed;top:max(12px,env(safe-area-inset-top));left:max(12px,env(safe-area-inset-left));z-index:15">한글</button>
+<div class="top-bar">
+  <button type="button" class="lang-chip" data-lang-toggle>한글</button>
+  <button type="button" class="lang-chip" id="soundBtn" aria-pressed="true">Sound on</button>
+</div>
 
 <div class="wrap" id="loading">
   <div>
@@ -228,6 +234,7 @@ footer{display:flex;flex-direction:column;align-items:center;gap:4px}
 </div>
 
 <div id="modalRoot"></div>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SUPABASE_URL = 'https://tlpzztuxttsobhqprosk.supabase.co';
@@ -236,6 +243,7 @@ const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { pers
 
 const CS_KEY = 'tidypop_callsign';
 const LANG_KEY = 'tidypop_lang';
+const SOUND_KEY = 'tidypop_sound';
 const CS_RE = /^[a-z0-9_-]{3,30}$/;
 const PIN_RE = /^[0-9]{4,8}$/;
 const ZONE_IDS = ['floor','bed','desk','dresser','toys'];
@@ -256,7 +264,7 @@ const STR = {
     week:'이번 주', mission:'오늘의 미션', missionSub:'자기 전 10분 · 구역마다 별 1개',
     questHead:'대청소 퀘스트', questSub:'한 번만 하면 돼요 · 각 별 10개',
     shop:'별 상점', shopSub:'교환할 때 부모님 비밀번호가 필요해요', log:'별 기록',
-    parentBtn:'부모님 설정', switchBtn:'가족 바꾸기',
+    parentBtn:'부모님 설정', switchBtn:'가족 바꾸기', soundOn:'소리 켜짐', soundOff:'소리 꺼짐',
     streakN:'{0}일 연속 중', allOn:'올클리어 보너스 받았어요 (+2)', allOff:'5구역 모두 끝내면 보너스 별 2개 ({0}/5)',
     streakOn:'{0}일 연속 보너스 받았어요 (+5)', streakOff:'연속 보너스까지 {0}일 남았어요',
     parentNeed:'올클리어하면 부모님 확인받기', parentReady:'부모님 확인받기 (별 +2)', parentDone:'오늘 부모님 확인 완료!',
@@ -324,7 +332,7 @@ const STR = {
     week:'This week', mission:'Today’s mission', missionSub:'10 minutes before bed · 1 star each zone',
     questHead:'Big tidy quests', questSub:'Do each one once · 10 stars',
     shop:'Star shop', shopSub:'A parent PIN is needed to trade', log:'Star log',
-    parentBtn:'Parent settings', switchBtn:'Switch family',
+    parentBtn:'Parent settings', switchBtn:'Switch family', soundOn:'Sound on', soundOff:'Sound off',
     streakN:'{0} days in a row', allOn:'All-clear bonus earned (+2)', allOff:'Finish all 5 zones for 2 bonus stars ({0}/5)',
     streakOn:'{0}-day streak bonus earned (+5)', streakOff:'{0} days left until the streak bonus',
     parentNeed:'Clear all zones to ask a parent', parentReady:'Parent check (+2 stars)', parentDone:'Parent checked today!',
@@ -475,8 +483,22 @@ function applyLang(){
     if (typeof v === 'string') el.placeholder = v;
   });
   document.querySelectorAll('[data-lang-toggle]').forEach(el => { el.textContent = lang === 'ko' ? 'English' : '한글'; });
+  updateSoundBtn();
   if ($('gateErr')) setGateErr(gateErrCode);
   if (mode === 'app') render();
+}
+function updateSoundBtn(){
+  const b = $('soundBtn');
+  if (!b) return;
+  const on = soundOn();
+  b.textContent = on ? t('soundOn') : t('soundOff');
+  b.setAttribute('aria-pressed', on ? 'true' : 'false');
+}
+function toggleSound(){
+  soundPref = soundOn() ? 'off' : 'on';
+  storeSet(SOUND_KEY, soundPref);
+  updateSoundBtn();
+  if (soundOn()) ensureAudio();
 }
 function toggleLang(){
   lang = lang === 'ko' ? 'en' : 'ko';
@@ -555,6 +577,7 @@ function schedule(mutateLocal, call, opt){
     pending--;
     if (isState(res)){
       if (opt.celebrate) opt.celebrate(before, res);
+      try { rewardFx(before, res, opt.fx); } catch(e){}
       if (pending === 0) applyState(res);
     } else if (!(res && res.ok)){
       if (mutateLocal && pending === 0){
@@ -653,9 +676,14 @@ function render(){
   if ($('csNote')) $('csNote').textContent = callsign ? '@'+callsign : '';
 }
 
-function burst(n){
+function burst(n, originEl){
   const b = document.createElement('div');
   b.className = 'burst';
+  if (originEl && originEl.getBoundingClientRect){
+    const r = originEl.getBoundingClientRect();
+    b.style.left = (r.left + r.width / 2) + 'px';
+    b.style.top = (r.top + r.height / 2) + 'px';
+  }
   for (let i = 0; i < n; i++){
     const s = document.createElement('i');
     s.textContent = '★';
@@ -669,6 +697,156 @@ function burst(n){
   setTimeout(() => b.remove(), 1200);
 }
 let tt;
+let audioCtx = null;
+let soundPref = storeGet(SOUND_KEY) === 'off' ? 'off' : 'on';
+const fxLast = Object.create(null);
+const FX_COLORS = ['#2f8fbf','#3fae8c','#f2b705','#e86a5a','#fff4c2'];
+function soundOn(){ return soundPref !== 'off'; }
+function ensureAudio(){
+  if (!soundOn()) return;
+  const AC = window.AudioContext || window.webkitAudioContext;
+  if (!AC) return;
+  if (!audioCtx){ try { audioCtx = new AC(); } catch(e){ return; } }
+  if (audioCtx.state === 'suspended') audioCtx.resume().catch(function(){});
+}
+function fxGate(name){
+  const now = performance.now();
+  if (fxLast[name] && now - fxLast[name] < 200) return false;
+  fxLast[name] = now;
+  return true;
+}
+function motionOk(){
+  return !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+}
+function popConfetti(opts){
+  if (!motionOk() || typeof window.confetti !== 'function') return;
+  try { window.confetti(opts); } catch(e){}
+}
+function bell(freq, delay, dur, peak){
+  if (!audioCtx || !soundOn()) return;
+  const t0 = audioCtx.currentTime + delay;
+  const master = audioCtx.createGain();
+  master.connect(audioCtx.destination);
+  master.gain.setValueAtTime(Math.max(0.0001, peak), t0);
+  master.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+  [[1, 1], [2.76, 0.28], [5.04, 0.08]].forEach(function(part){
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(freq * part[0], t0);
+    g.gain.value = part[1];
+    o.connect(g); g.connect(master);
+    o.start(t0);
+    o.stop(t0 + dur + 0.04);
+  });
+}
+function playNotes(steps, dur, peak){
+  ensureAudio();
+  steps.forEach(function(step){ bell(step[0], step[1], dur, peak); });
+}
+function playDing(){ playNotes([[1174.66, 0]], 0.26, 0.07); }
+function playPop(){
+  ensureAudio();
+  if (!audioCtx || !soundOn()) return;
+  const t0 = audioCtx.currentTime;
+  const o = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  o.type = 'sine';
+  o.frequency.setValueAtTime(620, t0);
+  o.frequency.exponentialRampToValueAtTime(310, t0 + 0.07);
+  g.gain.setValueAtTime(0.04, t0);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.09);
+  o.connect(g); g.connect(audioCtx.destination);
+  o.start(t0); o.stop(t0 + 0.1);
+}
+function playClear(){ playNotes([[523.25,0],[659.25,0.11],[783.99,0.22],[1046.5,0.34]], 0.34, 0.06); }
+function playQuest(){ playNotes([[659.25,0],[783.99,0.1],[1046.5,0.2]], 0.3, 0.06); }
+function playBonus(){ playNotes([[523.25,0],[659.25,0.1],[783.99,0.2],[1046.5,0.3],[1318.5,0.42]], 0.36, 0.065); }
+function playCoin(){ playNotes([[988,0],[1318.5,0.07]], 0.16, 0.06); }
+function playLevel(){ playNotes([[523.25,0],[659.25,0.09],[783.99,0.18],[1046.5,0.28],[1318.5,0.38],[1568,0.5],[2093,0.62]], 0.4, 0.075); }
+function confettiClear(){
+  const shot = function(x, y, n){ popConfetti({ particleCount:n, spread:86, startVelocity:40, ticks:90, gravity:0.95, scalar:0.95, origin:{x:x,y:y}, colors:FX_COLORS, disableForReducedMotion:true, zIndex:32 }); };
+  shot(0.5, 0.42, 90);
+  setTimeout(function(){ shot(0.22, 0.32, 40); }, 260);
+  setTimeout(function(){ shot(0.78, 0.32, 40); }, 480);
+  setTimeout(function(){ shot(0.5, 0.5, 46); }, 820);
+}
+function confettiQuest(){
+  popConfetti({ particleCount:58, spread:68, startVelocity:30, ticks:75, scalar:0.85, origin:{x:0.5,y:0.55}, colors:FX_COLORS, disableForReducedMotion:true, zIndex:32 });
+}
+function confettiSides(){
+  const fire = function(){
+    popConfetti({ particleCount:46, angle:60, spread:55, startVelocity:42, ticks:100, origin:{x:0,y:0.68}, colors:FX_COLORS, disableForReducedMotion:true, zIndex:32 });
+    popConfetti({ particleCount:46, angle:120, spread:55, startVelocity:42, ticks:100, origin:{x:1,y:0.68}, colors:FX_COLORS, disableForReducedMotion:true, zIndex:32 });
+  };
+  fire();
+  setTimeout(fire, 420);
+}
+function confettiShop(){
+  const el = $('shop');
+  let origin = { x:0.5, y:0.72 };
+  if (el){
+    const r = el.getBoundingClientRect();
+    origin = {
+      x: Math.min(1, Math.max(0, (r.left + r.width / 2) / Math.max(1, window.innerWidth))),
+      y: Math.min(0.95, Math.max(0.05, (r.top + Math.min(r.height, 36)) / Math.max(1, window.innerHeight)))
+    };
+  }
+  popConfetti({ particleCount:50, spread:70, startVelocity:28, ticks:70, scalar:0.85, origin:origin, colors:FX_COLORS, disableForReducedMotion:true, zIndex:32 });
+}
+function confettiLevel(){
+  [0, 340, 680].forEach(function(ms){
+    setTimeout(function(){
+      popConfetti({ particleCount:80, spread:100, startVelocity:46, ticks:110, origin:{x:0.5,y:0.42}, colors:FX_COLORS, disableForReducedMotion:true, zIndex:32 });
+    }, ms);
+  });
+}
+function showLevelPop(){
+  document.querySelectorAll('.lv-pop').forEach(function(el){ el.remove(); });
+  const d = document.createElement('div');
+  d.className = 'lv-pop';
+  d.textContent = lang === 'ko' ? '레벨 업!' : 'Level up!';
+  document.body.appendChild(d);
+  setTimeout(function(){ d.remove(); }, 1500);
+}
+function levelIndex(total){
+  const n = Number(total);
+  if (!Number.isFinite(n)) return -1;
+  let li = 0;
+  LEVEL_AT.forEach(function(thr, i){ if (n >= thr) li = i; });
+  return li;
+}
+function dayOf(state, k){
+  return (state && state.days || []).find(function(d){ return String(d.day).slice(0,10) === k; });
+}
+function rewardFx(before, res, fx){
+  fx = fx || {};
+  const k = today();
+  const b = dayOf(before, k);
+  const n = dayOf(res, k);
+  const allNew = !(b && b.all_bonus) && !!(n && n.all_bonus);
+  const streakNew = !(b && b.streak_paid) && !!(n && n.streak_paid);
+  const parentNew = fx.kind === 'parent' && !(b && b.parent_checked) && !!(n && n.parent_checked);
+  const prevLv = levelIndex(before && before.total);
+  const nextLv = levelIndex(res && res.total);
+  const leveled = prevLv >= 0 && nextLv > prevLv;
+  const zoneOn = fx.kind === 'zone' && !fx.wasOn && !!(n && (n.zones || []).includes(fx.id));
+  const zoneOff = fx.kind === 'zone' && !!fx.wasOn && !(n && (n.zones || []).includes(fx.id));
+  const questOn = fx.kind === 'quest' && !fx.wasOn && (res.quests || []).includes(fx.id);
+  const spark = function(){
+    if (zoneOn) burst(allNew ? 10 : 4, document.querySelector('.zone[data-z="'+fx.id+'"]'));
+    else if (questOn) burst(12);
+    else if (parentNew) burst(8);
+    else if (fx.kind === 'redeem') burst(14);
+  };
+  if (leveled && fxGate('level')){ spark(); playLevel(); confettiLevel(); showLevelPop(); return; }
+  if ((streakNew || parentNew) && fxGate('bonus')){ spark(); playBonus(); confettiSides(); return; }
+  if (allNew && fxGate('clear')){ spark(); playClear(); confettiClear(); return; }
+  if (questOn && fxGate('quest')){ burst(12); playQuest(); confettiQuest(); return; }
+  if (fx.kind === 'redeem' && fxGate('coin')){ burst(14); playCoin(); confettiShop(); return; }
+  if (zoneOn && fxGate('ding')){ burst(4, document.querySelector('.zone[data-z="'+fx.id+'"]')); playDing(); return; }
+  if (zoneOff && fxGate('pop')){ playPop(); }
+}
 function toast(text){
   document.querySelectorAll('.toast').forEach(x => x.remove());
   const d = document.createElement('div');
@@ -690,21 +868,20 @@ function toggleZone(id){
   if (!ZONE_IDS.includes(id) || !callsign) return;
   const cur = dayRec(today());
   const wasOn = !!(cur && cur.zones.includes(id));
-  if (!wasOn) burst(((cur && cur.zones.length) || 0) + 1 === 5 ? 10 : 4);
   schedule(() => {
     const D = ensureToday();
     if (D.zones.includes(id)){ D.zones = D.zones.filter(z => z !== id); D.all_bonus = false; }
     else { D.zones.push(id); if (D.zones.length === 5) D.all_bonus = true; }
-  }, () => rpc('tidy_toggle_zone', { p_callsign: callsign, p_today: today(), p_zone: id }), { celebrate: celebrateZone });
+  }, () => rpc('tidy_toggle_zone', { p_callsign: callsign, p_today: today(), p_zone: id }), { celebrate: celebrateZone, fx: { kind:'zone', id:id, wasOn:wasOn } });
 }
 function toggleQuest(id){
   if (!QUEST_IDS.includes(id) || !callsign) return;
   const wasOn = (S.quests || []).includes(id);
-  if (!wasOn) burst(12);
   schedule(() => {
     if (S.quests.includes(id)) S.quests = S.quests.filter(q => q !== id);
     else S.quests.push(id);
   }, () => rpc('tidy_toggle_quest', { p_callsign: callsign, p_today: today(), p_quest: id }), {
+    fx: { kind:'quest', id:id, wasOn:wasOn },
     celebrate(before, res){
       const had = (before.quests || []).includes(id);
       const has = (res.quests || []).includes(id);
@@ -760,7 +937,8 @@ function onParentCheck(){
     ensureToday().parent_checked = true;
   }, () => rpc('tidy_parent_check', { p_callsign: callsign, p_today: today(), p_pin: pin }), {
     quiet: true,
-    celebrate(){ burst(8); toast(t('toastParent')); }
+    fx: { kind:'parent' },
+    celebrate(){ toast(t('toastParent')); }
   }));
 }
 function onParentOpen(){
@@ -860,7 +1038,8 @@ function redeem(id){
     p_callsign: callsign, p_today: today(), p_reward: id, p_pin: pin
   }), {
     quiet: true,
-    celebrate(){ burst(14); toast(t('toastRedeem').replace('{0}', showReward(r.name))); }
+    fx: { kind:'redeem' },
+    celebrate(){ toast(t('toastRedeem').replace('{0}', showReward(r.name))); }
   }));
 }
 function onSwitch(){
@@ -940,7 +1119,12 @@ async function createFamily(){
   } else setGateErr(res.error || 'network');
 }
 
+document.addEventListener('pointerdown', e => {
+  if (e.target.closest('button')) ensureAudio();
+}, { passive:true });
 document.addEventListener('click', e => {
+  if (e.target.closest('button')) ensureAudio();
+  if (e.target.closest('#soundBtn')){ toggleSound(); return; }
   if (e.target.closest('[data-lang-toggle]')){ toggleLang(); return; }
   const del = e.target.closest('[data-del]');
   if (del){ removeReward(del.getAttribute('data-del')); return; }
