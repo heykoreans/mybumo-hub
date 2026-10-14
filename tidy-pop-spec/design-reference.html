@@ -1,0 +1,342 @@
+<title>방 정리 퀘스트</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap">
+<style>
+/* Layout: one column "quest board" app; star counter header, today's 5 zones, quests, shop, parent drawer */
+:root{
+  --bg:#eef6f8; --card:#ffffff; --ink:#1d3340; --muted:#5d7684; --line:#d3e4ea;
+  --sky:#2f8fbf; --mint:#3fae8c; --star:#f2b705; --star-ink:#7a5a00; --coral:#e86a5a;
+  --soft-sky:#dcf0f8; --soft-mint:#dcf3ea; --soft-star:#fff3c9;
+  --display:"Jua","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --body:"Gowun Dodum","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f1b22; --card:#172833; --ink:#e7f1f5; --muted:#9ab3c0; --line:#26404d;
+  --sky:#5bb6e3; --mint:#5fcfa9; --star:#ffc93a; --star-ink:#ffe08a; --coral:#ff8a7a;
+  --soft-sky:#1b3542; --soft-mint:#173a30; --soft-star:#3a3014; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1b22; --card:#172833; --ink:#e7f1f5; --muted:#9ab3c0; --line:#26404d;
+  --sky:#5bb6e3; --mint:#5fcfa9; --star:#ffc93a; --star-ink:#ffe08a; --coral:#ff8a7a;
+  --soft-sky:#1b3542; --soft-mint:#173a30; --soft-star:#3a3014; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+.wrap{max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:22px}
+h1,h2,h3{font-family:var(--display);font-weight:400;margin:0;text-wrap:balance}
+h2{font-size:22px}
+.muted{color:var(--muted);font-size:14px}
+button{font:inherit;cursor:pointer;border:0;border-radius:12px}
+button:focus-visible,input:focus-visible{outline:3px solid var(--sky);outline-offset:2px}
+
+/* header */
+.hero{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center}
+.hero h1{font-size:30px;line-height:1.15}
+.bank{background:var(--soft-star);border:2px solid var(--star);border-radius:18px;padding:10px 16px;text-align:center;min-width:110px}
+.bank b{display:block;font-family:var(--display);font-size:36px;font-weight:400;color:var(--star-ink);font-variant-numeric:tabular-nums;line-height:1}
+.bank span{font-size:13px;color:var(--star-ink)}
+.level{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.level-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.level-name{font-family:var(--display);font-size:20px;color:var(--sky)}
+.bar{height:12px;background:var(--soft-sky);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--sky);border-radius:99px;transition:width .4s}
+
+/* week */
+.week{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;text-align:center}
+.day{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;color:var(--muted)}
+.dot{width:30px;height:30px;border-radius:50%;border:2px dashed var(--line);display:grid;place-items:center;font-size:15px;color:var(--star-ink)}
+.dot.full{background:var(--star);border:2px solid var(--star);color:#3a2a00}
+.dot.part{border:2px solid var(--star);background:var(--soft-star)}
+.day.today .dot{outline:2px solid var(--sky);outline-offset:2px}
+.streak{font-family:var(--display);color:var(--coral);font-size:17px}
+
+/* zones */
+.section-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.zones{display:flex;flex-direction:column;gap:10px}
+.zone{display:grid;grid-template-columns:44px 1fr auto;gap:12px;align-items:center;background:var(--card);border:2px solid var(--line);border-radius:16px;padding:12px 14px;text-align:left;color:var(--ink);width:100%}
+.zone .ic{width:44px;height:44px;border-radius:12px;background:var(--soft-sky);display:grid;place-items:center;font-family:var(--display);font-size:20px;color:var(--sky)}
+.zone .tx{min-width:0}
+.zone .tx strong{font-family:var(--display);font-weight:400;font-size:19px;display:block}
+.zone .tx small{color:var(--muted);font-size:14px}
+.zone .chk{width:34px;height:34px;border-radius:50%;border:3px solid var(--line);display:grid;place-items:center;font-size:18px;color:transparent}
+.zone.done{border-color:var(--mint);background:var(--soft-mint)}
+.zone.done .ic{background:var(--mint);color:#fff}
+.zone.done .chk{background:var(--mint);border-color:var(--mint);color:#fff}
+.zone.done .tx strong{text-decoration:line-through;text-decoration-color:var(--mint);text-decoration-thickness:2px}
+
+.bonus-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pill{border-radius:14px;padding:12px;font-size:14px;background:var(--card);border:1px dashed var(--line);color:var(--muted)}
+.pill.on{border:2px solid var(--star);background:var(--soft-star);color:var(--star-ink)}
+.btn{background:var(--sky);color:#fff;padding:12px 16px;font-family:var(--display);font-size:17px}
+.btn.alt{background:var(--card);color:var(--ink);border:2px solid var(--line)}
+.btn.star{background:var(--star);color:#3a2a00}
+.btn:disabled{opacity:.45;cursor:default}
+
+/* quests */
+.quests{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.quest{background:var(--card);border:2px solid var(--line);border-radius:16px;padding:12px;text-align:left;color:var(--ink);display:flex;flex-direction:column;gap:4px;min-width:0}
+.quest strong{font-family:var(--display);font-weight:400;font-size:17px}
+.quest small{color:var(--muted);font-size:13px}
+.quest .pts{font-size:13px;color:var(--star-ink);font-weight:700}
+.quest.done{border-color:var(--mint);background:var(--soft-mint)}
+.quest.done .pts::after{content:" · 완료!"}
+
+/* shop */
+.shop{display:flex;flex-direction:column;gap:14px}
+.cat h3{font-size:16px;color:var(--muted);margin-bottom:6px}
+.items{display:flex;flex-direction:column;gap:8px}
+.item{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px}
+.item span{min-width:0}
+.item .cost{font-family:var(--display);color:var(--star-ink);background:var(--soft-star);border-radius:10px;padding:8px 12px;font-size:16px;white-space:nowrap}
+.item .cost:disabled{background:var(--bg);color:var(--muted)}
+
+/* log */
+.log{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:6px 14px}
+.log div{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+.log div:last-child{border-bottom:0}
+.log .d{color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.plus{color:var(--mint);font-weight:700}.minus{color:var(--coral);font-weight:700}
+
+footer{display:flex;justify-content:center}
+
+/* modal */
+.scrim{position:fixed;inset:0;background:rgba(10,25,35,.55);display:grid;place-items:center;padding:20px;z-index:20}
+.modal{background:var(--card);color:var(--ink);border-radius:20px;padding:20px;width:100%;max-width:400px;display:flex;flex-direction:column;gap:12px;max-height:90vh;overflow:auto}
+.modal input{font:inherit;padding:10px 12px;border-radius:10px;border:2px solid var(--line);background:var(--bg);color:var(--ink);width:100%}
+.row{display:flex;gap:8px;flex-wrap:wrap}.row>*{flex:1 1 120px}
+.err{color:var(--coral);font-size:14px;min-height:1em}
+.prow{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;font-size:14px}
+.prow button{padding:6px 10px;background:var(--bg);color:var(--ink);border:1px solid var(--line)}
+
+/* celebration */
+.burst{position:fixed;left:50%;top:40%;pointer-events:none;z-index:30}
+.burst i{position:absolute;font-style:normal;font-size:26px;color:var(--star);animation:fly .9s ease-out forwards}
+@keyframes fly{from{transform:translate(0,0) scale(.6);opacity:1}to{transform:translate(var(--x),var(--y)) scale(1.2);opacity:0}}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:99px;font-family:var(--display);z-index:40;max-width:calc(100% - 32px);text-align:center}
+@media (prefers-reduced-motion:reduce){.burst{display:none}.bar i{transition:none}}
+@media (max-width:420px){.quests{grid-template-columns:1fr}.hero h1{font-size:25px}.bonus-row{grid-template-columns:1fr}}
+</style>
+
+<div class="wrap">
+  <header class="hero">
+    <div>
+      <h1 id="title">방 정리 퀘스트</h1>
+      <div class="muted" id="todayLabel"></div>
+    </div>
+    <div class="bank" aria-live="polite"><b id="stars">0</b><span>내 별</span></div>
+  </header>
+
+  <section class="level">
+    <div class="level-top"><span class="level-name" id="lvName"></span><span class="muted" id="lvNext"></span></div>
+    <div class="bar"><i id="lvBar" style="width:0"></i></div>
+  </section>
+
+  <section>
+    <div class="section-head"><h2>이번 주</h2><span class="streak" id="streak"></span></div>
+    <div class="week" id="week" style="margin-top:10px"></div>
+  </section>
+
+  <section style="display:flex;flex-direction:column;gap:12px">
+    <div class="section-head"><h2>오늘의 미션</h2><span class="muted">자기 전 10분 · 구역마다 별 1개</span></div>
+    <div class="zones" id="zones"></div>
+    <div class="bonus-row">
+      <div class="pill" id="allPill">5구역 모두 끝내면 보너스 별 2개</div>
+      <div class="pill" id="streakPill">5일 연속이면 보너스 별 5개</div>
+    </div>
+    <button class="btn star" id="parentCheck">부모님 확인받기 (별 +2)</button>
+  </section>
+
+  <section style="display:flex;flex-direction:column;gap:12px">
+    <div class="section-head"><h2>대청소 퀘스트</h2><span class="muted">한 번만 하면 돼요 · 각 별 10개</span></div>
+    <div class="quests" id="quests"></div>
+  </section>
+
+  <section class="shop">
+    <div class="section-head"><h2>별 상점</h2><span class="muted">교환할 때 부모님 비밀번호가 필요해요</span></div>
+    <div id="shop" class="shop"></div>
+  </section>
+
+  <section style="display:flex;flex-direction:column;gap:10px">
+    <h2>별 기록</h2>
+    <div class="log" id="log"></div>
+  </section>
+
+  <footer><button class="btn alt" id="parentBtn">부모님 설정</button></footer>
+</div>
+
+<div id="modalRoot"></div>
+
+<script>
+const ZONES=[
+ {id:'floor',ic:'바',name:'바닥',tip:'바닥에 물건 0개. 종이, 신발, 인형 모두 제자리로'},
+ {id:'bed',ic:'침',name:'침대',tip:'이불 펴서 덮기, 잠옷은 베개 밑에'},
+ {id:'desk',ic:'책',name:'책상',tip:'숙제 도구만 남기고 종이는 서류함에'},
+ {id:'dresser',ic:'서',name:'서랍장 위',tip:'거울과 액세서리 스탠드만 남기기'},
+ {id:'toys',ic:'인',name:'인형·장난감',tip:'인형은 바구니, 작은 장난감은 통 안으로'}
+];
+const QUESTS=[
+ {id:'audition',name:'인형 오디션',tip:'방에 남길 최애 인형 고르기. 나머지는 휴가 상자로'},
+ {id:'artbox',name:'작품 상자 만들기',tip:'그림과 종이 작품을 한 상자에 모으기'},
+ {id:'outside',name:'방 밖으로 보내기',tip:'로션, 간식, 껌, 신발은 원래 자리로'},
+ {id:'labels',name:'라벨 붙이기',tip:'작은 물건 통을 나누고 이름표 붙이기'},
+ {id:'photo',name:'완성 사진 찍기',tip:'깨끗해진 방 사진을 찍어 벽에 붙이기'},
+ {id:'donate',name:'나눔 상자',tip:'안 쓰는 물건을 골라 나눔 상자에 넣기'}
+];
+const DEFAULT_REWARDS=[
+ {id:'r1',cat:'경험',name:'아빠랑 단둘이 데이트',cost:40},
+ {id:'r2',cat:'경험',name:'주말 저녁 메뉴 내가 정하기',cost:15},
+ {id:'r3',cat:'경험',name:'친구 초대해서 놀기',cost:50},
+ {id:'r4',cat:'특권',name:'게임·영상 30분 더',cost:10},
+ {id:'r5',cat:'특권',name:'30분 늦게 자기 (주말)',cost:20},
+ {id:'r6',cat:'선물',name:'스티커·문구 하나',cost:25},
+ {id:'r7',cat:'선물',name:'갖고 싶은 책 한 권',cost:40},
+ {id:'r8',cat:'용돈',name:'용돈 $1 (저금통으로)',cost:10}
+];
+const LEVELS=[[0,'정리 새싹'],[30,'정리 탐험가'],[80,'정리 기사'],[160,'정리 마스터'],[300,'방의 주인']];
+const KEY='roomquest-v1';
+
+function fresh(){return{pin:'0000',stars:0,total:0,days:{},quests:{},rewards:DEFAULT_REWARDS.map(r=>({...r})),log:[],streakPaid:{}}}
+let S;
+try{S=JSON.parse(localStorage.getItem(KEY))||fresh()}catch(e){S=fresh()}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+
+const pad=n=>String(n).padStart(2,'0');
+const dkey=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const today=()=>dkey(new Date());
+const day=k=>S.days[k]||(S.days[k]={zones:[],all:false,parent:false});
+const isFull=k=>S.days[k]&&S.days[k].zones.length===ZONES.length;
+
+function add(n,text){
+  S.stars+=n; if(n>0)S.total+=n;
+  S.log.unshift({d:today(),t:text,n}); S.log=S.log.slice(0,60);
+}
+function streak(){
+  let c=0,d=new Date();
+  if(!isFull(dkey(d))) d.setDate(d.getDate()-1);
+  while(isFull(dkey(d))){c++;d.setDate(d.getDate()-1)}
+  return c;
+}
+function toggleZone(id){
+  const k=today(),D=day(k),i=D.zones.indexOf(id),z=ZONES.find(z=>z.id===id);
+  if(i>=0){D.zones.splice(i,1);add(-1,`${z.name} 체크 취소`);
+    if(D.all){D.all=false;add(-2,'올클리어 보너스 취소')}
+  }else{D.zones.push(id);add(1,`${z.name} 정리 완료`);burst(4);
+    if(D.zones.length===ZONES.length&&!D.all){D.all=true;add(2,'5구역 올클리어 보너스');burst(10);toast('오늘 미션 올클리어! 별 +2');
+      const s=streak();
+      if(s>0&&s%5===0&&!S.streakPaid[k]){S.streakPaid[k]=true;add(5,`${s}일 연속 보너스`);setTimeout(()=>toast(`${s}일 연속! 별 +5`),1400)}
+    }
+  }
+  save();render();
+}
+function toggleQuest(id){
+  const q=QUESTS.find(q=>q.id===id);
+  if(S.quests[id]){delete S.quests[id];add(-10,`${q.name} 취소`)}
+  else{S.quests[id]=true;add(10,`퀘스트: ${q.name}`);burst(12);toast(`${q.name} 완료! 별 +10`)}
+  save();render();
+}
+
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function render(){
+  const k=today(),D=day(k);
+  $('stars').textContent=S.stars;
+  const now=new Date();
+  $('todayLabel').textContent=`${now.getMonth()+1}월 ${now.getDate()}일 ${'일월화수목금토'[now.getDay()]}요일`;
+  // level
+  let li=0;LEVELS.forEach((l,i)=>{if(S.total>=l[0])li=i});
+  $('lvName').textContent=`Lv.${li+1} ${LEVELS[li][1]}`;
+  const nx=LEVELS[li+1];
+  if(nx){$('lvNext').textContent=`다음 레벨까지 별 ${nx[0]-S.total}개`;
+    $('lvBar').style.width=((S.total-LEVELS[li][0])/(nx[0]-LEVELS[li][0])*100)+'%'}
+  else{$('lvNext').textContent='최고 레벨 달성!';$('lvBar').style.width='100%'}
+  // week
+  const st=streak();
+  $('streak').textContent=st?`${st}일 연속 중`:'';
+  let w='';
+  for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const kk=dkey(d);const n=S.days[kk]?S.days[kk].zones.length:0;
+    w+=`<div class="day ${i===0?'today':''}"><span class="dot ${n===ZONES.length?'full':n?'part':''}">${n===ZONES.length?'★':n||''}</span>${'일월화수목금토'[d.getDay()]}</div>`}
+  $('week').innerHTML=w;
+  // zones
+  $('zones').innerHTML=ZONES.map(z=>{const on=D.zones.includes(z.id);
+    return `<button class="zone ${on?'done':''}" data-z="${z.id}" aria-pressed="${on}"><span class="ic">${on?'★':z.ic}</span><span class="tx"><strong>${z.name}</strong><small>${z.tip}</small></span><span class="chk">✓</span></button>`}).join('');
+  $('allPill').className='pill'+(D.all?' on':'');
+  $('allPill').textContent=D.all?'올클리어 보너스 받았어요 (+2)':`5구역 모두 끝내면 보너스 별 2개 (${D.zones.length}/5)`;
+  const left=5-(st%5);
+  $('streakPill').className='pill'+(S.streakPaid[k]?' on':'');
+  $('streakPill').textContent=S.streakPaid[k]?`${st}일 연속 보너스 받았어요 (+5)`:`연속 보너스까지 ${isFull(k)?left:left}일 남았어요`;
+  const pc=$('parentCheck');
+  pc.disabled=!D.all||D.parent;
+  pc.textContent=D.parent?'오늘 부모님 확인 완료!':D.all?'부모님 확인받기 (별 +2)':'올클리어하면 부모님 확인받기';
+  // quests
+  $('quests').innerHTML=QUESTS.map(q=>`<button class="quest ${S.quests[q.id]?'done':''}" data-q="${q.id}" aria-pressed="${!!S.quests[q.id]}"><strong>${q.name}</strong><small>${q.tip}</small><span class="pts">★ 10</span></button>`).join('');
+  // shop
+  const cats=['경험','특권','선물','용돈'];
+  $('shop').innerHTML=cats.map(c=>{const its=S.rewards.filter(r=>r.cat===c);if(!its.length)return'';
+    return `<div class="cat"><h3>${c}</h3><div class="items">${its.map(r=>`<div class="item"><span>${esc(r.name)}</span><button class="cost" data-r="${r.id}" ${S.stars<r.cost?'disabled':''}>★ ${r.cost}</button></div>`).join('')}</div></div>`}).join('');
+  // log
+  $('log').innerHTML=S.log.length?S.log.slice(0,12).map(l=>`<div><span>${esc(l.t)}</span><span><span class="${l.n>=0?'plus':'minus'}">${l.n>=0?'+':''}${l.n}</span> <span class="d">${l.d.slice(5).replace('-','/')}</span></span></div>`).join(''):'<div><span class="muted">구역을 체크하면 여기에 별 기록이 쌓여요</span></div>';
+}
+
+document.addEventListener('click',e=>{
+  const z=e.target.closest('[data-z]');if(z)return toggleZone(z.dataset.z);
+  const q=e.target.closest('[data-q]');if(q)return toggleQuest(q.dataset.q);
+  const r=e.target.closest('[data-r]');if(r)return redeem(r.dataset.r);
+});
+$('parentCheck').onclick=()=>askPin('오늘 방을 같이 확인했나요?','부모님 비밀번호를 입력하면 별 2개를 줘요.',()=>{
+  const D=day(today());D.parent=true;add(2,'부모님 확인 보너스');save();render();burst(8);toast('부모님 확인 완료! 별 +2')});
+$('parentBtn').onclick=()=>askPin('부모님 설정','비밀번호를 입력하세요. (처음 비밀번호는 0000)',parentPanel);
+
+function redeem(id){
+  const r=S.rewards.find(r=>r.id===id);if(!r||S.stars<r.cost)return;
+  askPin(`${r.name}`,`별 ${r.cost}개를 사용해요. 부모님 비밀번호를 입력해 주세요.`,()=>{
+    add(-r.cost,`교환: ${r.name}`);save();render();burst(14);toast(`${r.name} 교환 완료!`)});
+}
+
+function modal(html){$('modalRoot').innerHTML=`<div class="scrim" id="scrim"><div class="modal" role="dialog" aria-modal="true">${html}</div></div>`;
+  $('scrim').addEventListener('click',e=>{if(e.target.id==='scrim')close()});}
+function close(){$('modalRoot').innerHTML=''}
+function askPin(title,desc,ok){
+  modal(`<h2>${esc(title)}</h2><p class="muted" style="margin:0">${esc(desc)}</p>
+  <input id="pinIn" type="password" inputmode="numeric" maxlength="8" placeholder="비밀번호" autocomplete="off">
+  <div class="err" id="pinErr"></div>
+  <div class="row"><button class="btn alt" id="pinNo">취소</button><button class="btn" id="pinOk">확인</button></div>`);
+  const go=()=>{if($('pinIn').value===S.pin){close();ok()}else{$('pinErr').textContent='비밀번호가 달라요. 다시 입력해 주세요.';$('pinIn').value=''}};
+  $('pinOk').onclick=go;$('pinNo').onclick=close;$('pinIn').onkeydown=e=>{if(e.key==='Enter')go()};$('pinIn').focus();
+}
+function parentPanel(){
+  modal(`<h2>부모님 설정</h2>
+  <h3 style="font-size:17px">별 조정</h3>
+  <div class="row"><input id="adjN" type="number" inputmode="numeric" placeholder="예: 5 또는 -3"><input id="adjT" placeholder="이유 (예: 칭찬 보너스)"></div>
+  <button class="btn" id="adjGo">별 조정하기</button>
+  <h3 style="font-size:17px">보상 목록</h3>
+  <div id="rlist" style="display:flex;flex-direction:column;gap:6px"></div>
+  <div class="row"><input id="rName" placeholder="새 보상 이름"><input id="rCost" type="number" inputmode="numeric" placeholder="별 개수"></div>
+  <div class="row"><select id="rCat" style="font:inherit;padding:10px;border-radius:10px;border:2px solid var(--line);background:var(--bg);color:var(--ink)"><option>경험</option><option>특권</option><option>선물</option><option>용돈</option></select><button class="btn" id="rAdd">보상 추가</button></div>
+  <h3 style="font-size:17px">비밀번호 변경</h3>
+  <div class="row"><input id="newPin" type="password" inputmode="numeric" maxlength="8" placeholder="새 비밀번호 4자리 이상"><button class="btn" id="pinSet">변경</button></div>
+  <div class="err" id="pErr"></div>
+  <button class="btn alt" id="pClose">닫기</button>`);
+  const list=()=>{$('rlist').innerHTML=S.rewards.map(r=>`<div class="prow"><span>${esc(r.cat)} · ${esc(r.name)}</span><span>★${r.cost}</span><button data-del="${r.id}">삭제</button></div>`).join('')};
+  list();
+  $('rlist').onclick=e=>{const b=e.target.closest('[data-del]');if(!b)return;S.rewards=S.rewards.filter(r=>r.id!==b.dataset.del);save();list();render()};
+  $('adjGo').onclick=()=>{const n=parseInt($('adjN').value,10);if(!n){$('pErr').textContent='조정할 별 개수를 숫자로 입력해 주세요.';return}
+    add(n,$('adjT').value.trim()||'부모님 조정');save();render();$('adjN').value='';$('adjT').value='';$('pErr').textContent=`별 ${n>0?'+':''}${n} 반영했어요.`};
+  $('rAdd').onclick=()=>{const name=$('rName').value.trim(),cost=parseInt($('rCost').value,10);
+    if(!name||!(cost>0)){$('pErr').textContent='보상 이름과 별 개수를 입력해 주세요.';return}
+    S.rewards.push({id:'r'+Date.now(),cat:$('rCat').value,name,cost});save();list();render();$('rName').value='';$('rCost').value='';$('pErr').textContent='보상을 추가했어요.'};
+  $('pinSet').onclick=()=>{const p=$('newPin').value;if(p.length<4){$('pErr').textContent='비밀번호는 4자리 이상이어야 해요.';return}
+    S.pin=p;save();$('newPin').value='';$('pErr').textContent='비밀번호를 바꿨어요.'};
+  $('pClose').onclick=close;
+}
+
+function burst(n){
+  const b=document.createElement('div');b.className='burst';
+  for(let i=0;i<n;i++){const s=document.createElement('i');s.textContent='★';const a=Math.random()*Math.PI*2,r=60+Math.random()*90;
+    s.style.setProperty('--x',Math.cos(a)*r+'px');s.style.setProperty('--y',Math.sin(a)*r+'px');s.style.animationDelay=(Math.random()*.15)+'s';b.appendChild(s)}
+  document.body.appendChild(b);setTimeout(()=>b.remove(),1200);
+}
+let tt;function toast(t){document.querySelectorAll('.toast').forEach(x=>x.remove());const d=document.createElement('div');d.className='toast';d.textContent=t;document.body.appendChild(d);clearTimeout(tt);tt=setTimeout(()=>d.remove(),2200)}
+
+render();
+</script>

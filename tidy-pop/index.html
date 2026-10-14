@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#eef6f8">
+<title>TIDY POP — Room Quest</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap">
+<style>
+:root{
+  --bg:#eef6f8; --card:#ffffff; --ink:#1d3340; --muted:#5d7684; --line:#d3e4ea;
+  --sky:#2f8fbf; --mint:#3fae8c; --star:#f2b705; --star-ink:#7a5a00; --coral:#e86a5a;
+  --soft-sky:#dcf0f8; --soft-mint:#dcf3ea; --soft-star:#fff3c9;
+  --display:"Jua","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --body:"Gowun Dodum","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f1b22; --card:#172833; --ink:#e7f1f5; --muted:#9ab3c0; --line:#26404d;
+  --sky:#5bb6e3; --mint:#5fcfa9; --star:#ffc93a; --star-ink:#ffe08a; --coral:#ff8a7a;
+  --soft-sky:#1b3542; --soft-mint:#173a30; --soft-star:#3a3014; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1b22; --card:#172833; --ink:#e7f1f5; --muted:#9ab3c0; --line:#26404d;
+  --sky:#5bb6e3; --mint:#5fcfa9; --star:#ffc93a; --star-ink:#ffe08a; --coral:#ff8a7a;
+  --soft-sky:#1b3542; --soft-mint:#173a30; --soft-star:#3a3014; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none !important}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;margin:0;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-top:max(64px,calc(env(safe-area-inset-top,0px) + 52px));padding-bottom:calc(48px + env(safe-area-inset-bottom,0px))}
+.wrap{max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:22px}
+#loading{min-height:70vh;justify-content:center;align-items:center;text-align:center}
+h1,h2,h3{font-family:var(--display);font-weight:400;margin:0;text-wrap:balance}
+h2{font-size:22px}
+.muted{color:var(--muted);font-size:14px}
+button,input,select{font:inherit;font-size:16px}
+button{cursor:pointer;border:0;border-radius:12px;touch-action:manipulation}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--sky);outline-offset:2px}
+a{color:var(--sky)}
+
+.hero{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center}
+.hero h1{font-size:30px;line-height:1.15}
+.bank{background:var(--soft-star);border:2px solid var(--star);border-radius:18px;padding:10px 16px;text-align:center;min-width:110px}
+.bank b{display:block;font-family:var(--display);font-size:36px;font-weight:400;color:var(--star-ink);font-variant-numeric:tabular-nums;line-height:1}
+.bank span{font-size:13px;color:var(--star-ink)}
+.level{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.level-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.level-name{font-family:var(--display);font-size:20px;color:var(--sky)}
+.bar{height:12px;background:var(--soft-sky);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--sky);border-radius:99px;transition:width .4s}
+
+.week{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;text-align:center}
+.day{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;color:var(--muted)}
+.dot{width:30px;height:30px;border-radius:50%;border:2px dashed var(--line);display:grid;place-items:center;font-size:15px;color:var(--star-ink)}
+.dot.full{background:var(--star);border:2px solid var(--star);color:#3a2a00}
+.dot.part{border:2px solid var(--star);background:var(--soft-star)}
+.day.today .dot{outline:2px solid var(--sky);outline-offset:2px}
+.streak{font-family:var(--display);color:var(--coral);font-size:17px}
+
+.section-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.zones{display:flex;flex-direction:column;gap:10px}
+.zone{display:grid;grid-template-columns:44px 1fr auto;gap:12px;align-items:center;background:var(--card);border:2px solid var(--line);border-radius:16px;padding:12px 14px;text-align:left;color:var(--ink);width:100%;user-select:none}
+.zone .ic{width:44px;height:44px;border-radius:12px;background:var(--soft-sky);display:grid;place-items:center;font-family:var(--display);font-size:20px;color:var(--sky)}
+.zone .tx{min-width:0}
+.zone .tx strong{font-family:var(--display);font-weight:400;font-size:19px;display:block;overflow-wrap:break-word}
+.zone .tx small{color:var(--muted);font-size:14px;overflow-wrap:break-word}
+.zone .chk{width:34px;height:34px;border-radius:50%;border:3px solid var(--line);display:grid;place-items:center;font-size:18px;color:transparent}
+.zone.done{border-color:var(--mint);background:var(--soft-mint)}
+.zone.done .ic{background:var(--mint);color:#fff}
+.zone.done .chk{background:var(--mint);border-color:var(--mint);color:#fff}
+.zone.done .tx strong{text-decoration:line-through;text-decoration-color:var(--mint);text-decoration-thickness:2px}
+
+.bonus-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pill{border-radius:14px;padding:12px;font-size:14px;background:var(--card);border:1px dashed var(--line);color:var(--muted);overflow-wrap:break-word}
+.pill.on{border:2px solid var(--star);background:var(--soft-star);color:var(--star-ink)}
+.btn{background:var(--sky);color:#fff;padding:12px 16px;font-family:var(--display);font-size:17px;min-height:48px;white-space:normal;line-height:1.25;overflow-wrap:break-word}
+.btn.alt{background:var(--card);color:var(--ink);border:2px solid var(--line)}
+.btn.star{background:var(--star);color:#3a2a00}
+.btn:disabled{opacity:.45;cursor:default}
+.lang-chip{background:var(--card);color:var(--muted);border:1px solid var(--line);border-radius:99px;padding:6px 12px;font-size:13px;min-height:36px}
+.text-btn{background:transparent;color:var(--muted);padding:8px 10px;font-size:14px;min-height:44px}
+
+.quests{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.quest{background:var(--card);border:2px solid var(--line);border-radius:16px;padding:12px;text-align:left;color:var(--ink);display:flex;flex-direction:column;gap:4px;min-width:0;user-select:none}
+.quest strong{font-family:var(--display);font-weight:400;font-size:17px;overflow-wrap:break-word}
+.quest small{color:var(--muted);font-size:13px;overflow-wrap:break-word}
+.quest .pts{font-size:13px;color:var(--star-ink);font-weight:700}
+.quest.done{border-color:var(--mint);background:var(--soft-mint)}
+
+.shop{display:flex;flex-direction:column;gap:14px}
+.cat h3{font-size:16px;color:var(--muted);margin-bottom:6px}
+.items{display:flex;flex-direction:column;gap:8px}
+.item{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px}
+.item span{min-width:0;overflow-wrap:break-word}
+.item .cost{font-family:var(--display);color:var(--star-ink);background:var(--soft-star);border-radius:10px;padding:8px 12px;font-size:16px;white-space:nowrap;min-height:44px}
+.item .cost:disabled{background:var(--bg);color:var(--muted)}
+
+.log{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:6px 14px}
+.log div{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+.log div > span:first-child{min-width:0;overflow-wrap:break-word}
+.log div:last-child{border-bottom:0}
+.log .d{color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.plus{color:var(--mint);font-weight:700}.minus{color:var(--coral);font-weight:700}
+footer{display:flex;flex-direction:column;align-items:center;gap:4px}
+.foot-row{display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap}
+.field{display:flex;flex-direction:column;gap:6px}
+.field input{padding:10px 12px;border-radius:10px;border:2px solid var(--line);background:var(--bg);color:var(--ink);width:100%}
+.gate-actions{display:flex;flex-direction:column;gap:10px}
+.gate-actions .btn{width:100%}
+#createBox{display:flex;flex-direction:column;gap:10px}
+
+.scrim{position:fixed;inset:0;background:rgba(10,25,35,.55);display:grid;place-items:center;padding:max(20px,env(safe-area-inset-top)) 20px max(20px,env(safe-area-inset-bottom));z-index:20}
+.modal{background:var(--card);color:var(--ink);border-radius:20px;padding:20px;width:100%;max-width:400px;display:flex;flex-direction:column;gap:12px;max-height:90vh;overflow:auto}
+.modal input,.modal select{padding:10px 12px;border-radius:10px;border:2px solid var(--line);background:var(--bg);color:var(--ink);width:100%}
+.row{display:flex;gap:8px;flex-wrap:wrap}.row>*{flex:1 1 120px}
+.err{color:var(--coral);font-size:14px;min-height:1em}
+.prow{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;font-size:14px}
+.prow span{min-width:0;overflow-wrap:break-word}
+.toast,.modal h2,.modal p,.level-next,.section-head .muted{overflow-wrap:break-word}
+.prow button{padding:6px 10px;background:var(--bg);color:var(--ink);border:1px solid var(--line);min-height:44px}
+
+.burst{position:fixed;left:50%;top:40%;pointer-events:none;z-index:30}
+.burst i{position:absolute;font-style:normal;font-size:26px;color:var(--star);animation:fly .9s ease-out forwards}
+@keyframes fly{from{transform:translate(0,0) scale(.6);opacity:1}to{transform:translate(var(--x),var(--y)) scale(1.2);opacity:0}}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:99px;font-family:var(--display);z-index:40;max-width:calc(100% - 32px);text-align:center}
+@media (prefers-reduced-motion:reduce){.burst{display:none}.bar i{transition:none}}
+@media (max-width:420px){.quests{grid-template-columns:1fr}.hero h1{font-size:25px}.bonus-row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<button type="button" class="lang-chip" data-lang-toggle style="position:fixed;top:max(12px,env(safe-area-inset-top));left:max(12px,env(safe-area-inset-left));z-index:15">한글</button>
+
+<div class="wrap" id="loading">
+  <div>
+    <h1>TIDY POP</h1>
+    <p class="muted" data-k="loading">Loading…</p>
+  </div>
+</div>
+
+<div class="wrap" id="gate" hidden>
+  <header class="hero">
+    <div>
+      <h1>TIDY POP</h1>
+      <div class="muted" data-k="gateSub">Room tidy quest</div>
+    </div>
+  </header>
+  <section class="level">
+    <p class="muted" data-k="gateLead" style="margin:0">Enter your family callsign. The same callsign shares stars on a parent phone and a kid phone.</p>
+    <div class="field">
+      <label for="csIn" data-k="callsignLabel">Callsign</label>
+      <input id="csIn" maxlength="30" autocapitalize="none" autocorrect="off" spellcheck="false" autocomplete="off" data-ph="callsignPh" placeholder="lowercase, numbers, _ , -">
+    </div>
+    <div class="err" id="gateErr" aria-live="polite"></div>
+    <div class="gate-actions">
+      <button type="button" class="btn" id="loadBtn" data-k="loadBtn">Load</button>
+      <button type="button" class="btn alt" id="firstBtn" data-k="firstBtn">We are new here</button>
+    </div>
+    <div id="createBox" hidden>
+      <p class="muted" data-k="createLead" style="margin:0">Make a family with the child’s name and a parent PIN. The PIN is 4–8 digits and is needed to trade stars.</p>
+      <div class="field">
+        <label for="nameIn" data-k="childLabel">Child’s name</label>
+        <input id="nameIn" maxlength="20" autocomplete="off" data-ph="childPh" placeholder="e.g. Mina">
+      </div>
+      <div class="field">
+        <label for="pinNew" data-k="pinLabel">Parent PIN</label>
+        <input id="pinNew" type="password" inputmode="numeric" maxlength="8" autocomplete="off" data-ph="pinPh" placeholder="4–8 digits">
+      </div>
+      <button type="button" class="btn star" id="createBtn" data-k="createBtn">Create</button>
+    </div>
+  </section>
+  <p style="text-align:center;margin:0"><a href="/" data-k="backHub">Game hub</a></p>
+</div>
+
+<div class="wrap" id="app" hidden>
+  <header class="hero">
+    <div>
+      <h1 id="title" data-k="title">Room Quest</h1>
+      <div class="muted" id="todayLabel"></div>
+    </div>
+    <div class="bank" aria-live="polite"><b id="stars">–</b><span data-k="bank">My stars</span></div>
+  </header>
+
+  <section class="level">
+    <div class="level-top"><span class="level-name" id="lvName"></span><span class="muted" id="lvNext"></span></div>
+    <div class="bar"><i id="lvBar" style="width:0"></i></div>
+  </section>
+
+  <section>
+    <div class="section-head"><h2 data-k="week">This week</h2><span class="streak" id="streak"></span></div>
+    <div class="week" id="week" style="margin-top:10px"></div>
+  </section>
+
+  <section style="display:flex;flex-direction:column;gap:12px">
+    <div class="section-head"><h2 data-k="mission">Today’s mission</h2><span class="muted" data-k="missionSub">10 minutes before bed · 1 star each zone</span></div>
+    <div class="zones" id="zones"></div>
+    <div class="bonus-row">
+      <div class="pill" id="allPill"></div>
+      <div class="pill" id="streakPill"></div>
+    </div>
+    <button type="button" class="btn star" id="parentCheck">Parent check (+2 stars)</button>
+  </section>
+
+  <section style="display:flex;flex-direction:column;gap:12px">
+    <div class="section-head"><h2 data-k="questHead">Big tidy quests</h2><span class="muted" data-k="questSub">Do each one once · 10 stars</span></div>
+    <div class="quests" id="quests"></div>
+  </section>
+
+  <section class="shop">
+    <div class="section-head"><h2 data-k="shop">Star shop</h2><span class="muted" data-k="shopSub">A parent PIN is needed to trade</span></div>
+    <div id="shop" class="shop"></div>
+  </section>
+
+  <section style="display:flex;flex-direction:column;gap:10px">
+    <h2 data-k="log">Star log</h2>
+    <div class="log" id="log"></div>
+  </section>
+
+  <footer>
+    <button type="button" class="btn alt" id="parentBtn" data-k="parentBtn">Parent settings</button>
+    <div class="foot-row">
+      <button type="button" class="text-btn" id="switchBtn" data-k="switchBtn">Switch family</button>
+      <a class="text-btn" href="/" data-k="backHub">Game hub</a>
+    </div>
+    <div class="muted" id="csNote"></div>
+  </footer>
+</div>
+
+<div id="modalRoot"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://tlpzztuxttsobhqprosk.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRscHp6dHV4dHRzb2JocXByb3NrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2Mzg2NDQsImV4cCI6MjA5MzIxNDY0NH0.gMP2SO2NCnbWbknHMObs11Z8vWH3Wa6_3bAGobV9_GU';
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: false, autoRefreshToken: false } });
+
+const CS_KEY = 'tidypop_callsign';
+const LANG_KEY = 'tidypop_lang';
+const CS_RE = /^[a-z0-9_-]{3,30}$/;
+const PIN_RE = /^[0-9]{4,8}$/;
+const ZONE_IDS = ['floor','bed','desk','dresser','toys'];
+const QUEST_IDS = ['audition','artbox','outside','labels','photo','donate'];
+const CATS = ['경험','특권','선물','용돈'];
+const LEVEL_AT = [0, 30, 80, 160, 300];
+const KNOWN_ERR = ['bad_pin','not_enough_stars','not_all_done','already_checked','callsign_taken','bad_callsign','bad_pin_format','family_not_found','bad_zone','bad_quest','bad_delta','reward_not_found','invalid_day'];
+
+const STR = {
+  ko: {
+    loading:'불러오는 중…', gateSub:'방 정리 퀘스트',
+    gateLead:'콜사인으로 우리 집을 불러와요. 같은 콜사인이면 아이와 부모 폰이 별을 함께 봐요.',
+    callsignLabel:'콜사인', callsignPh:'영문 소문자, 숫자, _ , -',
+    loadBtn:'불러오기', firstBtn:'우리 집이 처음이에요',
+    createLead:'아이 이름과 부모님 비밀번호로 새로 만들어요. 비밀번호는 숫자 4~8자리이고, 교환할 때 필요해요.',
+    childLabel:'아이 이름', childPh:'예: 지민', pinLabel:'부모님 비밀번호', pinPh:'숫자 4~8자리',
+    createBtn:'새로 만들기', backHub:'게임 허브로', title:'방 정리 퀘스트', bank:'내 별',
+    week:'이번 주', mission:'오늘의 미션', missionSub:'자기 전 10분 · 구역마다 별 1개',
+    questHead:'대청소 퀘스트', questSub:'한 번만 하면 돼요 · 각 별 10개',
+    shop:'별 상점', shopSub:'교환할 때 부모님 비밀번호가 필요해요', log:'별 기록',
+    parentBtn:'부모님 설정', switchBtn:'가족 바꾸기',
+    streakN:'{0}일 연속 중', allOn:'올클리어 보너스 받았어요 (+2)', allOff:'5구역 모두 끝내면 보너스 별 2개 ({0}/5)',
+    streakOn:'{0}일 연속 보너스 받았어요 (+5)', streakOff:'연속 보너스까지 {0}일 남았어요',
+    parentNeed:'올클리어하면 부모님 확인받기', parentReady:'부모님 확인받기 (별 +2)', parentDone:'오늘 부모님 확인 완료!',
+    doneMark:'완료!', emptyLog:'구역을 체크하면 여기에 별 기록이 쌓여요',
+    lvNext:'다음 레벨까지 별 {0}개', lvMax:'최고 레벨 달성!',
+    levels:['정리 새싹','정리 탐험가','정리 기사','정리 마스터','방의 주인'],
+    zones:{
+      floor:{ic:'바',name:'바닥',tip:'바닥에 물건 0개. 종이, 신발, 인형 모두 제자리로'},
+      bed:{ic:'침',name:'침대',tip:'이불 펴서 덮기, 잠옷은 베개 밑에'},
+      desk:{ic:'책',name:'책상',tip:'숙제 도구만 남기고 종이는 서류함에'},
+      dresser:{ic:'서',name:'서랍장 위',tip:'거울과 액세서리 스탠드만 남기기'},
+      toys:{ic:'인',name:'인형·장난감',tip:'인형은 바구니, 작은 장난감은 통 안으로'}
+    },
+    quests:{
+      audition:{name:'인형 오디션',tip:'방에 남길 최애 인형 고르기. 나머지는 휴가 상자로'},
+      artbox:{name:'작품 상자 만들기',tip:'그림과 종이 작품을 한 상자에 모으기'},
+      outside:{name:'방 밖으로 보내기',tip:'로션, 간식, 껌, 신발은 원래 자리로'},
+      labels:{name:'라벨 붙이기',tip:'작은 물건 통을 나누고 이름표 붙이기'},
+      photo:{name:'완성 사진 찍기',tip:'깨끗해진 방 사진을 찍어 벽에 붙이기'},
+      donate:{name:'나눔 상자',tip:'안 쓰는 물건을 골라 나눔 상자에 넣기'}
+    },
+    cats:{'경험':'경험','특권':'특권','선물':'선물','용돈':'용돈'},
+    cancel:'취소', ok:'확인', close:'닫기', remove:'삭제',
+    parentAskTitle:'오늘 방을 같이 확인했나요?',
+    parentAskDesc:'부모님 비밀번호를 입력하면 별 2개를 줘요.',
+    parentTitle:'부모님 설정', parentEnter:'비밀번호를 입력하세요.',
+    redeemDesc:'별 {0}개를 사용해요. 부모님 비밀번호를 입력해 주세요.',
+    adjustHead:'별 조정', rewardHead:'보상 목록', pinHead:'비밀번호 변경',
+    adjPh:'예: 5 또는 -3', reasonPh:'이유 (예: 칭찬 보너스)', adjGo:'별 조정하기',
+    rewardPh:'새 보상 이름', costPh:'별 개수', addReward:'보상 추가',
+    newPinPh:'새 비밀번호 4자리 이상', pinSet:'변경',
+    adjustDefault:'부모님 조정', adjusted:'별 {0} 반영했어요.',
+    added:'보상을 추가했어요.', removed:'보상을 뺐어요.', pinChanged:'비밀번호를 바꿨어요.',
+    noRewards:'등록된 보상이 없어요.',
+    toastAll:'오늘 미션 올클리어! 별 +2', toastStreak:'{0}일 연속! 별 +5',
+    toastQuest:'{0} 완료! 별 +10', toastParent:'부모님 확인 완료! 별 +2', toastRedeem:'{0} 교환 완료!',
+    switchTitle:'다른 가족으로 바꿀까요?', switchDesc:'이 기기에 저장된 콜사인만 지워요. 별 기록은 그대로 남아요.', switchYes:'바꾸기',
+    weekLetters:'일월화수목금토',
+    err:{
+      bad_pin:'비밀번호가 틀렸거나 여러 번 틀려서 10분간 잠겼어요',
+      not_enough_stars:'별이 모자라서 이 보상으로 바꿀 수 없어요.',
+      not_all_done:'오늘 구역 5개를 모두 끝내야 부모님 확인을 받을 수 있어요.',
+      already_checked:'오늘은 이미 부모님 확인을 받았어요.',
+      callsign_taken:'이미 있는 콜사인이에요. 불러오기를 눌러 주세요.',
+      bad_callsign:'콜사인은 영문 소문자, 숫자, _, - 로 3~30자예요.',
+      bad_pin_format:'비밀번호는 숫자 4~8자리예요.',
+      family_not_found:'이 콜사인의 가족이 아직 없어요. 아래에서 새로 만들 수 있어요.',
+      bad_delta:'별은 한 번에 -500부터 500까지 조정할 수 있고, 0은 안 돼요.',
+      reward_not_found:'그 보상을 찾지 못했어요.',
+      invalid_day:'오늘 날짜가 서버와 달라요. 잠시 후 다시 열어 주세요.',
+      bad_zone:'알 수 없는 구역이에요.',
+      bad_quest:'알 수 없는 퀘스트예요.',
+      bad_reward:'보상 이름은 1~60자, 별은 1~1000개로 입력해 주세요.',
+      network:'연결이 잠시 끊겼어요. 다시 눌러 주세요.'
+    }
+  },
+  en: {
+    loading:'Loading…', gateSub:'Room tidy quest',
+    gateLead:'Enter your family callsign. The same callsign shares stars on a parent phone and a kid phone.',
+    callsignLabel:'Callsign', callsignPh:'lowercase, numbers, _ , -',
+    loadBtn:'Load', firstBtn:'We are new here',
+    createLead:'Make a family with the child’s name and a parent PIN. The PIN is 4–8 digits and is needed to trade stars.',
+    childLabel:'Child’s name', childPh:'e.g. Mina', pinLabel:'Parent PIN', pinPh:'4–8 digits',
+    createBtn:'Create', backHub:'Game hub', title:'Room Quest', bank:'My stars',
+    week:'This week', mission:'Today’s mission', missionSub:'10 minutes before bed · 1 star each zone',
+    questHead:'Big tidy quests', questSub:'Do each one once · 10 stars',
+    shop:'Star shop', shopSub:'A parent PIN is needed to trade', log:'Star log',
+    parentBtn:'Parent settings', switchBtn:'Switch family',
+    streakN:'{0} days in a row', allOn:'All-clear bonus earned (+2)', allOff:'Finish all 5 zones for 2 bonus stars ({0}/5)',
+    streakOn:'{0}-day streak bonus earned (+5)', streakOff:'{0} days left until the streak bonus',
+    parentNeed:'Clear all zones to ask a parent', parentReady:'Parent check (+2 stars)', parentDone:'Parent checked today!',
+    doneMark:'Done!', emptyLog:'Check a zone and the star log shows up here.',
+    lvNext:'{0} stars to the next level', lvMax:'Top level reached!',
+    levels:['Tidy Sprout','Tidy Explorer','Tidy Knight','Tidy Master','Room Captain'],
+    zones:{
+      floor:{ic:'바',name:'Floor',tip:'Nothing on the floor. Papers, shoes, and plushies go home.'},
+      bed:{ic:'침',name:'Bed',tip:'Spread the blanket. Pajamas go under the pillow.'},
+      desk:{ic:'책',name:'Desk',tip:'Only homework tools stay. Papers go in the tray.'},
+      dresser:{ic:'서',name:'Dresser top',tip:'Only the mirror and accessory stand stay.'},
+      toys:{ic:'인',name:'Plushies & toys',tip:'Plushies in the basket, small toys in the bin.'}
+    },
+    quests:{
+      audition:{name:'Plushie audition',tip:'Pick favorite plushies to keep. The rest go in a vacation box.'},
+      artbox:{name:'Make an art box',tip:'Put drawings and paper art in one box.'},
+      outside:{name:'Send things out',tip:'Lotion, snacks, gum, and shoes go back home.'},
+      labels:{name:'Add labels',tip:'Sort the small bins and add name labels.'},
+      photo:{name:'Take a done photo',tip:'Take a photo of the clean room and put it on the wall.'},
+      donate:{name:'Giving box',tip:'Pick unused things and put them in the giving box.'}
+    },
+    cats:{'경험':'Experiences','특권':'Privileges','선물':'Gifts','용돈':'Allowance'},
+    cancel:'Cancel', ok:'OK', close:'Close', remove:'Remove',
+    parentAskTitle:'Did you check the room together?',
+    parentAskDesc:'Enter the parent PIN to add 2 stars.',
+    parentTitle:'Parent settings', parentEnter:'Enter the PIN.',
+    redeemDesc:'This uses {0} stars. Enter the parent PIN.',
+    adjustHead:'Adjust stars', rewardHead:'Rewards', pinHead:'Change PIN',
+    adjPh:'e.g. 5 or -3', reasonPh:'Reason (e.g. praise bonus)', adjGo:'Adjust stars',
+    rewardPh:'New reward name', costPh:'Star cost', addReward:'Add reward',
+    newPinPh:'New PIN, 4 or more digits', pinSet:'Change',
+    adjustDefault:'Adjusted by parent', adjusted:'Stars {0} saved.',
+    added:'Reward added.', removed:'Reward removed.', pinChanged:'PIN changed.',
+    noRewards:'No rewards yet.',
+    toastAll:'All clear today! +2 stars', toastStreak:'{0} days in a row! +5 stars',
+    toastQuest:'{0} done! +10 stars', toastParent:'Parent check complete! +2 stars', toastRedeem:'{0} traded!',
+    switchTitle:'Switch to another family?', switchDesc:'This only forgets the callsign on this device. Stars stay saved.', switchYes:'Switch',
+    weekLetters:'SMTWTFS',
+    err:{
+      bad_pin:'Wrong PIN, or it is locked for 10 minutes after too many tries.',
+      not_enough_stars:'Not enough stars for this reward yet.',
+      not_all_done:'Finish all 5 zones today before a parent check.',
+      already_checked:'A parent already checked today.',
+      callsign_taken:'That callsign is taken. Try Load.',
+      bad_callsign:'Use 3–30 characters: lowercase letters, numbers, _, or -.',
+      bad_pin_format:'The PIN must be 4–8 digits.',
+      family_not_found:'No family uses that callsign yet. You can create one below.',
+      bad_delta:'Adjust between -500 and 500 stars, and not zero.',
+      reward_not_found:'That reward could not be found.',
+      invalid_day:'This device date does not match the server. Reopen in a moment.',
+      bad_zone:'Unknown zone.',
+      bad_quest:'Unknown quest.',
+      bad_reward:'Use a reward name of 1–60 characters and a cost from 1 to 1000.',
+      network:'The connection dropped. Please try again.'
+    }
+  }
+};
+
+const REWARD_EN = {
+  '아빠랑 단둘이 데이트':'Special date with Dad',
+  '주말 저녁 메뉴 내가 정하기':'I pick weekend dinner',
+  '친구 초대해서 놀기':'Have a friend over',
+  '게임·영상 30분 더':'30 more minutes of games or videos',
+  '30분 늦게 자기 (주말)':'Stay up 30 minutes later (weekend)',
+  '스티커·문구 하나':'A sticker or stationery item',
+  '갖고 싶은 책 한 권':'A book I want',
+  '용돈 $1 (저금통으로)':'$1 allowance (into the piggy bank)'
+};
+const ZONE_EN = {'바닥':'Floor','침대':'Bed','책상':'Desk','서랍장 위':'Dresser top','인형·장난감':'Plushies & toys'};
+const QUEST_EN = {
+  '인형 오디션':'Plushie audition',
+  '작품 상자 만들기':'Make an art box',
+  '방 밖으로 보내기':'Send things out',
+  '라벨 붙이기':'Add labels',
+  '완성 사진 찍기':'Take a done photo',
+  '나눔 상자':'Giving box'
+};
+
+function storeGet(key){ try { return localStorage.getItem(key); } catch(e){ return null; } }
+function storeSet(key, value){ try { localStorage.setItem(key, value); } catch(e){} }
+function storeRemove(key){ try { localStorage.removeItem(key); } catch(e){} }
+function readLang(){
+  const v = storeGet(LANG_KEY);
+  return v === 'ko' ? 'ko' : 'en';
+}
+let lang = readLang();
+let mode = 'loading';
+let callsign = '';
+let sessionPin = '';
+let gateErrCode = '';
+let S = emptyState();
+let tail = Promise.resolve();
+let pending = 0;
+
+function emptyState(){ return { child_name:'', stars:null, total:null, streak:0, days:[], quests:[], rewards:[], ledger:[] }; }
+function $(id){ return document.getElementById(id); }
+function pad(n){ return String(n).padStart(2,'0'); }
+function dkey(d){ return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
+function today(){ return dkey(new Date()); }
+function clone(o){ return JSON.parse(JSON.stringify(o)); }
+function t(key){
+  const cur = STR[lang] && STR[lang][key];
+  if (typeof cur === 'string') return cur;
+  const en = STR.en && STR.en[key];
+  return typeof en === 'string' ? en : key;
+}
+function errText(code){ const e = (STR[lang] && STR[lang].err) || STR.en.err; return (e && e[code]) || e.network; }
+function showReward(name){
+  if (lang !== 'en') return name || '';
+  return REWARD_EN[name] || name || '';
+}
+function showReason(reason){
+  const s = String(reason || '');
+  if (lang !== 'en' || !s) return s;
+  let m;
+  if ((m = s.match(/^(.+) 정리 완료$/)) && ZONE_EN[m[1]]) return ZONE_EN[m[1]] + ' done';
+  if ((m = s.match(/^(.+) 체크 취소$/)) && ZONE_EN[m[1]]) return ZONE_EN[m[1]] + ' unchecked';
+  if (s === '5구역 올클리어 보너스') return 'All 5 zones bonus';
+  if (s === '올클리어 보너스 취소') return 'All-clear bonus removed';
+  if ((m = s.match(/^(\d+)일 연속 보너스$/))) return m[1] + '-day streak bonus';
+  if (s === '부모님 확인 보너스') return 'Parent check bonus';
+  if (s === '부모님 조정') return 'Adjusted by parent';
+  if ((m = s.match(/^퀘스트: (.+)$/))) return 'Quest: ' + (QUEST_EN[m[1]] || m[1]);
+  if ((m = s.match(/^(.+) 취소$/)) && QUEST_EN[m[1]]) return QUEST_EN[m[1]] + ' undone';
+  if ((m = s.match(/^교환: (.+)$/))) return 'Traded: ' + (REWARD_EN[m[1]] || m[1]);
+  return s;
+}
+function esc(s){ return String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function normCs(s){ return String(s || '').trim().toLowerCase(); }
+
+function applyLang(){
+  document.documentElement.lang = lang === 'en' ? 'en' : 'ko';
+  document.title = lang === 'en' ? 'TIDY POP — Room Quest' : 'TIDY POP — 방 정리 퀘스트';
+  document.querySelectorAll('[data-k]').forEach(el => {
+    const v = STR[lang][el.getAttribute('data-k')];
+    if (typeof v === 'string') el.textContent = v;
+  });
+  document.querySelectorAll('[data-ph]').forEach(el => {
+    const v = STR[lang][el.getAttribute('data-ph')];
+    if (typeof v === 'string') el.placeholder = v;
+  });
+  document.querySelectorAll('[data-lang-toggle]').forEach(el => { el.textContent = lang === 'ko' ? 'English' : '한글'; });
+  if ($('gateErr')) setGateErr(gateErrCode);
+  if (mode === 'app') render();
+}
+function toggleLang(){
+  lang = lang === 'ko' ? 'en' : 'ko';
+  storeSet(LANG_KEY, lang);
+  applyLang();
+}
+
+function dayRec(k){
+  return (S.days || []).find(d => String(d.day).slice(0,10) === k);
+}
+function ensureToday(){
+  const k = today();
+  let d = dayRec(k);
+  if (!d){
+    d = { day:k, zones:[], all_bonus:false, parent_checked:false, streak_paid:false };
+    S.days.push(d);
+  }
+  if (!Array.isArray(d.zones)) d.zones = [];
+  return d;
+}
+function isState(res){
+  return !!(res && res.ok === true && Object.prototype.hasOwnProperty.call(res, 'stars') && Number.isFinite(Number(res.stars)));
+}
+function applyState(data){
+  const days = Array.isArray(data.days) ? data.days : [];
+  S = {
+    child_name: data.child_name || '',
+    stars: Number(data.stars),
+    total: Number(data.total),
+    streak: Number(data.streak) || 0,
+    days: days.map(d => ({
+      day: String(d.day).slice(0,10),
+      zones: Array.isArray(d.zones) ? d.zones.slice() : [],
+      all_bonus: !!d.all_bonus,
+      parent_checked: !!d.parent_checked,
+      streak_paid: !!d.streak_paid
+    })),
+    quests: Array.isArray(data.quests) ? data.quests.slice() : [],
+    rewards: Array.isArray(data.rewards) ? data.rewards.map(r => ({ id:r.id, cat:r.cat, name:r.name, cost:Number(r.cost) })) : [],
+    ledger: Array.isArray(data.ledger) ? data.ledger.map(l => ({ delta:Number(l.delta), reason:l.reason || '', created_at:l.created_at })) : []
+  };
+  if (mode === 'app') render();
+  if ($('rlist')) paintParentRewards();
+}
+
+async function rpc(fn, args){
+  try{
+    const { data, error } = await db.rpc(fn, args);
+    if (error){
+      const blob = [error.message, error.details, error.hint, error.code].filter(Boolean).join(' ');
+      const code = KNOWN_ERR.find(c => blob.includes(c));
+      return { ok:false, error: code || 'network' };
+    }
+    let body = data;
+    if (typeof body === 'string'){ try { body = JSON.parse(body); } catch(e){ return { ok:false, error:'network' }; } }
+    if (body && typeof body === 'object'){
+      if (body.ok === false && !body.error) return { ok:false, error:'bad_pin' };
+      return body;
+    }
+    return { ok:false, error:'network' };
+  }catch(e){
+    return { ok:false, error:'network' };
+  }
+}
+
+function schedule(mutateLocal, call, opt){
+  opt = opt || {};
+  const before = clone(S);
+  if (mutateLocal) mutateLocal();
+  if (mutateLocal && mode === 'app'){ render(); if ($('rlist')) paintParentRewards(); }
+  pending++;
+  const p = tail.then(async () => {
+    let res;
+    try { res = await call(); }
+    catch(e){ res = { ok:false, error:'network' }; }
+    pending--;
+    if (isState(res)){
+      if (opt.celebrate) opt.celebrate(before, res);
+      if (pending === 0) applyState(res);
+    } else if (!(res && res.ok)){
+      if (mutateLocal && pending === 0){
+        const fresh = await rpc('tidy_get_state', { p_callsign: callsign, p_today: today() });
+        if (isState(fresh)) applyState(fresh);
+        else { S = before; if (mode === 'app'){ render(); if ($('rlist')) paintParentRewards(); } }
+      }
+      if (!opt.quiet) toast(errText(res && res.error));
+    }
+    return res || { ok:false, error:'network' };
+  });
+  tail = p.then(() => {}, () => {});
+  return p;
+}
+
+function dateLabel(){
+  const now = new Date();
+  if (lang === 'ko') return (now.getMonth()+1)+'월 '+now.getDate()+'일 '+'일월화수목금토'[now.getDay()]+'요일';
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  return days[now.getDay()]+', '+months[now.getMonth()]+' '+now.getDate();
+}
+function md(iso){
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '';
+  return pad(d.getMonth()+1)+'/'+pad(d.getDate());
+}
+
+function render(){
+  const D = dayRec(today()) || { zones:[], all_bonus:false, parent_checked:false, streak_paid:false };
+  $('stars').textContent = Number.isFinite(Number(S.stars)) ? String(S.stars) : '–';
+  const bits = [];
+  if (S.child_name) bits.push(S.child_name);
+  bits.push(dateLabel());
+  $('todayLabel').textContent = bits.join(' · ');
+  const total = Number(S.total);
+  let li = 0;
+  if (Number.isFinite(total)) LEVEL_AT.forEach((n,i) => { if (total >= n) li = i; });
+  $('lvName').textContent = Number.isFinite(total) ? ('Lv.'+(li+1)+' '+STR[lang].levels[li]) : '';
+  const next = LEVEL_AT[li+1];
+  if (!Number.isFinite(total)){
+    $('lvNext').textContent = '';
+    $('lvBar').style.width = '0%';
+  } else if (next != null){
+    $('lvNext').textContent = t('lvNext').replace('{0}', next - total);
+    const span = next - LEVEL_AT[li];
+    const pct = span ? Math.max(0, Math.min(100, ((total - LEVEL_AT[li]) / span) * 100)) : 0;
+    $('lvBar').style.width = pct + '%';
+  } else {
+    $('lvNext').textContent = t('lvMax');
+    $('lvBar').style.width = '100%';
+  }
+  const st = Number(S.streak) || 0;
+  $('streak').textContent = st ? t('streakN').replace('{0}', st) : '';
+  const letters = t('weekLetters');
+  let w = '';
+  for (let i = 6; i >= 0; i--){
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const rec = dayRec(dkey(d));
+    const n = rec ? rec.zones.length : 0;
+    const full = n === ZONE_IDS.length;
+    w += '<div class="day '+(i===0?'today':'')+'"><span class="dot '+(full?'full':n?'part':'')+'">'+(full?'★':(n||''))+'</span>'+letters[d.getDay()]+'</div>';
+  }
+  $('week').innerHTML = w;
+  $('zones').innerHTML = ZONE_IDS.map(id => {
+    const z = STR[lang].zones[id];
+    const on = D.zones.includes(id);
+    return '<button type="button" class="zone '+(on?'done':'')+'" data-z="'+id+'" aria-pressed="'+on+'"><span class="ic">'+(on?'★':z.ic)+'</span><span class="tx"><strong>'+esc(z.name)+'</strong><small>'+esc(z.tip)+'</small></span><span class="chk">✓</span></button>';
+  }).join('');
+  $('allPill').className = 'pill'+(D.all_bonus?' on':'');
+  $('allPill').textContent = D.all_bonus ? t('allOn') : t('allOff').replace('{0}', D.zones.length);
+  const left = 5 - (st % 5);
+  $('streakPill').className = 'pill'+(D.streak_paid?' on':'');
+  $('streakPill').textContent = D.streak_paid ? t('streakOn').replace('{0}', st) : t('streakOff').replace('{0}', left);
+  const pc = $('parentCheck');
+  pc.disabled = !D.all_bonus || !!D.parent_checked;
+  pc.textContent = D.parent_checked ? t('parentDone') : D.all_bonus ? t('parentReady') : t('parentNeed');
+  $('quests').innerHTML = QUEST_IDS.map(id => {
+    const q = STR[lang].quests[id];
+    const on = (S.quests || []).includes(id);
+    return '<button type="button" class="quest '+(on?'done':'')+'" data-q="'+id+'" aria-pressed="'+on+'"><strong>'+esc(q.name)+'</strong><small>'+esc(q.tip)+'</small><span class="pts">★ 10'+(on?' · '+esc(t('doneMark')):'')+'</span></button>';
+  }).join('');
+  $('shop').innerHTML = CATS.map(c => {
+    const its = (S.rewards || []).filter(r => r.cat === c);
+    if (!its.length) return '';
+    return '<div class="cat"><h3>'+esc(STR[lang].cats[c] || c)+'</h3><div class="items">'+its.map(r => {
+      const afford = Number(S.stars) >= Number(r.cost);
+      return '<div class="item"><span>'+esc(showReward(r.name))+'</span><button type="button" class="cost" data-r="'+esc(r.id)+'" '+(afford?'':'disabled')+'>★ '+Number(r.cost)+'</button></div>';
+    }).join('')+'</div></div>';
+  }).join('');
+  $('log').innerHTML = (S.ledger && S.ledger.length) ? S.ledger.slice(0,12).map(l => {
+    const n = Number(l.delta);
+    return '<div><span>'+esc(showReason(l.reason))+'</span><span><span class="'+(n>=0?'plus':'minus')+'">'+(n>=0?'+':'')+n+'</span> <span class="d">'+esc(md(l.created_at))+'</span></span></div>';
+  }).join('') : '<div><span class="muted">'+esc(t('emptyLog'))+'</span></div>';
+  if ($('csNote')) $('csNote').textContent = callsign ? '@'+callsign : '';
+}
+
+function burst(n){
+  const b = document.createElement('div');
+  b.className = 'burst';
+  for (let i = 0; i < n; i++){
+    const s = document.createElement('i');
+    s.textContent = '★';
+    const a = Math.random()*Math.PI*2, r = 60+Math.random()*90;
+    s.style.setProperty('--x', Math.cos(a)*r+'px');
+    s.style.setProperty('--y', Math.sin(a)*r+'px');
+    s.style.animationDelay = (Math.random()*.15)+'s';
+    b.appendChild(s);
+  }
+  document.body.appendChild(b);
+  setTimeout(() => b.remove(), 1200);
+}
+let tt;
+function toast(text){
+  document.querySelectorAll('.toast').forEach(x => x.remove());
+  const d = document.createElement('div');
+  d.className = 'toast';
+  d.textContent = text;
+  document.body.appendChild(d);
+  clearTimeout(tt);
+  tt = setTimeout(() => d.remove(), 2200);
+}
+
+function celebrateZone(before, res){
+  const k = today();
+  const b = (before.days || []).find(d => String(d.day).slice(0,10) === k);
+  const n = (res.days || []).find(d => String(d.day).slice(0,10) === k);
+  if (!(b && b.all_bonus) && n && n.all_bonus) toast(t('toastAll'));
+  if (!(b && b.streak_paid) && n && n.streak_paid) setTimeout(() => toast(t('toastStreak').replace('{0}', res.streak)), 1400);
+}
+function toggleZone(id){
+  if (!ZONE_IDS.includes(id) || !callsign) return;
+  const cur = dayRec(today());
+  const wasOn = !!(cur && cur.zones.includes(id));
+  if (!wasOn) burst(((cur && cur.zones.length) || 0) + 1 === 5 ? 10 : 4);
+  schedule(() => {
+    const D = ensureToday();
+    if (D.zones.includes(id)){ D.zones = D.zones.filter(z => z !== id); D.all_bonus = false; }
+    else { D.zones.push(id); if (D.zones.length === 5) D.all_bonus = true; }
+  }, () => rpc('tidy_toggle_zone', { p_callsign: callsign, p_today: today(), p_zone: id }), { celebrate: celebrateZone });
+}
+function toggleQuest(id){
+  if (!QUEST_IDS.includes(id) || !callsign) return;
+  const wasOn = (S.quests || []).includes(id);
+  if (!wasOn) burst(12);
+  schedule(() => {
+    if (S.quests.includes(id)) S.quests = S.quests.filter(q => q !== id);
+    else S.quests.push(id);
+  }, () => rpc('tidy_toggle_quest', { p_callsign: callsign, p_today: today(), p_quest: id }), {
+    celebrate(before, res){
+      const had = (before.quests || []).includes(id);
+      const has = (res.quests || []).includes(id);
+      if (!had && has) toast(t('toastQuest').replace('{0}', STR[lang].quests[id].name));
+    }
+  });
+}
+
+function modal(html, onScrim){
+  $('modalRoot').innerHTML = '<div class="scrim" id="scrim"><div class="modal" role="dialog" aria-modal="true">'+html+'</div></div>';
+  $('scrim').addEventListener('click', e => { if (e.target.id === 'scrim' && onScrim) onScrim(); });
+}
+function close(){ $('modalRoot').innerHTML = ''; }
+
+function askPin(title, desc, attempt){
+  let closed = false;
+  const shut = () => { closed = true; close(); };
+  modal('<h2>'+esc(title)+'</h2><p class="muted" style="margin:0">'+esc(desc)+'</p>'+
+    '<input id="pinIn" type="password" inputmode="numeric" maxlength="8" autocomplete="off" placeholder="'+esc(t('pinPh'))+'">'+
+    '<div class="err" id="pinErr"></div>'+
+    '<div class="row"><button type="button" class="btn alt" id="pinNo">'+esc(t('cancel'))+'</button><button type="button" class="btn" id="pinOk">'+esc(t('ok'))+'</button></div>',
+    () => { if ($('pinOk') && !$('pinOk').disabled) shut(); });
+  $('pinNo').onclick = shut;
+  const go = async () => {
+    if (closed || !$('pinIn')) return;
+    const pin = $('pinIn').value.trim();
+    if (!PIN_RE.test(pin)){ $('pinErr').textContent = errText('bad_pin_format'); return; }
+    $('pinOk').disabled = true;
+    $('pinNo').disabled = true;
+    const res = await attempt(pin);
+    if (closed || !$('pinErr')){
+      if (!(res && res.ok)) toast(errText((res && res.error) || 'bad_pin'));
+      return;
+    }
+    $('pinOk').disabled = false;
+    $('pinNo').disabled = false;
+    if (res && res.ok) shut();
+    else {
+      $('pinErr').textContent = errText((res && res.error) || 'bad_pin');
+      $('pinIn').value = '';
+      $('pinIn').focus();
+    }
+  };
+  $('pinOk').onclick = go;
+  $('pinIn').onkeydown = e => { if (e.key === 'Enter') go(); };
+  $('pinIn').focus();
+}
+
+function onParentCheck(){
+  const D = dayRec(today());
+  if (!D || !D.all_bonus || D.parent_checked) return;
+  askPin(t('parentAskTitle'), t('parentAskDesc'), pin => schedule(() => {
+    ensureToday().parent_checked = true;
+  }, () => rpc('tidy_parent_check', { p_callsign: callsign, p_today: today(), p_pin: pin }), {
+    quiet: true,
+    celebrate(){ burst(8); toast(t('toastParent')); }
+  }));
+}
+function onParentOpen(){
+  askPin(t('parentTitle'), t('parentEnter'), async pin => {
+    const res = await rpc('tidy_verify_pin', { p_callsign: callsign, p_pin: pin });
+    if (res && res.ok){
+      sessionPin = pin;
+      setTimeout(parentPanel, 0);
+      return { ok:true };
+    }
+    return { ok:false, error: (res && res.error) || 'bad_pin' };
+  });
+}
+function closeParent(){ sessionPin = ''; close(); }
+function paintParentRewards(){
+  const el = $('rlist');
+  if (!el) return;
+  if (!S.rewards.length){ el.innerHTML = '<div class="muted">'+esc(t('noRewards'))+'</div>'; return; }
+  el.innerHTML = S.rewards.map(r => {
+    const pendingRow = String(r.id).indexOf('pending-') === 0;
+    return '<div class="prow"><span>'+esc(STR[lang].cats[r.cat] || r.cat)+' · '+esc(showReward(r.name))+'</span><span>★'+Number(r.cost)+'</span>'+
+      (pendingRow ? '<span></span>' : '<button type="button" data-del="'+esc(r.id)+'">'+esc(t('remove'))+'</button>')+'</div>';
+  }).join('');
+}
+function parentPanel(){
+  const opts = CATS.map(c => '<option value="'+c+'">'+esc(STR[lang].cats[c])+'</option>').join('');
+  modal('<h2>'+esc(t('parentTitle'))+'</h2>'+
+    '<h3 style="font-size:17px">'+esc(t('adjustHead'))+'</h3>'+
+    '<div class="row"><input id="adjN" type="number" inputmode="numeric" placeholder="'+esc(t('adjPh'))+'"><input id="adjT" maxlength="40" placeholder="'+esc(t('reasonPh'))+'"></div>'+
+    '<button type="button" class="btn" id="adjGo">'+esc(t('adjGo'))+'</button>'+
+    '<h3 style="font-size:17px">'+esc(t('rewardHead'))+'</h3>'+
+    '<div id="rlist" style="display:flex;flex-direction:column;gap:6px"></div>'+
+    '<div class="row"><input id="rName" maxlength="60" placeholder="'+esc(t('rewardPh'))+'"><input id="rCost" type="number" inputmode="numeric" placeholder="'+esc(t('costPh'))+'"></div>'+
+    '<div class="row"><select id="rCat">'+opts+'</select><button type="button" class="btn" id="rAdd">'+esc(t('addReward'))+'</button></div>'+
+    '<h3 style="font-size:17px">'+esc(t('pinHead'))+'</h3>'+
+    '<div class="row"><input id="newPin" type="password" inputmode="numeric" maxlength="8" placeholder="'+esc(t('newPinPh'))+'"><button type="button" class="btn" id="pinSet">'+esc(t('pinSet'))+'</button></div>'+
+    '<div class="err" id="pErr"></div>'+
+    '<button type="button" class="btn alt" id="pClose">'+esc(t('close'))+'</button>', closeParent);
+  paintParentRewards();
+  $('pClose').onclick = closeParent;
+  $('adjGo').onclick = doAdjust;
+  $('rAdd').onclick = doAdd;
+  $('pinSet').onclick = doSetPin;
+}
+async function doAdjust(){
+  const n = parseInt($('adjN').value, 10);
+  const reason = $('adjT').value.trim();
+  if (!Number.isInteger(n) || n === 0 || Math.abs(n) > 500){ $('pErr').textContent = errText('bad_delta'); return; }
+  $('adjGo').disabled = true;
+  const res = await schedule(() => {
+    S.ledger.unshift({ delta:n, reason: reason || t('adjustDefault'), created_at: new Date().toISOString() });
+  }, () => rpc('tidy_adjust', { p_callsign: callsign, p_today: today(), p_pin: sessionPin, p_delta: n, p_reason: reason }), { quiet:true });
+  if (!$('pErr')) return;
+  $('adjGo').disabled = false;
+  if (isState(res)){ $('adjN').value = ''; $('adjT').value = ''; $('pErr').textContent = t('adjusted').replace('{0}', (n>0?'+':'')+n); }
+  else $('pErr').textContent = errText((res && res.error) || 'network');
+}
+async function doAdd(){
+  const name = $('rName').value.trim();
+  const cost = parseInt($('rCost').value, 10);
+  const cat = $('rCat').value;
+  if (!name || name.length > 60 || !Number.isInteger(cost) || cost < 1 || cost > 1000 || !CATS.includes(cat)){
+    $('pErr').textContent = errText('bad_reward'); return;
+  }
+  $('rAdd').disabled = true;
+  const tempId = 'pending-'+Date.now();
+  const res = await schedule(() => {
+    S.rewards.push({ id:tempId, cat, name, cost });
+  }, () => rpc('tidy_reward_add', { p_callsign: callsign, p_today: today(), p_pin: sessionPin, p_cat: cat, p_name: name, p_cost: cost }), { quiet:true });
+  if (!$('pErr')) return;
+  $('rAdd').disabled = false;
+  if (isState(res)){ $('rName').value = ''; $('rCost').value = ''; $('pErr').textContent = t('added'); }
+  else $('pErr').textContent = errText((res && res.error) || 'network');
+}
+async function removeReward(id){
+  if (!id || String(id).indexOf('pending-') === 0 || !$('pErr')) return;
+  const res = await schedule(() => {
+    S.rewards = S.rewards.filter(r => r.id !== id);
+  }, () => rpc('tidy_reward_remove', { p_callsign: callsign, p_today: today(), p_pin: sessionPin, p_reward: id }), { quiet:true });
+  if ($('pErr') && isState(res)) $('pErr').textContent = t('removed');
+  else if ($('pErr')) $('pErr').textContent = errText((res && res.error) || 'network');
+}
+async function doSetPin(){
+  const np = $('newPin').value.trim();
+  if (!PIN_RE.test(np)){ $('pErr').textContent = errText('bad_pin_format'); return; }
+  $('pinSet').disabled = true;
+  const res = await schedule(null, () => rpc('tidy_set_pin', { p_callsign: callsign, p_old_pin: sessionPin, p_new_pin: np }), { quiet:true });
+  if (!$('pErr')) return;
+  $('pinSet').disabled = false;
+  if (res && res.ok){ sessionPin = np; $('newPin').value = ''; $('pErr').textContent = t('pinChanged'); }
+  else $('pErr').textContent = errText((res && res.error) || 'bad_pin');
+}
+function redeem(id){
+  const r = (S.rewards || []).find(x => x.id === id);
+  if (!r || !(Number(S.stars) >= Number(r.cost))) return;
+  askPin(showReward(r.name), t('redeemDesc').replace('{0}', r.cost), pin => schedule(null, () => rpc('tidy_redeem', {
+    p_callsign: callsign, p_today: today(), p_reward: id, p_pin: pin
+  }), {
+    quiet: true,
+    celebrate(){ burst(14); toast(t('toastRedeem').replace('{0}', showReward(r.name))); }
+  }));
+}
+function onSwitch(){
+  modal('<h2>'+esc(t('switchTitle'))+'</h2><p class="muted" style="margin:0">'+esc(t('switchDesc'))+'</p>'+
+    '<div class="row"><button type="button" class="btn alt" id="swNo">'+esc(t('cancel'))+'</button><button type="button" class="btn" id="swYes">'+esc(t('switchYes'))+'</button></div>', close);
+  $('swNo').onclick = close;
+  $('swYes').onclick = () => {
+    storeRemove(CS_KEY);
+    callsign = '';
+    sessionPin = '';
+    S = emptyState();
+    close();
+    showGate();
+  };
+}
+
+function setGateErr(code){
+  gateErrCode = code || '';
+  const el = $('gateErr');
+  if (el) el.textContent = gateErrCode ? errText(gateErrCode) : '';
+}
+function showLoading(){ mode = 'loading'; $('loading').hidden = false; $('gate').hidden = true; $('app').hidden = true; }
+function showGate(prefill, errorCode){
+  mode = 'gate';
+  $('loading').hidden = true;
+  $('app').hidden = true;
+  $('gate').hidden = false;
+  $('createBox').hidden = true;
+  if (typeof prefill === 'string') $('csIn').value = prefill;
+  if (errorCode === 'family_not_found') $('createBox').hidden = false;
+  setGateErr(errorCode || '');
+}
+function showApp(){
+  mode = 'app';
+  $('loading').hidden = true;
+  $('gate').hidden = true;
+  $('app').hidden = false;
+  render();
+}
+function setGateBusy(on){
+  $('loadBtn').disabled = on;
+  $('createBtn').disabled = on;
+  $('firstBtn').disabled = on;
+}
+async function loadFamily(){
+  const cs = normCs($('csIn').value);
+  if (!CS_RE.test(cs)){ setGateErr('bad_callsign'); return; }
+  setGateBusy(true);
+  const res = await rpc('tidy_get_state', { p_callsign: cs, p_today: today() });
+  setGateBusy(false);
+  if (isState(res)){
+    storeSet(CS_KEY, cs);
+    callsign = cs;
+    applyState(res);
+    showApp();
+  } else if (res.error === 'family_not_found'){
+    $('createBox').hidden = false;
+    setGateErr('family_not_found');
+    $('nameIn').focus();
+  } else setGateErr(res.error || 'network');
+}
+async function createFamily(){
+  const cs = normCs($('csIn').value);
+  const name = $('nameIn').value.trim();
+  const pin = $('pinNew').value.trim();
+  if (!CS_RE.test(cs)){ setGateErr('bad_callsign'); return; }
+  if (!PIN_RE.test(pin)){ setGateErr('bad_pin_format'); return; }
+  setGateBusy(true);
+  const res = await rpc('tidy_create_family', { p_callsign: cs, p_child_name: name, p_pin: pin, p_today: today() });
+  setGateBusy(false);
+  if (isState(res)){
+    storeSet(CS_KEY, cs);
+    callsign = cs;
+    $('pinNew').value = '';
+    applyState(res);
+    showApp();
+  } else setGateErr(res.error || 'network');
+}
+
+document.addEventListener('click', e => {
+  if (e.target.closest('[data-lang-toggle]')){ toggleLang(); return; }
+  const del = e.target.closest('[data-del]');
+  if (del){ removeReward(del.getAttribute('data-del')); return; }
+  if (mode !== 'app') return;
+  const z = e.target.closest('[data-z]');
+  if (z){ toggleZone(z.getAttribute('data-z')); return; }
+  const q = e.target.closest('[data-q]');
+  if (q){ toggleQuest(q.getAttribute('data-q')); return; }
+  const r = e.target.closest('[data-r]');
+  if (r && !r.disabled){ redeem(r.getAttribute('data-r')); }
+});
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape' || !$('scrim')) return;
+  if ($('pinOk') && $('pinOk').disabled) return;
+  if ($('rlist')) sessionPin = '';
+  close();
+});
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState !== 'visible' || mode !== 'app' || !callsign || pending) return;
+  rpc('tidy_get_state', { p_callsign: callsign, p_today: today() }).then(res => { if (isState(res) && pending === 0) applyState(res); });
+});
+
+$('loadBtn').onclick = loadFamily;
+$('firstBtn').onclick = () => { $('createBox').hidden = false; setGateErr(''); $('nameIn').focus(); };
+$('createBtn').onclick = createFamily;
+$('csIn').addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDefault(); loadFamily(); } });
+$('nameIn').addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDefault(); $('pinNew').focus(); } });
+$('pinNew').addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDefault(); createFamily(); } });
+$('parentCheck').onclick = onParentCheck;
+$('parentBtn').onclick = onParentOpen;
+$('switchBtn').onclick = onSwitch;
+
+applyLang();
+(async function boot(){
+  const saved = storeGet(CS_KEY) || '';
+  if (!saved){ showGate(); return; }
+  showLoading();
+  const res = await rpc('tidy_get_state', { p_callsign: saved, p_today: today() });
+  if (isState(res)){ callsign = saved; applyState(res); showApp(); }
+  else showGate(saved, res.error || 'network');
+})();
+</script>
+</body>
+</html>

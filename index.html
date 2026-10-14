@@ -168,6 +168,11 @@ header{display:flex;align-items:center;justify-content:space-between;padding-bot
         <div class="game-desc" data-i18n="desc_multpop">Singapore math × tables — CPA method</div>
         <div class="game-card-foot"><span class="game-link">multpop.mybumo.com →</span><span class="card-plays" id="ct-multpop"></span></div>
       </div>
+      <div class="game-card" onclick="trackClick('tidypop','/tidy-pop/')">
+        <div class="game-card-head"><span class="game-title">TIDY POP</span><span class="badge badge-live">LIVE</span></div>
+        <div class="game-desc" data-i18n="desc_tidypop">Tidy your room, collect stars, trade for rewards</div>
+        <div class="game-card-foot"><span class="game-link">/tidy-pop/ →</span><span class="card-plays" id="ct-tidypop"></span></div>
+      </div>
       <div class="game-card soon">
         <div class="game-card-head"><span class="game-title">WORD POP</span><span class="badge badge-soon">SOON</span></div>
         <div class="game-desc" data-i18n="desc_wordpop">Type words to stop the workers</div>
@@ -311,6 +316,7 @@ const STRINGS = {
     desc_matchpop: 'Flip cards and find matching pairs',
     desc_multpop: 'Singapore math \xd7 tables \u2014 CPA method',
     desc_wordpop: 'Type words to stop the workers',
+    desc_tidypop: 'Tidy your room, collect stars, trade for rewards',
     statToday: 'Today {0} visitors', statTotal: 'Total {0} plays',
     csErrLen: 'Callsign must be 2~20 characters.',
     csErrProfanity: 'Contains invalid words.',
@@ -361,6 +367,7 @@ const STRINGS = {
     desc_matchpop: '\uce74\ub4dc\ub97c \ub4a4\uc9d1\uc5b4 \uc9dd\uc744 \ub9de\ucdb0\ub294 \uba54\ubaa8\ub9ac \uac8c\uc784',
     desc_multpop: '싱가포르 수학 구구단 — CPA 3단계 학습',
     desc_wordpop: '\ub2e8\uc5b4\ub97c \uc785\ub825\ud574 \uc77c\uaefc\uc744 \ub9c9\ub294 \ud0c0\uc774\ud551 \uac8c\uc784',
+    desc_tidypop: '방 정리 퀘스트. 매일 정리하고 별을 모아 보상으로 바꿔요',
     statToday: '\uc624\ub298 {0}\uba85 \ubc29\ubb38', statTotal: '\uc5f4 {0}\uba85\uc774 \ud50c\ub808\uc774',
     csErrLen: '\ucf5c\uc0ac\uc778\uc740 2~20\uc790\uc5ec\uc57c \ud569\ub2c8\ub2e4.',
     csErrProfanity: '\uc0ac\uc6a9\ud560 \uc218 \uc5c6\ub294 \ub2e8\uc5b4\uac00 \ud3ec\ud568\ub418\uc5b4 \uc788\uc5b4\uc694.',
