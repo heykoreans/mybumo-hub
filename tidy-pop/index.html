@@ -61,6 +61,8 @@ a{color:var(--sky)}
 .zones{display:flex;flex-direction:column;gap:10px}
 .zone{display:grid;grid-template-columns:44px 1fr auto;gap:12px;align-items:center;background:var(--card);border:2px solid var(--line);border-radius:16px;padding:12px 14px;text-align:left;color:var(--ink);width:100%;user-select:none}
 .zone .ic{width:44px;height:44px;border-radius:12px;background:var(--soft-sky);display:grid;place-items:center;font-family:var(--display);font-size:20px;color:var(--sky)}
+.zone .ic svg{width:26px;height:26px;display:block}
+.zone .ic svg path,.zone .ic svg circle{fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
 .zone .tx{min-width:0}
 .zone .tx strong{font-family:var(--display);font-weight:400;font-size:19px;display:block;overflow-wrap:break-word}
 .zone .tx small{color:var(--muted);font-size:14px;overflow-wrap:break-word}
@@ -262,11 +264,11 @@ const STR = {
     lvNext:'다음 레벨까지 별 {0}개', lvMax:'최고 레벨 달성!',
     levels:['정리 새싹','정리 탐험가','정리 기사','정리 마스터','방의 주인'],
     zones:{
-      floor:{ic:'바',name:'바닥',tip:'바닥에 물건 0개. 종이, 신발, 인형 모두 제자리로'},
-      bed:{ic:'침',name:'침대',tip:'이불 펴서 덮기, 잠옷은 베개 밑에'},
-      desk:{ic:'책',name:'책상',tip:'숙제 도구만 남기고 종이는 서류함에'},
-      dresser:{ic:'서',name:'서랍장 위',tip:'거울과 액세서리 스탠드만 남기기'},
-      toys:{ic:'인',name:'인형·장난감',tip:'인형은 바구니, 작은 장난감은 통 안으로'}
+      floor:{name:'바닥',tip:'바닥에 물건 0개. 종이, 신발, 인형 모두 제자리로'},
+      bed:{name:'침대',tip:'이불 펴서 덮기, 잠옷은 베개 밑에'},
+      desk:{name:'책상',tip:'숙제 도구만 남기고 종이는 서류함에'},
+      dresser:{name:'서랍장 위',tip:'거울과 액세서리 스탠드만 남기기'},
+      toys:{name:'인형·장난감',tip:'인형은 바구니, 작은 장난감은 통 안으로'}
     },
     quests:{
       audition:{name:'인형 오디션',tip:'방에 남길 최애 인형 고르기. 나머지는 휴가 상자로'},
@@ -330,11 +332,11 @@ const STR = {
     lvNext:'{0} stars to the next level', lvMax:'Top level reached!',
     levels:['Tidy Sprout','Tidy Explorer','Tidy Knight','Tidy Master','Room Captain'],
     zones:{
-      floor:{ic:'바',name:'Floor',tip:'Nothing on the floor. Papers, shoes, and plushies go home.'},
-      bed:{ic:'침',name:'Bed',tip:'Spread the blanket. Pajamas go under the pillow.'},
-      desk:{ic:'책',name:'Desk',tip:'Only homework tools stay. Papers go in the tray.'},
-      dresser:{ic:'서',name:'Dresser top',tip:'Only the mirror and accessory stand stay.'},
-      toys:{ic:'인',name:'Plushies & toys',tip:'Plushies in the basket, small toys in the bin.'}
+      floor:{name:'Floor',tip:'Nothing on the floor. Papers, shoes, and plushies go home.'},
+      bed:{name:'Bed',tip:'Spread the blanket. Pajamas go under the pillow.'},
+      desk:{name:'Desk',tip:'Only homework tools stay. Papers go in the tray.'},
+      dresser:{name:'Dresser top',tip:'Only the mirror and accessory stand stay.'},
+      toys:{name:'Plushies & toys',tip:'Plushies in the basket, small toys in the bin.'}
     },
     quests:{
       audition:{name:'Plushie audition',tip:'Pick favorite plushies to keep. The rest go in a vacation box.'},
@@ -451,6 +453,14 @@ function showReason(reason){
   return s;
 }
 function esc(s){ return String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+const ZONE_SVG = {
+  floor:'<path d="M15.6 3.4 10 13"/><path d="M6.2 13.7c1.5-.8 3.2-1 4.8-.5 1.6.4 3 1.1 4.4 1.8"/><path d="M6.3 14.1 5.4 20.5"/><path d="M8.7 13.6 8.2 20.5"/><path d="M11.1 13.3v7.2"/><path d="M13.5 13.7l.6 6.8"/><path d="M15.7 14.6l.8 5.6"/>',
+  bed:'<path d="M4.5 19.5V7.5"/><path d="M19.5 19.5V12"/><path d="M4.5 13.5h15"/><path d="M4.5 19.5h15"/><path d="M7 13.5V11h4.2v2.5"/>',
+  desk:'<path d="M3.5 10h17"/><path d="M6.5 10v9.5"/><path d="M17.5 10v9.5"/><path d="M6.5 14.2h11"/><path d="M8.2 7.6 13.2 4.5"/><path d="M12.8 4.8 14.2 3.6"/>',
+  dresser:'<path d="M5.5 4.5h13v15h-13z"/><path d="M5.5 9.5h13"/><path d="M5.5 14.5h13"/><path d="M11.2 7h1.6"/><path d="M11.2 12h1.6"/><path d="M11.2 17h1.6"/>',
+  toys:'<circle cx="8" cy="6.4" r="2"/><circle cx="16" cy="6.4" r="2"/><circle cx="12" cy="10.6" r="3.6"/><path d="M8 14.2c.3 3.6 1.6 6 4 6s3.7-2.4 4-6"/>'
+};
+function zoneSvg(id){ return '<svg viewBox="0 0 24 24" aria-hidden="true">'+(ZONE_SVG[id]||'')+'</svg>'; }
 function normCs(s){ return String(s || '').trim().toLowerCase(); }
 
 function applyLang(){
@@ -613,7 +623,7 @@ function render(){
   $('zones').innerHTML = ZONE_IDS.map(id => {
     const z = STR[lang].zones[id];
     const on = D.zones.includes(id);
-    return '<button type="button" class="zone '+(on?'done':'')+'" data-z="'+id+'" aria-pressed="'+on+'"><span class="ic">'+(on?'★':z.ic)+'</span><span class="tx"><strong>'+esc(z.name)+'</strong><small>'+esc(z.tip)+'</small></span><span class="chk">✓</span></button>';
+    return '<button type="button" class="zone '+(on?'done':'')+'" data-z="'+id+'" aria-pressed="'+on+'"><span class="ic">'+(on?'★':zoneSvg(id))+'</span><span class="tx"><strong>'+esc(z.name)+'</strong><small>'+esc(z.tip)+'</small></span><span class="chk">✓</span></button>';
   }).join('');
   $('allPill').className = 'pill'+(D.all_bonus?' on':'');
   $('allPill').textContent = D.all_bonus ? t('allOn') : t('allOff').replace('{0}', D.zones.length);
