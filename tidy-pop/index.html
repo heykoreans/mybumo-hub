@@ -119,7 +119,19 @@ footer{display:flex;flex-direction:column;align-items:center;gap:4px}
 .err{color:var(--coral);font-size:14px;min-height:1em}
 .prow{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;font-size:14px}
 .prow span{min-width:0;overflow-wrap:break-word}
-.toast,.modal h2,.modal p,.level-next,.section-head .muted{overflow-wrap:break-word}
+.toast,.modal h2,.modal p,.level-next,.section-head .muted,.hint,.guide-copy{overflow-wrap:break-word}
+.hint{margin:4px 0 0;font-size:13px}
+.guide-art{min-height:84px;display:flex;align-items:center;justify-content:center;gap:8px;color:var(--sky);flex-wrap:wrap}
+.guide-art svg{width:34px;height:34px;display:block}
+.guide-art .mini svg{width:28px;height:28px}
+.guide-art svg path,.guide-art svg circle,.guide-art svg rect{fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+.guide-art .star{font-family:var(--display);color:var(--star);font-size:28px;line-height:1}
+.guide-art .badge{font-family:var(--display);color:var(--star-ink);background:var(--soft-star);border:2px solid var(--star);border-radius:12px;padding:6px 8px;font-size:15px;line-height:1}
+.guide-copy{margin:0;font-size:16px}
+.guide-dots{display:flex;gap:6px;justify-content:center;align-items:center}
+.guide-dots i{width:8px;height:8px;border-radius:50%;background:var(--line);display:block}
+.guide-dots i.on{background:var(--sky)}
+.guide-dots span{margin-left:4px;font-size:13px}
 .prow button{padding:6px 10px;background:var(--bg);color:var(--ink);border:1px solid var(--line);min-height:44px}
 
 .burst{position:fixed;left:50%;top:40%;pointer-events:none;z-index:30}
@@ -136,6 +148,7 @@ footer{display:flex;flex-direction:column;align-items:center;gap:4px}
 <div class="top-bar">
   <button type="button" class="lang-chip" data-lang-toggle>한글</button>
   <button type="button" class="lang-chip" id="soundBtn" aria-pressed="true">Sound on</button>
+  <button type="button" class="lang-chip" id="helpBtn" aria-label="Help">?</button>
 </div>
 
 <div class="wrap" id="loading">
@@ -190,6 +203,7 @@ footer{display:flex;flex-direction:column;align-items:center;gap:4px}
 
   <section class="level">
     <div class="level-top"><span class="level-name" id="lvName"></span><span class="muted" id="lvNext"></span></div>
+    <p class="muted hint" data-k="levelHint">Every star you earn helps you level up.</p>
     <div class="bar"><i id="lvBar" style="width:0"></i></div>
   </section>
 
@@ -199,7 +213,10 @@ footer{display:flex;flex-direction:column;align-items:center;gap:4px}
   </section>
 
   <section style="display:flex;flex-direction:column;gap:12px">
-    <div class="section-head"><h2 data-k="mission">Today’s mission</h2><span class="muted" data-k="missionSub">10 minutes before bed · 1 star each zone</span></div>
+    <div>
+      <div class="section-head"><h2 data-k="mission">Today’s mission</h2><span class="muted" data-k="missionSub">10 minutes before bed · 1 star each zone</span></div>
+      <p class="muted hint" data-k="missionHint">Tap each zone when it's done. Tap again to undo.</p>
+    </div>
     <div class="zones" id="zones"></div>
     <div class="bonus-row">
       <div class="pill" id="allPill"></div>
@@ -209,12 +226,18 @@ footer{display:flex;flex-direction:column;align-items:center;gap:4px}
   </section>
 
   <section style="display:flex;flex-direction:column;gap:12px">
-    <div class="section-head"><h2 data-k="questHead">Big tidy quests</h2><span class="muted" data-k="questSub">Do each one once · 10 stars</span></div>
+    <div>
+      <div class="section-head"><h2 data-k="questHead">Big tidy quests</h2><span class="muted" data-k="questSub">Do each one once · 10 stars</span></div>
+      <p class="muted hint" data-k="questHint">Tap a quest to see how. Mark it done when you finish.</p>
+    </div>
     <div class="quests" id="quests"></div>
   </section>
 
   <section class="shop">
-    <div class="section-head"><h2 data-k="shop">Star shop</h2><span class="muted" data-k="shopSub">A parent PIN is needed to trade</span></div>
+    <div>
+      <div class="section-head"><h2 data-k="shop">Star shop</h2><span class="muted" data-k="shopSub">A parent PIN is needed to trade</span></div>
+      <p class="muted hint" data-k="shopHint">Pick a reward and ask a parent to enter the PIN.</p>
+    </div>
     <div id="shop" class="shop"></div>
   </section>
 
@@ -244,6 +267,7 @@ const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { pers
 const CS_KEY = 'tidypop_callsign';
 const LANG_KEY = 'tidypop_lang';
 const SOUND_KEY = 'tidypop_sound';
+const GUIDE_KEY = 'tidypop_guide';
 const CS_RE = /^[a-z0-9_-]{3,30}$/;
 const PIN_RE = /^[0-9]{4,8}$/;
 const ZONE_IDS = ['floor','bed','desk','dresser','toys'];
@@ -264,7 +288,28 @@ const STR = {
     week:'이번 주', mission:'오늘의 미션', missionSub:'자기 전 10분 · 구역마다 별 1개',
     questHead:'대청소 퀘스트', questSub:'한 번만 하면 돼요 · 각 별 10개',
     shop:'별 상점', shopSub:'교환할 때 부모님 비밀번호가 필요해요', log:'별 기록',
-    parentBtn:'부모님 설정', switchBtn:'가족 바꾸기', soundOn:'소리 켜짐', soundOff:'소리 꺼짐',
+    parentBtn:'부모님 설정', switchBtn:'가족 바꾸기', soundOn:'소리 켜짐', soundOff:'소리 꺼짐', helpLabel:'도움말',
+    levelHint:'별을 모을수록 레벨이 올라가.',
+    missionHint:'끝난 구역을 눌러. 잘못 눌렀으면 다시 누르면 돼.',
+    questHint:'퀘스트를 누르면 하는 방법이 나와. 다 하면 완료를 눌러.',
+    shopHint:'원하는 선물을 고르고 부모님께 비밀번호를 부탁해.',
+    guidePrev:'이전', guideNext:'다음', guideGo:'시작하기!',
+    questDone:'다 했어요! +10 ★', questLater:'아직이에요', questUndo:'취소하기',
+    guide:[
+      '방 정리 퀘스트에 온 걸 환영해! 방을 정리하고 별을 모아서 선물로 바꿔 보자.',
+      '매일 자기 전 10분, 5개 구역을 정리해. 진짜 다 끝났을 때 구역을 눌러. 구역 하나에 별 1개!',
+      '보너스 별! 5구역 모두 끝내면 +2, 부모님 확인받으면 +2, 5일 연속 성공하면 +5.',
+      '대청소 퀘스트는 한 번만 하는 특별 미션이야. 하나에 별 10개! 주말에 부모님이랑 같이 해 봐.',
+      '모은 별은 별 상점에서 선물로 바꿀 수 있어. 부모님이 비밀번호를 넣어 주면 교환 완료! 하루 못 해도 괜찮아. 모은 별은 없어지지 않아. 내일 다시 시작하면 돼!'
+    ],
+    questHow:{
+      audition:'1. 인형을 모두 한 줄로 세워. 2. 방에 남길 최애 인형을 골라. 3. 나머지는 "휴가 상자"에 넣어. 나중에 다시 꺼낼 수 있어!',
+      artbox:'1. 마음에 드는 상자를 골라. 2. 그림과 종이 작품을 다 모아. 3. 상자에 넣어. 가득 차면 부모님이랑 제일 좋은 것만 골라.',
+      outside:'1. 로션, 간식, 껌, 신발처럼 방에 살지 않는 물건을 찾아. 2. 원래 자리로 하나씩 돌려보내.',
+      labels:'1. 머리핀, 스티커, 장난감처럼 작은 물건을 종류별로 나눠. 2. 종류마다 통 하나씩 넣어. 3. 통마다 글씨나 그림으로 이름표를 붙여.',
+      photo:'1. 방을 최고로 깨끗하게 정리해. 2. 부모님께 사진을 찍어 달라고 해. 3. 사진을 벽에 붙여. 이게 바로 "완성"의 모습이야!',
+      donate:'1. 이제 안 쓰는 물건을 찾아. 2. 나눔 상자에 넣어. 3. 부모님이랑 필요한 사람에게 나눠 줘.'
+    },
     streakN:'{0}일 연속 중', allOn:'올클리어 보너스 받았어요 (+2)', allOff:'5구역 모두 끝내면 보너스 별 2개 ({0}/5)',
     streakOn:'{0}일 연속 보너스 받았어요 (+5)', streakOff:'연속 보너스까지 {0}일 남았어요',
     parentNeed:'올클리어하면 부모님 확인받기', parentReady:'부모님 확인받기 (별 +2)', parentDone:'오늘 부모님 확인 완료!',
@@ -332,7 +377,28 @@ const STR = {
     week:'This week', mission:'Today’s mission', missionSub:'10 minutes before bed · 1 star each zone',
     questHead:'Big tidy quests', questSub:'Do each one once · 10 stars',
     shop:'Star shop', shopSub:'A parent PIN is needed to trade', log:'Star log',
-    parentBtn:'Parent settings', switchBtn:'Switch family', soundOn:'Sound on', soundOff:'Sound off',
+    parentBtn:'Parent settings', switchBtn:'Switch family', soundOn:'Sound on', soundOff:'Sound off', helpLabel:'Help',
+    levelHint:'Every star you earn helps you level up.',
+    missionHint:'Tap each zone when it\'s done. Tap again to undo.',
+    questHint:'Tap a quest to see how. Mark it done when you finish.',
+    shopHint:'Pick a reward and ask a parent to enter the PIN.',
+    guidePrev:'Previous', guideNext:'Next', guideGo:'Let\'s go!',
+    questDone:'Done! +10 ★', questLater:'Not yet', questUndo:'Undo',
+    guide:[
+      'Welcome to Tidy Pop! Tidy your room, collect stars, and trade them for rewards.',
+      'Every night before bed, take 10 minutes to tidy 5 zones. Tap a zone when it\'s really done. Each zone = 1 star.',
+      'Bonus stars! Finish all 5 zones = +2. Ask a parent to check = +2. Do all 5 zones for 5 days in a row = +5.',
+      'Big tidy quests are special one-time jobs. Each one = 10 stars. Try them with a parent on the weekend!',
+      'Trade your stars in the Star Shop. A parent enters the PIN to say yes. Missed a day? That\'s okay. Your stars never go away. Just start again tomorrow!'
+    ],
+    questHow:{
+      audition:'1. Line up all your plushies. 2. Pick your favorites to stay in your room. 3. Put the rest in a "vacation box." They can come back later!',
+      artbox:'1. Find a box you like. 2. Collect all your drawings and paper crafts. 3. Put them in the box. When it\'s full, pick your best ones with a parent.',
+      outside:'1. Find things that don\'t live in your room, like lotion, snacks, gum, and shoes. 2. Take each one back to where it belongs.',
+      labels:'1. Sort small things into groups, like hair clips, stickers, and toys. 2. Put each group in its own bin. 3. Make a label for each bin with words or a drawing.',
+      photo:'1. Make your room super tidy. 2. Ask a parent to take a photo. 3. Put the photo on your wall. This is what "done" looks like!',
+      donate:'1. Find things you don\'t use anymore. 2. Put them in a giving box. 3. With a parent, give them to someone who can use them.'
+    },
     streakN:'{0} days in a row', allOn:'All-clear bonus earned (+2)', allOff:'Finish all 5 zones for 2 bonus stars ({0}/5)',
     streakOn:'{0}-day streak bonus earned (+5)', streakOff:'{0} days left until the streak bonus',
     parentNeed:'Clear all zones to ask a parent', parentReady:'Parent check (+2 stars)', parentDone:'Parent checked today!',
@@ -484,8 +550,12 @@ function applyLang(){
   });
   document.querySelectorAll('[data-lang-toggle]').forEach(el => { el.textContent = lang === 'ko' ? 'English' : '한글'; });
   updateSoundBtn();
+  const help = $('helpBtn');
+  if (help) help.setAttribute('aria-label', t('helpLabel'));
   if ($('gateErr')) setGateErr(gateErrCode);
   if (mode === 'app') render();
+  if (guideAt >= 0) paintGuide();
+  else if (questOpen) paintQuest();
 }
 function updateSoundBtn(){
   const b = $('soundBtn');
@@ -895,6 +965,60 @@ function modal(html, onScrim){
   $('scrim').addEventListener('click', e => { if (e.target.id === 'scrim' && onScrim) onScrim(); });
 }
 function close(){ $('modalRoot').innerHTML = ''; }
+let guideAt = -1;
+let questOpen = '';
+function guideArt(i){
+  if (i === 1) return ZONE_IDS.map(id => '<span class="mini">'+zoneSvg(id)+'</span>').join('');
+  if (i === 2) return '<span class="badge">★ +2</span><span class="badge">★ +2</span><span class="badge">★ +5</span>';
+  if (i === 3) return '<span class="badge" style="font-size:22px">★ 10</span>';
+  if (i === 4) return '<span class="star">★</span>'+zoneSvg('toys')+'<span class="star">★</span>';
+  return '<span class="star">★</span>'+zoneSvg('floor')+'<span class="star">★</span>';
+}
+function openGuide(){
+  questOpen = '';
+  guideAt = 0;
+  paintGuide();
+}
+function paintGuide(){
+  const pages = (STR[lang] && STR[lang].guide) || STR.en.guide;
+  const last = guideAt >= pages.length - 1;
+  const dots = pages.map((_, n) => '<i class="'+(n===guideAt?'on':'')+'"></i>').join('');
+  modal('<div class="guide-art" aria-hidden="true">'+guideArt(guideAt)+'</div>'+
+    '<p class="guide-copy">'+esc(pages[guideAt])+'</p>'+
+    '<div class="guide-dots" aria-hidden="true">'+dots+'<span class="muted">'+(guideAt+1)+'/'+pages.length+'</span></div>'+
+    '<div class="row"><button type="button" class="btn alt" id="guidePrev"'+(guideAt===0?' disabled':'')+'>'+esc(t('guidePrev'))+'</button>'+
+    (last ? '<button type="button" class="btn star" id="guideGo">'+esc(t('guideGo'))+'</button>'
+          : '<button type="button" class="btn" id="guideNext">'+esc(t('guideNext'))+'</button>')+
+    '</div>', null);
+  $('guidePrev').onclick = () => { if (guideAt > 0){ guideAt--; paintGuide(); } };
+  if ($('guideNext')) $('guideNext').onclick = () => { guideAt++; paintGuide(); };
+  if ($('guideGo')) $('guideGo').onclick = () => { storeSet(GUIDE_KEY, '1'); guideAt = -1; close(); };
+}
+function questLines(id){
+  const raw = (STR[lang] && STR[lang].questHow && STR[lang].questHow[id]) || '';
+  return String(raw).split(/\s+(?=\d+\.\s)/).filter(Boolean);
+}
+function openQuest(id){
+  if (!QUEST_IDS.includes(id)) return;
+  guideAt = -1;
+  questOpen = id;
+  paintQuest();
+}
+function paintQuest(){
+  const id = questOpen;
+  if (!QUEST_IDS.includes(id)) return;
+  const q = STR[lang].quests[id];
+  const done = (S.quests || []).includes(id);
+  const shut = () => { questOpen = ''; close(); };
+  modal('<h2>'+esc(q.name)+'</h2>'+questLines(id).map(s => '<p class="muted" style="margin:0">'+esc(s)+'</p>').join('')+
+    '<div class="row">'+
+    (done ? '<button type="button" class="btn" id="questUndo">'+esc(t('questUndo'))+'</button>'
+          : '<button type="button" class="btn star" id="questDone">'+esc(t('questDone'))+'</button>')+
+    '<button type="button" class="btn alt" id="questLater">'+esc(t('questLater'))+'</button></div>', shut);
+  $('questLater').onclick = shut;
+  if ($('questDone')) $('questDone').onclick = () => { shut(); toggleQuest(id); };
+  if ($('questUndo')) $('questUndo').onclick = () => { shut(); toggleQuest(id); };
+}
 
 function askPin(title, desc, attempt){
   let closed = false;
@@ -1078,6 +1202,7 @@ function showApp(){
   $('gate').hidden = true;
   $('app').hidden = false;
   render();
+  if (guideAt < 0 && !questOpen && storeGet(GUIDE_KEY) !== '1') openGuide();
 }
 function setGateBusy(on){
   $('loadBtn').disabled = on;
@@ -1125,6 +1250,7 @@ document.addEventListener('pointerdown', e => {
 document.addEventListener('click', e => {
   if (e.target.closest('button')) ensureAudio();
   if (e.target.closest('#soundBtn')){ toggleSound(); return; }
+  if (e.target.closest('#helpBtn')){ openGuide(); return; }
   if (e.target.closest('[data-lang-toggle]')){ toggleLang(); return; }
   const del = e.target.closest('[data-del]');
   if (del){ removeReward(del.getAttribute('data-del')); return; }
@@ -1132,13 +1258,15 @@ document.addEventListener('click', e => {
   const z = e.target.closest('[data-z]');
   if (z){ toggleZone(z.getAttribute('data-z')); return; }
   const q = e.target.closest('[data-q]');
-  if (q){ toggleQuest(q.getAttribute('data-q')); return; }
+  if (q){ openQuest(q.getAttribute('data-q')); return; }
   const r = e.target.closest('[data-r]');
   if (r && !r.disabled){ redeem(r.getAttribute('data-r')); }
 });
 document.addEventListener('keydown', e => {
   if (e.key !== 'Escape' || !$('scrim')) return;
+  if (guideAt >= 0) return;
   if ($('pinOk') && $('pinOk').disabled) return;
+  questOpen = '';
   if ($('rlist')) sessionPin = '';
   close();
 });
