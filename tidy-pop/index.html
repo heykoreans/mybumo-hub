@@ -117,8 +117,11 @@ footer{display:flex;flex-direction:column;align-items:center;gap:4px}
 .modal input,.modal select{padding:10px 12px;border-radius:10px;border:2px solid var(--line);background:var(--bg);color:var(--ink);width:100%}
 .row{display:flex;gap:8px;flex-wrap:wrap}.row>*{flex:1 1 120px}
 .err{color:var(--coral);font-size:14px;min-height:1em}
-.prow{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;font-size:14px}
+.prow{display:grid;grid-template-columns:minmax(0,1fr) auto auto auto;gap:8px;align-items:center;font-size:14px}
 .prow span{min-width:0;overflow-wrap:break-word}
+.prow.editing{grid-template-columns:minmax(0,1fr)}
+.prow.editing .edit-actions{display:flex;gap:8px}
+.prow.editing .edit-actions button{flex:1 1 0;min-width:0}
 .toast,.modal h2,.modal p,.level-next,.section-head .muted,.hint,.guide-copy{overflow-wrap:break-word}
 .hint{margin:4px 0 0;font-size:13px}
 .guide-art{min-height:84px;display:flex;align-items:center;justify-content:center;gap:8px;color:var(--sky);flex-wrap:wrap}
@@ -132,6 +135,9 @@ footer{display:flex;flex-direction:column;align-items:center;gap:4px}
 .guide-dots i{width:8px;height:8px;border-radius:50%;background:var(--line);display:block}
 .guide-dots i.on{background:var(--sky)}
 .guide-dots span{margin-left:4px;font-size:13px}
+.guide-top{display:flex;justify-content:flex-end;align-items:center;gap:8px}
+.guide-x{width:36px;min-width:36px;height:36px;min-height:36px;padding:0;border-radius:50%;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:22px;line-height:1;flex:0 0 auto}
+body.guide-open .top-bar{z-index:25}
 .prow button{padding:6px 10px;background:var(--bg);color:var(--ink);border:1px solid var(--line);min-height:44px}
 
 .burst{position:fixed;left:50%;top:40%;pointer-events:none;z-index:30}
@@ -343,6 +349,8 @@ const STR = {
     newPinPh:'새 비밀번호 4자리 이상', pinSet:'변경',
     adjustDefault:'부모님 조정', adjusted:'별 {0} 반영했어요.',
     added:'보상을 추가했어요.', removed:'보상을 뺐어요.', pinChanged:'비밀번호를 바꿨어요.',
+    editReward:'수정', saveReward:'저장', savedReward:'저장했어요',
+    editBadReward:'이름은 1~60자, 별은 1~1000 사이로 입력해 주세요',
     noRewards:'등록된 보상이 없어요.',
     toastAll:'오늘 미션 올클리어! 별 +2', toastStreak:'{0}일 연속! 별 +5',
     toastQuest:'{0} 완료! 별 +10', toastParent:'부모님 확인 완료! 별 +2', toastRedeem:'{0} 교환 완료!',
@@ -432,6 +440,8 @@ const STR = {
     newPinPh:'New PIN, 4 or more digits', pinSet:'Change',
     adjustDefault:'Adjusted by parent', adjusted:'Stars {0} saved.',
     added:'Reward added.', removed:'Reward removed.', pinChanged:'PIN changed.',
+    editReward:'Edit', saveReward:'Save', savedReward:'Saved',
+    editBadReward:'Name must be 1 to 60 characters, stars 1 to 1000',
     noRewards:'No rewards yet.',
     toastAll:'All clear today! +2 stars', toastStreak:'{0} days in a row! +5 stars',
     toastQuest:'{0} done! +10 stars', toastParent:'Parent check complete! +2 stars', toastRedeem:'{0} traded!',
@@ -964,7 +974,7 @@ function modal(html, onScrim){
   $('modalRoot').innerHTML = '<div class="scrim" id="scrim"><div class="modal" role="dialog" aria-modal="true">'+html+'</div></div>';
   $('scrim').addEventListener('click', e => { if (e.target.id === 'scrim' && onScrim) onScrim(); });
 }
-function close(){ $('modalRoot').innerHTML = ''; }
+function close(){ $('modalRoot').innerHTML = ''; document.body.classList.remove('guide-open'); }
 let guideAt = -1;
 let questOpen = '';
 function guideArt(i){
@@ -979,17 +989,22 @@ function openGuide(){
   guideAt = 0;
   paintGuide();
 }
+function dismissGuide(){ guideAt = -1; close(); }
 function paintGuide(){
   const pages = (STR[lang] && STR[lang].guide) || STR.en.guide;
   const last = guideAt >= pages.length - 1;
   const dots = pages.map((_, n) => '<i class="'+(n===guideAt?'on':'')+'"></i>').join('');
-  modal('<div class="guide-art" aria-hidden="true">'+guideArt(guideAt)+'</div>'+
+  const langLabel = lang === 'ko' ? 'English' : '한글';
+  document.body.classList.add('guide-open');
+  modal('<div class="guide-top"><button type="button" class="lang-chip" data-lang-toggle>'+langLabel+'</button><button type="button" class="guide-x" id="guideX" aria-label="'+esc(t('close'))+'">×</button></div>'+
+    '<div class="guide-art" aria-hidden="true">'+guideArt(guideAt)+'</div>'+
     '<p class="guide-copy">'+esc(pages[guideAt])+'</p>'+
     '<div class="guide-dots" aria-hidden="true">'+dots+'<span class="muted">'+(guideAt+1)+'/'+pages.length+'</span></div>'+
     '<div class="row"><button type="button" class="btn alt" id="guidePrev"'+(guideAt===0?' disabled':'')+'>'+esc(t('guidePrev'))+'</button>'+
     (last ? '<button type="button" class="btn star" id="guideGo">'+esc(t('guideGo'))+'</button>'
           : '<button type="button" class="btn" id="guideNext">'+esc(t('guideNext'))+'</button>')+
-    '</div>', null);
+    '</div>', dismissGuide);
+  $('guideX').onclick = dismissGuide;
   $('guidePrev').onclick = () => { if (guideAt > 0){ guideAt--; paintGuide(); } };
   if ($('guideNext')) $('guideNext').onclick = () => { guideAt++; paintGuide(); };
   if ($('guideGo')) $('guideGo').onclick = () => { storeSet(GUIDE_KEY, '1'); guideAt = -1; close(); };
@@ -1076,18 +1091,56 @@ function onParentOpen(){
     return { ok:false, error: (res && res.error) || 'bad_pin' };
   });
 }
-function closeParent(){ sessionPin = ''; close(); }
+function closeParent(){ sessionPin = ''; editingId = ''; close(); }
+let editingId = '';
 function paintParentRewards(){
   const el = $('rlist');
   if (!el) return;
   if (!S.rewards.length){ el.innerHTML = '<div class="muted">'+esc(t('noRewards'))+'</div>'; return; }
+  if (editingId && !S.rewards.some(r => r.id === editingId)) editingId = '';
   el.innerHTML = S.rewards.map(r => {
     const pendingRow = String(r.id).indexOf('pending-') === 0;
+    if (!pendingRow && r.id === editingId){
+      const opts = CATS.map(c => '<option value="'+c+'"'+(c===r.cat?' selected':'')+'>'+esc(STR[lang].cats[c] || c)+'</option>').join('');
+      return '<div class="prow editing"><select id="editCat">'+opts+'</select>'+
+        '<input id="editName" maxlength="60" value="'+esc(r.name)+'">'+
+        '<input id="editCost" type="number" inputmode="numeric" min="1" max="1000" value="'+Number(r.cost)+'">'+
+        '<div class="edit-actions"><button type="button" id="editSave">'+esc(t('saveReward'))+'</button><button type="button" id="editCancel">'+esc(t('cancel'))+'</button></div></div>';
+    }
     return '<div class="prow"><span>'+esc(STR[lang].cats[r.cat] || r.cat)+' · '+esc(showReward(r.name))+'</span><span>★'+Number(r.cost)+'</span>'+
-      (pendingRow ? '<span></span>' : '<button type="button" data-del="'+esc(r.id)+'">'+esc(t('remove'))+'</button>')+'</div>';
+      (pendingRow ? '<span></span><span></span>' : '<button type="button" data-edit="'+esc(r.id)+'">'+esc(t('editReward'))+'</button><button type="button" data-del="'+esc(r.id)+'">'+esc(t('remove'))+'</button>')+'</div>';
   }).join('');
 }
+function startRewardEdit(id){
+  if (!id || String(id).indexOf('pending-') === 0 || !$('rlist')) return;
+  editingId = id;
+  paintParentRewards();
+  if ($('editName')) $('editName').focus();
+}
+async function saveRewardEdit(){
+  if (!editingId || !$('editName') || !$('pErr')) return;
+  const id = editingId;
+  const name = $('editName').value.trim();
+  const cost = parseInt($('editCost').value, 10);
+  const cat = $('editCat').value;
+  if (!name || name.length > 60 || !Number.isInteger(cost) || cost < 1 || cost > 1000 || !CATS.includes(cat)){
+    $('pErr').textContent = t('editBadReward');
+    return;
+  }
+  $('editSave').disabled = true;
+  editingId = '';
+  const res = await schedule(() => {
+    const r = S.rewards.find(x => x.id === id);
+    if (r){ r.cat = cat; r.name = name; r.cost = cost; }
+  }, () => rpc('tidy_reward_update', {
+    p_callsign: callsign, p_today: today(), p_pin: sessionPin, p_reward: id, p_cat: cat, p_name: name, p_cost: cost
+  }), { quiet:true });
+  if (!$('pErr')) return;
+  if (isState(res)) $('pErr').textContent = t('savedReward');
+  else $('pErr').textContent = (res && res.error) === 'bad_reward' ? t('editBadReward') : errText((res && res.error) || 'network');
+}
 function parentPanel(){
+  editingId = '';
   const opts = CATS.map(c => '<option value="'+c+'">'+esc(STR[lang].cats[c])+'</option>').join('');
   modal('<h2>'+esc(t('parentTitle'))+'</h2>'+
     '<h3 style="font-size:17px">'+esc(t('adjustHead'))+'</h3>'+
@@ -1252,6 +1305,10 @@ document.addEventListener('click', e => {
   if (e.target.closest('#soundBtn')){ toggleSound(); return; }
   if (e.target.closest('#helpBtn')){ openGuide(); return; }
   if (e.target.closest('[data-lang-toggle]')){ toggleLang(); return; }
+  if (e.target.closest('#editCancel')){ editingId = ''; if ($('rlist')) paintParentRewards(); return; }
+  if (e.target.closest('#editSave')){ saveRewardEdit(); return; }
+  const edit = e.target.closest('[data-edit]');
+  if (edit){ startRewardEdit(edit.getAttribute('data-edit')); return; }
   const del = e.target.closest('[data-del]');
   if (del){ removeReward(del.getAttribute('data-del')); return; }
   if (mode !== 'app') return;
@@ -1264,10 +1321,10 @@ document.addEventListener('click', e => {
 });
 document.addEventListener('keydown', e => {
   if (e.key !== 'Escape' || !$('scrim')) return;
-  if (guideAt >= 0) return;
+  if (guideAt >= 0){ dismissGuide(); return; }
   if ($('pinOk') && $('pinOk').disabled) return;
   questOpen = '';
-  if ($('rlist')) sessionPin = '';
+  if ($('rlist')){ sessionPin = ''; editingId = ''; }
   close();
 });
 document.addEventListener('visibilitychange', () => {
