@@ -24,10 +24,11 @@
   --sky:#5bb6e3; --mint:#5fcfa9; --star:#ffc93a; --star-ink:#ffe08a; --coral:#ff8a7a;
   --soft-sky:#1b3542; --soft-mint:#173a30; --soft-star:#3a3014; color-scheme:dark}
 *{box-sizing:border-box}
+html{scroll-padding-top:calc(max(12px,env(safe-area-inset-top,0px)) + 56px)}
 [hidden]{display:none !important}
 body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;margin:0;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
-  padding-top:max(64px,calc(env(safe-area-inset-top,0px) + 52px));padding-bottom:calc(48px + env(safe-area-inset-bottom,0px))}
+  padding-top:calc(max(12px,env(safe-area-inset-top,0px)) + 56px);padding-bottom:calc(48px + env(safe-area-inset-bottom,0px))}
 .wrap{max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:22px}
 #loading{min-height:70vh;justify-content:center;align-items:center;text-align:center}
 h1,h2,h3{font-family:var(--display);font-weight:400;margin:0;text-wrap:balance}
@@ -79,7 +80,7 @@ a{color:var(--sky)}
 .btn.alt{background:var(--card);color:var(--ink);border:2px solid var(--line)}
 .btn.star{background:var(--star);color:#3a2a00}
 .btn:disabled{opacity:.45;cursor:default}
-.top-bar{position:fixed;top:max(12px,env(safe-area-inset-top));left:max(12px,env(safe-area-inset-left));z-index:15;display:flex;gap:8px;align-items:center}
+.top-bar{position:fixed;top:0;left:0;right:0;z-index:15;display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:var(--bg);border-bottom:1px solid var(--line);padding:max(12px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) 8px max(16px,env(safe-area-inset-left,0px))}
 .lang-chip{background:var(--card);color:var(--muted);border:1px solid var(--line);border-radius:99px;padding:6px 12px;font-size:13px;min-height:36px}
 .text-btn{background:transparent;color:var(--muted);padding:8px 10px;font-size:14px;min-height:44px}
 
@@ -89,6 +90,16 @@ a{color:var(--sky)}
 .quest small{color:var(--muted);font-size:13px;overflow-wrap:break-word}
 .quest .pts{font-size:13px;color:var(--star-ink);font-weight:700}
 .quest.done{border-color:var(--mint);background:var(--soft-mint)}
+.done-fold{border:1px dashed var(--line);border-radius:16px;background:var(--card)}
+.done-fold summary{padding:12px 14px;font-family:var(--display);font-size:17px;cursor:pointer}
+.done-fold .quests{padding:0 10px 12px}
+.qrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:14px}
+.qrow .qn{flex:1 1 160px;min-width:0;overflow-wrap:break-word}
+.qrow button,.qedit button{padding:6px 10px;background:var(--bg);color:var(--ink);border:1px solid var(--line);min-height:44px}
+.qedit{display:flex;flex-direction:column;gap:8px;min-width:0}
+.qedit .edit-actions{display:flex;gap:8px}
+.qedit .edit-actions button{flex:1 1 0;min-width:0}
+.steps{white-space:pre-wrap;margin:0}
 
 .shop{display:flex;flex-direction:column;gap:14px}
 .cat h3{font-size:16px;color:var(--muted);margin-bottom:6px}
@@ -114,7 +125,8 @@ footer{display:flex;flex-direction:column;align-items:center;gap:4px}
 
 .scrim{position:fixed;inset:0;background:rgba(10,25,35,.55);display:grid;place-items:center;padding:max(20px,env(safe-area-inset-top)) 20px max(20px,env(safe-area-inset-bottom));z-index:20}
 .modal{background:var(--card);color:var(--ink);border-radius:20px;padding:20px;width:100%;max-width:400px;display:flex;flex-direction:column;gap:12px;max-height:90vh;overflow:auto}
-.modal input,.modal select{padding:10px 12px;border-radius:10px;border:2px solid var(--line);background:var(--bg);color:var(--ink);width:100%}
+.modal input,.modal select,.modal textarea{padding:10px 12px;border-radius:10px;border:2px solid var(--line);background:var(--bg);color:var(--ink);width:100%;min-width:0}
+.modal textarea{min-height:96px;resize:vertical;line-height:1.4}
 .row{display:flex;gap:8px;flex-wrap:wrap}.row>*{flex:1 1 120px}
 .err{color:var(--coral);font-size:14px;min-height:1em}
 .prow{display:grid;grid-template-columns:minmax(0,1fr) auto auto auto;gap:8px;align-items:center;font-size:14px}
@@ -231,12 +243,21 @@ body.guide-open .top-bar{z-index:25}
     <button type="button" class="btn star" id="parentCheck">Parent check (+2 stars)</button>
   </section>
 
+  <section id="weekQuests" hidden style="display:flex;flex-direction:column;gap:12px">
+    <div class="section-head"><h2 data-k="weekQuests">This week's quests</h2></div>
+    <div class="quests" id="cquests"></div>
+  </section>
+
   <section style="display:flex;flex-direction:column;gap:12px">
     <div>
       <div class="section-head"><h2 data-k="questHead">Big tidy quests</h2><span class="muted" data-k="questSub">Do each one once · 10 stars</span></div>
       <p class="muted hint" data-k="questHint">Tap a quest to see how. Mark it done when you finish.</p>
     </div>
     <div class="quests" id="quests"></div>
+    <details id="doneFold" class="done-fold" hidden>
+      <summary id="doneSum"></summary>
+      <div class="quests" id="doneQuests"></div>
+    </details>
   </section>
 
   <section class="shop">
@@ -280,7 +301,7 @@ const ZONE_IDS = ['floor','bed','desk','dresser','toys'];
 const QUEST_IDS = ['audition','artbox','outside','labels','photo','donate'];
 const CATS = ['경험','특권','선물','용돈'];
 const LEVEL_AT = [0, 30, 80, 160, 300];
-const KNOWN_ERR = ['bad_pin','not_enough_stars','not_all_done','already_checked','callsign_taken','bad_callsign','bad_pin_format','family_not_found','bad_zone','bad_quest','bad_delta','reward_not_found','invalid_day'];
+const KNOWN_ERR = ['bad_pin','not_enough_stars','not_all_done','already_checked','callsign_taken','bad_callsign','bad_pin_format','family_not_found','bad_zone','bad_quest_input','quest_not_found','bad_quest','bad_delta','reward_not_found','invalid_day'];
 
 const STR = {
   ko: {
@@ -293,6 +314,10 @@ const STR = {
     createBtn:'새로 만들기', backHub:'게임 허브로', title:'방 정리 퀘스트', bank:'내 별',
     week:'이번 주', mission:'오늘의 미션', missionSub:'자기 전 10분 · 구역마다 별 1개',
     questHead:'대청소 퀘스트', questSub:'한 번만 하면 돼요 · 각 별 10개',
+    weekQuests:'이번 주 퀘스트', doneFold:'완료한 퀘스트 ({0})', cqDone:'다 했어요! +{0} ★',
+    pqHead:'퀘스트', pqAdd:'퀘스트 추가', pqNamePh:'퀘스트 이름', pqNameKoPh:'한국어 이름 (선택)',
+    pqStepsPh:'하는 방법', pqStepsKoPh:'한국어 방법 (선택)', pqStarsPh:'별 개수',
+    pqReopen:'다시 열기', pqOpen:'진행 중', pqStarsLock:'완료된 퀘스트는 별 개수를 바꿀 수 없어요',
     shop:'별 상점', shopSub:'교환할 때 부모님 비밀번호가 필요해요', log:'별 기록',
     parentBtn:'부모님 설정', switchBtn:'가족 바꾸기', soundOn:'소리 켜짐', soundOff:'소리 꺼짐', helpLabel:'도움말',
     levelHint:'별을 모을수록 레벨이 올라가.',
@@ -370,6 +395,8 @@ const STR = {
       invalid_day:'오늘 날짜가 서버와 달라요. 잠시 후 다시 열어 주세요.',
       bad_zone:'알 수 없는 구역이에요.',
       bad_quest:'알 수 없는 퀘스트예요.',
+      bad_quest_input:'이름은 1~60자, 별은 1~100 사이로 입력해 주세요',
+      quest_not_found:'그 퀘스트를 찾지 못했어요.',
       bad_reward:'보상 이름은 1~60자, 별은 1~1000개로 입력해 주세요.',
       network:'연결이 잠시 끊겼어요. 다시 눌러 주세요.'
     }
@@ -384,6 +411,10 @@ const STR = {
     createBtn:'Create', backHub:'Game hub', title:'Room Quest', bank:'My stars',
     week:'This week', mission:'Today’s mission', missionSub:'10 minutes before bed · 1 star each zone',
     questHead:'Big tidy quests', questSub:'Do each one once · 10 stars',
+    weekQuests:'This week\'s quests', doneFold:'Completed quests ({0})', cqDone:'Done! +{0} ★',
+    pqHead:'Quests', pqAdd:'Add quest', pqNamePh:'Quest name', pqNameKoPh:'Korean name (optional)',
+    pqStepsPh:'How to do it', pqStepsKoPh:'Korean steps (optional)', pqStarsPh:'Stars',
+    pqReopen:'Reopen', pqOpen:'Open', pqStarsLock:'Completed quests keep their stars',
     shop:'Star shop', shopSub:'A parent PIN is needed to trade', log:'Star log',
     parentBtn:'Parent settings', switchBtn:'Switch family', soundOn:'Sound on', soundOff:'Sound off', helpLabel:'Help',
     levelHint:'Every star you earn helps you level up.',
@@ -461,6 +492,8 @@ const STR = {
       invalid_day:'This device date does not match the server. Reopen in a moment.',
       bad_zone:'Unknown zone.',
       bad_quest:'Unknown quest.',
+      bad_quest_input:'Name 1~60 characters, stars 1~100',
+      quest_not_found:'That quest could not be found.',
       bad_reward:'Use a reward name of 1–60 characters and a cost from 1 to 1000.',
       network:'The connection dropped. Please try again.'
     }
@@ -503,7 +536,7 @@ let S = emptyState();
 let tail = Promise.resolve();
 let pending = 0;
 
-function emptyState(){ return { child_name:'', stars:null, total:null, streak:0, days:[], quests:[], rewards:[], ledger:[] }; }
+function emptyState(){ return { child_name:'', stars:null, total:null, streak:0, days:[], quests:[], custom_quests:[], rewards:[], ledger:[] }; }
 function $(id){ return document.getElementById(id); }
 function pad(n){ return String(n).padStart(2,'0'); }
 function dkey(d){ return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
@@ -520,10 +553,17 @@ function showReward(name){
   if (lang !== 'en') return name || '';
   return REWARD_EN[name] || name || '';
 }
+function cqName(q){ return (lang === 'ko' && q && q.name_ko) ? q.name_ko : ((q && q.name) || ''); }
+function cqSteps(q){ return (lang === 'ko' && q && q.steps_ko) ? q.steps_ko : ((q && q.steps) || ''); }
 function showReason(reason){
   const s = String(reason || '');
-  if (lang !== 'en' || !s) return s;
+  if (!s) return s;
   let m;
+  if (lang === 'ko'){
+    if ((m = s.match(/^Quest: (.+)$/))) return '퀘스트: ' + m[1];
+    if ((m = s.match(/^(.+) undone$/))) return m[1] + ' 취소';
+    return s;
+  }
   if ((m = s.match(/^(.+) 정리 완료$/)) && ZONE_EN[m[1]]) return ZONE_EN[m[1]] + ' done';
   if ((m = s.match(/^(.+) 체크 취소$/)) && ZONE_EN[m[1]]) return ZONE_EN[m[1]] + ' unchecked';
   if (s === '5구역 올클리어 보너스') return 'All 5 zones bonus';
@@ -566,6 +606,7 @@ function applyLang(){
   if (mode === 'app') render();
   if (guideAt >= 0) paintGuide();
   else if (questOpen) paintQuest();
+  else if (cquestOpen) paintCquest();
 }
 function updateSoundBtn(){
   const b = $('soundBtn');
@@ -617,11 +658,12 @@ function applyState(data){
       streak_paid: !!d.streak_paid
     })),
     quests: Array.isArray(data.quests) ? data.quests.slice() : [],
+    custom_quests: Array.isArray(data.custom_quests) ? data.custom_quests.map(normCquest) : [],
     rewards: Array.isArray(data.rewards) ? data.rewards.map(r => ({ id:r.id, cat:r.cat, name:r.name, cost:Number(r.cost) })) : [],
     ledger: Array.isArray(data.ledger) ? data.ledger.map(l => ({ delta:Number(l.delta), reason:l.reason || '', created_at:l.created_at })) : []
   };
   if (mode === 'app') render();
-  if ($('rlist')) paintParentRewards();
+  refreshParent();
 }
 
 async function rpc(fn, args){
@@ -648,7 +690,7 @@ function schedule(mutateLocal, call, opt){
   opt = opt || {};
   const before = clone(S);
   if (mutateLocal) mutateLocal();
-  if (mutateLocal && mode === 'app'){ render(); if ($('rlist')) paintParentRewards(); }
+  if (mutateLocal && mode === 'app'){ render(); refreshParent(); }
   pending++;
   const p = tail.then(async () => {
     let res;
@@ -663,7 +705,7 @@ function schedule(mutateLocal, call, opt){
       if (mutateLocal && pending === 0){
         const fresh = await rpc('tidy_get_state', { p_callsign: callsign, p_today: today() });
         if (isState(fresh)) applyState(fresh);
-        else { S = before; if (mode === 'app'){ render(); if ($('rlist')) paintParentRewards(); } }
+        else { S = before; if (mode === 'app'){ render(); refreshParent(); } }
       }
       if (!opt.quiet) toast(errText(res && res.error));
     }
@@ -736,11 +778,23 @@ function render(){
   const pc = $('parentCheck');
   pc.disabled = !D.all_bonus || !!D.parent_checked;
   pc.textContent = D.parent_checked ? t('parentDone') : D.all_bonus ? t('parentReady') : t('parentNeed');
-  $('quests').innerHTML = QUEST_IDS.map(id => {
-    const q = STR[lang].quests[id];
-    const on = (S.quests || []).includes(id);
-    return '<button type="button" class="quest '+(on?'done':'')+'" data-q="'+id+'" aria-pressed="'+on+'"><strong>'+esc(q.name)+'</strong><small>'+esc(q.tip)+'</small><span class="pts">★ 10'+(on?' · '+esc(t('doneMark')):'')+'</span></button>';
-  }).join('');
+  const openCq = (S.custom_quests || []).filter(q => !q.done);
+  const week = $('weekQuests');
+  if (week) week.hidden = openCq.length === 0;
+  if ($('cquests')) $('cquests').innerHTML = openCq.map(cquestCard).join('');
+  const openBig = QUEST_IDS.filter(id => !(S.quests || []).includes(id));
+  const doneBig = QUEST_IDS.filter(id => (S.quests || []).includes(id));
+  $('quests').innerHTML = openBig.map(bigQuestCard).join('');
+  const doneCq = (S.custom_quests || []).filter(q => q.done);
+  const doneCount = doneBig.length + doneCq.length;
+  const fold = $('doneFold');
+  if (fold){
+    fold.hidden = doneCount === 0;
+    if (doneCount){
+      $('doneSum').textContent = t('doneFold').replace('{0}', doneCount);
+      $('doneQuests').innerHTML = doneBig.map(id => bigQuestCard(id, true)).concat(doneCq.map(cquestCard)).join('');
+    }
+  }
   $('shop').innerHTML = CATS.map(c => {
     const its = (S.rewards || []).filter(r => r.cat === c);
     if (!its.length) return '';
@@ -912,7 +966,8 @@ function rewardFx(before, res, fx){
   const leveled = prevLv >= 0 && nextLv > prevLv;
   const zoneOn = fx.kind === 'zone' && !fx.wasOn && !!(n && (n.zones || []).includes(fx.id));
   const zoneOff = fx.kind === 'zone' && !!fx.wasOn && !(n && (n.zones || []).includes(fx.id));
-  const questOn = fx.kind === 'quest' && !fx.wasOn && (res.quests || []).includes(fx.id);
+  const cquestOn = fx.kind === 'cquest' && !fx.wasOn && (res.custom_quests || []).some(q => q.id === fx.id && q.done);
+  const questOn = (fx.kind === 'quest' && !fx.wasOn && (res.quests || []).includes(fx.id)) || cquestOn;
   const spark = function(){
     if (zoneOn) burst(allNew ? 10 : 4, document.querySelector('.zone[data-z="'+fx.id+'"]'));
     else if (questOn) burst(12);
@@ -954,6 +1009,22 @@ function toggleZone(id){
     else { D.zones.push(id); if (D.zones.length === 5) D.all_bonus = true; }
   }, () => rpc('tidy_toggle_zone', { p_callsign: callsign, p_today: today(), p_zone: id }), { celebrate: celebrateZone, fx: { kind:'zone', id:id, wasOn:wasOn } });
 }
+function bigQuestCard(id, done){
+  const q = STR[lang].quests[id];
+  const on = done || (S.quests || []).includes(id);
+  return '<button type="button" class="quest '+(on?'done':'')+'" data-q="'+id+'" aria-pressed="'+on+'"><strong>'+esc(q.name)+'</strong><small>'+esc(q.tip)+'</small><span class="pts">★ 10'+(on?' · '+esc(t('doneMark')):'')+'</span></button>';
+}
+function cquestCard(q){
+  const first = String(cqSteps(q) || '').split('\n')[0];
+  return '<button type="button" class="quest '+(q.done?'done':'')+'" data-cq="'+esc(q.id)+'" aria-pressed="'+(q.done?'true':'false')+'"><strong>'+esc(cqName(q))+'</strong>'+(first?'<small>'+esc(first)+'</small>':'')+'<span class="pts">★ '+Number(q.stars)+(q.done?' · '+esc(t('doneMark')):'')+'</span></button>';
+}
+function normCquest(q){
+  return { id:q.id, name:q.name || '', name_ko:q.name_ko || '', steps:q.steps || '', steps_ko:q.steps_ko || '', stars:Number(q.stars) || 0, done:!!q.done, done_at:q.done_at || '' };
+}
+function refreshParent(){
+  if ($('rlist')) paintParentRewards();
+  if ($('qlist')) paintParentQuests();
+}
 function toggleQuest(id){
   if (!QUEST_IDS.includes(id) || !callsign) return;
   const wasOn = (S.quests || []).includes(id);
@@ -986,6 +1057,7 @@ function guideArt(i){
 }
 function openGuide(){
   questOpen = '';
+  cquestOpen = '';
   guideAt = 0;
   paintGuide();
 }
@@ -1016,6 +1088,7 @@ function questLines(id){
 function openQuest(id){
   if (!QUEST_IDS.includes(id)) return;
   guideAt = -1;
+  cquestOpen = '';
   questOpen = id;
   paintQuest();
 }
@@ -1033,6 +1106,36 @@ function paintQuest(){
   $('questLater').onclick = shut;
   if ($('questDone')) $('questDone').onclick = () => { shut(); toggleQuest(id); };
   if ($('questUndo')) $('questUndo').onclick = () => { shut(); toggleQuest(id); };
+}
+function toggleCquest(id){
+  const q = (S.custom_quests || []).find(x => x.id === id);
+  if (!q || !callsign || String(id).indexOf('pending-') === 0) return;
+  const wasOn = !!q.done;
+  schedule(() => {
+    const cur = (S.custom_quests || []).find(x => x.id === id);
+    if (cur) cur.done = !cur.done;
+  }, () => rpc('tidy_cquest_toggle', { p_callsign: callsign, p_today: today(), p_id: id }), { fx: { kind:'cquest', id:id, wasOn:wasOn } });
+}
+let cquestOpen = '';
+function openCquest(id){
+  if (!(S.custom_quests || []).some(q => q.id === id)) return;
+  guideAt = -1;
+  questOpen = '';
+  cquestOpen = id;
+  paintCquest();
+}
+function paintCquest(){
+  const q = (S.custom_quests || []).find(x => x.id === cquestOpen);
+  if (!q){ cquestOpen = ''; return; }
+  const shut = () => { cquestOpen = ''; close(); };
+  modal('<h2>'+esc(cqName(q))+'</h2><p class="muted steps">'+esc(cqSteps(q))+'</p>'+
+    '<div class="row">'+
+    (q.done ? '<button type="button" class="btn" id="cqUndo">'+esc(t('questUndo'))+'</button>'
+            : '<button type="button" class="btn star" id="cqDone">'+esc(t('cqDone').replace('{0}', Number(q.stars)))+'</button>')+
+    '<button type="button" class="btn alt" id="cqLater">'+esc(t('questLater'))+'</button></div>', shut);
+  $('cqLater').onclick = shut;
+  if ($('cqDone')) $('cqDone').onclick = () => { const id = q.id; shut(); toggleCquest(id); };
+  if ($('cqUndo')) $('cqUndo').onclick = () => { const id = q.id; shut(); toggleCquest(id); };
 }
 
 function askPin(title, desc, attempt){
@@ -1091,8 +1194,9 @@ function onParentOpen(){
     return { ok:false, error: (res && res.error) || 'bad_pin' };
   });
 }
-function closeParent(){ sessionPin = ''; editingId = ''; close(); }
+function closeParent(){ sessionPin = ''; editingId = ''; editingQuest = ''; close(); }
 let editingId = '';
+let editingQuest = '';
 function paintParentRewards(){
   const el = $('rlist');
   if (!el) return;
@@ -1113,8 +1217,10 @@ function paintParentRewards(){
 }
 function startRewardEdit(id){
   if (!id || String(id).indexOf('pending-') === 0 || !$('rlist')) return;
+  editingQuest = '';
   editingId = id;
   paintParentRewards();
+  if ($('qlist')) paintParentQuests();
   if ($('editName')) $('editName').focus();
 }
 async function saveRewardEdit(){
@@ -1139,13 +1245,118 @@ async function saveRewardEdit(){
   if (isState(res)) $('pErr').textContent = t('savedReward');
   else $('pErr').textContent = (res && res.error) === 'bad_reward' ? t('editBadReward') : errText((res && res.error) || 'network');
 }
+function questInputBad(name, nameKo, steps, stepsKo, stars, lockStars){
+  if (!name || name.length > 60 || nameKo.length > 60 || steps.length > 600 || stepsKo.length > 600) return true;
+  if (!lockStars && (!Number.isInteger(stars) || stars < 1 || stars > 100)) return true;
+  return false;
+}
+function paintParentQuests(){
+  const el = $('qlist');
+  if (!el) return;
+  const list = S.custom_quests || [];
+  if (editingQuest && !list.some(q => q.id === editingQuest)) editingQuest = '';
+  el.innerHTML = list.map(q => {
+    const pending = String(q.id).indexOf('pending-') === 0;
+    if (!pending && q.id === editingQuest){
+      return '<div class="qedit"><input id="qeName" maxlength="60" value="'+esc(q.name)+'" placeholder="'+esc(t('pqNamePh'))+'">'+
+        '<input id="qeNameKo" maxlength="60" value="'+esc(q.name_ko)+'" placeholder="'+esc(t('pqNameKoPh'))+'">'+
+        '<textarea id="qeSteps" maxlength="600" placeholder="'+esc(t('pqStepsPh'))+'">'+esc(q.steps)+'</textarea>'+
+        '<textarea id="qeStepsKo" maxlength="600" placeholder="'+esc(t('pqStepsKoPh'))+'">'+esc(q.steps_ko)+'</textarea>'+
+        '<input id="qeStars" type="number" inputmode="numeric" min="1" max="100" value="'+Number(q.stars)+'"'+(q.done?' disabled':'')+'>'+
+        (q.done ? '<p class="muted" style="margin:0">'+esc(t('pqStarsLock'))+'</p>' : '')+
+        '<div class="edit-actions"><button type="button" id="qeSave">'+esc(t('saveReward'))+'</button><button type="button" id="qeCancel">'+esc(t('cancel'))+'</button></div></div>';
+    }
+    return '<div class="qrow"><span class="qn">'+esc(cqName(q))+' · ★'+Number(q.stars)+' · '+esc(q.done ? t('doneMark') : t('pqOpen'))+'</span>'+
+      (pending ? '' : '<button type="button" data-qedit="'+esc(q.id)+'">'+esc(t('editReward'))+'</button>'+
+        (q.done ? '<button type="button" data-qreopen="'+esc(q.id)+'">'+esc(t('pqReopen'))+'</button>' : '')+
+        '<button type="button" data-qdel="'+esc(q.id)+'">'+esc(t('remove'))+'</button>')+'</div>';
+  }).join('');
+}
+function startQuestEdit(id){
+  if (!id || String(id).indexOf('pending-') === 0 || !$('qlist')) return;
+  editingId = '';
+  editingQuest = id;
+  if ($('rlist')) paintParentRewards();
+  paintParentQuests();
+  if ($('qeName')) $('qeName').focus();
+}
+async function saveQuestEdit(){
+  const q = (S.custom_quests || []).find(x => x.id === editingQuest);
+  if (!q || !$('qeName') || !$('pErr')) return;
+  const id = q.id;
+  const locked = !!q.done;
+  const name = $('qeName').value.trim();
+  const nameKo = $('qeNameKo').value.trim();
+  const steps = $('qeSteps').value.replace(/\r\n/g, '\n');
+  const stepsKo = $('qeStepsKo').value.replace(/\r\n/g, '\n');
+  const stars = locked ? Number(q.stars) : parseInt($('qeStars').value, 10);
+  if (questInputBad(name, nameKo, steps, stepsKo, stars, locked)){ $('pErr').textContent = errText('bad_quest_input'); return; }
+  $('qeSave').disabled = true;
+  editingQuest = '';
+  const res = await schedule(() => {
+    const cur = (S.custom_quests || []).find(x => x.id === id);
+    if (cur){ cur.name = name; cur.name_ko = nameKo; cur.steps = steps; cur.steps_ko = stepsKo; cur.stars = stars; }
+  }, () => rpc('tidy_cquest_update', {
+    p_callsign: callsign, p_today: today(), p_pin: sessionPin, p_id: id,
+    p_name: name, p_name_ko: nameKo, p_steps: steps, p_steps_ko: stepsKo, p_stars: stars
+  }), { quiet:true });
+  if (!$('pErr')) return;
+  if (isState(res)) $('pErr').textContent = t('savedReward');
+  else $('pErr').textContent = (res && res.error) === 'bad_quest_input' ? errText('bad_quest_input') : errText((res && res.error) || 'network');
+}
+async function addCquest(){
+  if (!$('cqName') || !$('pErr')) return;
+  const name = $('cqName').value.trim();
+  const nameKo = $('cqNameKo').value.trim();
+  const steps = $('cqSteps').value.replace(/\r\n/g, '\n');
+  const stepsKo = $('cqStepsKo').value.replace(/\r\n/g, '\n');
+  const stars = parseInt($('cqStars').value, 10);
+  if (questInputBad(name, nameKo, steps, stepsKo, stars, false)){ $('pErr').textContent = errText('bad_quest_input'); return; }
+  $('cqAdd').disabled = true;
+  const tempId = 'pending-'+Date.now();
+  const res = await schedule(() => {
+    S.custom_quests.push({ id:tempId, name:name, name_ko:nameKo, steps:steps, steps_ko:stepsKo, stars:stars, done:false, done_at:'' });
+  }, () => rpc('tidy_cquest_add', {
+    p_callsign: callsign, p_today: today(), p_pin: sessionPin,
+    p_name: name, p_name_ko: nameKo, p_steps: steps, p_steps_ko: stepsKo, p_stars: stars
+  }), { quiet:true });
+  if (!$('pErr')) return;
+  $('cqAdd').disabled = false;
+  if (isState(res)){
+    $('cqName').value = ''; $('cqNameKo').value = ''; $('cqSteps').value = ''; $('cqStepsKo').value = ''; $('cqStars').value = '5';
+    $('pErr').textContent = t('savedReward');
+  } else $('pErr').textContent = (res && res.error) === 'bad_quest_input' ? errText('bad_quest_input') : errText((res && res.error) || 'network');
+}
+async function removeCquest(id){
+  if (!id || String(id).indexOf('pending-') === 0 || !$('pErr')) return;
+  const res = await schedule(() => {
+    S.custom_quests = (S.custom_quests || []).filter(q => q.id !== id);
+  }, () => rpc('tidy_cquest_remove', { p_callsign: callsign, p_today: today(), p_pin: sessionPin, p_id: id }), { quiet:true });
+  if ($('pErr') && !isState(res)) $('pErr').textContent = errText((res && res.error) || 'network');
+}
+async function reopenCquest(id){
+  if (!id || !$('pErr')) return;
+  const res = await schedule(() => {
+    const cur = (S.custom_quests || []).find(q => q.id === id);
+    if (cur) cur.done = false;
+  }, () => rpc('tidy_cquest_reopen', { p_callsign: callsign, p_today: today(), p_pin: sessionPin, p_id: id }), { quiet:true });
+  if ($('pErr') && !isState(res)) $('pErr').textContent = errText((res && res.error) || 'network');
+}
 function parentPanel(){
   editingId = '';
+  editingQuest = '';
   const opts = CATS.map(c => '<option value="'+c+'">'+esc(STR[lang].cats[c])+'</option>').join('');
   modal('<h2>'+esc(t('parentTitle'))+'</h2>'+
     '<h3 style="font-size:17px">'+esc(t('adjustHead'))+'</h3>'+
     '<div class="row"><input id="adjN" type="number" inputmode="numeric" placeholder="'+esc(t('adjPh'))+'"><input id="adjT" maxlength="40" placeholder="'+esc(t('reasonPh'))+'"></div>'+
     '<button type="button" class="btn" id="adjGo">'+esc(t('adjGo'))+'</button>'+
+    '<h3 style="font-size:17px">'+esc(t('pqHead'))+'</h3>'+
+    '<div id="qlist" style="display:flex;flex-direction:column;gap:8px"></div>'+
+    '<input id="cqName" maxlength="60" placeholder="'+esc(t('pqNamePh'))+'">'+
+    '<input id="cqNameKo" maxlength="60" placeholder="'+esc(t('pqNameKoPh'))+'">'+
+    '<textarea id="cqSteps" maxlength="600" placeholder="'+esc(t('pqStepsPh'))+'"></textarea>'+
+    '<textarea id="cqStepsKo" maxlength="600" placeholder="'+esc(t('pqStepsKoPh'))+'"></textarea>'+
+    '<div class="row"><input id="cqStars" type="number" inputmode="numeric" min="1" max="100" value="5" placeholder="'+esc(t('pqStarsPh'))+'"><button type="button" class="btn" id="cqAdd">'+esc(t('pqAdd'))+'</button></div>'+
     '<h3 style="font-size:17px">'+esc(t('rewardHead'))+'</h3>'+
     '<div id="rlist" style="display:flex;flex-direction:column;gap:6px"></div>'+
     '<div class="row"><input id="rName" maxlength="60" placeholder="'+esc(t('rewardPh'))+'"><input id="rCost" type="number" inputmode="numeric" placeholder="'+esc(t('costPh'))+'"></div>'+
@@ -1154,10 +1365,12 @@ function parentPanel(){
     '<div class="row"><input id="newPin" type="password" inputmode="numeric" maxlength="8" placeholder="'+esc(t('newPinPh'))+'"><button type="button" class="btn" id="pinSet">'+esc(t('pinSet'))+'</button></div>'+
     '<div class="err" id="pErr"></div>'+
     '<button type="button" class="btn alt" id="pClose">'+esc(t('close'))+'</button>', closeParent);
+  paintParentQuests();
   paintParentRewards();
   $('pClose').onclick = closeParent;
   $('adjGo').onclick = doAdjust;
   $('rAdd').onclick = doAdd;
+  $('cqAdd').onclick = addCquest;
   $('pinSet').onclick = doSetPin;
 }
 async function doAdjust(){
@@ -1307,6 +1520,14 @@ document.addEventListener('click', e => {
   if (e.target.closest('[data-lang-toggle]')){ toggleLang(); return; }
   if (e.target.closest('#editCancel')){ editingId = ''; if ($('rlist')) paintParentRewards(); return; }
   if (e.target.closest('#editSave')){ saveRewardEdit(); return; }
+  if (e.target.closest('#qeCancel')){ editingQuest = ''; if ($('qlist')) paintParentQuests(); return; }
+  if (e.target.closest('#qeSave')){ saveQuestEdit(); return; }
+  const qedit = e.target.closest('[data-qedit]');
+  if (qedit){ startQuestEdit(qedit.getAttribute('data-qedit')); return; }
+  const qre = e.target.closest('[data-qreopen]');
+  if (qre){ reopenCquest(qre.getAttribute('data-qreopen')); return; }
+  const qdel = e.target.closest('[data-qdel]');
+  if (qdel){ removeCquest(qdel.getAttribute('data-qdel')); return; }
   const edit = e.target.closest('[data-edit]');
   if (edit){ startRewardEdit(edit.getAttribute('data-edit')); return; }
   const del = e.target.closest('[data-del]');
@@ -1314,6 +1535,8 @@ document.addEventListener('click', e => {
   if (mode !== 'app') return;
   const z = e.target.closest('[data-z]');
   if (z){ toggleZone(z.getAttribute('data-z')); return; }
+  const cq = e.target.closest('[data-cq]');
+  if (cq){ openCquest(cq.getAttribute('data-cq')); return; }
   const q = e.target.closest('[data-q]');
   if (q){ openQuest(q.getAttribute('data-q')); return; }
   const r = e.target.closest('[data-r]');
@@ -1324,7 +1547,8 @@ document.addEventListener('keydown', e => {
   if (guideAt >= 0){ dismissGuide(); return; }
   if ($('pinOk') && $('pinOk').disabled) return;
   questOpen = '';
-  if ($('rlist')){ sessionPin = ''; editingId = ''; }
+  cquestOpen = '';
+  if ($('rlist')){ sessionPin = ''; editingId = ''; editingQuest = ''; }
   close();
 });
 document.addEventListener('visibilitychange', () => {
