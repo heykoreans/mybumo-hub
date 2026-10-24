@@ -72,6 +72,17 @@ a{color:var(--sky)}
 .zone.done .ic{background:var(--mint);color:#fff}
 .zone.done .chk{background:var(--mint);border-color:var(--mint);color:#fff}
 .zone.done .tx strong{text-decoration:line-through;text-decoration-color:var(--mint);text-decoration-thickness:2px}
+.zone .tx .zone-line{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;min-width:0}
+.zone .tx .zone-line strong{display:inline;width:auto}
+.zone .tx .prog{font-size:14px;color:var(--muted);font-variant-numeric:tabular-nums}
+.zone .checks{grid-column:1 / -1;display:flex;flex-direction:column;min-width:0;margin-top:4px}
+.check{display:flex;align-items:center;gap:10px;width:100%;min-width:0;min-height:44px;padding:8px 4px;background:transparent;color:var(--ink);text-align:left;line-height:1.35}
+.check .mark{width:22px;height:22px;flex:0 0 22px;border-radius:6px;border:2px solid var(--line);display:grid;place-items:center;font-size:14px;color:transparent;background:var(--card)}
+.check.on .mark{background:var(--mint);border-color:var(--mint);color:#fff}
+.check.on .label{opacity:.62}
+.check .label{flex:1;min-width:0;overflow-wrap:break-word;text-decoration:none}
+.check:disabled{cursor:default;opacity:.7}
+.qrow button.arm{border-color:var(--coral);color:var(--coral)}
 
 .bonus-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .pill{border-radius:14px;padding:12px;font-size:14px;background:var(--card);border:1px dashed var(--line);color:var(--muted);overflow-wrap:break-word}
@@ -233,6 +244,7 @@ body.guide-open .top-bar{z-index:25}
   <section style="display:flex;flex-direction:column;gap:12px">
     <div>
       <div class="section-head"><h2 data-k="mission">Today’s mission</h2><span class="muted" data-k="missionSub">10 minutes before bed · 1 star each zone</span></div>
+      <p class="muted hint" data-k="checkDaily">New checklist every day!</p>
       <p class="muted hint" data-k="missionHint">Tap each zone when it's done. Tap again to undo.</p>
     </div>
     <div class="zones" id="zones"></div>
@@ -301,7 +313,7 @@ const ZONE_IDS = ['floor','bed','desk','dresser','toys'];
 const QUEST_IDS = ['audition','artbox','outside','labels','photo','donate'];
 const CATS = ['경험','특권','선물','용돈'];
 const LEVEL_AT = [0, 30, 80, 160, 300];
-const KNOWN_ERR = ['bad_pin','not_enough_stars','not_all_done','already_checked','callsign_taken','bad_callsign','bad_pin_format','family_not_found','bad_zone','bad_quest_input','quest_not_found','bad_quest','bad_delta','reward_not_found','invalid_day'];
+const KNOWN_ERR = ['bad_pin','not_enough_stars','not_all_done','already_checked','callsign_taken','bad_callsign','bad_pin_format','family_not_found','bad_zone','bad_item_input','item_not_found','bad_quest_input','quest_not_found','bad_quest','bad_delta','reward_not_found','invalid_day'];
 
 const STR = {
   ko: {
@@ -313,6 +325,8 @@ const STR = {
     childLabel:'아이 이름', childPh:'예: 지민', pinLabel:'부모님 비밀번호', pinPh:'숫자 4~8자리',
     createBtn:'새로 만들기', backHub:'게임 허브로', title:'방 정리 퀘스트', bank:'내 별',
     week:'이번 주', mission:'오늘의 미션', missionSub:'자기 전 10분 · 구역마다 별 1개',
+    checkDaily:'체크리스트는 매일 새로 시작해요!',
+    clHead:'데일리 체크리스트', clAdd:'추가', clEnPh:'영어 문장', clKoPh:'한국어 문장 (선택)', clRemoveAsk:'삭제할까요?',
     questHead:'대청소 퀘스트', questSub:'한 번만 하면 돼요 · 각 별 10개',
     weekQuests:'이번 주 퀘스트', doneFold:'완료한 퀘스트 ({0})', cqDone:'다 했어요! +{0} ★',
     pqHead:'퀘스트', pqAdd:'퀘스트 추가', pqNamePh:'퀘스트 이름', pqNameKoPh:'한국어 이름 (선택)',
@@ -397,6 +411,8 @@ const STR = {
       bad_quest:'알 수 없는 퀘스트예요.',
       bad_quest_input:'이름은 1~60자, 별은 1~100 사이로 입력해 주세요',
       quest_not_found:'그 퀘스트를 찾지 못했어요.',
+      bad_item_input:'1~80자로 입력해 주세요',
+      item_not_found:'이미 없는 항목이에요. 새로고침할게요.',
       bad_reward:'보상 이름은 1~60자, 별은 1~1000개로 입력해 주세요.',
       network:'연결이 잠시 끊겼어요. 다시 눌러 주세요.'
     }
@@ -410,6 +426,8 @@ const STR = {
     childLabel:'Child’s name', childPh:'e.g. Mina', pinLabel:'Parent PIN', pinPh:'4–8 digits',
     createBtn:'Create', backHub:'Game hub', title:'Room Quest', bank:'My stars',
     week:'This week', mission:'Today’s mission', missionSub:'10 minutes before bed · 1 star each zone',
+    checkDaily:'New checklist every day!',
+    clHead:'Daily checklist', clAdd:'Add', clEnPh:'English', clKoPh:'Korean (optional)', clRemoveAsk:'Remove?',
     questHead:'Big tidy quests', questSub:'Do each one once · 10 stars',
     weekQuests:'This week\'s quests', doneFold:'Completed quests ({0})', cqDone:'Done! +{0} ★',
     pqHead:'Quests', pqAdd:'Add quest', pqNamePh:'Quest name', pqNameKoPh:'Korean name (optional)',
@@ -494,6 +512,8 @@ const STR = {
       bad_quest:'Unknown quest.',
       bad_quest_input:'Name 1~60 characters, stars 1~100',
       quest_not_found:'That quest could not be found.',
+      bad_item_input:'Write 1~80 characters',
+      item_not_found:'This item is gone. Refreshing.',
       bad_reward:'Use a reward name of 1–60 characters and a cost from 1 to 1000.',
       network:'The connection dropped. Please try again.'
     }
@@ -535,8 +555,11 @@ let gateErrCode = '';
 let S = emptyState();
 let tail = Promise.resolve();
 let pending = 0;
+let seenDay = today();
+let refreshFlight = null;
+const busyItems = new Set();
 
-function emptyState(){ return { child_name:'', stars:null, total:null, streak:0, days:[], quests:[], custom_quests:[], rewards:[], ledger:[] }; }
+function emptyState(){ return { child_name:'', stars:null, total:null, streak:0, days:[], quests:[], custom_quests:[], check_items:[], check_marks:[], rewards:[], ledger:[] }; }
 function $(id){ return document.getElementById(id); }
 function pad(n){ return String(n).padStart(2,'0'); }
 function dkey(d){ return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
@@ -555,6 +578,26 @@ function showReward(name){
 }
 function cqName(q){ return (lang === 'ko' && q && q.name_ko) ? q.name_ko : ((q && q.name) || ''); }
 function cqSteps(q){ return (lang === 'ko' && q && q.steps_ko) ? q.steps_ko : ((q && q.steps) || ''); }
+function normItem(it){
+  return {
+    id: String(it && it.id || ''),
+    zone: it && it.zone,
+    text_en: (it && it.text_en) || '',
+    text_ko: (it && it.text_ko) || '',
+    sort: Number(it && it.sort) || 0
+  };
+}
+function itemText(it){
+  if (lang === 'ko' && it && it.text_ko) return it.text_ko;
+  return (it && it.text_en) || '';
+}
+function hasMark(list, id){
+  const key = String(id);
+  return (list || []).some(x => String(x) === key);
+}
+function zoneItems(zone){
+  return (S.check_items || []).filter(it => it.zone === zone).slice().sort((a, b) => (a.sort - b.sort) || String(a.id).localeCompare(String(b.id)));
+}
 function showReason(reason){
   const s = String(reason || '');
   if (!s) return s;
@@ -659,6 +702,8 @@ function applyState(data){
     })),
     quests: Array.isArray(data.quests) ? data.quests.slice() : [],
     custom_quests: Array.isArray(data.custom_quests) ? data.custom_quests.map(normCquest) : [],
+    check_items: Array.isArray(data.check_items) ? data.check_items.map(normItem).filter(it => it.id && ZONE_IDS.includes(it.zone)) : [],
+    check_marks: Array.isArray(data.check_marks) ? data.check_marks.map(x => String(x)) : [],
     rewards: Array.isArray(data.rewards) ? data.rewards.map(r => ({ id:r.id, cat:r.cat, name:r.name, cost:Number(r.cost) })) : [],
     ledger: Array.isArray(data.ledger) ? data.ledger.map(l => ({ delta:Number(l.delta), reason:l.reason || '', created_at:l.created_at })) : []
   };
@@ -765,11 +810,7 @@ function render(){
     w += '<div class="day '+(i===0?'today':'')+'"><span class="dot '+(full?'full':n?'part':'')+'">'+(full?'★':(n||''))+'</span>'+letters[d.getDay()]+'</div>';
   }
   $('week').innerHTML = w;
-  $('zones').innerHTML = ZONE_IDS.map(id => {
-    const z = STR[lang].zones[id];
-    const on = D.zones.includes(id);
-    return '<button type="button" class="zone '+(on?'done':'')+'" data-z="'+id+'" aria-pressed="'+on+'"><span class="ic">'+(on?'★':zoneSvg(id))+'</span><span class="tx"><strong>'+esc(z.name)+'</strong><small>'+esc(z.tip)+'</small></span><span class="chk">✓</span></button>';
-  }).join('');
+  $('zones').innerHTML = ZONE_IDS.map(id => zoneCard(id, D)).join('');
   $('allPill').className = 'pill'+(D.all_bonus?' on':'');
   $('allPill').textContent = D.all_bonus ? t('allOn') : t('allOff').replace('{0}', D.zones.length);
   const left = 5 - (st % 5);
@@ -893,6 +934,20 @@ function playPop(){
   o.connect(g); g.connect(audioCtx.destination);
   o.start(t0); o.stop(t0 + 0.1);
 }
+function playTick(){
+  ensureAudio();
+  if (!audioCtx || !soundOn()) return;
+  const t0 = audioCtx.currentTime;
+  const o = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  o.type = 'sine';
+  o.frequency.setValueAtTime(740, t0);
+  o.frequency.exponentialRampToValueAtTime(1180, t0 + 0.045);
+  g.gain.setValueAtTime(0.05, t0);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.07);
+  o.connect(g); g.connect(audioCtx.destination);
+  o.start(t0); o.stop(t0 + 0.08);
+}
 function playClear(){ playNotes([[523.25,0],[659.25,0.11],[783.99,0.22],[1046.5,0.34]], 0.34, 0.06); }
 function playQuest(){ playNotes([[659.25,0],[783.99,0.1],[1046.5,0.2]], 0.3, 0.06); }
 function playBonus(){ playNotes([[523.25,0],[659.25,0.1],[783.99,0.2],[1046.5,0.3],[1318.5,0.42]], 0.36, 0.065); }
@@ -964,22 +1019,28 @@ function rewardFx(before, res, fx){
   const prevLv = levelIndex(before && before.total);
   const nextLv = levelIndex(res && res.total);
   const leveled = prevLv >= 0 && nextLv > prevLv;
-  const zoneOn = fx.kind === 'zone' && !fx.wasOn && !!(n && (n.zones || []).includes(fx.id));
-  const zoneOff = fx.kind === 'zone' && !!fx.wasOn && !(n && (n.zones || []).includes(fx.id));
+  const checkOn = fx.kind === 'check' && !fx.wasOn && hasMark(res.check_marks, fx.id);
+  const zoneKey = fx.kind === 'check' ? fx.zone : fx.id;
+  const zoneOn = (fx.kind === 'zone' && !fx.wasOn && !!(n && (n.zones || []).includes(fx.id)))
+    || (fx.kind === 'check' && !fx.wasZone && !!(n && (n.zones || []).includes(fx.zone)));
+  const zoneOff = (fx.kind === 'zone' && !!fx.wasOn && !(n && (n.zones || []).includes(fx.id)))
+    || (fx.kind === 'check' && !!fx.wasZone && !(n && (n.zones || []).includes(fx.zone)));
   const cquestOn = fx.kind === 'cquest' && !fx.wasOn && (res.custom_quests || []).some(q => q.id === fx.id && q.done);
   const questOn = (fx.kind === 'quest' && !fx.wasOn && (res.quests || []).includes(fx.id)) || cquestOn;
+  const zoneEl = document.querySelector('.zone[data-zone="'+zoneKey+'"]') || document.querySelector('.zone[data-z="'+zoneKey+'"]');
   const spark = function(){
-    if (zoneOn) burst(allNew ? 10 : 4, document.querySelector('.zone[data-z="'+fx.id+'"]'));
+    if (zoneOn) burst(allNew ? 10 : 4, zoneEl);
     else if (questOn) burst(12);
     else if (parentNew) burst(8);
     else if (fx.kind === 'redeem') burst(14);
   };
+  if (checkOn && fxGate('tick')) playTick();
   if (leveled && fxGate('level')){ spark(); playLevel(); confettiLevel(); showLevelPop(); return; }
   if ((streakNew || parentNew) && fxGate('bonus')){ spark(); playBonus(); confettiSides(); return; }
   if (allNew && fxGate('clear')){ spark(); playClear(); confettiClear(); return; }
   if (questOn && fxGate('quest')){ burst(12); playQuest(); confettiQuest(); return; }
   if (fx.kind === 'redeem' && fxGate('coin')){ burst(14); playCoin(); confettiShop(); return; }
-  if (zoneOn && fxGate('ding')){ burst(4, document.querySelector('.zone[data-z="'+fx.id+'"]')); playDing(); return; }
+  if (zoneOn && fxGate('ding')){ burst(4, zoneEl); playDing(); return; }
   if (zoneOff && fxGate('pop')){ playPop(); }
 }
 function toast(text){
@@ -999,8 +1060,58 @@ function celebrateZone(before, res){
   if (!(b && b.all_bonus) && n && n.all_bonus) toast(t('toastAll'));
   if (!(b && b.streak_paid) && n && n.streak_paid) setTimeout(() => toast(t('toastStreak').replace('{0}', res.streak)), 1400);
 }
+function zoneCard(id, D){
+  const z = STR[lang].zones[id];
+  const on = !!(D && D.zones && D.zones.includes(id));
+  const items = zoneItems(id);
+  const icon = '<span class="ic">'+(on?'★':zoneSvg(id))+'</span>';
+  const title = items.length
+    ? '<span class="zone-line"><strong>'+esc(z.name)+'</strong><span class="prog">'+items.filter(it => hasMark(S.check_marks, it.id)).length+'/'+items.length+'</span></span>'
+    : '<strong>'+esc(z.name)+'</strong>';
+  const body = icon+'<span class="tx">'+title+'<small>'+esc(z.tip)+'</small></span><span class="chk">✓</span>';
+  if (!items.length) return '<button type="button" class="zone '+(on?'done':'')+'" data-z="'+id+'" data-zone="'+id+'" aria-pressed="'+on+'">'+body+'</button>';
+  const checks = '<div class="checks">'+items.map(it => {
+    const marked = hasMark(S.check_marks, it.id);
+    const busy = busyItems.has(String(it.id));
+    return '<button type="button" class="check'+(marked?' on':'')+'" data-item="'+esc(it.id)+'" aria-pressed="'+(marked?'true':'false')+'"'+(busy?' disabled':'')+'><span class="mark" aria-hidden="true">'+(marked?'✓':'')+'</span><span class="label">'+esc(itemText(it))+'</span></button>';
+  }).join('')+'</div>';
+  return '<div class="zone'+(on?' done':'')+'" data-zone="'+id+'">'+body+checks+'</div>';
+}
+function toggleCheck(id){
+  if (!id || !callsign || busyItems.has(String(id)) || String(id).indexOf('pending-') === 0) return;
+  const item = (S.check_items || []).find(x => String(x.id) === String(id));
+  if (!item || !ZONE_IDS.includes(item.zone)) return;
+  const key = String(item.id);
+  busyItems.add(key);
+  const wasOn = hasMark(S.check_marks, key);
+  const zone = item.zone;
+  const day = dayRec(today());
+  const wasZone = !!(day && day.zones.includes(zone));
+  if (mode === 'app') render();
+  schedule(() => {
+    if (!Array.isArray(S.check_marks)) S.check_marks = [];
+    if (wasOn) S.check_marks = S.check_marks.filter(x => String(x) !== key);
+    else if (!hasMark(S.check_marks, key)) S.check_marks.push(key);
+    const items = zoneItems(zone);
+    const done = items.length > 0 && items.every(it => hasMark(S.check_marks, it.id));
+    const D = ensureToday();
+    if (done){
+      if (!D.zones.includes(zone)) D.zones.push(zone);
+      if (D.zones.length === 5) D.all_bonus = true;
+    } else if (D.zones.includes(zone)){
+      D.zones = D.zones.filter(z => z !== zone);
+      D.all_bonus = false;
+    }
+  }, () => rpc('tidy_toggle_check', { p_callsign: callsign, p_today: today(), p_item: key }), {
+    celebrate: celebrateZone,
+    fx: { kind:'check', id:key, zone:zone, wasOn:wasOn, wasZone:wasZone }
+  }).finally(() => {
+    busyItems.delete(key);
+    if (mode === 'app') render();
+  });
+}
 function toggleZone(id){
-  if (!ZONE_IDS.includes(id) || !callsign) return;
+  if (!ZONE_IDS.includes(id) || !callsign || zoneItems(id).length) return;
   const cur = dayRec(today());
   const wasOn = !!(cur && cur.zones.includes(id));
   schedule(() => {
@@ -1024,6 +1135,7 @@ function normCquest(q){
 function refreshParent(){
   if ($('rlist')) paintParentRewards();
   if ($('qlist')) paintParentQuests();
+  if ($('clist')) paintParentChecks();
 }
 function toggleQuest(id){
   if (!QUEST_IDS.includes(id) || !callsign) return;
@@ -1194,9 +1306,11 @@ function onParentOpen(){
     return { ok:false, error: (res && res.error) || 'bad_pin' };
   });
 }
-function closeParent(){ sessionPin = ''; editingId = ''; editingQuest = ''; close(); }
+function closeParent(){ sessionPin = ''; editingId = ''; editingQuest = ''; editingItem = ''; confirmItem = ''; close(); }
 let editingId = '';
 let editingQuest = '';
+let editingItem = '';
+let confirmItem = '';
 function paintParentRewards(){
   const el = $('rlist');
   if (!el) return;
@@ -1218,6 +1332,7 @@ function paintParentRewards(){
 function startRewardEdit(id){
   if (!id || String(id).indexOf('pending-') === 0 || !$('rlist')) return;
   editingQuest = '';
+  if (editingItem) cancelItemEdit();
   editingId = id;
   paintParentRewards();
   if ($('qlist')) paintParentQuests();
@@ -1275,6 +1390,7 @@ function paintParentQuests(){
 function startQuestEdit(id){
   if (!id || String(id).indexOf('pending-') === 0 || !$('qlist')) return;
   editingId = '';
+  if (editingItem) cancelItemEdit();
   editingQuest = id;
   if ($('rlist')) paintParentRewards();
   paintParentQuests();
@@ -1342,14 +1458,135 @@ async function reopenCquest(id){
   }, () => rpc('tidy_cquest_reopen', { p_callsign: callsign, p_today: today(), p_pin: sessionPin, p_id: id }), { quiet:true });
   if ($('pErr') && !isState(res)) $('pErr').textContent = errText((res && res.error) || 'network');
 }
+function itemInputBad(en, ko){
+  return !en || en.length > 80 || ko.length > 80;
+}
+function syncCheckForm(){
+  const add = $('ciAdd');
+  const cancel = $('ciCancel');
+  if (!add) return;
+  add.textContent = editingItem ? t('saveReward') : t('clAdd');
+  if (cancel) cancel.hidden = !editingItem;
+}
+function paintParentChecks(){
+  const el = $('clist');
+  if (!el) return;
+  const list = S.check_items || [];
+  if (editingItem && !list.some(it => it.id === editingItem)){ editingItem = ''; syncCheckForm(); }
+  if (confirmItem && !list.some(it => it.id === confirmItem)) confirmItem = '';
+  el.innerHTML = ZONE_IDS.map(zone => {
+    const items = zoneItems(zone);
+    if (!items.length) return '';
+    const name = (STR[lang].zones[zone] && STR[lang].zones[zone].name) || zone;
+    return '<div class="cigroup"><div class="muted" style="font-family:var(--display);font-size:15px">'+esc(name)+'</div>'+
+      items.map(it => {
+        const pending = String(it.id).indexOf('pending-') === 0;
+        const ko = it.text_ko ? '<br><span class="muted">'+esc(it.text_ko)+'</span>' : '';
+        const armed = confirmItem === it.id;
+        return '<div class="qrow"><span class="qn">'+esc(it.text_en)+ko+'</span>'+
+          (pending ? '' : '<button type="button" data-ciedit="'+esc(it.id)+'">'+esc(t('editReward'))+'</button><button type="button" data-cidel="'+esc(it.id)+'"'+(armed?' class="arm"':'')+'>'+esc(armed ? t('clRemoveAsk') : t('remove'))+'</button>')+
+          '</div>';
+      }).join('')+'</div>';
+  }).join('');
+}
+function startItemEdit(id){
+  const it = (S.check_items || []).find(x => x.id === id);
+  if (!it || String(id).indexOf('pending-') === 0 || !$('ciEn')) return;
+  editingId = '';
+  editingQuest = '';
+  editingItem = id;
+  confirmItem = '';
+  $('ciZone').value = it.zone;
+  $('ciEn').value = it.text_en;
+  $('ciKo').value = it.text_ko || '';
+  syncCheckForm();
+  if ($('rlist')) paintParentRewards();
+  if ($('qlist')) paintParentQuests();
+  paintParentChecks();
+  $('ciEn').focus();
+}
+function cancelItemEdit(){
+  editingItem = '';
+  if ($('ciEn')) $('ciEn').value = '';
+  if ($('ciKo')) $('ciKo').value = '';
+  if ($('ciZone')) $('ciZone').value = ZONE_IDS[0];
+  syncCheckForm();
+  if ($('clist')) paintParentChecks();
+}
+function checkItemError(res){
+  if (!$('pErr')) return;
+  const code = (res && res.error) || 'network';
+  if (code === 'item_not_found'){ editingItem = ''; confirmItem = ''; syncCheckForm(); }
+  $('pErr').textContent = errText(code === 'bad_item_input' ? 'bad_item_input' : code);
+}
+async function submitCheckItem(){
+  if (!$('ciEn') || !$('ciZone') || !$('pErr')) return;
+  const zone = $('ciZone').value;
+  const en = $('ciEn').value.trim();
+  const ko = $('ciKo').value.trim();
+  if (!ZONE_IDS.includes(zone) || itemInputBad(en, ko)){ $('pErr').textContent = errText('bad_item_input'); return; }
+  const editing = editingItem;
+  $('ciAdd').disabled = true;
+  let res;
+  if (editing){
+    res = await schedule(() => {
+      const cur = (S.check_items || []).find(x => x.id === editing);
+      if (cur){ cur.zone = zone; cur.text_en = en; cur.text_ko = ko; }
+    }, () => rpc('tidy_check_item_update', {
+      p_callsign: callsign, p_today: today(), p_pin: sessionPin, p_id: editing, p_zone: zone, p_text_en: en, p_text_ko: ko
+    }), { quiet:true });
+  } else {
+    const sort = zoneItems(zone).reduce((m, it) => Math.max(m, Number(it.sort) || 0), 0) + 1;
+    const tempId = 'pending-'+Date.now();
+    res = await schedule(() => {
+      S.check_items.push({ id:tempId, zone:zone, text_en:en, text_ko:ko, sort:sort });
+    }, () => rpc('tidy_check_item_add', {
+      p_callsign: callsign, p_today: today(), p_pin: sessionPin, p_zone: zone, p_text_en: en, p_text_ko: ko
+    }), { quiet:true });
+  }
+  if (!$('pErr') || !$('ciAdd')) return;
+  $('ciAdd').disabled = false;
+  if (isState(res)){
+    editingItem = '';
+    $('ciEn').value = '';
+    $('ciKo').value = '';
+    syncCheckForm();
+    $('pErr').textContent = editing ? t('savedReward') : t('added');
+  } else checkItemError(res);
+}
+function armRemoveItem(id){
+  if (!id || String(id).indexOf('pending-') === 0 || !$('clist')) return;
+  if (confirmItem !== id){ confirmItem = id; paintParentChecks(); return; }
+  removeCheckItem(id);
+}
+async function removeCheckItem(id){
+  if (!id || !$('pErr')) return;
+  confirmItem = '';
+  const res = await schedule(() => {
+    S.check_items = (S.check_items || []).filter(it => it.id !== id);
+    S.check_marks = (S.check_marks || []).filter(x => String(x) !== String(id));
+  }, () => rpc('tidy_check_item_remove', { p_callsign: callsign, p_today: today(), p_pin: sessionPin, p_id: id }), { quiet:true });
+  if (!$('pErr')) return;
+  if (isState(res)) $('pErr').textContent = t('removed');
+  else checkItemError(res);
+}
 function parentPanel(){
   editingId = '';
   editingQuest = '';
+  editingItem = '';
+  confirmItem = '';
   const opts = CATS.map(c => '<option value="'+c+'">'+esc(STR[lang].cats[c])+'</option>').join('');
+  const zones = ZONE_IDS.map(id => '<option value="'+id+'">'+esc(STR[lang].zones[id].name)+'</option>').join('');
   modal('<h2>'+esc(t('parentTitle'))+'</h2>'+
     '<h3 style="font-size:17px">'+esc(t('adjustHead'))+'</h3>'+
     '<div class="row"><input id="adjN" type="number" inputmode="numeric" placeholder="'+esc(t('adjPh'))+'"><input id="adjT" maxlength="40" placeholder="'+esc(t('reasonPh'))+'"></div>'+
     '<button type="button" class="btn" id="adjGo">'+esc(t('adjGo'))+'</button>'+
+    '<h3 style="font-size:17px">'+esc(t('clHead'))+'</h3>'+
+    '<div id="clist" style="display:flex;flex-direction:column;gap:8px"></div>'+
+    '<select id="ciZone">'+zones+'</select>'+
+    '<input id="ciEn" maxlength="80" placeholder="'+esc(t('clEnPh'))+'">'+
+    '<input id="ciKo" maxlength="80" placeholder="'+esc(t('clKoPh'))+'">'+
+    '<div class="row"><button type="button" class="btn alt" id="ciCancel" hidden>'+esc(t('cancel'))+'</button><button type="button" class="btn" id="ciAdd">'+esc(t('clAdd'))+'</button></div>'+
     '<h3 style="font-size:17px">'+esc(t('pqHead'))+'</h3>'+
     '<div id="qlist" style="display:flex;flex-direction:column;gap:8px"></div>'+
     '<input id="cqName" maxlength="60" placeholder="'+esc(t('pqNamePh'))+'">'+
@@ -1365,12 +1602,15 @@ function parentPanel(){
     '<div class="row"><input id="newPin" type="password" inputmode="numeric" maxlength="8" placeholder="'+esc(t('newPinPh'))+'"><button type="button" class="btn" id="pinSet">'+esc(t('pinSet'))+'</button></div>'+
     '<div class="err" id="pErr"></div>'+
     '<button type="button" class="btn alt" id="pClose">'+esc(t('close'))+'</button>', closeParent);
+  paintParentChecks();
   paintParentQuests();
   paintParentRewards();
   $('pClose').onclick = closeParent;
   $('adjGo').onclick = doAdjust;
   $('rAdd').onclick = doAdd;
   $('cqAdd').onclick = addCquest;
+  $('ciAdd').onclick = submitCheckItem;
+  $('ciCancel').onclick = cancelItemEdit;
   $('pinSet').onclick = doSetPin;
 }
 async function doAdjust(){
@@ -1528,11 +1768,17 @@ document.addEventListener('click', e => {
   if (qre){ reopenCquest(qre.getAttribute('data-qreopen')); return; }
   const qdel = e.target.closest('[data-qdel]');
   if (qdel){ removeCquest(qdel.getAttribute('data-qdel')); return; }
+  const ciedit = e.target.closest('[data-ciedit]');
+  if (ciedit){ startItemEdit(ciedit.getAttribute('data-ciedit')); return; }
+  const cidel = e.target.closest('[data-cidel]');
+  if (cidel){ armRemoveItem(cidel.getAttribute('data-cidel')); return; }
   const edit = e.target.closest('[data-edit]');
   if (edit){ startRewardEdit(edit.getAttribute('data-edit')); return; }
   const del = e.target.closest('[data-del]');
   if (del){ removeReward(del.getAttribute('data-del')); return; }
   if (mode !== 'app') return;
+  const itemBtn = e.target.closest('[data-item]');
+  if (itemBtn){ if (!itemBtn.disabled) toggleCheck(itemBtn.getAttribute('data-item')); return; }
   const z = e.target.closest('[data-z]');
   if (z){ toggleZone(z.getAttribute('data-z')); return; }
   const cq = e.target.closest('[data-cq]');
@@ -1548,13 +1794,27 @@ document.addEventListener('keydown', e => {
   if ($('pinOk') && $('pinOk').disabled) return;
   questOpen = '';
   cquestOpen = '';
-  if ($('rlist')){ sessionPin = ''; editingId = ''; editingQuest = ''; }
+  if ($('rlist') || $('clist')){ sessionPin = ''; editingId = ''; editingQuest = ''; editingItem = ''; confirmItem = ''; }
   close();
 });
+function refreshState(){
+  if (mode !== 'app' || !callsign || pending || refreshFlight) return;
+  const day = today();
+  refreshFlight = rpc('tidy_get_state', { p_callsign: callsign, p_today: day }).then(res => {
+    if (isState(res) && pending === 0){
+      applyState(res);
+      if (today() === day) seenDay = day;
+    }
+  }).finally(() => { refreshFlight = null; });
+}
+function watchDay(){
+  if (today() !== seenDay) refreshState();
+}
 document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState !== 'visible' || mode !== 'app' || !callsign || pending) return;
-  rpc('tidy_get_state', { p_callsign: callsign, p_today: today() }).then(res => { if (isState(res) && pending === 0) applyState(res); });
+  if (document.visibilityState === 'visible') refreshState();
 });
+window.addEventListener('focus', refreshState);
+setInterval(watchDay, 60000);
 
 $('loadBtn').onclick = loadFamily;
 $('firstBtn').onclick = () => { $('createBox').hidden = false; setGateErr(''); $('nameIn').focus(); };
