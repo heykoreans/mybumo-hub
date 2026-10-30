@@ -57,6 +57,8 @@ a{color:var(--sky)}
 .dot.part{border:2px solid var(--star);background:var(--soft-star)}
 .day.today .dot{outline:2px solid var(--sky);outline-offset:2px}
 .streak{font-family:var(--display);color:var(--coral);font-size:17px}
+.streak-wrap{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:flex-end;gap:6px;min-width:0;max-width:100%}
+.streak-note{font-size:12px;overflow-wrap:break-word}
 
 .section-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
 .zones{display:flex;flex-direction:column;gap:10px}
@@ -264,7 +266,7 @@ body.guide-open .top-bar{z-index:25}
   </section>
 
   <section>
-    <div class="section-head"><h2 data-k="week">This week</h2><span class="streak" id="streak"></span></div>
+    <div class="section-head"><h2 data-k="week">This week</h2><span class="streak-wrap"><span class="streak" id="streak"></span><span class="muted streak-note" id="streakNote"></span></span></div>
     <div class="week" id="week" style="margin-top:10px"></div>
   </section>
 
@@ -396,7 +398,7 @@ const STR = {
     guide:[
       '방 정리 퀘스트에 온 걸 환영해! 방을 정리하고 별을 모아서 선물로 바꿔 보자.',
       '매일 자기 전 10분, 5개 구역을 정리해. 진짜 다 끝났을 때 구역을 눌러. 구역 하나에 별 1개!',
-      '보너스 별! 5구역 모두 끝내면 +2, 부모님 확인받으면 +2, 5일 연속 성공하면 +5.',
+      '보너스 별! 5구역 모두 끝내면 +2, 부모님 확인받으면 +2, 7일 연속 성공하면 +10.',
       '대청소 퀘스트는 한 번만 하는 특별 미션이야. 하나에 별 10개! 주말에 부모님이랑 같이 해 봐.',
       '모은 별은 별 상점에서 선물로 바꿀 수 있어. 부모님이 비밀번호를 넣어 주면 교환 완료! 하루 못 해도 괜찮아. 모은 별은 없어지지 않아. 내일 다시 시작하면 돼!'
     ],
@@ -409,7 +411,8 @@ const STR = {
       donate:'1. 이제 안 쓰는 물건을 찾아. 2. 나눔 상자에 넣어. 3. 부모님이랑 필요한 사람에게 나눠 줘.'
     },
     streakN:'{0}일 연속 중', allOn:'올클리어 보너스 받았어요 (+2)', allOff:'5구역 모두 끝내면 보너스 별 2개 ({0}/5)',
-    streakOn:'{0}일 연속 보너스 받았어요 (+5)', streakOff:'연속 보너스까지 {0}일 남았어요',
+    streakOn:'{0}일 연속 보너스 받았어요 (+10)', streakOff:'연속 보너스까지 {0}일 남았어요',
+    streakLeft:'+10 ★까지 {0}일 남았어요', streakToday:'오늘 +10 ★ 보너스!',
     parentNeed:'올클리어하면 부모님 확인받기', parentReady:'부모님 확인받기 (별 +2)', parentDone:'오늘 부모님 확인 완료!',
     doneMark:'완료!', emptyLog:'구역을 체크하면 여기에 별 기록이 쌓여요',
     lvNext:'다음 레벨까지 별 {0}개', lvMax:'최고 레벨 달성!',
@@ -444,7 +447,7 @@ const STR = {
     editReward:'수정', saveReward:'저장', savedReward:'저장했어요',
     editBadReward:'이름은 1~60자, 별은 1~1000 사이로 입력해 주세요',
     noRewards:'등록된 보상이 없어요.',
-    toastAll:'오늘 미션 올클리어! 별 +2', toastStreak:'{0}일 연속! 별 +5',
+    toastAll:'오늘 미션 올클리어! 별 +2', toastStreak:'{0}일 연속! 별 +10',
     toastQuest:'{0} 완료! 별 +10', toastParent:'부모님 확인 완료! 별 +2', toastRedeem:'{0} 교환 완료!',
     switchTitle:'다른 가족으로 바꿀까요?', switchDesc:'이 기기에 저장된 콜사인만 지워요. 별 기록은 그대로 남아요.', switchYes:'바꾸기',
     weekLetters:'일월화수목금토',
@@ -508,7 +511,7 @@ const STR = {
     guide:[
       'Welcome to Tidy Pop! Tidy your room, collect stars, and trade them for rewards.',
       'Every night before bed, take 10 minutes to tidy 5 zones. Tap a zone when it\'s really done. Each zone = 1 star.',
-      'Bonus stars! Finish all 5 zones = +2. Ask a parent to check = +2. Do all 5 zones for 5 days in a row = +5.',
+      'Bonus stars! Finish all 5 zones = +2. Ask a parent to check = +2. Do all 5 zones for 7 days in a row = +10.',
       'Big tidy quests are special one-time jobs. Each one = 10 stars. Try them with a parent on the weekend!',
       'Trade your stars in the Star Shop. A parent enters the PIN to say yes. Missed a day? That\'s okay. Your stars never go away. Just start again tomorrow!'
     ],
@@ -521,7 +524,8 @@ const STR = {
       donate:'1. Find things you don\'t use anymore. 2. Put them in a giving box. 3. With a parent, give them to someone who can use them.'
     },
     streakN:'{0} days in a row', allOn:'All-clear bonus earned (+2)', allOff:'Finish all 5 zones for 2 bonus stars ({0}/5)',
-    streakOn:'{0}-day streak bonus earned (+5)', streakOff:'{0} days left until the streak bonus',
+    streakOn:'{0}-day streak bonus earned (+10)', streakOff:'{0} days left until the streak bonus',
+    streakLeft:'{0} more days to +10 ★', streakToday:'+10 ★ bonus today!',
     parentNeed:'Clear all zones to ask a parent', parentReady:'Parent check (+2 stars)', parentDone:'Parent checked today!',
     doneMark:'Done!', emptyLog:'Check a zone and the star log shows up here.',
     lvNext:'{0} stars to the next level', lvMax:'Top level reached!',
@@ -556,7 +560,7 @@ const STR = {
     editReward:'Edit', saveReward:'Save', savedReward:'Saved',
     editBadReward:'Name must be 1 to 60 characters, stars 1 to 1000',
     noRewards:'No rewards yet.',
-    toastAll:'All clear today! +2 stars', toastStreak:'{0} days in a row! +5 stars',
+    toastAll:'All clear today! +2 stars', toastStreak:'{0} days in a row! +10 stars',
     toastQuest:'{0} done! +10 stars', toastParent:'Parent check complete! +2 stars', toastRedeem:'{0} traded!',
     switchTitle:'Switch to another family?', switchDesc:'This only forgets the callsign on this device. Stars stay saved.', switchYes:'Switch',
     weekLetters:'SMTWTFS',
@@ -874,6 +878,10 @@ function render(){
   }
   const st = Number(S.streak) || 0;
   $('streak').textContent = st ? t('streakN').replace('{0}', st) : '';
+  const streakMod = st % 7;
+  const streakLeft = 7 - streakMod;
+  const streakBonusDay = st > 0 && streakMod === 0;
+  $('streakNote').textContent = streakBonusDay ? t('streakToday') : t('streakLeft').replace('{0}', streakLeft);
   const letters = t('weekLetters');
   let w = '';
   for (let i = 6; i >= 0; i--){
@@ -890,9 +898,8 @@ function render(){
   paintPhotos();
   $('allPill').className = 'pill'+(D.all_bonus?' on':'');
   $('allPill').textContent = D.all_bonus ? t('allOn') : t('allOff').replace('{0}', D.zones.length);
-  const left = 5 - (st % 5);
   $('streakPill').className = 'pill'+(D.streak_paid?' on':'');
-  $('streakPill').textContent = D.streak_paid ? t('streakOn').replace('{0}', st) : t('streakOff').replace('{0}', left);
+  $('streakPill').textContent = D.streak_paid ? t('streakOn').replace('{0}', st) : (streakBonusDay ? t('streakToday') : t('streakOff').replace('{0}', streakLeft));
   const pc = $('parentCheck');
   pc.disabled = !D.all_bonus || !!D.parent_checked;
   pc.textContent = D.parent_checked ? t('parentDone') : D.all_bonus ? t('parentReady') : t('parentNeed');
@@ -1602,7 +1609,7 @@ let guideAt = -1;
 let questOpen = '';
 function guideArt(i){
   if (i === 1) return ZONE_IDS.map(id => '<span class="mini">'+zoneSvg(id)+'</span>').join('');
-  if (i === 2) return '<span class="badge">★ +2</span><span class="badge">★ +2</span><span class="badge">★ +5</span>';
+  if (i === 2) return '<span class="badge">★ +2</span><span class="badge">★ +2</span><span class="badge">★ +10</span>';
   if (i === 3) return '<span class="badge" style="font-size:22px">★ 10</span>';
   if (i === 4) return '<span class="star">★</span>'+zoneSvg('toys')+'<span class="star">★</span>';
   return '<span class="star">★</span>'+zoneSvg('floor')+'<span class="star">★</span>';
