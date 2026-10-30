@@ -83,6 +83,33 @@ a{color:var(--sky)}
 .check .label{flex:1;min-width:0;overflow-wrap:break-word;text-decoration:none}
 .check:disabled{cursor:default;opacity:.7}
 .qrow button.arm{border-color:var(--coral);color:var(--coral)}
+.jend{display:flex;align-items:center;gap:8px}
+.jstar{font-family:var(--display);color:var(--star-ink);white-space:nowrap;font-size:16px}
+#journalBtn .ic{font-size:22px;line-height:1;background:var(--soft-star)}
+#journalBtn:disabled{opacity:.7;cursor:default}
+.photo-block{display:flex;flex-direction:column;gap:8px;min-width:0}
+.photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+.ptile{display:flex;flex-direction:column;align-items:flex-start;gap:6px;width:100%;min-width:0;min-height:44px;padding:10px;background:var(--card);border:2px solid var(--line);border-radius:16px;color:var(--ink);text-align:left}
+.ptile.on{border-color:var(--mint);background:var(--soft-mint)}
+.ptile img{width:100%;height:84px;object-fit:cover;border-radius:10px;background:var(--bg)}
+.ptile .pname{font-family:var(--display);font-size:16px;overflow-wrap:break-word}
+.ptile .psaved{font-size:13px;color:var(--mint)}
+.ptile:disabled{opacity:.55;cursor:default}
+.spin{width:18px;height:18px;border:3px solid var(--line);border-top-color:var(--sky);border-radius:50%;display:inline-block;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.file-hide{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
+#album{display:flex;flex-direction:column;gap:10px;min-width:0}
+.day-chips{display:flex;gap:8px;overflow-x:auto;max-width:100%;min-width:0;padding-bottom:4px}
+.day-chip{flex:0 0 auto;min-height:44px;padding:8px 12px;border-radius:99px;border:1px solid var(--line);background:var(--bg);color:var(--ink);white-space:nowrap}
+.day-chip.on{border-color:var(--sky);background:var(--soft-sky);color:var(--ink)}
+.album-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px}
+.aphoto{display:flex;flex-direction:column;gap:4px;padding:0;background:transparent;color:var(--ink);min-width:0;text-align:left}
+.aphoto img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px;background:var(--bg)}
+.aphoto span{font-size:13px;overflow-wrap:break-word}
+.photo-view{position:fixed;inset:0;z-index:28;background:rgba(10,25,35,.9);display:flex;flex-direction:column;gap:12px;padding:max(16px,env(safe-area-inset-top)) 16px max(16px,env(safe-area-inset-bottom));overflow:auto}
+.photo-view img{width:100%;max-height:70vh;object-fit:contain;border-radius:12px;background:#000;flex:0 0 auto}
+.photo-view .pname{color:#fff;margin:0;font-family:var(--display);font-size:18px}
+.photo-view .row{flex:0 0 auto}
 
 .bonus-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .pill{border-radius:14px;padding:12px;font-size:14px;background:var(--card);border:1px dashed var(--line);color:var(--muted);overflow-wrap:break-word}
@@ -169,7 +196,7 @@ body.guide-open .top-bar{z-index:25}
 .lv-pop{position:fixed;left:50%;top:42%;transform:translate(-50%,-50%);z-index:36;pointer-events:none;font-family:var(--display);font-size:clamp(28px,8vw,44px);color:var(--star-ink);background:var(--soft-star);border:3px solid var(--star);border-radius:18px;padding:12px 20px;text-align:center;max-width:calc(100% - 32px);animation:lvpop 1.5s ease forwards}
 @keyframes lvpop{0%{opacity:0}12%{opacity:1}78%{opacity:1}100%{opacity:0}}
 .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:99px;font-family:var(--display);z-index:40;max-width:calc(100% - 32px);text-align:center}
-@media (prefers-reduced-motion:reduce){.burst{display:none}.bar i{transition:none}.lv-pop{animation:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){.burst{display:none}.bar i{transition:none}.lv-pop{animation:none;opacity:1}.spin{animation:none}}
 @media (max-width:420px){.quests{grid-template-columns:1fr}.hero h1{font-size:25px}.bonus-row{grid-template-columns:1fr}}
 </style>
 </head>
@@ -248,6 +275,18 @@ body.guide-open .top-bar{z-index:25}
       <p class="muted hint" data-k="missionHint">Tap each zone when it's done. Tap again to undo.</p>
     </div>
     <div class="zones" id="zones"></div>
+    <button type="button" class="zone" id="journalBtn" aria-pressed="false">
+      <span class="ic" aria-hidden="true">📓</span>
+      <span class="tx"><strong data-k="journalLabel">I wrote my journal today</strong></span>
+      <span class="jend"><span class="jstar">+1 ★</span><span class="chk">✓</span></span>
+    </button>
+    <div class="photo-block" id="bedPhotos">
+      <div class="section-head"><h2><span aria-hidden="true">🌙 </span><span data-k="photoHead">Bedtime photos</span></h2><span class="muted" id="photoProg">0/5</span></div>
+      <p class="muted hint" data-k="photoLead">One photo for each spot before bed. 5 photos = +1 ★</p>
+      <p class="muted hint" data-k="photoSafe">Only your room in the photo. No faces!</p>
+      <div class="photo-grid" id="photoTiles"></div>
+      <input id="photoFile" class="file-hide" type="file" accept="image/*" tabindex="-1" aria-hidden="true">
+    </div>
     <div class="bonus-row">
       <div class="pill" id="allPill"></div>
       <div class="pill" id="streakPill"></div>
@@ -296,6 +335,12 @@ body.guide-open .top-bar{z-index:25}
 </div>
 
 <div id="modalRoot"></div>
+<div id="photoView" class="photo-view" hidden>
+  <img id="photoBig" alt="">
+  <p id="photoCap" class="pname"></p>
+  <div class="err" id="photoErr"></div>
+  <div class="row" id="photoActs"></div>
+</div>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -313,7 +358,7 @@ const ZONE_IDS = ['floor','bed','desk','dresser','toys'];
 const QUEST_IDS = ['audition','artbox','outside','labels','photo','donate'];
 const CATS = ['경험','특권','선물','용돈'];
 const LEVEL_AT = [0, 30, 80, 160, 300];
-const KNOWN_ERR = ['bad_pin','not_enough_stars','not_all_done','already_checked','callsign_taken','bad_callsign','bad_pin_format','family_not_found','bad_zone','bad_item_input','item_not_found','bad_quest_input','quest_not_found','bad_quest','bad_delta','reward_not_found','invalid_day'];
+const KNOWN_ERR = ['bad_pin','not_enough_stars','not_all_done','already_checked','callsign_taken','bad_callsign','bad_pin_format','family_not_found','bad_zone','bad_image','photo_not_found','server_error','bad_item_input','item_not_found','bad_quest_input','quest_not_found','bad_quest','bad_delta','reward_not_found','invalid_day'];
 
 const STR = {
   ko: {
@@ -326,6 +371,14 @@ const STR = {
     createBtn:'새로 만들기', backHub:'게임 허브로', title:'방 정리 퀘스트', bank:'내 별',
     week:'이번 주', mission:'오늘의 미션', missionSub:'자기 전 10분 · 구역마다 별 1개',
     checkDaily:'체크리스트는 매일 새로 시작해요!',
+    journalLabel:'오늘 저널 썼어요',
+    photoHead:'자기 전 사진',
+    photoLead:'자기 전에 구역마다 사진 1장. 5장 다 찍으면 +1 ★',
+    photoSafe:'방만 찍어요. 얼굴은 안 나오게!',
+    photoSaved:'저장됨', photoFail:'사진이 안 올라갔어요. 다시 해 볼까요?',
+    retakeAsk:'다시 찍을까요?',
+    albumHead:'사진 앨범', albumOpen:'앨범 열기', albumEmpty:'아직 사진이 없어요',
+    photoRemoveAsk:'이 사진을 지울까요?',
     clHead:'데일리 체크리스트', clAdd:'추가', clEnPh:'영어 문장', clKoPh:'한국어 문장 (선택)', clRemoveAsk:'삭제할까요?',
     questHead:'대청소 퀘스트', questSub:'한 번만 하면 돼요 · 각 별 10개',
     weekQuests:'이번 주 퀘스트', doneFold:'완료한 퀘스트 ({0})', cqDone:'다 했어요! +{0} ★',
@@ -413,6 +466,9 @@ const STR = {
       quest_not_found:'그 퀘스트를 찾지 못했어요.',
       bad_item_input:'1~80자로 입력해 주세요',
       item_not_found:'이미 없는 항목이에요. 새로고침할게요.',
+      bad_image:'이 사진은 사용할 수 없어요.',
+      photo_not_found:'그 사진은 이미 없어요.',
+      server_error:'잠시 문제가 생겼어요. 다시 해 주세요.',
       bad_reward:'보상 이름은 1~60자, 별은 1~1000개로 입력해 주세요.',
       network:'연결이 잠시 끊겼어요. 다시 눌러 주세요.'
     }
@@ -427,6 +483,14 @@ const STR = {
     createBtn:'Create', backHub:'Game hub', title:'Room Quest', bank:'My stars',
     week:'This week', mission:'Today’s mission', missionSub:'10 minutes before bed · 1 star each zone',
     checkDaily:'New checklist every day!',
+    journalLabel:'I wrote my journal today',
+    photoHead:'Bedtime photos',
+    photoLead:'One photo for each spot before bed. 5 photos = +1 ★',
+    photoSafe:'Only your room in the photo. No faces!',
+    photoSaved:'Saved', photoFail:'Photo didn\'t upload. Try again!',
+    retakeAsk:'Retake?',
+    albumHead:'Photo album', albumOpen:'Open album', albumEmpty:'No photos yet',
+    photoRemoveAsk:'Remove this photo?',
     clHead:'Daily checklist', clAdd:'Add', clEnPh:'English', clKoPh:'Korean (optional)', clRemoveAsk:'Remove?',
     questHead:'Big tidy quests', questSub:'Do each one once · 10 stars',
     weekQuests:'This week\'s quests', doneFold:'Completed quests ({0})', cqDone:'Done! +{0} ★',
@@ -514,6 +578,9 @@ const STR = {
       quest_not_found:'That quest could not be found.',
       bad_item_input:'Write 1~80 characters',
       item_not_found:'This item is gone. Refreshing.',
+      bad_image:'That photo could not be used.',
+      photo_not_found:'That photo is already gone.',
+      server_error:'Something went wrong. Please try again.',
       bad_reward:'Use a reward name of 1–60 characters and a cost from 1 to 1000.',
       network:'The connection dropped. Please try again.'
     }
@@ -559,7 +626,7 @@ let seenDay = today();
 let refreshFlight = null;
 const busyItems = new Set();
 
-function emptyState(){ return { child_name:'', stars:null, total:null, streak:0, days:[], quests:[], custom_quests:[], check_items:[], check_marks:[], rewards:[], ledger:[] }; }
+function emptyState(){ return { child_name:'', stars:null, total:null, streak:0, days:[], quests:[], custom_quests:[], check_items:[], check_marks:[], photo_zones:[], rewards:[], ledger:[] }; }
 function $(id){ return document.getElementById(id); }
 function pad(n){ return String(n).padStart(2,'0'); }
 function dkey(d){ return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
@@ -614,6 +681,9 @@ function showReason(reason){
   if ((m = s.match(/^(\d+)일 연속 보너스$/))) return m[1] + '-day streak bonus';
   if (s === '부모님 확인 보너스') return 'Parent check bonus';
   if (s === '부모님 조정') return 'Adjusted by parent';
+  if (s === '저널 쓰기 완료') return 'Journal done';
+  if (s === '저널 체크 취소') return 'Journal undone';
+  if (s === '자기 전 사진 5장') return 'Bedtime photos 5/5';
   if ((m = s.match(/^퀘스트: (.+)$/))) return 'Quest: ' + (QUEST_EN[m[1]] || m[1]);
   if ((m = s.match(/^(.+) 취소$/)) && QUEST_EN[m[1]]) return QUEST_EN[m[1]] + ' undone';
   if ((m = s.match(/^교환: (.+)$/))) return 'Traded: ' + (REWARD_EN[m[1]] || m[1]);
@@ -647,6 +717,8 @@ function applyLang(){
   if (help) help.setAttribute('aria-label', t('helpLabel'));
   if ($('gateErr')) setGateErr(gateErrCode);
   if (mode === 'app') render();
+  if (albumOn) paintAlbum();
+  if (viewing) paintPhotoView();
   if (guideAt >= 0) paintGuide();
   else if (questOpen) paintQuest();
   else if (cquestOpen) paintCquest();
@@ -677,7 +749,7 @@ function ensureToday(){
   const k = today();
   let d = dayRec(k);
   if (!d){
-    d = { day:k, zones:[], all_bonus:false, parent_checked:false, streak_paid:false };
+    d = { day:k, zones:[], all_bonus:false, parent_checked:false, streak_paid:false, journal:false, photo_bonus:false };
     S.days.push(d);
   }
   if (!Array.isArray(d.zones)) d.zones = [];
@@ -698,12 +770,15 @@ function applyState(data){
       zones: Array.isArray(d.zones) ? d.zones.slice() : [],
       all_bonus: !!d.all_bonus,
       parent_checked: !!d.parent_checked,
-      streak_paid: !!d.streak_paid
+      streak_paid: !!d.streak_paid,
+      journal: !!d.journal,
+      photo_bonus: !!d.photo_bonus
     })),
     quests: Array.isArray(data.quests) ? data.quests.slice() : [],
     custom_quests: Array.isArray(data.custom_quests) ? data.custom_quests.map(normCquest) : [],
     check_items: Array.isArray(data.check_items) ? data.check_items.map(normItem).filter(it => it.id && ZONE_IDS.includes(it.zone)) : [],
     check_marks: Array.isArray(data.check_marks) ? data.check_marks.map(x => String(x)) : [],
+    photo_zones: Array.isArray(data.photo_zones) ? data.photo_zones.filter(z => ZONE_IDS.includes(z)) : [],
     rewards: Array.isArray(data.rewards) ? data.rewards.map(r => ({ id:r.id, cat:r.cat, name:r.name, cost:Number(r.cost) })) : [],
     ledger: Array.isArray(data.ledger) ? data.ledger.map(l => ({ delta:Number(l.delta), reason:l.reason || '', created_at:l.created_at })) : []
   };
@@ -811,6 +886,8 @@ function render(){
   }
   $('week').innerHTML = w;
   $('zones').innerHTML = ZONE_IDS.map(id => zoneCard(id, D)).join('');
+  paintJournal(D);
+  paintPhotos();
   $('allPill').className = 'pill'+(D.all_bonus?' on':'');
   $('allPill').textContent = D.all_bonus ? t('allOn') : t('allOff').replace('{0}', D.zones.length);
   const left = 5 - (st % 5);
@@ -1020,6 +1097,7 @@ function rewardFx(before, res, fx){
   const nextLv = levelIndex(res && res.total);
   const leveled = prevLv >= 0 && nextLv > prevLv;
   const checkOn = fx.kind === 'check' && !fx.wasOn && hasMark(res.check_marks, fx.id);
+  const journalOn = fx.kind === 'journal' && !fx.wasOn && !!(n && n.journal);
   const zoneKey = fx.kind === 'check' ? fx.zone : fx.id;
   const zoneOn = (fx.kind === 'zone' && !fx.wasOn && !!(n && (n.zones || []).includes(fx.id)))
     || (fx.kind === 'check' && !fx.wasZone && !!(n && (n.zones || []).includes(fx.zone)));
@@ -1034,7 +1112,7 @@ function rewardFx(before, res, fx){
     else if (parentNew) burst(8);
     else if (fx.kind === 'redeem') burst(14);
   };
-  if (checkOn && fxGate('tick')) playTick();
+  if ((checkOn || journalOn) && fxGate('tick')) playTick();
   if (leveled && fxGate('level')){ spark(); playLevel(); confettiLevel(); showLevelPop(); return; }
   if ((streakNew || parentNew) && fxGate('bonus')){ spark(); playBonus(); confettiSides(); return; }
   if (allNew && fxGate('clear')){ spark(); playClear(); confettiClear(); return; }
@@ -1109,6 +1187,368 @@ function toggleCheck(id){
     busyItems.delete(key);
     if (mode === 'app') render();
   });
+}
+let photoBusy = false;
+let photoBusyZone = '';
+let photoPreview = {};
+let previewDay = '';
+let pickZone = '';
+let albumOn = false;
+let album = null;
+let albumErr = '';
+let albumLoading = false;
+let albumToken = 0;
+let viewing = null;
+let photoAsk = false;
+let photoViewErr = '';
+const albumRetried = new Set();
+function paintJournal(D){
+  const btn = $('journalBtn');
+  if (!btn) return;
+  const on = !!(D && D.journal);
+  btn.className = 'zone'+(on ? ' done' : '');
+  btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+  btn.disabled = false;
+}
+function paintPhotos(){
+  const box = $('photoTiles');
+  const prog = $('photoProg');
+  if (!box || !prog) return;
+  if (previewDay && previewDay !== today()){ photoPreview = {}; previewDay = ''; }
+  const saved = (S.photo_zones || []).filter(z => ZONE_IDS.includes(z));
+  const n = ZONE_IDS.filter(id => saved.includes(id)).length;
+  prog.textContent = n+'/5';
+  box.innerHTML = ZONE_IDS.map(id => {
+    const on = saved.includes(id);
+    const name = STR[lang].zones[id].name;
+    const prev = photoPreview[id] || '';
+    const busy = photoBusy && photoBusyZone === id;
+    return '<button type="button" class="ptile'+(on?' on':'')+'" data-photo="'+id+'"'+(photoBusy?' disabled':'')+'>'+
+      (prev ? '<img alt="" src="'+prev+'">' : '')+
+      '<span class="pname">'+esc(name)+'</span>'+
+      (busy ? '<span class="spin" aria-hidden="true"></span>' : '')+
+      (on && !busy ? '<span class="psaved">✓ '+esc(t('photoSaved'))+'</span>' : '')+
+      '</button>';
+  }).join('');
+}
+function toggleJournal(){
+  if (!callsign) return;
+  const cur = dayRec(today());
+  const wasOn = !!(cur && cur.journal);
+  schedule(() => {
+    const D = ensureToday();
+    D.journal = !wasOn;
+  }, () => rpc('tidy_toggle_journal', { p_callsign: callsign, p_today: today() }), { fx: { kind:'journal', wasOn:wasOn } });
+}
+async function photoApi(body){
+  try{
+    const { data, error } = await db.functions.invoke('tidy-photos', { body: body });
+    if (data && typeof data === 'object' && (data.ok === true || data.ok === false || data.error)) return data;
+    if (error){
+      let payload = null;
+      try{
+        if (error.context && typeof error.context.json === 'function') payload = await error.context.json();
+      }catch(e){}
+      if (payload && payload.error) return { ok:false, error: payload.error };
+      return { ok:false, error: 'server_error' };
+    }
+    return { ok:false, error: 'server_error' };
+  }catch(e){
+    return { ok:false, error: 'server_error' };
+  }
+}
+function sourceSize(src){
+  return { w: src.width || src.naturalWidth || 0, h: src.height || src.naturalHeight || 0 };
+}
+function scaleCanvas(src, maxEdge){
+  const size = sourceSize(src);
+  const edge = Math.max(size.w, size.h) || 1;
+  const scale = Math.min(1, maxEdge / edge);
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.max(1, Math.round(size.w * scale));
+  canvas.height = Math.max(1, Math.round(size.h * scale));
+  canvas.getContext('2d').drawImage(src, 0, 0, canvas.width, canvas.height);
+  return canvas;
+}
+function jpegBytes(dataUrl){
+  const i = String(dataUrl).indexOf(',');
+  const b64 = i >= 0 ? dataUrl.slice(i + 1) : String(dataUrl);
+  const pad = b64.endsWith('==') ? 2 : (b64.endsWith('=') ? 1 : 0);
+  return Math.floor(b64.length * 3 / 4) - pad;
+}
+async function orientedSource(file){
+  if (typeof createImageBitmap === 'function'){
+    try{
+      const bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
+      return { source: bitmap, revoke: null };
+    }catch(e){
+      try{
+        const bitmap = await createImageBitmap(file);
+        return { source: bitmap, revoke: null };
+      }catch(e2){}
+    }
+  }
+  const url = URL.createObjectURL(file);
+  const img = await new Promise((resolve, reject) => {
+    const im = new Image();
+    im.onload = () => resolve(im);
+    im.onerror = () => reject(new Error('img'));
+    im.src = url;
+  });
+  return { source: img, revoke: () => URL.revokeObjectURL(url) };
+}
+async function makePhotoPayload(file){
+  const loaded = await orientedSource(file);
+  try{
+    const big = scaleCanvas(loaded.source, 1280);
+    let image = big.toDataURL('image/jpeg', 0.75);
+    if (jpegBytes(image) > 1.4 * 1024 * 1024) image = big.toDataURL('image/jpeg', 0.6);
+    const thumb = scaleCanvas(big, 320).toDataURL('image/jpeg', 0.7);
+    return { image: image, thumb: thumb };
+  }finally{
+    if (loaded.revoke) loaded.revoke();
+    if (loaded.source && typeof loaded.source.close === 'function') loaded.source.close();
+  }
+}
+function dayHasBonus(state){
+  const d = dayOf(state, today());
+  return !!(d && d.photo_bonus);
+}
+async function uploadPhoto(zone, file){
+  if (photoBusy || !callsign || !ZONE_IDS.includes(zone) || !file) return;
+  photoBusy = true;
+  photoBusyZone = zone;
+  const before = clone(S);
+  if (mode === 'app') render();
+  try{
+    const payload = await makePhotoPayload(file);
+    const res = await photoApi({ action:'upload', callsign: callsign, today: today(), zone: zone, image: payload.image, thumb: payload.thumb });
+    if (!isState(res)){ toast(t('photoFail')); return; }
+    if (previewDay !== today()){ photoPreview = {}; previewDay = today(); }
+    photoPreview[zone] = payload.thumb;
+    const bonusNew = !dayHasBonus(before) && dayHasBonus(res);
+    const prevLv = levelIndex(before.total);
+    const nextLv = levelIndex(res.total);
+    if (pending === 0) applyState(res);
+    else tail.then(() => { if (pending === 0) refreshState(); });
+    if (prevLv >= 0 && nextLv > prevLv && fxGate('level')){ playLevel(); confettiLevel(); showLevelPop(); }
+    else if (bonusNew && fxGate('clear')){ playClear(); confettiClear(); }
+  }catch(e){
+    toast(t('photoFail'));
+  }finally{
+    photoBusy = false;
+    photoBusyZone = '';
+    if (mode === 'app') render();
+  }
+}
+function pickPhoto(zone){
+  if (photoBusy || !ZONE_IDS.includes(zone)) return;
+  pickZone = zone;
+  const input = $('photoFile');
+  if (!input) return;
+  input.value = '';
+  input.click();
+}
+function askRetake(zone){
+  modal('<h2>'+esc(t('retakeAsk'))+'</h2><div class="row"><button type="button" class="btn alt" id="rtNo">'+esc(t('cancel'))+'</button><button type="button" class="btn" id="rtYes">'+esc(t('ok'))+'</button></div>', close);
+  $('rtNo').onclick = close;
+  $('rtYes').onclick = () => { close(); pickPhoto(zone); };
+}
+function onPhotoTile(zone){
+  if (photoBusy || !ZONE_IDS.includes(zone)) return;
+  const saved = (S.photo_zones || []).includes(zone) || !!photoPreview[zone];
+  if (saved) askRetake(zone);
+  else pickPhoto(zone);
+}
+function albumDayLabel(day, count){
+  const p = String(day || '').slice(0,10).split('-');
+  const m = Number(p[1]);
+  const d = Number(p[2]);
+  const n = Number(count) || 0;
+  if (!m || !d) return String(day || '');
+  if (lang === 'ko') return m+'월 '+d+'일 · '+n;
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return months[m - 1]+' '+d+' · '+n;
+}
+function retryAlbumPhoto(id){
+  const key = String(id || '');
+  if (!key || albumRetried.has(key)) return;
+  albumRetried.add(key);
+  loadAlbum(album && album.day);
+}
+function paintAlbum(){
+  const el = $('album');
+  if (!el) return;
+  el.hidden = !albumOn;
+  el.replaceChildren();
+  if (!albumOn) return;
+  const chips = document.createElement('div');
+  chips.className = 'day-chips';
+  ((album && album.days) || []).forEach(d => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    const day = String(d.day || '').slice(0,10);
+    b.className = 'day-chip'+(album && day === album.day ? ' on' : '');
+    b.textContent = albumDayLabel(day, d.count);
+    b.onclick = () => loadAlbum(day);
+    chips.appendChild(b);
+  });
+  el.appendChild(chips);
+  if (albumLoading){
+    const p = document.createElement('p');
+    p.className = 'muted';
+    p.style.margin = '0';
+    p.textContent = t('loading');
+    el.appendChild(p);
+    return;
+  }
+  if (albumErr && !(album && album.photos && album.photos.length)){
+    const p = document.createElement('p');
+    p.className = 'err';
+    p.textContent = albumErr;
+    el.appendChild(p);
+    return;
+  }
+  const photos = (album && album.photos) || [];
+  if (!photos.length){
+    const p = document.createElement('p');
+    p.className = 'muted';
+    p.style.margin = '0';
+    p.textContent = t('albumEmpty');
+    el.appendChild(p);
+    return;
+  }
+  const grid = document.createElement('div');
+  grid.className = 'album-grid';
+  photos.forEach(p => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'aphoto';
+    const img = document.createElement('img');
+    img.alt = '';
+    img.src = p.thumb_url || '';
+    img.addEventListener('error', () => retryAlbumPhoto(p.id));
+    const cap = document.createElement('span');
+    const zoneName = STR[lang].zones[p.zone] && STR[lang].zones[p.zone].name;
+    cap.textContent = zoneName || '';
+    btn.appendChild(img);
+    btn.appendChild(cap);
+    btn.onclick = () => openPhoto(p);
+    grid.appendChild(btn);
+  });
+  el.appendChild(grid);
+}
+async function loadAlbum(day){
+  if (!$('album') || !sessionPin) return;
+  const token = ++albumToken;
+  albumOn = true;
+  albumLoading = true;
+  albumErr = '';
+  $('album').hidden = false;
+  paintAlbum();
+  const body = { action:'list', callsign: callsign, today: today(), pin: sessionPin };
+  if (day) body.day = day;
+  const res = await photoApi(body);
+  if (token !== albumToken || !$('album')) return;
+  albumLoading = false;
+  if (res && res.ok){
+    album = {
+      day: String(res.day || day || '').slice(0,10),
+      days: Array.isArray(res.days) ? res.days : [],
+      photos: Array.isArray(res.photos) ? res.photos : []
+    };
+    albumErr = '';
+    if (viewing){
+      const next = album.photos.find(p => p.id === viewing.id);
+      if (next) viewing = next;
+    }
+  } else albumErr = errText((res && res.error) || 'server_error');
+  paintAlbum();
+  if (viewing) paintPhotoView();
+}
+function closePhotoView(){
+  viewing = null;
+  photoAsk = false;
+  photoViewErr = '';
+  const box = $('photoView');
+  if (box) box.hidden = true;
+  const img = $('photoBig');
+  if (img) img.removeAttribute('src');
+}
+function paintPhotoView(){
+  const box = $('photoView');
+  if (!box) return;
+  if (!viewing){ box.hidden = true; return; }
+  box.hidden = false;
+  const img = $('photoBig');
+  const nextUrl = viewing.url || '';
+  if (img && img.getAttribute('src') !== nextUrl) img.setAttribute('src', nextUrl);
+  const cap = $('photoCap');
+  if (cap){
+    const zoneName = STR[lang].zones[viewing.zone] && STR[lang].zones[viewing.zone].name;
+    cap.textContent = zoneName || '';
+  }
+  const err = $('photoErr');
+  if (err) err.textContent = photoViewErr || '';
+  const acts = $('photoActs');
+  if (!acts) return;
+  acts.replaceChildren();
+  if (photoAsk){
+    const q = document.createElement('p');
+    q.className = 'muted';
+    q.style.margin = '0';
+    q.style.flex = '1 1 100%';
+    q.style.color = '#fff';
+    q.textContent = t('photoRemoveAsk');
+    const no = document.createElement('button');
+    no.type = 'button';
+    no.className = 'btn alt';
+    no.textContent = t('cancel');
+    no.onclick = () => { photoAsk = false; paintPhotoView(); };
+    const yes = document.createElement('button');
+    yes.type = 'button';
+    yes.className = 'btn';
+    yes.textContent = t('remove');
+    yes.onclick = () => doRemovePhoto();
+    acts.appendChild(q);
+    acts.appendChild(no);
+    acts.appendChild(yes);
+    return;
+  }
+  const shut = document.createElement('button');
+  shut.type = 'button';
+  shut.className = 'btn alt';
+  shut.textContent = t('close');
+  shut.onclick = closePhotoView;
+  const rm = document.createElement('button');
+  rm.type = 'button';
+  rm.className = 'btn';
+  rm.textContent = t('remove');
+  rm.onclick = () => { photoAsk = true; photoViewErr = ''; paintPhotoView(); };
+  acts.appendChild(shut);
+  acts.appendChild(rm);
+}
+function openPhoto(photo){
+  if (!photo) return;
+  viewing = photo;
+  photoAsk = false;
+  photoViewErr = '';
+  paintPhotoView();
+}
+async function doRemovePhoto(){
+  if (!viewing || !sessionPin) return;
+  const id = viewing.id;
+  const day = album && album.day;
+  const res = await photoApi({ action:'remove', callsign: callsign, today: today(), pin: sessionPin, id: id });
+  if (res && res.ok){
+    closePhotoView();
+    await loadAlbum(day);
+    refreshState();
+  } else {
+    photoViewErr = errText((res && res.error) || 'server_error');
+    photoAsk = false;
+    paintPhotoView();
+  }
 }
 function toggleZone(id){
   if (!ZONE_IDS.includes(id) || !callsign || zoneItems(id).length) return;
@@ -1306,7 +1746,17 @@ function onParentOpen(){
     return { ok:false, error: (res && res.error) || 'bad_pin' };
   });
 }
-function closeParent(){ sessionPin = ''; editingId = ''; editingQuest = ''; editingItem = ''; confirmItem = ''; close(); }
+function closeParent(){
+  sessionPin = '';
+  editingId = '';
+  editingQuest = '';
+  editingItem = '';
+  confirmItem = '';
+  albumOn = false;
+  albumToken++;
+  closePhotoView();
+  close();
+}
 let editingId = '';
 let editingQuest = '';
 let editingItem = '';
@@ -1575,12 +2025,17 @@ function parentPanel(){
   editingQuest = '';
   editingItem = '';
   confirmItem = '';
+  albumOn = false;
+  closePhotoView();
   const opts = CATS.map(c => '<option value="'+c+'">'+esc(STR[lang].cats[c])+'</option>').join('');
   const zones = ZONE_IDS.map(id => '<option value="'+id+'">'+esc(STR[lang].zones[id].name)+'</option>').join('');
   modal('<h2>'+esc(t('parentTitle'))+'</h2>'+
     '<h3 style="font-size:17px">'+esc(t('adjustHead'))+'</h3>'+
     '<div class="row"><input id="adjN" type="number" inputmode="numeric" placeholder="'+esc(t('adjPh'))+'"><input id="adjT" maxlength="40" placeholder="'+esc(t('reasonPh'))+'"></div>'+
     '<button type="button" class="btn" id="adjGo">'+esc(t('adjGo'))+'</button>'+
+    '<h3 style="font-size:17px">'+esc(t('albumHead'))+'</h3>'+
+    '<button type="button" class="btn" id="albumOpen">'+esc(t('albumOpen'))+'</button>'+
+    '<div id="album" hidden></div>'+
     '<h3 style="font-size:17px">'+esc(t('clHead'))+'</h3>'+
     '<div id="clist" style="display:flex;flex-direction:column;gap:8px"></div>'+
     '<select id="ciZone">'+zones+'</select>'+
@@ -1611,6 +2066,7 @@ function parentPanel(){
   $('cqAdd').onclick = addCquest;
   $('ciAdd').onclick = submitCheckItem;
   $('ciCancel').onclick = cancelItemEdit;
+  $('albumOpen').onclick = () => loadAlbum('');
   $('pinSet').onclick = doSetPin;
 }
 async function doAdjust(){
@@ -1777,6 +2233,8 @@ document.addEventListener('click', e => {
   const del = e.target.closest('[data-del]');
   if (del){ removeReward(del.getAttribute('data-del')); return; }
   if (mode !== 'app') return;
+  const photoTile = e.target.closest('[data-photo]');
+  if (photoTile){ if (!photoTile.disabled) onPhotoTile(photoTile.getAttribute('data-photo')); return; }
   const itemBtn = e.target.closest('[data-item]');
   if (itemBtn){ if (!itemBtn.disabled) toggleCheck(itemBtn.getAttribute('data-item')); return; }
   const z = e.target.closest('[data-z]');
@@ -1789,7 +2247,9 @@ document.addEventListener('click', e => {
   if (r && !r.disabled){ redeem(r.getAttribute('data-r')); }
 });
 document.addEventListener('keydown', e => {
-  if (e.key !== 'Escape' || !$('scrim')) return;
+  if (e.key !== 'Escape') return;
+  if (viewing){ closePhotoView(); return; }
+  if (!$('scrim')) return;
   if (guideAt >= 0){ dismissGuide(); return; }
   if ($('pinOk') && $('pinOk').disabled) return;
   questOpen = '';
@@ -1822,6 +2282,21 @@ $('createBtn').onclick = createFamily;
 $('csIn').addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDefault(); loadFamily(); } });
 $('nameIn').addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDefault(); $('pinNew').focus(); } });
 $('pinNew').addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDefault(); createFamily(); } });
+$('journalBtn').onclick = toggleJournal;
+$('photoFile').addEventListener('change', () => {
+  const input = $('photoFile');
+  const file = input.files && input.files[0];
+  const zone = pickZone;
+  input.value = '';
+  if (file && zone) uploadPhoto(zone, file);
+});
+$('photoBig').addEventListener('error', () => {
+  if (!viewing) return;
+  const key = 'big:'+viewing.id;
+  if (albumRetried.has(key)) return;
+  albumRetried.add(key);
+  loadAlbum(album && album.day);
+});
 $('parentCheck').onclick = onParentCheck;
 $('parentBtn').onclick = onParentOpen;
 $('switchBtn').onclick = onSwitch;
