@@ -150,10 +150,16 @@ a{color:var(--sky)}
 .item .cost:disabled{background:var(--bg);color:var(--muted)}
 
 .log{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:6px 14px}
-.log div{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
-.log div > span:first-child{min-width:0;overflow-wrap:break-word}
-.log div:last-child{border-bottom:0}
-.log .d{color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.log-empty{margin:0;padding:8px 0;color:var(--muted);font-size:14px}
+.log-day{display:flex;flex-direction:column;min-width:0}
+.log-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:10px 0 2px}
+.log-head > span:first-child{min-width:0;overflow-wrap:break-word;font-family:var(--display);font-size:15px}
+.log-sum{font-size:13px;white-space:nowrap}
+.log-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:8px;align-items:start;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+.log-time{color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.log-reason{min-width:0;overflow-wrap:break-word}
+.log-day:last-child .log-row:last-child{border-bottom:0}
+#logAll,#ledgerClose,#ledgerMore .btn{width:100%}
 .plus{color:var(--mint);font-weight:700}.minus{color:var(--coral);font-weight:700}
 footer{display:flex;flex-direction:column;align-items:center;gap:4px}
 .foot-row{display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap}
@@ -324,6 +330,7 @@ body.guide-open .top-bar{z-index:25}
   <section style="display:flex;flex-direction:column;gap:10px">
     <h2 data-k="log">Star log</h2>
     <div class="log" id="log"></div>
+    <button type="button" class="btn alt" id="logAll" data-k="logSeeAll">See all</button>
   </section>
 
   <footer>
@@ -415,6 +422,8 @@ const STR = {
     streakLeft:'+10 ★까지 {0}일 남았어요', streakToday:'오늘 +10 ★ 보너스!',
     parentNeed:'올클리어하면 부모님 확인받기', parentReady:'부모님 확인받기 (별 +2)', parentDone:'오늘 부모님 확인 완료!',
     doneMark:'완료!', emptyLog:'구역을 체크하면 여기에 별 기록이 쌓여요',
+    logSeeAll:'더보기', logAllTitle:'전체 별 기록', logAllCount:'총 {0}개 기록', logMore:'더 불러오기',
+    logFail:'불러오지 못했어요. 다시 해 볼까요?',
     lvNext:'다음 레벨까지 별 {0}개', lvMax:'최고 레벨 달성!',
     levels:['정리 새싹','정리 탐험가','정리 기사','정리 마스터','방의 주인'],
     zones:{
@@ -528,6 +537,8 @@ const STR = {
     streakLeft:'{0} more days to +10 ★', streakToday:'+10 ★ bonus today!',
     parentNeed:'Clear all zones to ask a parent', parentReady:'Parent check (+2 stars)', parentDone:'Parent checked today!',
     doneMark:'Done!', emptyLog:'Check a zone and the star log shows up here.',
+    logSeeAll:'See all', logAllTitle:'All stars', logAllCount:'Total {0} records', logMore:'Load more',
+    logFail:'Couldn\'t load. Try again.',
     lvNext:'{0} stars to the next level', lvMax:'Top level reached!',
     levels:['Tidy Sprout','Tidy Explorer','Tidy Knight','Tidy Master','Room Captain'],
     zones:{
@@ -628,6 +639,12 @@ let tail = Promise.resolve();
 let pending = 0;
 let seenDay = today();
 let refreshFlight = null;
+let ledgerOpen = false;
+let ledgerEntries = [];
+let ledgerTotal = 0;
+let ledgerLoading = false;
+let ledgerErr = '';
+let ledgerToken = 0;
 const busyItems = new Set();
 
 function emptyState(){ return { child_name:'', stars:null, total:null, streak:0, days:[], quests:[], custom_quests:[], check_items:[], check_marks:[], photo_zones:[], rewards:[], ledger:[] }; }
@@ -723,6 +740,7 @@ function applyLang(){
   if (mode === 'app') render();
   if (albumOn) paintAlbum();
   if (viewing) paintPhotoView();
+  if (ledgerOpen) paintLedger();
   if (guideAt >= 0) paintGuide();
   else if (questOpen) paintQuest();
   else if (cquestOpen) paintCquest();
@@ -851,6 +869,167 @@ function md(iso){
   if (Number.isNaN(d.getTime())) return '';
   return pad(d.getMonth()+1)+'/'+pad(d.getDate());
 }
+function localWhen(iso){
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+function shiftDay(n){
+  const d = new Date();
+  d.setDate(d.getDate() + n);
+  return dkey(d);
+}
+function logDayLabel(date){
+  const key = dkey(date);
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const enDays = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const koDays = '일월화수목금토';
+  const en = enDays[date.getDay()]+', '+months[date.getMonth()]+' '+date.getDate();
+  const ko = (date.getMonth()+1)+'월 '+date.getDate()+'일 ('+koDays[date.getDay()]+')';
+  if (lang === 'ko'){
+    if (key === today()) return '오늘 · '+ko;
+    if (key === shiftDay(-1)) return '어제 · '+ko;
+    return ko;
+  }
+  if (key === today()) return 'Today · '+en;
+  if (key === shiftDay(-1)) return 'Yesterday · '+en;
+  return en;
+}
+function clockLabel(date){
+  if (!date) return '';
+  let h = date.getHours();
+  const m = pad(date.getMinutes());
+  const pm = h >= 12;
+  h = h % 12;
+  if (h === 0) h = 12;
+  if (lang === 'ko') return (pm ? '오후 ' : '오전 ')+h+':'+m;
+  return h+':'+m+(pm ? ' PM' : ' AM');
+}
+function ledgerGroups(entries){
+  const map = new Map();
+  (entries || []).forEach((entry, index) => {
+    const date = localWhen(entry && entry.created_at);
+    const key = date ? dkey(date) : '';
+    let g = map.get(key);
+    if (!g){
+      g = { key:key, date:date, items:[] };
+      map.set(key, g);
+    }
+    g.items.push({ entry:entry, index:index });
+  });
+  const groups = Array.from(map.values());
+  groups.sort((a, b) => a.key < b.key ? 1 : a.key > b.key ? -1 : 0);
+  groups.forEach(g => {
+    g.items.sort((a, b) => {
+      const ta = localWhen(a.entry.created_at);
+      const tb = localWhen(b.entry.created_at);
+      const na = ta ? ta.getTime() : 0;
+      const nb = tb ? tb.getTime() : 0;
+      return (nb - na) || (a.index - b.index);
+    });
+    g.sum = g.items.reduce((s, it) => s + (Number(it.entry.delta) || 0), 0);
+  });
+  return groups;
+}
+function logMarkup(entries){
+  const list = entries || [];
+  if (!list.length) return '<p class="log-empty">'+esc(t('emptyLog'))+'</p>';
+  return ledgerGroups(list).map(g => {
+    const sum = g.sum;
+    const head = g.date ? logDayLabel(g.date) : '';
+    const rows = g.items.map(it => {
+      const n = Number(it.entry.delta);
+      const delta = Number.isFinite(n) ? n : 0;
+      const when = clockLabel(localWhen(it.entry.created_at));
+      return '<div class="log-row"><span class="log-time">'+esc(when)+'</span><span class="log-reason">'+esc(showReason(it.entry.reason))+'</span><span class="'+(delta>=0?'plus':'minus')+'">'+(delta>0?'+':'')+delta+'</span></div>';
+    }).join('');
+    return '<div class="log-day"><div class="log-head"><span>'+esc(head)+'</span><span class="log-sum '+(sum>=0?'plus':'minus')+'">'+esc((sum>0?'+':'')+sum+' ★')+'</span></div>'+rows+'</div>';
+  }).join('');
+}
+function normLedgerEntry(l){
+  const n = Number(l && l.delta);
+  return {
+    id: l && l.id,
+    delta: Number.isFinite(n) ? n : 0,
+    reason: (l && l.reason) || '',
+    kind: (l && l.kind) || '',
+    created_at: (l && l.created_at) || ''
+  };
+}
+function paintLedger(){
+  if (!ledgerOpen) return;
+  if (!$('ledgerBox')){
+    modal('<h2 id="ledgerTitle"></h2><p class="muted" id="ledgerCount" style="margin:0"></p><div class="log" id="ledgerBox"></div><div class="err" id="ledgerErr"></div><div id="ledgerMore"></div><button type="button" class="btn alt" id="ledgerClose"></button>', close);
+    $('ledgerClose').onclick = close;
+  }
+  $('ledgerTitle').textContent = t('logAllTitle');
+  $('ledgerCount').textContent = t('logAllCount').replace('{0}', String(Number.isFinite(ledgerTotal) ? ledgerTotal : 0));
+  $('ledgerBox').innerHTML = (ledgerEntries.length || (!ledgerLoading && !ledgerErr)) ? logMarkup(ledgerEntries) : '';
+  $('ledgerClose').textContent = t('close');
+  const err = $('ledgerErr');
+  const more = $('ledgerMore');
+  err.textContent = '';
+  more.replaceChildren();
+  if (ledgerLoading){
+    const wrap = document.createElement('div');
+    wrap.style.textAlign = 'center';
+    const spin = document.createElement('span');
+    spin.className = 'spin';
+    spin.setAttribute('aria-hidden', 'true');
+    wrap.appendChild(spin);
+    more.appendChild(wrap);
+    return;
+  }
+  const needMore = ledgerEntries.length < ledgerTotal;
+  if (ledgerErr && !needMore && !ledgerEntries.length){
+    const retry = document.createElement('button');
+    retry.type = 'button';
+    retry.className = 'btn alt';
+    retry.textContent = t('logFail');
+    retry.onclick = () => loadLedger(false);
+    more.appendChild(retry);
+    return;
+  }
+  if (ledgerErr) err.textContent = t('logFail');
+  if (needMore){
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'btn';
+    b.id = 'ledgerMoreBtn';
+    b.textContent = t('logMore');
+    b.onclick = () => loadLedger(true);
+    more.appendChild(b);
+  }
+}
+function openLedger(){
+  ledgerOpen = true;
+  ledgerEntries = [];
+  ledgerTotal = 0;
+  ledgerErr = '';
+  ledgerLoading = false;
+  loadLedger(false);
+}
+async function loadLedger(more){
+  if (!callsign || !ledgerOpen || ledgerLoading) return;
+  const offset = more ? ledgerEntries.length : 0;
+  const token = ++ledgerToken;
+  ledgerLoading = true;
+  ledgerErr = '';
+  paintLedger();
+  const res = await rpc('tidy_ledger_list', { p_callsign: callsign, p_today: today(), p_offset: offset, p_limit: 100 });
+  if (token !== ledgerToken || !ledgerOpen) return;
+  ledgerLoading = false;
+  if (res && res.ok === true && Array.isArray(res.entries)){
+    const incoming = res.entries.map(normLedgerEntry);
+    ledgerEntries = more ? ledgerEntries.concat(incoming) : incoming;
+    const total = Number(res.total_count);
+    ledgerTotal = Number.isFinite(total) ? total : ledgerEntries.length;
+    ledgerErr = '';
+  } else {
+    ledgerErr = 'fail';
+    if (!more){ ledgerEntries = []; ledgerTotal = 0; }
+  }
+  paintLedger();
+}
 
 function render(){
   const D = dayRec(today()) || { zones:[], all_bonus:false, parent_checked:false, streak_paid:false };
@@ -928,10 +1107,7 @@ function render(){
       return '<div class="item"><span>'+esc(showReward(r.name))+'</span><button type="button" class="cost" data-r="'+esc(r.id)+'" '+(afford?'':'disabled')+'>★ '+Number(r.cost)+'</button></div>';
     }).join('')+'</div></div>';
   }).join('');
-  $('log').innerHTML = (S.ledger && S.ledger.length) ? S.ledger.slice(0,12).map(l => {
-    const n = Number(l.delta);
-    return '<div><span>'+esc(showReason(l.reason))+'</span><span><span class="'+(n>=0?'plus':'minus')+'">'+(n>=0?'+':'')+n+'</span> <span class="d">'+esc(md(l.created_at))+'</span></span></div>';
-  }).join('') : '<div><span class="muted">'+esc(t('emptyLog'))+'</span></div>';
+  $('log').innerHTML = logMarkup(S.ledger);
   if ($('csNote')) $('csNote').textContent = callsign ? '@'+callsign : '';
 }
 
@@ -1604,7 +1780,13 @@ function modal(html, onScrim){
   $('modalRoot').innerHTML = '<div class="scrim" id="scrim"><div class="modal" role="dialog" aria-modal="true">'+html+'</div></div>';
   $('scrim').addEventListener('click', e => { if (e.target.id === 'scrim' && onScrim) onScrim(); });
 }
-function close(){ $('modalRoot').innerHTML = ''; document.body.classList.remove('guide-open'); }
+function close(){
+  ledgerOpen = false;
+  ledgerLoading = false;
+  ledgerToken++;
+  $('modalRoot').innerHTML = '';
+  document.body.classList.remove('guide-open');
+}
 let guideAt = -1;
 let questOpen = '';
 function guideArt(i){
@@ -2290,6 +2472,7 @@ $('csIn').addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDe
 $('nameIn').addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDefault(); $('pinNew').focus(); } });
 $('pinNew').addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDefault(); createFamily(); } });
 $('journalBtn').onclick = toggleJournal;
+$('logAll').onclick = openLedger;
 $('photoFile').addEventListener('change', () => {
   const input = $('photoFile');
   const file = input.files && input.files[0];
