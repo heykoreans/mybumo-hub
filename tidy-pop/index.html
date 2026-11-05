@@ -96,22 +96,44 @@ a{color:var(--sky)}
 .ptile img{width:100%;height:84px;object-fit:cover;border-radius:10px;background:var(--bg)}
 .ptile .pname{font-family:var(--display);font-size:16px;overflow-wrap:break-word}
 .ptile .psaved{font-size:13px;color:var(--mint)}
+.ptile .ptap{font-size:13px;color:var(--muted)}
 .ptile:disabled{opacity:.55;cursor:default}
+.photo-prog{display:flex;align-items:center;justify-content:flex-end;gap:6px;flex-wrap:wrap;min-width:0}
+.photo-earn{font-family:var(--display);color:var(--star-ink);font-size:14px;white-space:nowrap}
 .spin{width:18px;height:18px;border:3px solid var(--line);border-top-color:var(--sky);border-radius:50%;display:inline-block;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .file-hide{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
-#album{display:flex;flex-direction:column;gap:10px;min-width:0}
-.day-chips{display:flex;gap:8px;overflow-x:auto;max-width:100%;min-width:0;padding-bottom:4px}
-.day-chip{flex:0 0 auto;min-height:44px;padding:8px 12px;border-radius:99px;border:1px solid var(--line);background:var(--bg);color:var(--ink);white-space:nowrap}
-.day-chip.on{border-color:var(--sky);background:var(--soft-sky);color:var(--ink)}
-.album-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px}
-.aphoto{display:flex;flex-direction:column;gap:4px;padding:0;background:transparent;color:var(--ink);min-width:0;text-align:left}
-.aphoto img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px;background:var(--bg)}
-.aphoto span{font-size:13px;overflow-wrap:break-word}
-.photo-view{position:fixed;inset:0;z-index:28;background:rgba(10,25,35,.9);display:flex;flex-direction:column;gap:12px;padding:max(16px,env(safe-area-inset-top)) 16px max(16px,env(safe-area-inset-bottom));overflow:auto}
-.photo-view img{width:100%;max-height:70vh;object-fit:contain;border-radius:12px;background:#000;flex:0 0 auto}
-.photo-view .pname{color:#fff;margin:0;font-family:var(--display);font-size:18px}
-.photo-view .row{flex:0 0 auto}
+.album-view{position:fixed;inset:0;z-index:28;background:var(--bg);color:var(--ink);display:flex;flex-direction:column;gap:10px;min-width:0;min-height:0;padding:max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));overflow:hidden}
+.album-bar,.album-photo-bar,.album-daynav{display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0;flex:0 0 auto;flex-wrap:wrap}
+.album-bar h2,.album-date{margin:0;min-width:0;overflow-wrap:break-word;font-family:var(--display);font-size:20px;font-weight:400}
+.album-date{text-align:center;font-size:16px}
+.album-body{flex:1 1 auto;min-height:0;min-width:0;display:flex;flex-direction:column}
+.album-dates{display:flex;flex-direction:column;gap:8px;min-width:0;overflow:auto}
+.album-day{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:8px;align-items:center;width:100%;min-height:48px;padding:8px 12px;border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink);text-align:left}
+.album-day .adate{min-width:0;overflow-wrap:break-word}
+.album-day .acount,.album-day .achev{white-space:nowrap}
+.album-day .achev{color:var(--muted);font-size:22px;line-height:1}
+.album-stage{flex:1 1 auto;min-height:0;min-width:0;display:flex;flex-direction:column;gap:8px}
+.album-frame{position:relative;flex:1 1 auto;min-height:0;min-width:0}
+.album-scroller{height:100%;width:100%;display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;min-width:0}
+.album-scroller::-webkit-scrollbar{display:none}
+.album-slide{flex:0 0 100%;width:100%;height:100%;min-width:0;scroll-snap-align:center;scroll-snap-stop:always;display:flex;align-items:center;justify-content:center;position:relative;box-sizing:border-box}
+.album-slide img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;background:#000}
+.album-remove{position:absolute;top:8px;right:8px;z-index:1;min-height:36px;padding:6px 10px;border-radius:99px;background:rgba(10,25,35,.72);color:#fff;font-size:13px}
+.album-side{position:absolute;top:50%;transform:translateY(-50%);z-index:1;width:44px;height:44px;border-radius:50%;background:rgba(10,25,35,.55);color:#fff;font-size:28px;line-height:1}
+.album-side.prev{left:4px}
+.album-side.next{right:4px}
+.album-side:disabled{opacity:.35}
+.album-cap{flex:0 0 auto;text-align:center;min-width:0}
+.album-cap .pname{margin:0;font-family:var(--display);font-size:18px;overflow-wrap:break-word}
+.album-cap .ptime{margin:2px 0 0;color:var(--muted);font-size:14px}
+.album-dots{flex:0 0 auto;display:flex;gap:0;justify-content:center;flex-wrap:wrap;min-width:0}
+.album-dot{width:44px;height:44px;background:transparent;display:grid;place-items:center}
+.album-dot i{width:8px;height:8px;border-radius:50%;background:var(--line);display:block}
+.album-dot.on i{background:var(--sky)}
+.album-ask{flex:0 0 auto;display:flex;flex-direction:column;gap:8px;min-width:0}
+.album-ask p{margin:0}
+.album-link{background:transparent;color:var(--ink);min-height:44px;padding:8px 4px;text-align:left}
 
 .bonus-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .pill{border-radius:14px;padding:12px;font-size:14px;background:var(--card);border:1px dashed var(--line);color:var(--muted);overflow-wrap:break-word}
@@ -283,23 +305,24 @@ body.guide-open .top-bar{z-index:25}
       <p class="muted hint" data-k="missionHint">Tap each zone when it's done. Tap again to undo.</p>
     </div>
     <div class="zones" id="zones"></div>
+    <div class="bonus-row">
+      <div class="pill" id="allPill"></div>
+      <div class="pill" id="streakPill"></div>
+    </div>
+    <button type="button" class="btn star" id="parentCheck">Parent check (+2 stars)</button>
     <button type="button" class="zone" id="journalBtn" aria-pressed="false">
       <span class="ic" aria-hidden="true">📓</span>
       <span class="tx"><strong data-k="journalLabel">I wrote my journal today</strong></span>
       <span class="jend"><span class="jstar">+2 ★</span><span class="chk">✓</span></span>
     </button>
     <div class="photo-block" id="bedPhotos">
-      <div class="section-head"><h2><span aria-hidden="true">🌙 </span><span data-k="photoHead">Bedtime photos</span></h2><span class="muted" id="photoProg">0/5</span></div>
+      <div class="section-head"><h2><span aria-hidden="true">🌙 </span><span data-k="photoHead">Bedtime photos</span></h2><span class="photo-prog"><span class="muted" id="photoProg">0/5</span><span class="photo-earn" id="photoBonus" hidden>+1 ★ ✓</span></span></div>
       <p class="muted hint" data-k="photoLead">One photo for each spot before bed. 5 photos = +1 ★</p>
       <p class="muted hint" data-k="photoSafe">Only your room in the photo. No faces!</p>
+      <p class="muted hint" data-k="photoNow">Stars come right away. No need to ask!</p>
       <div class="photo-grid" id="photoTiles"></div>
       <input id="photoFile" class="file-hide" type="file" accept="image/*" tabindex="-1" aria-hidden="true">
     </div>
-    <div class="bonus-row">
-      <div class="pill" id="allPill"></div>
-      <div class="pill" id="streakPill"></div>
-    </div>
-    <button type="button" class="btn star" id="parentCheck">Parent check (+2 stars)</button>
   </section>
 
   <section id="weekQuests" hidden style="display:flex;flex-direction:column;gap:12px">
@@ -344,11 +367,12 @@ body.guide-open .top-bar{z-index:25}
 </div>
 
 <div id="modalRoot"></div>
-<div id="photoView" class="photo-view" hidden>
-  <img id="photoBig" alt="">
-  <p id="photoCap" class="pname"></p>
-  <div class="err" id="photoErr"></div>
-  <div class="row" id="photoActs"></div>
+<div id="albumView" class="album-view" hidden>
+  <div class="album-bar" id="albumBar">
+    <h2 id="albumViewTitle">Photo album</h2>
+    <button type="button" class="btn alt" id="albumViewClose">Close</button>
+  </div>
+  <div id="albumBody" class="album-body"></div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -384,9 +408,12 @@ const STR = {
     photoHead:'자기 전 사진',
     photoLead:'자기 전에 구역마다 사진 1장. 5장 다 찍으면 +1 ★',
     photoSafe:'방만 찍어요. 얼굴은 안 나오게!',
-    photoSaved:'저장됨', photoFail:'사진이 안 올라갔어요. 다시 해 볼까요?',
+    photoSaved:'저장됨', photoTap:'눌러서 찍기', photoNow:'별은 바로 들어가요. 확인받지 않아도 돼요!',
+    photoFail:'사진이 안 올라갔어요. 다시 해 볼까요?',
     retakeAsk:'다시 찍을까요?',
     albumHead:'사진 앨범', albumOpen:'앨범 열기', albumEmpty:'아직 사진이 없어요',
+    albumBack:'‹ 날짜 목록', albumPrevDay:'‹ 이전 날', albumNextDay:'다음 날 ›',
+    albumCount:'사진 {0}/5장', albumFail:'불러오지 못했어요. 다시 해 볼까요?',
     photoRemoveAsk:'이 사진을 지울까요?',
     clHead:'데일리 체크리스트', clAdd:'추가', clEnPh:'영어 문장', clKoPh:'한국어 문장 (선택)', clRemoveAsk:'삭제할까요?',
     questHead:'대청소 퀘스트', questSub:'한 번만 하면 돼요 · 각 별 10개',
@@ -499,9 +526,12 @@ const STR = {
     photoHead:'Bedtime photos',
     photoLead:'One photo for each spot before bed. 5 photos = +1 ★',
     photoSafe:'Only your room in the photo. No faces!',
-    photoSaved:'Saved', photoFail:'Photo didn\'t upload. Try again!',
+    photoSaved:'Saved', photoTap:'Tap to take', photoNow:'Stars come right away. No need to ask!',
+    photoFail:'Photo didn\'t upload. Try again!',
     retakeAsk:'Retake?',
     albumHead:'Photo album', albumOpen:'Open album', albumEmpty:'No photos yet',
+    albumBack:'‹ Dates', albumPrevDay:'‹ Previous day', albumNextDay:'Next day ›',
+    albumCount:'{0}/5 photos', albumFail:'Couldn\'t load. Try again.',
     photoRemoveAsk:'Remove this photo?',
     clHead:'Daily checklist', clAdd:'Add', clEnPh:'English', clKoPh:'Korean (optional)', clRemoveAsk:'Remove?',
     questHead:'Big tidy quests', questSub:'Do each one once · 10 stars',
@@ -534,6 +564,7 @@ const STR = {
     },
     streakN:'{0} days in a row', allOn:'All-clear bonus earned (+2)', allOff:'Finish all 5 zones for 2 bonus stars ({0}/5)',
     streakOn:'{0}-day streak bonus earned (+10)', streakOff:'{0} days left until the streak bonus',
+    streakOff1:'1 day left until the streak bonus',
     streakLeft:'{0} more days to +10 ★', streakToday:'+10 ★ bonus today!',
     parentNeed:'Clear all zones to ask a parent', parentReady:'Parent check (+2 stars)', parentDone:'Parent checked today!',
     doneMark:'Done!', emptyLog:'Check a zone and the star log shows up here.',
@@ -739,7 +770,6 @@ function applyLang(){
   if ($('gateErr')) setGateErr(gateErrCode);
   if (mode === 'app') render();
   if (albumOn) paintAlbum();
-  if (viewing) paintPhotoView();
   if (ledgerOpen) paintLedger();
   if (guideAt >= 0) paintGuide();
   else if (questOpen) paintQuest();
@@ -1078,7 +1108,8 @@ function render(){
   $('allPill').className = 'pill'+(D.all_bonus?' on':'');
   $('allPill').textContent = D.all_bonus ? t('allOn') : t('allOff').replace('{0}', D.zones.length);
   $('streakPill').className = 'pill'+(D.streak_paid?' on':'');
-  $('streakPill').textContent = D.streak_paid ? t('streakOn').replace('{0}', st) : (streakBonusDay ? t('streakToday') : t('streakOff').replace('{0}', streakLeft));
+  const streakWait = (lang === 'en' && streakLeft === 1) ? t('streakOff1') : t('streakOff').replace('{0}', streakLeft);
+  $('streakPill').textContent = D.streak_paid ? t('streakOn').replace('{0}', st) : (streakBonusDay ? t('streakToday') : streakWait);
   const pc = $('parentCheck');
   pc.disabled = !D.all_bonus || !!D.parent_checked;
   pc.textContent = D.parent_checked ? t('parentDone') : D.all_bonus ? t('parentReady') : t('parentNeed');
@@ -1377,13 +1408,16 @@ let photoPreview = {};
 let previewDay = '';
 let pickZone = '';
 let albumOn = false;
-let album = null;
+let albumScreen = 'dates';
+let albumDays = [];
+let albumDay = '';
+let albumPhotos = [];
+let albumIndex = 0;
 let albumErr = '';
 let albumLoading = false;
 let albumToken = 0;
-let viewing = null;
-let photoAsk = false;
-let photoViewErr = '';
+let albumAskId = '';
+let albumScrollLock = false;
 const albumRetried = new Set();
 function paintJournal(D){
   const btn = $('journalBtn');
@@ -1400,7 +1434,10 @@ function paintPhotos(){
   if (previewDay && previewDay !== today()){ photoPreview = {}; previewDay = ''; }
   const saved = (S.photo_zones || []).filter(z => ZONE_IDS.includes(z));
   const n = ZONE_IDS.filter(id => saved.includes(id)).length;
+  const todayRec = dayRec(today());
   prog.textContent = n+'/5';
+  const bonus = $('photoBonus');
+  if (bonus) bonus.hidden = !(todayRec && todayRec.photo_bonus);
   box.innerHTML = ZONE_IDS.map(id => {
     const on = saved.includes(id);
     const name = STR[lang].zones[id].name;
@@ -1410,7 +1447,8 @@ function paintPhotos(){
       (prev ? '<img alt="" src="'+prev+'">' : '')+
       '<span class="pname">'+esc(name)+'</span>'+
       (busy ? '<span class="spin" aria-hidden="true"></span>' : '')+
-      (on && !busy ? '<span class="psaved">✓ '+esc(t('photoSaved'))+'</span>' : '')+
+      (on && !busy ? '<span class="psaved">✅ '+esc(t('photoSaved'))+'</span>' : '')+
+      (!on && !busy ? '<span class="ptap">📷 '+esc(t('photoTap'))+'</span>' : '')+
       '</button>';
   }).join('');
 }
@@ -1543,195 +1581,424 @@ function onPhotoTile(zone){
   if (saved) askRetake(zone);
   else pickPhoto(zone);
 }
-function albumDayLabel(day, count){
+function dateFromKey(day){
   const p = String(day || '').slice(0,10).split('-');
-  const m = Number(p[1]);
-  const d = Number(p[2]);
-  const n = Number(count) || 0;
-  if (!m || !d) return String(day || '');
-  if (lang === 'ko') return m+'월 '+d+'일 · '+n;
+  const y = Number(p[0]), m = Number(p[1]), d = Number(p[2]);
+  if (!y || !m || !d) return null;
+  return new Date(y, m - 1, d);
+}
+function albumDateLabel(day){
+  const date = dateFromKey(day);
+  if (!date) return String(day || '');
   const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  return months[m - 1]+' '+d+' · '+n;
+  const enDays = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const koDays = '일월화수목금토';
+  const en = enDays[date.getDay()]+', '+months[date.getMonth()]+' '+date.getDate();
+  const ko = (date.getMonth()+1)+'월 '+date.getDate()+'일 ('+koDays[date.getDay()]+')';
+  const key = String(day).slice(0,10);
+  if (lang === 'ko') return (key === today() ? '오늘 · ' : '')+ko;
+  return (key === today() ? 'Today · ' : '')+en;
+}
+function albumDaysSorted(){
+  return (albumDays || []).slice().sort((a, b) => String(b.day).localeCompare(String(a.day)));
+}
+function albumShiftDay(older){
+  const days = albumDaysSorted().map(d => String(d.day).slice(0,10));
+  const i = days.indexOf(String(albumDay).slice(0,10));
+  if (i < 0) return '';
+  return days[i + (older ? 1 : -1)] || '';
+}
+function closeAlbum(){
+  albumOn = false;
+  albumLoading = false;
+  albumAskId = '';
+  albumToken++;
+  const box = $('albumView');
+  if (box) box.hidden = true;
+}
+function albumGo(i){
+  if (i < 0 || i >= albumPhotos.length) return;
+  albumIndex = i;
+  const scroller = $('albumScroll');
+  if (scroller && scroller.clientWidth){
+    albumScrollLock = true;
+    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    scroller.scrollTo({ left: i * scroller.clientWidth, behavior: reduce ? 'auto' : 'smooth' });
+    const unlock = () => { albumScrollLock = false; };
+    scroller.addEventListener('scrollend', unlock, { once:true });
+    setTimeout(unlock, 500);
+  }
+  paintAlbumPos();
+}
+function paintAlbumPos(){
+  const pos = $('albumPos');
+  if (pos) pos.textContent = albumPhotos.length ? (albumIndex + 1)+'/'+albumPhotos.length : '0/0';
+  document.querySelectorAll('#albumBody .album-dot').forEach((b, i) => {
+    b.classList.toggle('on', i === albumIndex);
+  });
+  const prev = $('albumPrev');
+  const next = $('albumNext');
+  if (prev) prev.disabled = albumIndex <= 0;
+  if (next) next.disabled = albumIndex >= albumPhotos.length - 1;
+  const cap = $('albumCap');
+  const photo = albumPhotos[albumIndex];
+  if (cap){
+    cap.replaceChildren();
+    if (photo){
+      const name = document.createElement('p');
+      name.className = 'pname';
+      const zoneName = STR[lang].zones[photo.zone] && STR[lang].zones[photo.zone].name;
+      name.textContent = zoneName || '';
+      const time = document.createElement('p');
+      time.className = 'ptime';
+      time.textContent = clockLabel(localWhen(photo.created_at));
+      cap.appendChild(name);
+      cap.appendChild(time);
+    }
+  }
+}
+function attachAlbumImage(img, photo){
+  const thumb = photo.thumb_url || '';
+  const full = photo.url || '';
+  let moved = false;
+  const giveUp = () => retryAlbumPhoto(photo.id);
+  img.addEventListener('error', () => {
+    if (!moved && full && img.getAttribute('src') !== full){
+      moved = true;
+      img.src = full;
+      return;
+    }
+    giveUp();
+  });
+  if (thumb){
+    img.src = thumb;
+    if (full && full !== thumb){
+      const pre = new Image();
+      pre.onload = () => { if (img.isConnected) img.src = full; };
+      pre.onerror = giveUp;
+      pre.src = full;
+    }
+  } else if (full) img.src = full;
 }
 function retryAlbumPhoto(id){
   const key = String(id || '');
-  if (!key || albumRetried.has(key)) return;
+  if (!key || albumRetried.has(key) || albumLoading || !albumOn) return;
   albumRetried.add(key);
-  loadAlbum(album && album.day);
+  loadAlbum(albumDay, true);
 }
-function paintAlbum(){
-  const el = $('album');
-  if (!el) return;
-  el.hidden = !albumOn;
-  el.replaceChildren();
-  if (!albumOn) return;
-  const chips = document.createElement('div');
-  chips.className = 'day-chips';
-  ((album && album.days) || []).forEach(d => {
-    const b = document.createElement('button');
-    b.type = 'button';
-    const day = String(d.day || '').slice(0,10);
-    b.className = 'day-chip'+(album && day === album.day ? ' on' : '');
-    b.textContent = albumDayLabel(day, d.count);
-    b.onclick = () => loadAlbum(day);
-    chips.appendChild(b);
-  });
-  el.appendChild(chips);
-  if (albumLoading){
-    const p = document.createElement('p');
-    p.className = 'muted';
-    p.style.margin = '0';
-    p.textContent = t('loading');
-    el.appendChild(p);
-    return;
-  }
-  if (albumErr && !(album && album.photos && album.photos.length)){
-    const p = document.createElement('p');
-    p.className = 'err';
-    p.textContent = albumErr;
-    el.appendChild(p);
-    return;
-  }
-  const photos = (album && album.photos) || [];
-  if (!photos.length){
-    const p = document.createElement('p');
-    p.className = 'muted';
-    p.style.margin = '0';
-    p.textContent = t('albumEmpty');
-    el.appendChild(p);
-    return;
-  }
-  const grid = document.createElement('div');
-  grid.className = 'album-grid';
-  photos.forEach(p => {
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'aphoto';
+function paintAlbumAsk(){
+  const box = $('albumAsk');
+  if (!box) return;
+  box.replaceChildren();
+  if (!albumAskId){ box.hidden = true; return; }
+  box.hidden = false;
+  const q = document.createElement('p');
+  q.textContent = t('photoRemoveAsk');
+  const row = document.createElement('div');
+  row.className = 'row';
+  const no = document.createElement('button');
+  no.type = 'button';
+  no.className = 'btn alt';
+  no.textContent = t('cancel');
+  no.onclick = () => { albumAskId = ''; paintAlbumAsk(); };
+  const yes = document.createElement('button');
+  yes.type = 'button';
+  yes.className = 'btn';
+  yes.id = 'albumRemoveYes';
+  yes.textContent = t('remove');
+  yes.onclick = () => removeAlbumPhoto();
+  row.appendChild(no);
+  row.appendChild(yes);
+  box.appendChild(q);
+  box.appendChild(row);
+}
+function paintAlbumPhotos(){
+  const body = $('albumBody');
+  body.replaceChildren();
+  body.style.overflow = 'hidden';
+  const stage = document.createElement('div');
+  stage.className = 'album-stage';
+  const bar = document.createElement('div');
+  bar.className = 'album-photo-bar';
+  const back = document.createElement('button');
+  back.type = 'button';
+  back.className = 'album-link';
+  back.textContent = t('albumBack');
+  back.onclick = () => { albumScreen = 'dates'; albumAskId = ''; paintAlbum(); };
+  const pos = document.createElement('span');
+  pos.id = 'albumPos';
+  pos.className = 'muted';
+  bar.appendChild(back);
+  bar.appendChild(pos);
+  const nav = document.createElement('div');
+  nav.className = 'album-daynav';
+  const older = document.createElement('button');
+  older.type = 'button';
+  older.className = 'album-link';
+  older.id = 'albumOlder';
+  older.textContent = t('albumPrevDay');
+  older.disabled = !albumShiftDay(true);
+  older.onclick = () => { const d = albumShiftDay(true); if (d) loadAlbum(d); };
+  const label = document.createElement('div');
+  label.className = 'album-date';
+  label.textContent = albumDateLabel(albumDay);
+  const newer = document.createElement('button');
+  newer.type = 'button';
+  newer.className = 'album-link';
+  newer.id = 'albumNewer';
+  newer.textContent = t('albumNextDay');
+  newer.disabled = !albumShiftDay(false);
+  newer.onclick = () => { const d = albumShiftDay(false); if (d) loadAlbum(d); };
+  nav.appendChild(older);
+  nav.appendChild(label);
+  nav.appendChild(newer);
+  const frame = document.createElement('div');
+  frame.className = 'album-frame';
+  const scroller = document.createElement('div');
+  scroller.className = 'album-scroller';
+  scroller.id = 'albumScroll';
+  albumPhotos.forEach(photo => {
+    const slide = document.createElement('div');
+    slide.className = 'album-slide';
     const img = document.createElement('img');
     img.alt = '';
-    img.src = p.thumb_url || '';
-    img.addEventListener('error', () => retryAlbumPhoto(p.id));
-    const cap = document.createElement('span');
-    const zoneName = STR[lang].zones[p.zone] && STR[lang].zones[p.zone].name;
-    cap.textContent = zoneName || '';
-    btn.appendChild(img);
-    btn.appendChild(cap);
-    btn.onclick = () => openPhoto(p);
-    grid.appendChild(btn);
+    attachAlbumImage(img, photo);
+    const rm = document.createElement('button');
+    rm.type = 'button';
+    rm.className = 'album-remove';
+    rm.textContent = t('remove');
+    rm.onclick = () => { albumAskId = String(photo.id || ''); paintAlbumAsk(); };
+    slide.appendChild(img);
+    slide.appendChild(rm);
+    scroller.appendChild(slide);
   });
-  el.appendChild(grid);
+  scroller.addEventListener('scroll', () => {
+    if (albumScrollLock) return;
+    const w = scroller.clientWidth;
+    if (!w) return;
+    const i = Math.round(scroller.scrollLeft / w);
+    if (i === albumIndex || i < 0 || i >= albumPhotos.length) return;
+    albumIndex = i;
+    paintAlbumPos();
+  });
+  const prev = document.createElement('button');
+  prev.type = 'button';
+  prev.className = 'album-side prev';
+  prev.id = 'albumPrev';
+  prev.textContent = '‹';
+  prev.onclick = () => albumGo(albumIndex - 1);
+  const next = document.createElement('button');
+  next.type = 'button';
+  next.className = 'album-side next';
+  next.id = 'albumNext';
+  next.textContent = '›';
+  next.onclick = () => albumGo(albumIndex + 1);
+  frame.appendChild(scroller);
+  frame.appendChild(prev);
+  frame.appendChild(next);
+  const cap = document.createElement('div');
+  cap.className = 'album-cap';
+  cap.id = 'albumCap';
+  const dots = document.createElement('div');
+  dots.className = 'album-dots';
+  albumPhotos.forEach((photo, i) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'album-dot'+(i === albumIndex ? ' on' : '');
+    const mark = document.createElement('i');
+    b.appendChild(mark);
+    b.onclick = () => albumGo(i);
+    dots.appendChild(b);
+  });
+  const ask = document.createElement('div');
+  ask.className = 'album-ask';
+  ask.id = 'albumAsk';
+  ask.hidden = true;
+  const err = document.createElement('div');
+  err.className = 'err';
+  err.id = 'albumErr';
+  if (albumErr){
+    const again = document.createElement('button');
+    again.type = 'button';
+    again.className = 'btn alt';
+    again.textContent = t('albumFail');
+    again.onclick = () => loadAlbum(albumDay, true);
+    err.appendChild(again);
+  }
+  stage.appendChild(bar);
+  stage.appendChild(nav);
+  stage.appendChild(frame);
+  stage.appendChild(cap);
+  stage.appendChild(dots);
+  stage.appendChild(ask);
+  stage.appendChild(err);
+  body.appendChild(stage);
+  paintAlbumPos();
+  paintAlbumAsk();
+  requestAnimationFrame(() => {
+    const live = $('albumScroll');
+    if (!live || !live.clientWidth) return;
+    albumScrollLock = true;
+    live.scrollLeft = albumIndex * live.clientWidth;
+    albumScrollLock = false;
+  });
 }
-async function loadAlbum(day){
-  if (!$('album') || !sessionPin) return;
+function paintAlbumDates(){
+  const body = $('albumBody');
+  body.replaceChildren();
+  body.style.overflow = 'auto';
+  if (albumLoading){
+    const wrap = document.createElement('div');
+    wrap.style.textAlign = 'center';
+    const spin = document.createElement('span');
+    spin.className = 'spin';
+    spin.setAttribute('aria-hidden', 'true');
+    wrap.appendChild(spin);
+    body.appendChild(wrap);
+    return;
+  }
+  if (albumErr){
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'btn alt';
+    b.textContent = t('albumFail');
+    b.onclick = () => loadAlbum('');
+    body.appendChild(b);
+    return;
+  }
+  const days = albumDaysSorted().filter(d => Number(d.count) > 0);
+  if (!days.length){
+    const p = document.createElement('p');
+    p.className = 'muted';
+    p.textContent = t('albumEmpty');
+    body.appendChild(p);
+    return;
+  }
+  const list = document.createElement('div');
+  list.className = 'album-dates';
+  days.forEach(d => {
+    const day = String(d.day || '').slice(0,10);
+    const n = Number(d.count) || 0;
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'album-day';
+    const when = document.createElement('span');
+    when.className = 'adate';
+    when.textContent = albumDateLabel(day);
+    const count = document.createElement('span');
+    count.className = 'acount';
+    count.textContent = t('albumCount').replace('{0}', String(n))+(n >= 5 ? ' ✅' : '');
+    const chev = document.createElement('span');
+    chev.className = 'achev';
+    chev.textContent = '›';
+    btn.appendChild(when);
+    btn.appendChild(count);
+    btn.appendChild(chev);
+    btn.onclick = () => loadAlbum(day);
+    list.appendChild(btn);
+  });
+  body.appendChild(list);
+}
+function paintAlbum(){
+  const view = $('albumView');
+  if (!view) return;
+  if (!albumOn){ view.hidden = true; return; }
+  view.hidden = false;
+  const bar = $('albumBar');
+  if (bar) bar.hidden = albumScreen === 'photos';
+  const title = $('albumViewTitle');
+  if (title) title.textContent = t('albumHead');
+  const shut = $('albumViewClose');
+  if (shut) shut.textContent = t('close');
+  if (albumLoading){
+    const body = $('albumBody');
+    body.replaceChildren();
+    body.style.overflow = 'hidden';
+    if (albumScreen === 'photos'){
+      const back = document.createElement('button');
+      back.type = 'button';
+      back.className = 'album-link';
+      back.textContent = t('albumBack');
+      back.onclick = () => { albumScreen = 'dates'; albumLoading = false; albumToken++; paintAlbum(); };
+      body.appendChild(back);
+    }
+    const wrap = document.createElement('div');
+    wrap.style.textAlign = 'center';
+    const spin = document.createElement('span');
+    spin.className = 'spin';
+    spin.setAttribute('aria-hidden', 'true');
+    wrap.appendChild(spin);
+    body.appendChild(wrap);
+    return;
+  }
+  if (albumScreen === 'photos') paintAlbumPhotos();
+  else paintAlbumDates();
+}
+async function loadAlbum(day, keepIndex){
+  if (!sessionPin || !callsign) return;
   const token = ++albumToken;
+  const stay = albumIndex;
   albumOn = true;
   albumLoading = true;
   albumErr = '';
-  $('album').hidden = false;
+  albumAskId = '';
+  if (day){
+    albumScreen = 'photos';
+    albumDay = String(day).slice(0,10);
+    if (!keepIndex){
+      albumIndex = 0;
+      albumPhotos = [];
+      albumRetried.clear();
+    }
+  } else {
+    albumScreen = 'dates';
+    albumRetried.clear();
+  }
   paintAlbum();
   const body = { action:'list', callsign: callsign, today: today(), pin: sessionPin };
-  if (day) body.day = day;
+  if (day) body.day = String(day).slice(0,10);
   const res = await photoApi(body);
-  if (token !== albumToken || !$('album')) return;
+  if (token !== albumToken || !albumOn) return;
   albumLoading = false;
-  if (res && res.ok){
-    album = {
-      day: String(res.day || day || '').slice(0,10),
-      days: Array.isArray(res.days) ? res.days : [],
-      photos: Array.isArray(res.photos) ? res.photos : []
-    };
-    albumErr = '';
-    if (viewing){
-      const next = album.photos.find(p => p.id === viewing.id);
-      if (next) viewing = next;
-    }
-  } else albumErr = errText((res && res.error) || 'server_error');
-  paintAlbum();
-  if (viewing) paintPhotoView();
-}
-function closePhotoView(){
-  viewing = null;
-  photoAsk = false;
-  photoViewErr = '';
-  const box = $('photoView');
-  if (box) box.hidden = true;
-  const img = $('photoBig');
-  if (img) img.removeAttribute('src');
-}
-function paintPhotoView(){
-  const box = $('photoView');
-  if (!box) return;
-  if (!viewing){ box.hidden = true; return; }
-  box.hidden = false;
-  const img = $('photoBig');
-  const nextUrl = viewing.url || '';
-  if (img && img.getAttribute('src') !== nextUrl) img.setAttribute('src', nextUrl);
-  const cap = $('photoCap');
-  if (cap){
-    const zoneName = STR[lang].zones[viewing.zone] && STR[lang].zones[viewing.zone].name;
-    cap.textContent = zoneName || '';
-  }
-  const err = $('photoErr');
-  if (err) err.textContent = photoViewErr || '';
-  const acts = $('photoActs');
-  if (!acts) return;
-  acts.replaceChildren();
-  if (photoAsk){
-    const q = document.createElement('p');
-    q.className = 'muted';
-    q.style.margin = '0';
-    q.style.flex = '1 1 100%';
-    q.style.color = '#fff';
-    q.textContent = t('photoRemoveAsk');
-    const no = document.createElement('button');
-    no.type = 'button';
-    no.className = 'btn alt';
-    no.textContent = t('cancel');
-    no.onclick = () => { photoAsk = false; paintPhotoView(); };
-    const yes = document.createElement('button');
-    yes.type = 'button';
-    yes.className = 'btn';
-    yes.textContent = t('remove');
-    yes.onclick = () => doRemovePhoto();
-    acts.appendChild(q);
-    acts.appendChild(no);
-    acts.appendChild(yes);
+  if (!(res && res.ok)){
+    albumErr = 'fail';
+    paintAlbum();
     return;
   }
-  const shut = document.createElement('button');
-  shut.type = 'button';
-  shut.className = 'btn alt';
-  shut.textContent = t('close');
-  shut.onclick = closePhotoView;
-  const rm = document.createElement('button');
-  rm.type = 'button';
-  rm.className = 'btn';
-  rm.textContent = t('remove');
-  rm.onclick = () => { photoAsk = true; photoViewErr = ''; paintPhotoView(); };
-  acts.appendChild(shut);
-  acts.appendChild(rm);
-}
-function openPhoto(photo){
-  if (!photo) return;
-  viewing = photo;
-  photoAsk = false;
-  photoViewErr = '';
-  paintPhotoView();
-}
-async function doRemovePhoto(){
-  if (!viewing || !sessionPin) return;
-  const id = viewing.id;
-  const day = album && album.day;
-  const res = await photoApi({ action:'remove', callsign: callsign, today: today(), pin: sessionPin, id: id });
-  if (res && res.ok){
-    closePhotoView();
-    await loadAlbum(day);
-    refreshState();
-  } else {
-    photoViewErr = errText((res && res.error) || 'server_error');
-    photoAsk = false;
-    paintPhotoView();
+  if (Array.isArray(res.days)){
+    albumDays = res.days.map(d => ({ day: String(d.day || '').slice(0,10), count: Number(d.count) || 0 })).filter(d => d.day);
   }
+  if (day){
+    albumPhotos = Array.isArray(res.photos) ? res.photos : [];
+    albumDay = String(res.day || day).slice(0,10);
+    if (!albumPhotos.length){
+      albumScreen = 'dates';
+      albumIndex = 0;
+    } else if (keepIndex) albumIndex = Math.min(stay, albumPhotos.length - 1);
+    else albumIndex = 0;
+  }
+  albumErr = '';
+  paintAlbum();
+}
+async function removeAlbumPhoto(){
+  const id = albumAskId;
+  const photo = albumPhotos.find(p => String(p.id) === String(id)) || albumPhotos[albumIndex];
+  if (!photo || !sessionPin) return;
+  const day = albumDay;
+  albumAskId = '';
+  albumLoading = true;
+  paintAlbum();
+  const res = await photoApi({ action:'remove', callsign: callsign, today: today(), pin: sessionPin, id: photo.id });
+  if (!(res && res.ok)){
+    albumLoading = false;
+    albumErr = 'fail';
+    albumScreen = 'photos';
+    paintAlbum();
+    return;
+  }
+  refreshState();
+  albumRetried.delete(String(photo.id));
+  await loadAlbum(day, true);
 }
 function toggleZone(id){
   if (!ZONE_IDS.includes(id) || !callsign || zoneItems(id).length) return;
@@ -1941,9 +2208,7 @@ function closeParent(){
   editingQuest = '';
   editingItem = '';
   confirmItem = '';
-  albumOn = false;
-  albumToken++;
-  closePhotoView();
+  closeAlbum();
   close();
 }
 let editingId = '';
@@ -2214,8 +2479,7 @@ function parentPanel(){
   editingQuest = '';
   editingItem = '';
   confirmItem = '';
-  albumOn = false;
-  closePhotoView();
+  closeAlbum();
   const opts = CATS.map(c => '<option value="'+c+'">'+esc(STR[lang].cats[c])+'</option>').join('');
   const zones = ZONE_IDS.map(id => '<option value="'+id+'">'+esc(STR[lang].zones[id].name)+'</option>').join('');
   modal('<h2>'+esc(t('parentTitle'))+'</h2>'+
@@ -2224,7 +2488,6 @@ function parentPanel(){
     '<button type="button" class="btn" id="adjGo">'+esc(t('adjGo'))+'</button>'+
     '<h3 style="font-size:17px">'+esc(t('albumHead'))+'</h3>'+
     '<button type="button" class="btn" id="albumOpen">'+esc(t('albumOpen'))+'</button>'+
-    '<div id="album" hidden></div>'+
     '<h3 style="font-size:17px">'+esc(t('clHead'))+'</h3>'+
     '<div id="clist" style="display:flex;flex-direction:column;gap:8px"></div>'+
     '<select id="ciZone">'+zones+'</select>'+
@@ -2436,8 +2699,20 @@ document.addEventListener('click', e => {
   if (r && !r.disabled){ redeem(r.getAttribute('data-r')); }
 });
 document.addEventListener('keydown', e => {
+  if (albumOn && albumScreen === 'photos' && !albumAskId && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')){
+    const tag = e.target && e.target.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+    e.preventDefault();
+    albumGo(albumIndex + (e.key === 'ArrowRight' ? 1 : -1));
+    return;
+  }
   if (e.key !== 'Escape') return;
-  if (viewing){ closePhotoView(); return; }
+  if (albumOn){
+    if (albumAskId){ albumAskId = ''; paintAlbumAsk(); return; }
+    if (albumScreen === 'photos'){ albumScreen = 'dates'; albumAskId = ''; paintAlbum(); return; }
+    closeAlbum();
+    return;
+  }
   if (!$('scrim')) return;
   if (guideAt >= 0){ dismissGuide(); return; }
   if ($('pinOk') && $('pinOk').disabled) return;
@@ -2473,19 +2748,13 @@ $('nameIn').addEventListener('keydown', e => { if (e.key === 'Enter'){ e.prevent
 $('pinNew').addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDefault(); createFamily(); } });
 $('journalBtn').onclick = toggleJournal;
 $('logAll').onclick = openLedger;
+$('albumViewClose').onclick = closeAlbum;
 $('photoFile').addEventListener('change', () => {
   const input = $('photoFile');
   const file = input.files && input.files[0];
   const zone = pickZone;
   input.value = '';
   if (file && zone) uploadPhoto(zone, file);
-});
-$('photoBig').addEventListener('error', () => {
-  if (!viewing) return;
-  const key = 'big:'+viewing.id;
-  if (albumRetried.has(key)) return;
-  albumRetried.add(key);
-  loadAlbum(album && album.day);
 });
 $('parentCheck').onclick = onParentCheck;
 $('parentBtn').onclick = onParentOpen;
