@@ -46,7 +46,7 @@ a{color:var(--sky)}
 .bank span{font-size:13px;color:var(--star-ink)}
 .level{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px;display:flex;flex-direction:column;gap:8px}
 .level-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
-.level-name{font-family:var(--display);font-size:20px;color:var(--sky)}
+.level-name{font-family:var(--display);font-size:20px;color:var(--sky);min-width:0;overflow-wrap:break-word}
 .bar{height:12px;background:var(--soft-sky);border-radius:99px;overflow:hidden}
 .bar i{display:block;height:100%;background:var(--sky);border-radius:99px;transition:width .4s}
 
@@ -57,8 +57,13 @@ a{color:var(--sky)}
 .dot.part{border:2px solid var(--star);background:var(--soft-star)}
 .day.today .dot{outline:2px solid var(--sky);outline-offset:2px}
 .streak{font-family:var(--display);color:var(--coral);font-size:17px}
-.streak-wrap{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:flex-end;gap:6px;min-width:0;max-width:100%}
-.streak-note{font-size:12px;overflow-wrap:break-word}
+.streak-wrap{display:flex;flex-direction:column;align-items:flex-end;gap:4px;min-width:0;max-width:100%}
+.streak-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:8px;min-width:0}
+.streak-notes{display:flex;flex-direction:column;align-items:flex-end;min-width:0;max-width:100%}
+.streak-note{font-size:12px;overflow-wrap:break-word;text-align:right}
+.streak-meter{display:flex;gap:1px;flex:0 0 auto}
+.streak-meter i{width:4px;height:10px;border-radius:2px;background:var(--line);display:block}
+.streak-meter i.on{background:var(--coral)}
 
 .section-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
 .zones{display:flex;flex-direction:column;gap:10px}
@@ -102,6 +107,20 @@ a{color:var(--sky)}
 .photo-earn{font-family:var(--display);color:var(--star-ink);font-size:14px;white-space:nowrap}
 .times-card{display:flex;flex-direction:column;gap:8px;min-width:0}
 .times-card .btn{width:100%}
+.times-kicker{margin:0;font-family:var(--display);font-size:18px}
+.times-chips{display:flex;flex-wrap:wrap;gap:6px}
+.times-chips button{min-height:40px;padding:6px 12px;border:2px solid var(--line);background:var(--card);color:var(--ink);font-family:var(--display)}
+.times-chips button.on{background:var(--sky);border-color:var(--sky);color:#fff}
+.times-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.times-card .times-actions .btn{width:auto;flex:1 1 160px}
+.times-actions .hint{margin:0;flex:1 1 140px}
+.times-real{background:var(--soft-star);border:2px solid var(--star);border-radius:16px;padding:12px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.times-badge{margin:0;font-family:var(--display);font-size:18px;color:var(--star-ink);overflow-wrap:break-word}
+.times-mode{font-family:var(--display);font-size:clamp(16px,2.8vh,22px);line-height:1.15;min-width:0;overflow-wrap:anywhere}
+.times-mode.practice{color:var(--sky)}
+.times-mode.real{color:var(--star)}
+.times-miss{font-family:var(--display);font-size:clamp(22px,4.5vh,40px);line-height:1.15;text-align:center;margin:0}
+.times-stage.can-scroll{overflow:auto}
 body.times-open{overflow:hidden}
 .times-view{position:fixed;inset:0;z-index:30;background:var(--bg);color:var(--ink);display:flex;flex-direction:column;gap:6px;min-width:0;min-height:0;overflow:hidden;padding:max(8px,env(safe-area-inset-top)) max(10px,env(safe-area-inset-right)) max(8px,env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left))}
 .times-top{display:flex;align-items:center;justify-content:space-between;gap:8px;flex:0 0 auto;min-width:0}
@@ -313,10 +332,11 @@ body.guide-open .top-bar{z-index:25}
     <div class="level-top"><span class="level-name" id="lvName"></span><span class="muted" id="lvNext"></span></div>
     <p class="muted hint" data-k="levelHint">Every star you earn helps you level up.</p>
     <div class="bar"><i id="lvBar" style="width:0"></i></div>
+    <p class="muted hint" id="lvPeek"></p>
   </section>
 
   <section>
-    <div class="section-head"><h2 data-k="week">This week</h2><span class="streak-wrap"><span class="streak" id="streak"></span><span class="muted streak-note" id="streakNote"></span></span></div>
+    <div class="section-head"><h2 data-k="week">This week</h2><span class="streak-wrap"><span class="streak-row"><span class="streak" id="streak"></span><span class="streak-meter" id="streakMeter"></span></span><span class="streak-notes"><span class="muted streak-note" id="streakNote"></span><span class="muted streak-note" id="streakBig"></span></span></span></div>
     <div class="week" id="week" style="margin-top:10px"></div>
   </section>
 
@@ -338,10 +358,21 @@ body.guide-open .top-bar{z-index:25}
       <span class="jend"><span class="jstar">+2 ★</span><span class="chk">✓</span></span>
     </button>
     <div class="times-card" id="timesCard">
-      <div class="section-head"><h2><span aria-hidden="true">🧮 </span><span data-k="timesHead">Times Table Challenge</span></h2></div>
-      <p class="muted hint" data-k="timesLead">5 questions, 5 seconds each. All right = +2 ★, 1 miss = +1 ★</p>
-      <p class="muted hint" id="timesStatus" hidden></p>
-      <button type="button" class="btn" id="timesGo">Start</button>
+      <div class="section-head"><h2><span aria-hidden="true">🧮 </span><span data-k="timesHead">Times Tables</span></h2></div>
+      <p class="times-kicker" data-k="timesFirst">Practice first!</p>
+      <div class="times-chips" id="timesChips"></div>
+      <div class="times-actions">
+        <button type="button" class="btn" id="timesPracticeBtn">Practice</button>
+        <p class="muted hint" data-k="timesFree">No stars, play as much as you like</p>
+      </div>
+      <p class="muted hint" id="timesCount"></p>
+      <div class="times-real" id="timesReal">
+        <p class="times-badge" id="timesBadge"></p>
+        <p class="muted hint" id="timesRealLead"></p>
+        <p class="muted hint" id="timesNudge" hidden></p>
+        <p class="muted hint" id="timesStatus" hidden></p>
+        <button type="button" class="btn star" id="timesReady">I'm ready!</button>
+      </div>
     </div>
     <div class="photo-block" id="bedPhotos">
       <div class="section-head"><h2><span aria-hidden="true">🌙 </span><span data-k="photoHead">Bedtime photos</span></h2><span class="photo-prog"><span class="muted" id="photoProg">0/5</span><span class="photo-earn" id="photoBonus" hidden>+1 ★ ✓</span></span></div>
@@ -404,7 +435,7 @@ body.guide-open .top-bar{z-index:25}
 </div>
 <div id="timesView" class="times-view" hidden>
   <div class="times-top">
-    <span class="muted" id="timesMode"></span>
+    <span id="timesMode" class="times-mode"></span>
     <button type="button" class="btn alt" id="timesClose">Close</button>
   </div>
   <div id="timesStage" class="times-stage"></div>
@@ -421,13 +452,15 @@ const LANG_KEY = 'tidypop_lang';
 const SOUND_KEY = 'tidypop_sound';
 const GUIDE_KEY = 'tidypop_guide';
 const TIMES_POP_KEY = 'tidypop_times_pop';
+const TIMES_TABLES_KEY = 'tidypop_times_tables';
+const LEVEL_SEEN_KEY = 'tidypop_level_seen';
 const CS_RE = /^[a-z0-9_-]{3,30}$/;
 const PIN_RE = /^[0-9]{4,8}$/;
 const ZONE_IDS = ['floor','bed','desk','dresser','toys'];
 const QUEST_IDS = ['audition','artbox','outside','labels','photo','donate'];
 const CATS = ['경험','특권','선물','용돈'];
 const LEVEL_AT = [0, 30, 80, 160, 300];
-const KNOWN_ERR = ['bad_pin','not_enough_stars','not_all_done','already_checked','callsign_taken','bad_callsign','bad_pin_format','family_not_found','bad_zone','bad_image','photo_not_found','server_error','bad_item_input','item_not_found','bad_quest_input','quest_not_found','bad_quest','bad_delta','reward_not_found','invalid_day','run_not_found','already_finished'];
+const KNOWN_ERR = ['bad_pin','not_enough_stars','not_all_done','already_checked','callsign_taken','bad_callsign','bad_pin_format','family_not_found','bad_zone','bad_image','photo_not_found','server_error','bad_item_input','item_not_found','bad_quest_input','quest_not_found','bad_quest','bad_delta','reward_not_found','invalid_day','run_not_found','already_finished','challenge_done','bad_mode'];
 
 const STR = {
   ko: {
@@ -441,14 +474,21 @@ const STR = {
     week:'이번 주', mission:'오늘의 미션', missionSub:'자기 전 10분 · 구역마다 별 1개',
     checkDaily:'체크리스트는 매일 새로 시작해요!',
     journalLabel:'오늘 저널 썼어요',
-    timesHead:'구구단 도전',
-    timesLead:'5문제, 문제당 5초. 다 맞히면 +2 ★, 1개 틀리면 +1 ★',
-    timesStart:'도전하기', timesPractice:'연습하기',
-    timesPop:'깜짝 퀴즈! 구구단 5문제 도전할래?', timesNow:'도전!', timesLater:'나중에',
-    timesUnfinished:'오늘 도전은 끝났어요. 연습할까요?',
-    timesTodayStar:'오늘: {0}/5 · +{1} ★ ✓', timesTodayZero:'오늘: {0}/5 · 내일 다시 도전!',
-    timesPracticeTag:'연습 (별 없음)', timesAgain:'또 연습하기', timesDone:'닫기',
-    timesPerfect:'완벽해! +2 ★', timesSoClose:'아깝다! +1 ★',
+    timesHead:'구구단',
+    timesFirst:'먼저 연습해요!', timesAll:'전체', timesFree:'별은 없어요, 마음껏 해요',
+    timesCount:'오늘 연습 {0}번',
+    timesPractice:'연습하기',
+    timesRealBadge:'⭐ 진짜 도전',
+    timesRealLead:'하루 한 번! 2~9단 랜덤 5문제. 다 맞히면 +2 ★, 1개 틀리면 +1 ★',
+    timesNudge:'연습 먼저 해 보는 거 어때?', timesReady:'준비됐어요!',
+    timesAsk:'진짜 도전이에요! 오늘 한 번만 할 수 있어요. 준비됐어?',
+    timesStart:'시작!', timesMoreAsk:'연습 더 할래', timesWarn:'시작하면 5문제 끝까지!',
+    timesPop:'구구단 시간! 연습하고 진짜 도전해 보자.', timesPopReal:'진짜 도전', timesLater:'나중에',
+    timesUnfinished:'오늘 도전은 끝났어요.',
+    timesTodayStar:'오늘 도전: {0}/5 · +{1} ★ ✓', timesTodayZero:'오늘 도전: {0}/5 · 내일 다시 도전!',
+    timesPracticeMode:'연습 · {0}', timesRealTag:'⭐ 진짜 도전',
+    timesAgain:'또 연습하기', timesReadyGo:'진짜 도전 준비됐어요!', timesMore:'연습 더 하기', timesDone:'닫기',
+    timesPerfect:'완벽해! +2 ★', timesSoClose:'아깝다! +1 ★', timesGreat:'잘했어!',
     timesZero:'연습하면 돼! 내일 또 도전하자.', timesLate:'시간이 너무 지났어요.',
     timesPracticeScore:'연습 결과: {0}/5',
     photoHead:'자기 전 사진',
@@ -478,7 +518,7 @@ const STR = {
     guide:[
       '방 정리 퀘스트에 온 걸 환영해! 방을 정리하고 별을 모아서 선물로 바꿔 보자.',
       '매일 자기 전 10분, 5개 구역을 정리해. 진짜 다 끝났을 때 구역을 눌러. 구역 하나에 별 1개!',
-      '보너스 별! 5구역 모두 끝내면 +2, 부모님 확인받으면 +2, 7일 연속 성공하면 +10.',
+      '보너스 별! 5구역 모두 끝내면 +2, 부모님 확인받으면 +2. 7일 연속 = +10 ★, 30일 연속 = +30 ★.',
       '대청소 퀘스트는 한 번만 하는 특별 미션이야. 하나에 별 10개! 주말에 부모님이랑 같이 해 봐.',
       '모은 별은 별 상점에서 선물로 바꿀 수 있어. 부모님이 비밀번호를 넣어 주면 교환 완료! 하루 못 해도 괜찮아. 모은 별은 없어지지 않아. 내일 다시 시작하면 돼!'
     ],
@@ -492,13 +532,15 @@ const STR = {
     },
     streakN:'{0}일 연속 중', allOn:'올클리어 보너스 받았어요 (+2)', allOff:'5구역 모두 끝내면 보너스 별 2개 ({0}/5)',
     streakOn:'{0}일 연속 보너스 받았어요 (+10)', streakOff:'연속 보너스까지 {0}일 남았어요',
-    streakLeft:'+10 ★까지 {0}일 남았어요', streakToday:'오늘 +10 ★ 보너스!',
+    streakLeft:'+10 ★까지 {0}일', streakToday:'오늘 +10 ★ 보너스!',
+    streakBig:'🏆 30일 대기록(+30 ★)까지 {0}일', streakBigToday:'🏆 오늘 +30 ★ 대기록 보너스!',
     parentNeed:'올클리어하면 부모님 확인받기', parentReady:'부모님 확인받기 (별 +2)', parentDone:'오늘 부모님 확인 완료!',
     doneMark:'완료!', emptyLog:'구역을 체크하면 여기에 별 기록이 쌓여요',
     logSeeAll:'더보기', logAllTitle:'전체 별 기록', logAllCount:'총 {0}개 기록', logMore:'더 불러오기',
     logFail:'불러오지 못했어요. 다시 해 볼까요?',
-    lvNext:'다음 레벨까지 별 {0}개', lvMax:'최고 레벨 달성!',
-    levels:['정리 새싹','정리 탐험가','정리 기사','정리 마스터','방의 주인'],
+    lvTo:'{1}까지 {0} ★', lvPeek:'다음: {0}', lvStar:'스타 ★{0}',
+    lvUp:'레벨 업! {0}', lvYay:'야호!',
+    levels:['정리 새싹','정리 탐험가','정리 기사','정리 마스터','방의 주인','정리 히어로','정리 마법사','방 마스터','정리 전설','타이디 팝 스타'],
     zones:{
       floor:{name:'바닥',tip:'바닥에 물건 0개. 종이, 신발, 인형 모두 제자리로'},
       bed:{name:'침대',tip:'이불 펴서 덮기, 잠옷은 베개 밑에'},
@@ -556,6 +598,8 @@ const STR = {
       server_error:'잠시 문제가 생겼어요. 다시 해 주세요.',
       run_not_found:'그 도전을 찾지 못했어요.',
       already_finished:'이미 끝난 도전이에요.',
+      challenge_done:'오늘 진짜 도전은 이미 했어요!',
+      bad_mode:'다시 시작해 주세요.',
       bad_reward:'보상 이름은 1~60자, 별은 1~1000개로 입력해 주세요.',
       network:'연결이 잠시 끊겼어요. 다시 눌러 주세요.'
     }
@@ -571,16 +615,23 @@ const STR = {
     week:'This week', mission:'Today’s mission', missionSub:'10 minutes before bed · 1 star each zone',
     checkDaily:'New checklist every day!',
     journalLabel:'I wrote my journal today',
-    timesHead:'Times Table Challenge',
-    timesLead:'5 questions, 5 seconds each. All right = +2 ★, 1 miss = +1 ★',
-    timesStart:'Start', timesPractice:'Practice',
-    timesPop:'Pop quiz time! 5 times tables?', timesNow:'Let\'s go!', timesLater:'Later',
-    timesUnfinished:'Today\'s try is over. Practice?',
-    timesTodayStar:'Today: {0}/5 · +{1} ★ ✓', timesTodayZero:'Today: {0}/5 · Try again tomorrow!',
-    timesPracticeTag:'Practice (no stars)', timesAgain:'Practice again', timesDone:'Done',
-    timesPerfect:'Perfect! +2 ★', timesSoClose:'So close! +1 ★',
+    timesHead:'Times Tables',
+    timesFirst:'Practice first!', timesAll:'All', timesFree:'No stars, play as much as you like',
+    timesCount:'Practiced {0} times today',
+    timesPractice:'Practice',
+    timesRealBadge:'⭐ REAL CHALLENGE',
+    timesRealLead:'Once a day. 5 questions from 2 to 9. All right = +2 ★, 1 miss = +1 ★',
+    timesNudge:'Try a practice round first!', timesReady:'I\'m ready!',
+    timesAsk:'This is the real challenge! You get only one try today. Ready?',
+    timesStart:'Start!', timesMoreAsk:'Practice more', timesWarn:'Once you start, finish all 5!',
+    timesPop:'Times tables time! Practice first, then take the real challenge.', timesPopReal:'Real challenge', timesLater:'Later',
+    timesUnfinished:'Today\'s challenge is over.',
+    timesTodayStar:'Today\'s challenge: {0}/5 · +{1} ★ ✓', timesTodayZero:'Today\'s challenge: {0}/5 · Try again tomorrow!',
+    timesPracticeMode:'PRACTICE · {0}', timesRealTag:'⭐ REAL CHALLENGE',
+    timesAgain:'Practice again', timesReadyGo:'I\'m ready for the real challenge!', timesMore:'Practice more', timesDone:'Done',
+    timesPerfect:'Perfect! +2 ★', timesSoClose:'So close! +1 ★', timesGreat:'Great!',
     timesZero:'Keep practicing! Try again tomorrow.', timesLate:'Time ran out.',
-    timesPracticeScore:'Practice done: {0}/5',
+    timesPracticeScore:'Practice: {0}/5',
     photoHead:'Bedtime photos',
     photoLead:'One photo for each spot before bed. 5 photos = +1 ★',
     photoSafe:'Only your room in the photo. No faces!',
@@ -608,7 +659,7 @@ const STR = {
     guide:[
       'Welcome to Tidy Pop! Tidy your room, collect stars, and trade them for rewards.',
       'Every night before bed, take 10 minutes to tidy 5 zones. Tap a zone when it\'s really done. Each zone = 1 star.',
-      'Bonus stars! Finish all 5 zones = +2. Ask a parent to check = +2. Do all 5 zones for 7 days in a row = +10.',
+      'Bonus stars! Finish all 5 zones = +2. Ask a parent to check = +2. 7 days in a row = +10 ★, 30 days in a row = +30 ★.',
       'Big tidy quests are special one-time jobs. Each one = 10 stars. Try them with a parent on the weekend!',
       'Trade your stars in the Star Shop. A parent enters the PIN to say yes. Missed a day? That\'s okay. Your stars never go away. Just start again tomorrow!'
     ],
@@ -623,13 +674,16 @@ const STR = {
     streakN:'{0} days in a row', allOn:'All-clear bonus earned (+2)', allOff:'Finish all 5 zones for 2 bonus stars ({0}/5)',
     streakOn:'{0}-day streak bonus earned (+10)', streakOff:'{0} days left until the streak bonus',
     streakOff1:'1 day left until the streak bonus',
-    streakLeft:'{0} more days to +10 ★', streakToday:'+10 ★ bonus today!',
+    streakLeft:'{0} more days to +10 ★', streakLeft1:'1 more day to +10 ★', streakToday:'+10 ★ bonus today!',
+    streakBig:'🏆 {0} more days to the 30-day bonus (+30 ★)', streakBig1:'🏆 1 more day to the 30-day bonus (+30 ★)',
+    streakBigToday:'🏆 +30 ★ big streak bonus today!',
     parentNeed:'Clear all zones to ask a parent', parentReady:'Parent check (+2 stars)', parentDone:'Parent checked today!',
     doneMark:'Done!', emptyLog:'Check a zone and the star log shows up here.',
     logSeeAll:'See all', logAllTitle:'All stars', logAllCount:'Total {0} records', logMore:'Load more',
     logFail:'Couldn\'t load. Try again.',
-    lvNext:'{0} stars to the next level', lvMax:'Top level reached!',
-    levels:['Tidy Sprout','Tidy Explorer','Tidy Knight','Tidy Master','Room Captain'],
+    lvTo:'{0} ★ to {1}', lvPeek:'Next: {0}', lvStar:'Star ★{0}',
+    lvUp:'LEVEL UP! {0}', lvYay:'Yay!',
+    levels:['Tidy Sprout','Tidy Explorer','Tidy Knight','Tidy Master','Room Captain','Tidy Hero','Order Wizard','Room Master','Tidy Legend','Tidy Pop Star'],
     zones:{
       floor:{name:'Floor',tip:'Nothing on the floor. Papers, shoes, and plushies go home.'},
       bed:{name:'Bed',tip:'Spread the blanket. Pajamas go under the pillow.'},
@@ -687,6 +741,8 @@ const STR = {
       server_error:'Something went wrong. Please try again.',
       run_not_found:'That round could not be found.',
       already_finished:'That round is already finished.',
+      challenge_done:'You already did today\'s challenge!',
+      bad_mode:'Please start again.',
       bad_reward:'Use a reward name of 1–60 characters and a cost from 1 to 1000.',
       network:'The connection dropped. Please try again.'
     }
@@ -753,9 +809,14 @@ let timesTimer = 0;
 let timesCountTimer = 0;
 let timesRevealTimer = 0;
 let timesPopMem = '';
+let timesWant = 'practice';
+let timesTables = null;
+let timesPick = [];
+let levelCueRank = null;
+let levelSeenMem = null;
 const busyItems = new Set();
 
-function emptyState(){ return { child_name:'', stars:null, total:null, streak:0, days:[], quests:[], custom_quests:[], check_items:[], check_marks:[], photo_zones:[], rewards:[], ledger:[], times_today:null }; }
+function emptyState(){ return { child_name:'', stars:null, total:null, streak:0, days:[], quests:[], custom_quests:[], check_items:[], check_marks:[], photo_zones:[], rewards:[], ledger:[], times_today:null, times_practice_today:0 }; }
 function $(id){ return document.getElementById(id); }
 function pad(n){ return String(n).padStart(2,'0'); }
 function dkey(d){ return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
@@ -807,6 +868,7 @@ function showReason(reason){
   if ((m = s.match(/^(.+) 체크 취소$/)) && ZONE_EN[m[1]]) return ZONE_EN[m[1]] + ' unchecked';
   if (s === '5구역 올클리어 보너스') return 'All 5 zones bonus';
   if (s === '올클리어 보너스 취소') return 'All-clear bonus removed';
+  if ((m = s.match(/^(\d+)일 연속 대기록 보너스$/))) return m[1] + '-day big streak bonus';
   if ((m = s.match(/^(\d+)일 연속 보너스$/))) return m[1] + '-day streak bonus';
   if (s === '부모님 확인 보너스') return 'Parent check bonus';
   if (s === '부모님 조정') return 'Adjusted by parent';
@@ -903,6 +965,7 @@ function normTimesToday(v){
 function applyState(data){
   const days = Array.isArray(data.days) ? data.days : [];
   const prevTimes = S && S.times_today;
+  const prevPractice = S && S.times_practice_today;
   S = {
     child_name: data.child_name || '',
     stars: Number(data.stars),
@@ -924,10 +987,14 @@ function applyState(data){
     photo_zones: Array.isArray(data.photo_zones) ? data.photo_zones.filter(z => ZONE_IDS.includes(z)) : [],
     rewards: Array.isArray(data.rewards) ? data.rewards.map(r => ({ id:r.id, cat:r.cat, name:r.name, cost:Number(r.cost) })) : [],
     ledger: Array.isArray(data.ledger) ? data.ledger.map(l => ({ delta:Number(l.delta), reason:l.reason || '', created_at:l.created_at })) : [],
-    times_today: Object.prototype.hasOwnProperty.call(data, 'times_today') ? normTimesToday(data.times_today) : (prevTimes || null)
+    times_today: Object.prototype.hasOwnProperty.call(data, 'times_today') ? normTimesToday(data.times_today) : (prevTimes || null),
+    times_practice_today: Object.prototype.hasOwnProperty.call(data, 'times_practice_today')
+      ? (Number.isFinite(Number(data.times_practice_today)) ? Number(data.times_practice_today) : 0)
+      : (Number.isFinite(Number(prevPractice)) ? Number(prevPractice) : 0)
   };
   if (mode === 'app') render();
   refreshParent();
+  syncLevelCue();
 }
 
 async function rpc(fn, args){
@@ -1161,28 +1228,31 @@ function render(){
   bits.push(dateLabel());
   $('todayLabel').textContent = bits.join(' · ');
   const total = Number(S.total);
-  let li = 0;
-  if (Number.isFinite(total)) LEVEL_AT.forEach((n,i) => { if (total >= n) li = i; });
-  $('lvName').textContent = Number.isFinite(total) ? ('Lv.'+(li+1)+' '+STR[lang].levels[li]) : '';
-  const next = LEVEL_AT[li+1];
-  if (!Number.isFinite(total)){
+  const info = levelRank(total);
+  if (!info){
+    $('lvName').textContent = '';
     $('lvNext').textContent = '';
+    $('lvPeek').textContent = '';
     $('lvBar').style.width = '0%';
-  } else if (next != null){
-    $('lvNext').textContent = t('lvNext').replace('{0}', next - total);
-    const span = next - LEVEL_AT[li];
-    const pct = span ? Math.max(0, Math.min(100, ((total - LEVEL_AT[li]) / span) * 100)) : 0;
-    $('lvBar').style.width = pct + '%';
   } else {
-    $('lvNext').textContent = t('lvMax');
-    $('lvBar').style.width = '100%';
+    const next = levelNext(info);
+    $('lvName').textContent = levelTitle(info);
+    $('lvNext').textContent = t('lvTo').replace('{0}', Math.max(0, next.at - total)).replace('{1}', next.title);
+    $('lvPeek').textContent = t('lvPeek').replace('{0}', next.title);
+    const span = next.at - info.at;
+    const pct = span ? Math.max(0, Math.min(100, ((total - info.at) / span) * 100)) : 0;
+    $('lvBar').style.width = pct + '%';
   }
   const st = Number(S.streak) || 0;
   $('streak').textContent = st ? t('streakN').replace('{0}', st) : '';
   const streakMod = st % 7;
   const streakLeft = 7 - streakMod;
   const streakBonusDay = st > 0 && streakMod === 0;
-  $('streakNote').textContent = streakBonusDay ? t('streakToday') : t('streakLeft').replace('{0}', streakLeft);
+  $('streakNote').textContent = streakBonusDay ? t('streakToday') : ((lang === 'en' && streakLeft === 1) ? t('streakLeft1') : t('streakLeft').replace('{0}', streakLeft));
+  const bigLeft = 30 - (st % 30);
+  const bigToday = st > 0 && st % 30 === 0;
+  $('streakBig').textContent = bigToday ? t('streakBigToday') : ((lang === 'en' && bigLeft === 1) ? t('streakBig1') : t('streakBig').replace('{0}', bigLeft));
+  paintStreakMeter(st);
   const letters = t('weekLetters');
   let w = '';
   for (let i = 6; i >= 0; i--){
@@ -1382,12 +1452,94 @@ function showLevelPop(){
   document.body.appendChild(d);
   setTimeout(function(){ d.remove(); }, 1500);
 }
-function levelIndex(total){
+function levelPoints(){
+  const l5 = LEVEL_AT[4];
+  const points = LEVEL_AT.slice();
+  [150, 350, 600, 900, 1300].forEach(function(n){ points.push(l5 + n); });
+  return points;
+}
+function levelRank(total){
   const n = Number(total);
-  if (!Number.isFinite(n)) return -1;
-  let li = 0;
-  LEVEL_AT.forEach(function(thr, i){ if (n >= thr) li = i; });
-  return li;
+  if (!Number.isFinite(n)) return null;
+  const points = levelPoints();
+  let idx = 0;
+  points.forEach(function(thr, i){ if (n >= thr) idx = i; });
+  let star = 0;
+  let at = points[idx];
+  if (idx === points.length - 1){
+    star = Math.floor((n - points[idx]) / 500);
+    at = points[idx] + star * 500;
+  }
+  return { idx: idx, star: star, at: at, points: points };
+}
+function levelTitle(info){
+  const names = STR[lang].levels;
+  const name = names[Math.min(info.idx, names.length - 1)] || '';
+  const lv = Math.min(info.idx + 1, 10);
+  let title = 'Lv.' + lv + ' ' + name;
+  if (info.star > 0) title += ' · ' + t('lvStar').replace('{0}', info.star);
+  return title;
+}
+function levelNext(info){
+  if (info.idx < info.points.length - 1){
+    const nextIdx = info.idx + 1;
+    const name = STR[lang].levels[nextIdx] || '';
+    return { at: info.points[nextIdx], title: 'Lv.' + (nextIdx + 1) + ' ' + name };
+  }
+  const nextStar = info.star + 1;
+  return { at: info.points[info.points.length - 1] + nextStar * 500, title: t('lvStar').replace('{0}', nextStar) };
+}
+function levelIndex(total){
+  const info = levelRank(total);
+  if (!info) return -1;
+  return info.idx + info.star;
+}
+function readLevelSeen(){
+  if (levelSeenMem != null && Number.isFinite(levelSeenMem)) return levelSeenMem;
+  const raw = storeGet(LEVEL_SEEN_KEY);
+  if (raw == null || raw === '') return null;
+  const n = Number(raw);
+  return Number.isFinite(n) ? n : null;
+}
+function writeLevelSeen(rank){
+  levelSeenMem = rank;
+  storeSet(LEVEL_SEEN_KEY, String(rank));
+}
+function syncLevelCue(){
+  const info = levelRank(S && S.total);
+  if (!info) return;
+  const rank = info.idx + info.star;
+  const saved = readLevelSeen();
+  if (saved == null){
+    if (info.idx + 1 >= 6) levelCueRank = rank;
+    else { writeLevelSeen(rank); levelCueRank = null; }
+  } else if (rank > saved) levelCueRank = rank;
+  else levelCueRank = null;
+  showLevelCue();
+}
+function showLevelCue(){
+  if (levelCueRank == null || mode !== 'app') return;
+  if (timesOn || albumOn || ledgerOpen || guideAt >= 0 || questOpen || cquestOpen || $('scrim')) return;
+  const info = levelRank(S && S.total);
+  if (!info) return;
+  const rank = info.idx + info.star;
+  writeLevelSeen(rank);
+  levelCueRank = null;
+  modal('<h2 id="lvUpTitle">'+esc(t('lvUp').replace('{0}', levelTitle(info)))+'</h2><button type="button" class="btn star" id="lvYay">'+esc(t('lvYay'))+'</button>', close);
+  $('lvYay').onclick = close;
+  if (fxGate('level')){ playLevel(); confettiLevel(); }
+}
+function paintStreakMeter(st){
+  const meter = $('streakMeter');
+  if (!meter) return;
+  let filled = st % 30;
+  if (st > 0 && filled === 0) filled = 30;
+  meter.replaceChildren();
+  for (let i = 0; i < 30; i++){
+    const cell = document.createElement('i');
+    if (i < filled) cell.className = 'on';
+    meter.appendChild(cell);
+  }
 }
 function dayOf(state, k){
   return (state && state.days || []).find(function(d){ return String(d.day).slice(0,10) === k; });
@@ -1420,7 +1572,7 @@ function rewardFx(before, res, fx){
     else if (fx.kind === 'redeem') burst(14);
   };
   if ((checkOn || journalOn) && fxGate('tick')) playTick();
-  if (leveled && fxGate('level')){ spark(); playLevel(); confettiLevel(); showLevelPop(); return; }
+  if (leveled){ spark(); return; }
   if ((streakNew || parentNew) && fxGate('bonus')){ spark(); playBonus(); confettiSides(); return; }
   if (allNew && fxGate('clear')){ spark(); playClear(); confettiClear(); return; }
   if (questOn && fxGate('quest')){ burst(12); playQuest(); confettiQuest(); return; }
@@ -1708,6 +1860,7 @@ function closeAlbum(){
   albumToken++;
   const box = $('albumView');
   if (box) box.hidden = true;
+  setTimeout(showLevelCue, 0);
 }
 function albumGo(i){
   if (i < 0 || i >= albumPhotos.length) return;
@@ -2146,6 +2299,7 @@ function close(){
   ledgerToken++;
   $('modalRoot').innerHTML = '';
   document.body.classList.remove('guide-open');
+  setTimeout(showLevelCue, 0);
 }
 let guideAt = -1;
 let questOpen = '';
@@ -2692,20 +2846,88 @@ function setGateErr(code){
   const el = $('gateErr');
   if (el) el.textContent = gateErrCode ? errText(gateErrCode) : '';
 }
+function loadTimesPick(){
+  timesPick = [];
+  const raw = storeGet(TIMES_TABLES_KEY);
+  if (!raw) return;
+  try {
+    const arr = JSON.parse(raw);
+    if (!Array.isArray(arr)) return;
+    const seen = {};
+    arr.forEach(function(n){
+      const v = Number(n);
+      if (Number.isInteger(v) && v >= 2 && v <= 9 && !seen[v]){ seen[v] = true; timesPick.push(v); }
+    });
+    timesPick.sort(function(a, b){ return a - b; });
+  } catch(e){ timesPick = []; }
+}
+function saveTimesPick(){
+  if (!timesPick.length) storeRemove(TIMES_TABLES_KEY);
+  else storeSet(TIMES_TABLES_KEY, JSON.stringify(timesPick));
+}
+function paintTimesChips(){
+  const box = $('timesChips');
+  if (!box) return;
+  box.replaceChildren();
+  const all = document.createElement('button');
+  all.type = 'button';
+  all.setAttribute('data-table', 'all');
+  all.textContent = t('timesAll');
+  if (!timesPick.length) all.className = 'on';
+  box.appendChild(all);
+  for (let n = 2; n <= 9; n++){
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.setAttribute('data-table', String(n));
+    b.textContent = String(n);
+    if (timesPick.indexOf(n) >= 0) b.className = 'on';
+    box.appendChild(b);
+  }
+}
+function onTimesChip(e){
+  const b = e.target.closest('[data-table]');
+  if (!b || !$('timesChips') || !$('timesChips').contains(b)) return;
+  const v = b.getAttribute('data-table');
+  if (v === 'all') timesPick = [];
+  else {
+    const n = Number(v);
+    if (timesPick.indexOf(n) >= 0) timesPick = timesPick.filter(function(x){ return x !== n; });
+    else timesPick = timesPick.concat(n).sort(function(a, c){ return a - c; });
+  }
+  saveTimesPick();
+  paintTimesChips();
+}
 function paintTimesCard(){
   const status = $('timesStatus');
-  const btn = $('timesGo');
-  if (!status || !btn) return;
+  const ready = $('timesReady');
+  const badge = $('timesBadge');
+  const lead = $('timesRealLead');
+  const nudge = $('timesNudge');
+  const count = $('timesCount');
+  if (!status || !ready) return;
+  paintTimesChips();
+  const practiceBtn = $('timesPracticeBtn');
+  if (practiceBtn) practiceBtn.textContent = t('timesPractice');
+  const n = Number(S && S.times_practice_today);
+  if (count) count.textContent = t('timesCount').replace('{0}', Number.isFinite(n) ? n : 0);
   const info = S && S.times_today;
+  if (badge) badge.textContent = info ? '' : t('timesRealBadge');
+  if (lead){
+    lead.textContent = info ? '' : t('timesRealLead');
+    lead.hidden = !!info;
+  }
+  if (badge) badge.hidden = !!info;
+  ready.textContent = t('timesReady');
+  ready.hidden = !!info;
+  if (nudge){
+    nudge.textContent = t('timesNudge');
+    nudge.hidden = !!info || (Number.isFinite(n) && n > 0);
+  }
   if (!info){
     status.textContent = '';
     status.hidden = true;
-    btn.textContent = t('timesStart');
-    btn.className = 'btn';
     return;
   }
-  btn.textContent = t('timesPractice');
-  btn.className = 'btn alt';
   status.hidden = false;
   if (!info.finished){
     status.textContent = t('timesUnfinished');
@@ -2714,6 +2936,18 @@ function paintTimesCard(){
   status.textContent = info.stars > 0
     ? t('timesTodayStar').replace('{0}', info.correct).replace('{1}', info.stars)
     : t('timesTodayZero').replace('{0}', info.correct);
+}
+function timesTablesText(){
+  if (!timesTables || !timesTables.length) return t('timesAll');
+  if (lang === 'ko') return timesTables.map(function(n){ return n + '단'; }).join(', ');
+  return timesTables.join(', ');
+}
+function paintTimesBanner(){
+  const modeEl = $('timesMode');
+  if (!modeEl) return;
+  const real = timesQs.length ? !!timesOfficial : timesWant === 'challenge';
+  modeEl.className = 'times-mode ' + (real ? 'real' : 'practice');
+  modeEl.textContent = real ? t('timesRealTag') : t('timesPracticeMode').replace('{0}', timesTablesText());
 }
 function timesPopSeen(){
   if (timesPopMem === today()) return true;
@@ -2729,9 +2963,17 @@ function timesBusy(){
 function openTimesPop(){
   if (mode !== 'app' || !callsign || (S && S.times_today) || timesPopSeen() || timesBusy()) return;
   markTimesPop();
-  modal('<h2>'+esc(t('timesPop'))+'</h2><div class="row"><button type="button" class="btn alt" id="timesLater">'+esc(t('timesLater'))+'</button><button type="button" class="btn star" id="timesNow">'+esc(t('timesNow'))+'</button></div>', close);
+  modal('<h2>'+esc(t('timesPop'))+'</h2><div class="row"><button type="button" class="btn" id="timesPopGo">'+esc(t('timesPractice'))+'</button><button type="button" class="btn star" id="timesPopReal">'+esc(t('timesPopReal'))+'</button><button type="button" class="btn alt" id="timesLater">'+esc(t('timesLater'))+'</button></div>', close);
+  $('timesPopGo').onclick = () => { close(); beginTimes('practice'); };
+  $('timesPopReal').onclick = () => { close(); askReal(); };
   $('timesLater').onclick = close;
-  $('timesNow').onclick = () => { close(); beginTimes(); };
+}
+function askReal(){
+  modal('<h2>'+esc(t('timesAsk'))+'</h2><p class="muted">'+esc(t('timesWarn'))+'</p><div class="row"><button type="button" class="btn alt" id="timesMoreAsk">'+esc(t('timesMoreAsk'))+'</button><button type="button" class="btn star" id="timesStartGo">'+esc(t('timesStart'))+'</button></div>', close);
+  const scrim = $('scrim');
+  if (scrim && timesOn) scrim.style.zIndex = '34';
+  $('timesMoreAsk').onclick = () => { close(); if (timesOn && timesPhase === 'result') endTimes(); };
+  $('timesStartGo').onclick = () => { close(); beginTimes('challenge'); };
 }
 function stopTimesTimers(){
   clearInterval(timesTimer);
@@ -2745,6 +2987,7 @@ function endTimes(){
   const view = $('timesView');
   if (view) view.hidden = true;
   document.body.classList.remove('times-open');
+  setTimeout(showLevelCue, 0);
 }
 function abandonTimes(){
   if (timesSent && timesPhase !== 'result') return;
@@ -2780,9 +3023,9 @@ function paintTimesGame(){
   if (!view || !stage) return;
   view.hidden = !timesOn;
   document.body.classList.toggle('times-open', !!timesOn);
+  stage.classList.toggle('can-scroll', timesPhase === 'result');
   if (!timesOn){ stage.replaceChildren(); return; }
-  const modeEl = $('timesMode');
-  if (modeEl) modeEl.textContent = (!timesOfficial && timesQs.length) ? t('timesPracticeTag') : '';
+  paintTimesBanner();
   const shut = $('timesClose');
   if (shut) shut.textContent = timesPhase === 'result' ? t('timesDone') : t('close');
   stage.replaceChildren();
@@ -2855,21 +3098,27 @@ function paintTimesGame(){
     head.className = 'times-q';
     head.id = 'timesHeadline';
     head.style.fontSize = 'clamp(26px, 5vh, 44px)';
+    const practicePerfect = !res.error && !res.late && !res.official && Number(res.correct) === 5;
     if (res.error) head.textContent = errText(res.error);
     else if (res.late) head.textContent = t('timesLate');
+    else if (practicePerfect) head.textContent = t('timesGreat');
     else if (!res.official) head.textContent = t('timesPracticeScore').replace('{0}', Number(res.correct) || 0);
     else if (Number(res.stars) === 2) head.textContent = t('timesPerfect');
     else if (Number(res.stars) === 1) head.textContent = t('timesSoClose');
     else head.textContent = t('timesZero');
     stage.appendChild(head);
     if (!res.error){
-      const score = document.createElement('p');
-      score.className = 'times-prog';
-      score.id = 'timesScore';
       const got = Number(res.correct) || 0;
       const stars = Number(res.stars) || 0;
-      score.textContent = got + '/5' + (stars > 0 ? ' · +' + stars + ' ★' : '');
-      stage.appendChild(score);
+      if (res.official || practicePerfect || res.late){
+        const score = document.createElement('p');
+        score.className = 'times-prog';
+        score.id = 'timesScore';
+        score.textContent = !res.official
+          ? t('timesPracticeScore').replace('{0}', got)
+          : (got + '/5' + (stars > 0 ? ' · +' + stars + ' ★' : ''));
+        stage.appendChild(score);
+      }
       const lines = document.createElement('div');
       lines.className = 'times-lines';
       (Array.isArray(res.results) ? res.results : []).forEach(row => {
@@ -2892,6 +3141,18 @@ function paintTimesGame(){
         lines.appendChild(line);
       });
       stage.appendChild(lines);
+      if (!res.official){
+        (Array.isArray(res.results) ? res.results : []).forEach(row => {
+          if (!row || row.ok) return;
+          const a = Number(row.a);
+          const b = Number(row.b);
+          const right = Number.isFinite(Number(row.correct_answer)) ? Number(row.correct_answer) : (a * b);
+          const miss = document.createElement('p');
+          miss.className = 'times-miss';
+          miss.textContent = a + ' × ' + b + ' = ' + right;
+          stage.appendChild(miss);
+        });
+      }
     }
     const row = document.createElement('div');
     row.className = 'row';
@@ -2900,14 +3161,32 @@ function paintTimesGame(){
     again.className = 'btn';
     again.id = 'timesAgain';
     again.textContent = t('timesAgain');
-    again.onclick = () => beginTimes();
+    again.onclick = () => beginTimes('practice');
+    if (!res.official && !(S && S.times_today)){
+      const ready = document.createElement('button');
+      ready.type = 'button';
+      ready.className = 'btn star';
+      ready.id = 'timesReadyGo';
+      ready.textContent = t('timesReadyGo');
+      ready.onclick = () => askReal();
+      row.appendChild(again);
+      row.appendChild(ready);
+    } else if (res.official){
+      const more = document.createElement('button');
+      more.type = 'button';
+      more.className = 'btn alt';
+      more.id = 'timesMoreBtn';
+      more.textContent = t('timesMore');
+      more.onclick = () => endTimes();
+      row.appendChild(again);
+      row.appendChild(more);
+    } else row.appendChild(again);
     const done = document.createElement('button');
     done.type = 'button';
     done.className = 'btn alt';
     done.id = 'timesDoneBtn';
     done.textContent = t('timesDone');
     done.onclick = () => endTimes();
-    row.appendChild(again);
     row.appendChild(done);
     stage.appendChild(row);
   }
@@ -2991,15 +3270,19 @@ async function submitTimes(token){
   timesResult = res;
   timesPhase = 'result';
   paintTimesGame();
-  if (!res.late && Number(res.stars) === 2 && fxGate('clear')){ playClear(); confettiClear(); }
+  if (!res.late && res.official && Number(res.stars) === 2 && fxGate('clear')){ playClear(); confettiClear(); }
+  else if (!res.late && !res.official && Number(res.correct) === 5 && fxGate('clear')) playClear();
 }
-async function beginTimes(){
+async function beginTimes(mode){
   if (!callsign) return;
+  const want = mode === 'challenge' ? 'challenge' : 'practice';
   stopTimesTimers();
   const token = ++timesToken;
   timesOn = true;
   timesSent = false;
-  timesOfficial = false;
+  timesWant = want;
+  timesOfficial = want === 'challenge';
+  timesTables = want === 'challenge' ? null : (timesPick.length ? timesPick.slice() : null);
   timesQs = [];
   timesAnswers = [null, null, null, null, null];
   timesIndex = 0;
@@ -3009,12 +3292,14 @@ async function beginTimes(){
   timesPhase = 'loading';
   document.body.classList.add('times-open');
   paintTimesGame();
-  const res = await rpc('tidy_times_start', { p_callsign: callsign, p_today: today() });
+  const res = await rpc('tidy_times_start', { p_callsign: callsign, p_today: today(), p_mode: want, p_tables: timesTables });
   if (token !== timesToken || !timesOn) return;
   const questions = res && Array.isArray(res.questions) ? res.questions : [];
   if (!(res && res.ok && questions.length === 5 && res.run_id)){
+    const code = (res && res.error) || 'network';
     endTimes();
-    toast(errText((res && res.error) || 'network'));
+    toast(errText(code));
+    if (code === 'challenge_done') refreshState();
     return;
   }
   timesRun = res.run_id;
@@ -3041,6 +3326,7 @@ function showApp(){
   render();
   if (guideAt < 0 && !questOpen && storeGet(GUIDE_KEY) !== '1') openGuide();
   else openTimesPop();
+  showLevelCue();
 }
 function setGateBusy(on){
   $('loadBtn').disabled = on;
@@ -3183,7 +3469,10 @@ $('csIn').addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDe
 $('nameIn').addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDefault(); $('pinNew').focus(); } });
 $('pinNew').addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDefault(); createFamily(); } });
 $('journalBtn').onclick = toggleJournal;
-$('timesGo').onclick = () => beginTimes();
+$('timesPracticeBtn').onclick = () => beginTimes('practice');
+$('timesReady').onclick = () => askReal();
+$('timesChips').addEventListener('click', onTimesChip);
+loadTimesPick();
 $('timesClose').onclick = () => { if (timesPhase === 'result') endTimes(); else abandonTimes(); };
 $('timesView').addEventListener('click', e => {
   const b = e.target.closest('[data-tk]');
