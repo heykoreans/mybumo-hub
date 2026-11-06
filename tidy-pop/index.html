@@ -57,6 +57,9 @@ a{color:var(--sky)}
 .dot.part{border:2px solid var(--star);background:var(--soft-star)}
 .day.today .dot{outline:2px solid var(--sky);outline-offset:2px}
 .dot.rest{background:var(--soft-sky);border-style:solid;border-color:var(--sky)}
+.dot.pause{background:var(--soft-sky);border-style:solid;border-color:var(--sky)}
+.pause-banner{margin:0;padding:12px 14px;border-radius:16px;background:var(--soft-sky);border:2px solid var(--sky);font-family:var(--display);font-size:18px;line-height:1.35;overflow-wrap:break-word}
+.pause-hold{margin:0;overflow-wrap:break-word}
 .rest-tag{font-size:10px;line-height:1.15;color:var(--sky);text-align:center;max-width:100%}
 .rest-banner{margin:0;padding:10px 12px;border-radius:14px;background:var(--soft-sky);overflow-wrap:break-word}
 .rest-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;min-width:0}
@@ -343,6 +346,8 @@ body.guide-open .top-bar{z-index:25}
     <p class="muted hint" id="lvPeek"></p>
   </section>
 
+  <p class="pause-banner" id="pauseBanner" hidden></p>
+
   <section>
     <div class="section-head"><h2 data-k="week">This week</h2><span class="streak-wrap"><span class="streak-row"><span class="streak" id="streak"></span><span class="streak-meter" id="streakMeter"></span></span><span class="streak-notes"><span class="muted streak-note" id="streakNote"></span><span class="muted streak-note" id="streakBig"></span></span></span></div>
     <div class="week" id="week" style="margin-top:10px"></div>
@@ -350,17 +355,19 @@ body.guide-open .top-bar{z-index:25}
 
   <section style="display:flex;flex-direction:column;gap:12px">
     <p class="rest-banner" id="restBanner" hidden></p>
-    <div>
+    <div id="missionBlock">
       <div class="section-head"><h2 data-k="mission">Today’s mission</h2><span class="muted" data-k="missionSub">10 minutes before bed · 1 star each zone</span></div>
       <p class="muted hint" data-k="checkDaily">New checklist every day!</p>
       <p class="muted hint" data-k="missionHint">Tap each zone when it's done. Tap again to undo.</p>
     </div>
+    <p class="pause-hold muted" id="pauseHold" hidden></p>
     <div class="zones" id="zones"></div>
-    <div class="bonus-row">
+    <div class="bonus-row" id="bonusRow">
       <div class="pill" id="allPill"></div>
       <div class="pill" id="streakPill"></div>
     </div>
     <button type="button" class="btn star" id="parentCheck">Parent check (+2 stars)</button>
+    <p class="muted hint" id="pauseEarn" hidden></p>
     <button type="button" class="zone" id="journalBtn" aria-pressed="false">
       <span class="ic" aria-hidden="true">📓</span>
       <span class="tx"><strong data-k="journalLabel">I wrote my journal today</strong></span>
@@ -527,7 +534,7 @@ const STR = {
     guide:[
       '방 정리 퀘스트에 온 걸 환영해! 방을 정리하고 별을 모아서 선물로 바꿔 보자.',
       '매일 자기 전 10분, 5개 구역을 정리해. 진짜 다 끝났을 때 구역을 눌러. 구역 하나에 별 1개!',
-      '보너스 별! 5구역 모두 끝내면 +2, 부모님 확인받으면 +2. 7일 연속 = +10 ★, 30일 연속 = +30 ★. 아프거나 여행 갈 때는 부모님이 쉬는 날로 정해 주면 연속 기록이 지켜져요.',
+      '보너스 별! 5구역 모두 끝내면 +2, 부모님 확인받으면 +2. 7일 연속 = +10 ★, 30일 연속 = +30 ★. 아프거나 여행 갈 때는 부모님이 쉬는 날로 정해 주면 연속 기록이 지켜져요. 긴 여행 때는 부모님이 일시정지할 수 있어요. 연속 기록이 기다려 줘요.',
       '대청소 퀘스트는 한 번만 하는 특별 미션이야. 하나에 별 10개! 주말에 부모님이랑 같이 해 봐.',
       '모은 별은 별 상점에서 선물로 바꿀 수 있어. 부모님이 비밀번호를 넣어 주면 교환 완료! 하루 못 해도 괜찮아. 모은 별은 없어지지 않아. 내일 다시 시작하면 돼!'
     ],
@@ -550,6 +557,15 @@ const STR = {
     restAsk:'이 쉬는 날을 취소할까요?', restEmpty:'지정된 쉬는 날이 없어요',
     restTag:'쉬는 날',
     restToday:'☁️ 오늘은 쉬는 날! 연속 기록은 지켜져요. 정리하면 별은 그대로 받아요.',
+    pauseHead:'여행 일시정지',
+    pauseLead:'긴 여행을 가나요? 일시정지하면 연속 기록이 지켜져요. 돌아오면 다시 시작하세요.',
+    pauseNow:'⏸ 지금 일시정지', pauseAsk:'오늘부터 일시정지할까요?',
+    pauseOn:'{0}부터 일시정지 중 ({1}일째)',
+    pauseResume:'▶ 다시 시작', pauseBack:'돌아왔군요! 오늘부터 다시 시작할까요?',
+    pauseBanner:'✈️ {0}부터 여행 중이라 멈춤 상태예요. 연속 기록은 그대로 저장돼 있어요!',
+    pauseHold:'여행 중에는 방 정리 미션을 쉬어요.',
+    pauseEarn:'여행 중에도 별을 받을 수 있어요!',
+    pauseFrozen:'연속 {0}일에서 멈춰 있어요',
     parentNeed:'올클리어하면 부모님 확인받기', parentReady:'부모님 확인받기 (별 +2)', parentDone:'오늘 부모님 확인 완료!',
     doneMark:'완료!', emptyLog:'구역을 체크하면 여기에 별 기록이 쌓여요',
     logSeeAll:'더보기', logAllTitle:'전체 별 기록', logAllCount:'총 {0}개 기록', logMore:'더 불러오기',
@@ -677,7 +693,7 @@ const STR = {
     guide:[
       'Welcome to Tidy Pop! Tidy your room, collect stars, and trade them for rewards.',
       'Every night before bed, take 10 minutes to tidy 5 zones. Tap a zone when it\'s really done. Each zone = 1 star.',
-      'Bonus stars! Finish all 5 zones = +2. Ask a parent to check = +2. 7 days in a row = +10 ★, 30 days in a row = +30 ★. Sick or traveling? A parent can set a rest day so your streak stays safe.',
+      'Bonus stars! Finish all 5 zones = +2. Ask a parent to check = +2. 7 days in a row = +10 ★, 30 days in a row = +30 ★. Sick or traveling? A parent can set a rest day so your streak stays safe. Long trip? A parent can pause the game. Your streak waits for you.',
       'Big tidy quests are special one-time jobs. Each one = 10 stars. Try them with a parent on the weekend!',
       'Trade your stars in the Star Shop. A parent enters the PIN to say yes. Missed a day? That\'s okay. Your stars never go away. Just start again tomorrow!'
     ],
@@ -702,6 +718,15 @@ const STR = {
     restAsk:'Cancel this rest day?', restEmpty:'No rest days',
     restTag:'Rest',
     restToday:'☁️ Rest day today! Your streak is safe. You can still tidy for stars.',
+    pauseHead:'Travel pause',
+    pauseLead:'Going on a long trip? Pause to keep the streak safe. Resume when you\'re back.',
+    pauseNow:'⏸ Pause now', pauseAsk:'Pause from today?',
+    pauseOn:'Paused since {0} ({1} days)', pauseOn1:'Paused since {0} (1 day)',
+    pauseResume:'▶ Resume', pauseBack:'Welcome back! Resume from today?',
+    pauseBanner:'✈️ Paused for travel since {0}. Your streak is saved!',
+    pauseHold:'Room missions are paused while you travel.',
+    pauseEarn:'You can still earn stars on your trip!',
+    pauseFrozen:'Streak frozen at {0} days', pauseFrozen1:'Streak frozen at 1 day',
     parentNeed:'Clear all zones to ask a parent', parentReady:'Parent check (+2 stars)', parentDone:'Parent checked today!',
     doneMark:'Done!', emptyLog:'Check a zone and the star log shows up here.',
     logSeeAll:'See all', logAllTitle:'All stars', logAllCount:'Total {0} records', logMore:'Load more',
@@ -809,6 +834,8 @@ let callsign = '';
 let sessionPin = '';
 let restAskDay = '';
 let restBusy = false;
+let pauseAsk = '';
+let pauseBusy = false;
 let gateErrCode = '';
 let S = emptyState();
 let tail = Promise.resolve();
@@ -845,7 +872,7 @@ let levelCueRank = null;
 let levelSeenMem = null;
 const busyItems = new Set();
 
-function emptyState(){ return { child_name:'', stars:null, total:null, streak:0, days:[], quests:[], custom_quests:[], check_items:[], check_marks:[], photo_zones:[], rewards:[], ledger:[], times_today:null, times_practice_today:0, rest_days:[], rest_left_this_month:3 }; }
+function emptyState(){ return { child_name:'', stars:null, total:null, streak:0, days:[], quests:[], custom_quests:[], check_items:[], check_marks:[], photo_zones:[], rewards:[], ledger:[], times_today:null, times_practice_today:0, rest_days:[], rest_left_this_month:3, paused:false, paused_since:null, pause_ranges:[] }; }
 function $(id){ return document.getElementById(id); }
 function pad(n){ return String(n).padStart(2,'0'); }
 function dkey(d){ return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
@@ -938,6 +965,7 @@ function applyLang(){
   if (help) help.setAttribute('aria-label', t('helpLabel'));
   if ($('gateErr')) setGateErr(gateErrCode);
   if (mode === 'app') render();
+  if ($('pauseBox')) paintPause();
   if ($('restList')) paintRestDays();
   if (albumOn) paintAlbum();
   if (timesOn) paintTimesGame();
@@ -974,6 +1002,18 @@ function isRestDay(k){
   if (rec && rec.rest_day) return true;
   return (S.rest_days || []).indexOf(key) >= 0;
 }
+function normPauseRanges(v){
+  if (!Array.isArray(v)) return [];
+  return v.map(function(r){
+    const start = r && r.start ? String(r.start).slice(0,10) : '';
+    const end = r && r.end ? String(r.end).slice(0,10) : null;
+    return { start: start, end: end };
+  }).filter(function(r){ return /^\d{4}-\d{2}-\d{2}$/.test(r.start); });
+}
+function inPause(k){
+  const day = String(k || '').slice(0,10);
+  return (S.pause_ranges || []).some(function(r){ return r.start && day >= r.start && (!r.end || day <= r.end); });
+}
 function ensureToday(){
   const k = today();
   let d = dayRec(k);
@@ -1004,6 +1044,9 @@ function applyState(data){
   const prevPractice = S && S.times_practice_today;
   const prevRest = S && S.rest_days;
   const prevLeft = S && S.rest_left_this_month;
+  const prevPaused = !!(S && S.paused);
+  const prevSince = S && S.paused_since;
+  const prevRanges = S && S.pause_ranges;
   S = {
     child_name: data.child_name || '',
     stars: Number(data.stars),
@@ -1035,7 +1078,14 @@ function applyState(data){
       : (Array.isArray(prevRest) ? prevRest.slice() : []),
     rest_left_this_month: Object.prototype.hasOwnProperty.call(data, 'rest_left_this_month')
       ? (Number.isFinite(Number(data.rest_left_this_month)) ? Math.max(0, Math.min(3, Number(data.rest_left_this_month))) : 0)
-      : (Number.isFinite(Number(prevLeft)) ? Number(prevLeft) : 3)
+      : (Number.isFinite(Number(prevLeft)) ? Number(prevLeft) : 3),
+    paused: Object.prototype.hasOwnProperty.call(data, 'paused') ? !!data.paused : prevPaused,
+    paused_since: Object.prototype.hasOwnProperty.call(data, 'paused_since')
+      ? (data.paused_since ? String(data.paused_since).slice(0,10) : null)
+      : (prevSince || null),
+    pause_ranges: Object.prototype.hasOwnProperty.call(data, 'pause_ranges')
+      ? normPauseRanges(data.pause_ranges)
+      : (Array.isArray(prevRanges) ? prevRanges.map(function(r){ return { start:r.start, end:r.end }; }) : [])
   };
   if (mode === 'app') render();
   refreshParent();
@@ -1293,10 +1343,17 @@ function render(){
   const streakMod = st % 7;
   const streakLeft = 7 - streakMod;
   const streakBonusDay = st > 0 && streakMod === 0;
-  $('streakNote').textContent = streakBonusDay ? t('streakToday') : ((lang === 'en' && streakLeft === 1) ? t('streakLeft1') : t('streakLeft').replace('{0}', streakLeft));
-  const bigLeft = 30 - (st % 30);
-  const bigToday = st > 0 && st % 30 === 0;
-  $('streakBig').textContent = bigToday ? t('streakBigToday') : ((lang === 'en' && bigLeft === 1) ? t('streakBig1') : t('streakBig').replace('{0}', bigLeft));
+  const bigNote = $('streakBig');
+  if (S.paused){
+    $('streakNote').textContent = (lang === 'en' && st === 1) ? t('pauseFrozen1') : t('pauseFrozen').replace('{0}', st);
+    if (bigNote){ bigNote.textContent = ''; bigNote.hidden = true; }
+  } else {
+    if (bigNote) bigNote.hidden = false;
+    $('streakNote').textContent = streakBonusDay ? t('streakToday') : ((lang === 'en' && streakLeft === 1) ? t('streakLeft1') : t('streakLeft').replace('{0}', streakLeft));
+    const bigLeft = 30 - (st % 30);
+    const bigToday = st > 0 && st % 30 === 0;
+    if (bigNote) bigNote.textContent = bigToday ? t('streakBigToday') : ((lang === 'en' && bigLeft === 1) ? t('streakBig1') : t('streakBig').replace('{0}', bigLeft));
+  }
   paintStreakMeter(st);
   const letters = t('weekLetters');
   let w = '';
@@ -1307,9 +1364,10 @@ function render(){
     const rec = dayRec(key);
     const n = rec ? rec.zones.length : 0;
     const full = n === ZONE_IDS.length;
-    const rest = isRestDay(key);
-    const mark = rest ? '☁️' : (full ? '★' : (n || ''));
-    const cls = rest ? 'rest' : (full ? 'full' : (n ? 'part' : ''));
+    const away = inPause(key);
+    const rest = !away && isRestDay(key);
+    const mark = away ? '✈️' : (rest ? '☁️' : (full ? '★' : (n || '')));
+    const cls = away ? 'pause' : (rest ? 'rest' : (full ? 'full' : (n ? 'part' : '')));
     w += '<div class="day '+(i===0?'today':'')+'"><span class="dot '+cls+'">'+mark+'</span><span>'+letters[d.getDay()]+'</span>'+(rest ? '<span class="rest-tag">'+esc(t('restTag'))+'</span>' : '')+'</div>';
   }
   $('week').innerHTML = w;
@@ -1319,6 +1377,7 @@ function render(){
     restBanner.hidden = !todayRest;
     restBanner.textContent = todayRest ? t('restToday') : '';
   }
+  applyPauseChrome();
   $('zones').innerHTML = ZONE_IDS.map(id => zoneCard(id, D)).join('');
   paintJournal(D);
   paintTimesCard();
@@ -1333,7 +1392,7 @@ function render(){
   pc.textContent = D.parent_checked ? t('parentDone') : D.all_bonus ? t('parentReady') : t('parentNeed');
   const openCq = (S.custom_quests || []).filter(q => !q.done);
   const week = $('weekQuests');
-  if (week) week.hidden = openCq.length === 0;
+  if (week) week.hidden = !!(S && S.paused) || openCq.length === 0;
   if ($('cquests')) $('cquests').innerHTML = openCq.map(cquestCard).join('');
   const openBig = QUEST_IDS.filter(id => !(S.quests || []).includes(id));
   const doneBig = QUEST_IDS.filter(id => (S.quests || []).includes(id));
@@ -2411,10 +2470,106 @@ async function setRestDay(day, on){
     if ($('pErr')) $('pErr').textContent = '';
   } else if ($('pErr')) $('pErr').textContent = errText((res && res.error) || 'network');
 }
+function pauseDateLabel(day){
+  const date = dateFromKey(day);
+  if (!date) return String(day || '');
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  if (lang === 'ko') return (date.getMonth()+1)+'월 '+date.getDate()+'일';
+  return months[date.getMonth()]+' '+date.getDate();
+}
+function pauseDays(since){
+  const a = dateFromKey(since);
+  const b = dateFromKey(today());
+  if (!a || !b) return 1;
+  const n = Math.round((b.getTime() - a.getTime()) / 86400000) + 1;
+  return n < 1 ? 1 : n;
+}
+function applyPauseChrome(){
+  const on = !!(S && S.paused);
+  const banner = $('pauseBanner');
+  if (banner){
+    banner.hidden = !on;
+    banner.textContent = on ? t('pauseBanner').replace('{0}', pauseDateLabel((S && S.paused_since) || today())) : '';
+  }
+  const hold = $('pauseHold');
+  if (hold){ hold.hidden = !on; hold.textContent = on ? t('pauseHold') : ''; }
+  const earn = $('pauseEarn');
+  if (earn){ earn.hidden = !on; earn.textContent = on ? t('pauseEarn') : ''; }
+  ['missionBlock','zones','bonusRow','parentCheck','bedPhotos'].forEach(function(id){
+    const el = $(id);
+    if (el) el.hidden = on;
+  });
+}
+function paintPause(){
+  const box = $('pauseBox');
+  if (!box) return;
+  box.replaceChildren();
+  const paused = !!(S && S.paused);
+  if (pauseAsk === 'pause' || pauseAsk === 'resume'){
+    const q = document.createElement('p');
+    q.className = 'muted';
+    q.textContent = pauseAsk === 'resume' ? t('pauseBack') : t('pauseAsk');
+    const row = document.createElement('div');
+    row.className = 'row';
+    const no = document.createElement('button');
+    no.type = 'button';
+    no.className = 'btn alt';
+    no.textContent = t('close');
+    no.onclick = function(){ pauseAsk = ''; paintPause(); };
+    const yes = document.createElement('button');
+    yes.type = 'button';
+    yes.className = pauseAsk === 'resume' ? 'btn star' : 'btn';
+    yes.textContent = pauseAsk === 'resume' ? t('pauseResume') : t('pauseNow');
+    yes.onclick = function(){ setPause(pauseAsk === 'resume' ? false : true); };
+    row.appendChild(no);
+    row.appendChild(yes);
+    box.appendChild(q);
+    box.appendChild(row);
+    return;
+  }
+  if (paused){
+    const since = S.paused_since || today();
+    const n = pauseDays(since);
+    const p = document.createElement('p');
+    p.className = 'muted';
+    const tmpl = (lang === 'en' && n === 1) ? t('pauseOn1') : t('pauseOn');
+    p.textContent = tmpl.replace('{0}', pauseDateLabel(since)).replace('{1}', n);
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'btn star';
+    b.textContent = t('pauseResume');
+    b.onclick = function(){ pauseAsk = 'resume'; paintPause(); };
+    box.appendChild(p);
+    box.appendChild(b);
+    return;
+  }
+  const lead = document.createElement('p');
+  lead.className = 'muted';
+  lead.textContent = t('pauseLead');
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'btn';
+  b.textContent = t('pauseNow');
+  b.onclick = function(){ pauseAsk = 'pause'; paintPause(); };
+  box.appendChild(lead);
+  box.appendChild(b);
+}
+async function setPause(on){
+  if (!sessionPin || !callsign || pauseBusy) return;
+  pauseBusy = true;
+  const res = await rpc('tidy_pause_set', { p_callsign: callsign, p_today: today(), p_pin: sessionPin, p_on: !!on });
+  pauseBusy = false;
+  if (isState(res)){
+    pauseAsk = '';
+    applyState(res);
+    if ($('pErr')) $('pErr').textContent = '';
+  } else if ($('pErr')) $('pErr').textContent = errText((res && res.error) || 'network');
+}
 function refreshParent(){
   if ($('rlist')) paintParentRewards();
   if ($('qlist')) paintParentQuests();
   if ($('clist')) paintParentChecks();
+  if ($('pauseBox')) paintPause();
   if ($('restList')) paintRestDays();
 }
 function toggleQuest(id){
@@ -2871,6 +3026,7 @@ function parentPanel(){
   editingItem = '';
   confirmItem = '';
   restAskDay = '';
+  pauseAsk = '';
   closeAlbum();
   const opts = CATS.map(c => '<option value="'+c+'">'+esc(STR[lang].cats[c])+'</option>').join('');
   const zones = ZONE_IDS.map(id => '<option value="'+id+'">'+esc(STR[lang].zones[id].name)+'</option>').join('');
@@ -2878,6 +3034,8 @@ function parentPanel(){
     '<h3 style="font-size:17px">'+esc(t('adjustHead'))+'</h3>'+
     '<div class="row"><input id="adjN" type="number" inputmode="numeric" placeholder="'+esc(t('adjPh'))+'"><input id="adjT" maxlength="40" placeholder="'+esc(t('reasonPh'))+'"></div>'+
     '<button type="button" class="btn" id="adjGo">'+esc(t('adjGo'))+'</button>'+
+    '<h3 style="font-size:17px" data-k="pauseHead">'+esc(t('pauseHead'))+'</h3>'+
+    '<div id="pauseBox" style="display:flex;flex-direction:column;gap:8px"></div>'+
     '<h3 style="font-size:17px" data-k="restHead">'+esc(t('restHead'))+'</h3>'+
     '<p class="muted" data-k="restLead">'+esc(t('restLead'))+'</p>'+
     '<p class="muted" id="restLeft"></p>'+
@@ -2912,6 +3070,7 @@ function parentPanel(){
   paintParentQuests();
   paintParentRewards();
   paintRestDays();
+  paintPause();
   $('pClose').onclick = closeParent;
   $('adjGo').onclick = doAdjust;
   $('rAdd').onclick = doAdd;
