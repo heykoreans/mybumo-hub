@@ -56,6 +56,14 @@ a{color:var(--sky)}
 .dot.full{background:var(--star);border:2px solid var(--star);color:#3a2a00}
 .dot.part{border:2px solid var(--star);background:var(--soft-star)}
 .day.today .dot{outline:2px solid var(--sky);outline-offset:2px}
+.dot.rest{background:var(--soft-sky);border-style:solid;border-color:var(--sky)}
+.rest-tag{font-size:10px;line-height:1.15;color:var(--sky);text-align:center;max-width:100%}
+.rest-banner{margin:0;padding:10px 12px;border-radius:14px;background:var(--soft-sky);overflow-wrap:break-word}
+.rest-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;min-width:0}
+.rest-row > span{min-width:0;overflow-wrap:break-word}
+.rest-row.past{opacity:.45}
+.rest-ask{flex:1 1 100%;display:flex;flex-direction:column;gap:8px;min-width:0}
+.rest-ask p{margin:0}
 .streak{font-family:var(--display);color:var(--coral);font-size:17px}
 .streak-wrap{display:flex;flex-direction:column;align-items:flex-end;gap:4px;min-width:0;max-width:100%}
 .streak-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:8px;min-width:0}
@@ -341,6 +349,7 @@ body.guide-open .top-bar{z-index:25}
   </section>
 
   <section style="display:flex;flex-direction:column;gap:12px">
+    <p class="rest-banner" id="restBanner" hidden></p>
     <div>
       <div class="section-head"><h2 data-k="mission">Today’s mission</h2><span class="muted" data-k="missionSub">10 minutes before bed · 1 star each zone</span></div>
       <p class="muted hint" data-k="checkDaily">New checklist every day!</p>
@@ -460,7 +469,7 @@ const ZONE_IDS = ['floor','bed','desk','dresser','toys'];
 const QUEST_IDS = ['audition','artbox','outside','labels','photo','donate'];
 const CATS = ['경험','특권','선물','용돈'];
 const LEVEL_AT = [0, 30, 80, 160, 300];
-const KNOWN_ERR = ['bad_pin','not_enough_stars','not_all_done','already_checked','callsign_taken','bad_callsign','bad_pin_format','family_not_found','bad_zone','bad_image','photo_not_found','server_error','bad_item_input','item_not_found','bad_quest_input','quest_not_found','bad_quest','bad_delta','reward_not_found','invalid_day','run_not_found','already_finished','challenge_done','bad_mode'];
+const KNOWN_ERR = ['bad_pin','not_enough_stars','not_all_done','already_checked','callsign_taken','bad_callsign','bad_pin_format','family_not_found','bad_zone','bad_image','photo_not_found','server_error','bad_item_input','item_not_found','bad_quest_input','quest_not_found','bad_quest','bad_delta','reward_not_found','invalid_day','run_not_found','already_finished','challenge_done','bad_mode','rest_limit','rest_bad_day'];
 
 const STR = {
   ko: {
@@ -518,7 +527,7 @@ const STR = {
     guide:[
       '방 정리 퀘스트에 온 걸 환영해! 방을 정리하고 별을 모아서 선물로 바꿔 보자.',
       '매일 자기 전 10분, 5개 구역을 정리해. 진짜 다 끝났을 때 구역을 눌러. 구역 하나에 별 1개!',
-      '보너스 별! 5구역 모두 끝내면 +2, 부모님 확인받으면 +2. 7일 연속 = +10 ★, 30일 연속 = +30 ★.',
+      '보너스 별! 5구역 모두 끝내면 +2, 부모님 확인받으면 +2. 7일 연속 = +10 ★, 30일 연속 = +30 ★. 아프거나 여행 갈 때는 부모님이 쉬는 날로 정해 주면 연속 기록이 지켜져요.',
       '대청소 퀘스트는 한 번만 하는 특별 미션이야. 하나에 별 10개! 주말에 부모님이랑 같이 해 봐.',
       '모은 별은 별 상점에서 선물로 바꿀 수 있어. 부모님이 비밀번호를 넣어 주면 교환 완료! 하루 못 해도 괜찮아. 모은 별은 없어지지 않아. 내일 다시 시작하면 돼!'
     ],
@@ -534,6 +543,13 @@ const STR = {
     streakOn:'{0}일 연속 보너스 받았어요 (+10)', streakOff:'연속 보너스까지 {0}일 남았어요',
     streakLeft:'+10 ★까지 {0}일', streakToday:'오늘 +10 ★ 보너스!',
     streakBig:'🏆 30일 대기록(+30 ★)까지 {0}일', streakBigToday:'🏆 오늘 +30 ★ 대기록 보너스!',
+    restHead:'쉬는 날',
+    restLead:'아프거나 여행 갈 때 써요. 연속 기록이 끊기지 않아요. 한 달에 3번까지.',
+    restLeft:'이번 달 남은 횟수: {0}번', restSet:'쉬는 날로 지정',
+    restTodayBtn:'오늘', restTomorrowBtn:'내일',
+    restAsk:'이 쉬는 날을 취소할까요?', restEmpty:'지정된 쉬는 날이 없어요',
+    restTag:'쉬는 날',
+    restToday:'☁️ 오늘은 쉬는 날! 연속 기록은 지켜져요. 정리하면 별은 그대로 받아요.',
     parentNeed:'올클리어하면 부모님 확인받기', parentReady:'부모님 확인받기 (별 +2)', parentDone:'오늘 부모님 확인 완료!',
     doneMark:'완료!', emptyLog:'구역을 체크하면 여기에 별 기록이 쌓여요',
     logSeeAll:'더보기', logAllTitle:'전체 별 기록', logAllCount:'총 {0}개 기록', logMore:'더 불러오기',
@@ -600,6 +616,8 @@ const STR = {
       already_finished:'이미 끝난 도전이에요.',
       challenge_done:'오늘 진짜 도전은 이미 했어요!',
       bad_mode:'다시 시작해 주세요.',
+      rest_limit:'그 달 쉬는 날 3번을 다 썼어요.',
+      rest_bad_day:'14일 전부터 60일 후까지 고를 수 있어요.',
       bad_reward:'보상 이름은 1~60자, 별은 1~1000개로 입력해 주세요.',
       network:'연결이 잠시 끊겼어요. 다시 눌러 주세요.'
     }
@@ -659,7 +677,7 @@ const STR = {
     guide:[
       'Welcome to Tidy Pop! Tidy your room, collect stars, and trade them for rewards.',
       'Every night before bed, take 10 minutes to tidy 5 zones. Tap a zone when it\'s really done. Each zone = 1 star.',
-      'Bonus stars! Finish all 5 zones = +2. Ask a parent to check = +2. 7 days in a row = +10 ★, 30 days in a row = +30 ★.',
+      'Bonus stars! Finish all 5 zones = +2. Ask a parent to check = +2. 7 days in a row = +10 ★, 30 days in a row = +30 ★. Sick or traveling? A parent can set a rest day so your streak stays safe.',
       'Big tidy quests are special one-time jobs. Each one = 10 stars. Try them with a parent on the weekend!',
       'Trade your stars in the Star Shop. A parent enters the PIN to say yes. Missed a day? That\'s okay. Your stars never go away. Just start again tomorrow!'
     ],
@@ -677,6 +695,13 @@ const STR = {
     streakLeft:'{0} more days to +10 ★', streakLeft1:'1 more day to +10 ★', streakToday:'+10 ★ bonus today!',
     streakBig:'🏆 {0} more days to the 30-day bonus (+30 ★)', streakBig1:'🏆 1 more day to the 30-day bonus (+30 ★)',
     streakBigToday:'🏆 +30 ★ big streak bonus today!',
+    restHead:'Rest days',
+    restLead:'Use when sick or traveling. Keeps the streak safe. Up to 3 per month.',
+    restLeft:'This month: {0} left', restSet:'Set rest day',
+    restTodayBtn:'Today', restTomorrowBtn:'Tomorrow',
+    restAsk:'Cancel this rest day?', restEmpty:'No rest days',
+    restTag:'Rest',
+    restToday:'☁️ Rest day today! Your streak is safe. You can still tidy for stars.',
     parentNeed:'Clear all zones to ask a parent', parentReady:'Parent check (+2 stars)', parentDone:'Parent checked today!',
     doneMark:'Done!', emptyLog:'Check a zone and the star log shows up here.',
     logSeeAll:'See all', logAllTitle:'All stars', logAllCount:'Total {0} records', logMore:'Load more',
@@ -743,6 +768,8 @@ const STR = {
       already_finished:'That round is already finished.',
       challenge_done:'You already did today\'s challenge!',
       bad_mode:'Please start again.',
+      rest_limit:'You used all 3 rest days for that month.',
+      rest_bad_day:'Pick a date from 14 days ago to 60 days ahead.',
       bad_reward:'Use a reward name of 1–60 characters and a cost from 1 to 1000.',
       network:'The connection dropped. Please try again.'
     }
@@ -780,6 +807,8 @@ let lang = readLang();
 let mode = 'loading';
 let callsign = '';
 let sessionPin = '';
+let restAskDay = '';
+let restBusy = false;
 let gateErrCode = '';
 let S = emptyState();
 let tail = Promise.resolve();
@@ -816,7 +845,7 @@ let levelCueRank = null;
 let levelSeenMem = null;
 const busyItems = new Set();
 
-function emptyState(){ return { child_name:'', stars:null, total:null, streak:0, days:[], quests:[], custom_quests:[], check_items:[], check_marks:[], photo_zones:[], rewards:[], ledger:[], times_today:null, times_practice_today:0 }; }
+function emptyState(){ return { child_name:'', stars:null, total:null, streak:0, days:[], quests:[], custom_quests:[], check_items:[], check_marks:[], photo_zones:[], rewards:[], ledger:[], times_today:null, times_practice_today:0, rest_days:[], rest_left_this_month:3 }; }
 function $(id){ return document.getElementById(id); }
 function pad(n){ return String(n).padStart(2,'0'); }
 function dkey(d){ return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
@@ -909,6 +938,7 @@ function applyLang(){
   if (help) help.setAttribute('aria-label', t('helpLabel'));
   if ($('gateErr')) setGateErr(gateErrCode);
   if (mode === 'app') render();
+  if ($('restList')) paintRestDays();
   if (albumOn) paintAlbum();
   if (timesOn) paintTimesGame();
   if (ledgerOpen) paintLedger();
@@ -938,11 +968,17 @@ function toggleLang(){
 function dayRec(k){
   return (S.days || []).find(d => String(d.day).slice(0,10) === k);
 }
+function isRestDay(k){
+  const key = String(k || '').slice(0,10);
+  const rec = dayRec(key);
+  if (rec && rec.rest_day) return true;
+  return (S.rest_days || []).indexOf(key) >= 0;
+}
 function ensureToday(){
   const k = today();
   let d = dayRec(k);
   if (!d){
-    d = { day:k, zones:[], all_bonus:false, parent_checked:false, streak_paid:false, journal:false, photo_bonus:false };
+    d = { day:k, zones:[], all_bonus:false, parent_checked:false, streak_paid:false, journal:false, photo_bonus:false, rest_day:false };
     S.days.push(d);
   }
   if (!Array.isArray(d.zones)) d.zones = [];
@@ -966,6 +1002,8 @@ function applyState(data){
   const days = Array.isArray(data.days) ? data.days : [];
   const prevTimes = S && S.times_today;
   const prevPractice = S && S.times_practice_today;
+  const prevRest = S && S.rest_days;
+  const prevLeft = S && S.rest_left_this_month;
   S = {
     child_name: data.child_name || '',
     stars: Number(data.stars),
@@ -978,7 +1016,8 @@ function applyState(data){
       parent_checked: !!d.parent_checked,
       streak_paid: !!d.streak_paid,
       journal: !!d.journal,
-      photo_bonus: !!d.photo_bonus
+      photo_bonus: !!d.photo_bonus,
+      rest_day: !!d.rest_day
     })),
     quests: Array.isArray(data.quests) ? data.quests.slice() : [],
     custom_quests: Array.isArray(data.custom_quests) ? data.custom_quests.map(normCquest) : [],
@@ -990,7 +1029,13 @@ function applyState(data){
     times_today: Object.prototype.hasOwnProperty.call(data, 'times_today') ? normTimesToday(data.times_today) : (prevTimes || null),
     times_practice_today: Object.prototype.hasOwnProperty.call(data, 'times_practice_today')
       ? (Number.isFinite(Number(data.times_practice_today)) ? Number(data.times_practice_today) : 0)
-      : (Number.isFinite(Number(prevPractice)) ? Number(prevPractice) : 0)
+      : (Number.isFinite(Number(prevPractice)) ? Number(prevPractice) : 0),
+    rest_days: Object.prototype.hasOwnProperty.call(data, 'rest_days')
+      ? (Array.isArray(data.rest_days) ? data.rest_days.map(x => String(x).slice(0,10)).filter(x => /^\d{4}-\d{2}-\d{2}$/.test(x)) : [])
+      : (Array.isArray(prevRest) ? prevRest.slice() : []),
+    rest_left_this_month: Object.prototype.hasOwnProperty.call(data, 'rest_left_this_month')
+      ? (Number.isFinite(Number(data.rest_left_this_month)) ? Math.max(0, Math.min(3, Number(data.rest_left_this_month))) : 0)
+      : (Number.isFinite(Number(prevLeft)) ? Number(prevLeft) : 3)
   };
   if (mode === 'app') render();
   refreshParent();
@@ -1258,12 +1303,22 @@ function render(){
   for (let i = 6; i >= 0; i--){
     const d = new Date();
     d.setDate(d.getDate() - i);
-    const rec = dayRec(dkey(d));
+    const key = dkey(d);
+    const rec = dayRec(key);
     const n = rec ? rec.zones.length : 0;
     const full = n === ZONE_IDS.length;
-    w += '<div class="day '+(i===0?'today':'')+'"><span class="dot '+(full?'full':n?'part':'')+'">'+(full?'★':(n||''))+'</span>'+letters[d.getDay()]+'</div>';
+    const rest = isRestDay(key);
+    const mark = rest ? '☁️' : (full ? '★' : (n || ''));
+    const cls = rest ? 'rest' : (full ? 'full' : (n ? 'part' : ''));
+    w += '<div class="day '+(i===0?'today':'')+'"><span class="dot '+cls+'">'+mark+'</span><span>'+letters[d.getDay()]+'</span>'+(rest ? '<span class="rest-tag">'+esc(t('restTag'))+'</span>' : '')+'</div>';
   }
   $('week').innerHTML = w;
+  const restBanner = $('restBanner');
+  if (restBanner){
+    const todayRest = isRestDay(today());
+    restBanner.hidden = !todayRest;
+    restBanner.textContent = todayRest ? t('restToday') : '';
+  }
   $('zones').innerHTML = ZONE_IDS.map(id => zoneCard(id, D)).join('');
   paintJournal(D);
   paintTimesCard();
@@ -2268,10 +2323,99 @@ function cquestCard(q){
 function normCquest(q){
   return { id:q.id, name:q.name || '', name_ko:q.name_ko || '', steps:q.steps || '', steps_ko:q.steps_ko || '', stars:Number(q.stars) || 0, done:!!q.done, done_at:q.done_at || '' };
 }
+function restLabel(day){
+  const date = dateFromKey(day);
+  if (!date) return String(day || '');
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const enDays = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const koDays = '일월화수목금토';
+  if (lang === 'ko') return (date.getMonth()+1)+'월 '+date.getDate()+'일 ('+koDays[date.getDay()]+')';
+  return enDays[date.getDay()]+', '+months[date.getMonth()]+' '+date.getDate();
+}
+function paintRestDays(){
+  const list = $('restList');
+  if (!list) return;
+  const left = $('restLeft');
+  if (left){
+    const n = Number(S && S.rest_left_this_month);
+    left.textContent = t('restLeft').replace('{0}', Number.isFinite(n) ? n : 0);
+  }
+  const date = $('restDate');
+  if (date){
+    date.min = shiftDay(-14);
+    date.max = shiftDay(60);
+    if (!date.value) date.value = today();
+  }
+  list.replaceChildren();
+  const days = (S.rest_days || []).slice().sort();
+  if (!days.length){
+    const p = document.createElement('p');
+    p.className = 'muted';
+    p.textContent = t('restEmpty');
+    list.appendChild(p);
+    return;
+  }
+  days.forEach(function(day){
+    const row = document.createElement('div');
+    row.className = 'rest-row'+(day < today() ? ' past' : '');
+    const name = document.createElement('span');
+    name.textContent = restLabel(day);
+    row.appendChild(name);
+    if (restAskDay === day){
+      const ask = document.createElement('div');
+      ask.className = 'rest-ask';
+      const q = document.createElement('p');
+      q.textContent = t('restAsk');
+      const actions = document.createElement('div');
+      actions.className = 'row';
+      const no = document.createElement('button');
+      no.type = 'button';
+      no.className = 'btn alt';
+      no.textContent = t('close');
+      no.onclick = function(){ restAskDay = ''; paintRestDays(); };
+      const yes = document.createElement('button');
+      yes.type = 'button';
+      yes.className = 'btn';
+      yes.textContent = t('cancel');
+      yes.onclick = function(){ setRestDay(day, false); };
+      actions.appendChild(no);
+      actions.appendChild(yes);
+      ask.appendChild(q);
+      ask.appendChild(actions);
+      row.appendChild(ask);
+    } else {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'btn alt';
+      b.textContent = t('cancel');
+      b.onclick = function(){ restAskDay = day; paintRestDays(); };
+      row.appendChild(b);
+    }
+    list.appendChild(row);
+  });
+}
+async function setRestDay(day, on){
+  const key = String(day || '').slice(0,10);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(key)){
+    if ($('pErr')) $('pErr').textContent = errText('rest_bad_day');
+    return;
+  }
+  if (!sessionPin || !callsign || restBusy) return;
+  restBusy = true;
+  const res = await rpc('tidy_rest_set', { p_callsign: callsign, p_today: today(), p_pin: sessionPin, p_day: key, p_on: !!on });
+  restBusy = false;
+  if (!$('pErr') && !isState(res)) return;
+  if (isState(res)){
+    restAskDay = '';
+    applyState(res);
+    if ($('pErr')) $('pErr').textContent = '';
+  } else if ($('pErr')) $('pErr').textContent = errText((res && res.error) || 'network');
+}
 function refreshParent(){
   if ($('rlist')) paintParentRewards();
   if ($('qlist')) paintParentQuests();
   if ($('clist')) paintParentChecks();
+  if ($('restList')) paintRestDays();
 }
 function toggleQuest(id){
   if (!QUEST_IDS.includes(id) || !callsign) return;
@@ -2726,6 +2870,7 @@ function parentPanel(){
   editingQuest = '';
   editingItem = '';
   confirmItem = '';
+  restAskDay = '';
   closeAlbum();
   const opts = CATS.map(c => '<option value="'+c+'">'+esc(STR[lang].cats[c])+'</option>').join('');
   const zones = ZONE_IDS.map(id => '<option value="'+id+'">'+esc(STR[lang].zones[id].name)+'</option>').join('');
@@ -2733,6 +2878,13 @@ function parentPanel(){
     '<h3 style="font-size:17px">'+esc(t('adjustHead'))+'</h3>'+
     '<div class="row"><input id="adjN" type="number" inputmode="numeric" placeholder="'+esc(t('adjPh'))+'"><input id="adjT" maxlength="40" placeholder="'+esc(t('reasonPh'))+'"></div>'+
     '<button type="button" class="btn" id="adjGo">'+esc(t('adjGo'))+'</button>'+
+    '<h3 style="font-size:17px" data-k="restHead">'+esc(t('restHead'))+'</h3>'+
+    '<p class="muted" data-k="restLead">'+esc(t('restLead'))+'</p>'+
+    '<p class="muted" id="restLeft"></p>'+
+    '<div class="row"><button type="button" class="btn alt" id="restTodayBtn" data-k="restTodayBtn">'+esc(t('restTodayBtn'))+'</button><button type="button" class="btn alt" id="restTomorrowBtn" data-k="restTomorrowBtn">'+esc(t('restTomorrowBtn'))+'</button></div>'+
+    '<input id="restDate" type="date">'+
+    '<button type="button" class="btn" id="restSet" data-k="restSet">'+esc(t('restSet'))+'</button>'+
+    '<div id="restList" style="display:flex;flex-direction:column;gap:8px"></div>'+
     '<h3 style="font-size:17px">'+esc(t('albumHead'))+'</h3>'+
     '<button type="button" class="btn" id="albumOpen">'+esc(t('albumOpen'))+'</button>'+
     '<h3 style="font-size:17px">'+esc(t('clHead'))+'</h3>'+
@@ -2759,6 +2911,7 @@ function parentPanel(){
   paintParentChecks();
   paintParentQuests();
   paintParentRewards();
+  paintRestDays();
   $('pClose').onclick = closeParent;
   $('adjGo').onclick = doAdjust;
   $('rAdd').onclick = doAdd;
@@ -2766,6 +2919,9 @@ function parentPanel(){
   $('ciAdd').onclick = submitCheckItem;
   $('ciCancel').onclick = cancelItemEdit;
   $('albumOpen').onclick = () => loadAlbum('');
+  $('restTodayBtn').onclick = () => setRestDay(today(), true);
+  $('restTomorrowBtn').onclick = () => setRestDay(shiftDay(1), true);
+  $('restSet').onclick = () => setRestDay(($('restDate') && $('restDate').value) || '', true);
   $('pinSet').onclick = doSetPin;
 }
 async function doAdjust(){
