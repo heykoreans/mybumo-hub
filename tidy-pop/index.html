@@ -100,6 +100,28 @@ a{color:var(--sky)}
 .ptile:disabled{opacity:.55;cursor:default}
 .photo-prog{display:flex;align-items:center;justify-content:flex-end;gap:6px;flex-wrap:wrap;min-width:0}
 .photo-earn{font-family:var(--display);color:var(--star-ink);font-size:14px;white-space:nowrap}
+.times-card{display:flex;flex-direction:column;gap:8px;min-width:0}
+.times-card .btn{width:100%}
+body.times-open{overflow:hidden}
+.times-view{position:fixed;inset:0;z-index:30;background:var(--bg);color:var(--ink);display:flex;flex-direction:column;gap:6px;min-width:0;min-height:0;overflow:hidden;padding:max(8px,env(safe-area-inset-top)) max(10px,env(safe-area-inset-right)) max(8px,env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left))}
+.times-top{display:flex;align-items:center;justify-content:space-between;gap:8px;flex:0 0 auto;min-width:0}
+.times-top .muted{min-width:0;overflow-wrap:break-word}
+.times-stage{flex:1 1 auto;min-height:0;min-width:0;display:flex;flex-direction:column;gap:6px;overflow:hidden}
+.times-mid{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-width:0}
+.times-q{font-family:var(--display);font-weight:400;font-size:clamp(34px,8vh,80px);line-height:1.05;text-align:center;margin:0;max-width:100%}
+.times-typed{font-family:var(--display);font-size:clamp(26px,5vh,44px);line-height:1.1;min-height:1.1em;text-align:center}
+.times-track{width:100%;height:12px;background:var(--soft-sky);border-radius:99px;overflow:hidden;flex:0 0 auto}
+.times-track i{display:block;height:100%;width:100%;background:var(--mint)}
+.times-track i.hot{background:var(--coral)}
+.times-prog{text-align:center;color:var(--muted);font-size:14px;flex:0 0 auto;margin:0}
+.times-pad{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;flex:0 0 auto;width:100%}
+.times-pad button{min-height:64px;font-family:var(--display);font-size:28px;background:var(--card);color:var(--ink);border:2px solid var(--line)}
+.times-pad button.ok{background:var(--sky);color:#fff;border-color:var(--sky)}
+.times-lines{display:flex;flex-direction:column;gap:4px;min-height:0;min-width:0;flex:0 1 auto;overflow:auto}
+.times-line{display:flex;gap:8px;align-items:baseline;min-width:0}
+.times-line b{flex:0 0 auto}
+.times-line span{min-width:0;overflow-wrap:break-word}
+.times-line small{color:var(--muted);font-size:13px}
 .spin{width:18px;height:18px;border:3px solid var(--line);border-top-color:var(--sky);border-radius:50%;display:inline-block;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .file-hide{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
@@ -315,6 +337,12 @@ body.guide-open .top-bar{z-index:25}
       <span class="tx"><strong data-k="journalLabel">I wrote my journal today</strong></span>
       <span class="jend"><span class="jstar">+2 ★</span><span class="chk">✓</span></span>
     </button>
+    <div class="times-card" id="timesCard">
+      <div class="section-head"><h2><span aria-hidden="true">🧮 </span><span data-k="timesHead">Times Table Challenge</span></h2></div>
+      <p class="muted hint" data-k="timesLead">5 questions, 5 seconds each. All right = +2 ★, 1 miss = +1 ★</p>
+      <p class="muted hint" id="timesStatus" hidden></p>
+      <button type="button" class="btn" id="timesGo">Start</button>
+    </div>
     <div class="photo-block" id="bedPhotos">
       <div class="section-head"><h2><span aria-hidden="true">🌙 </span><span data-k="photoHead">Bedtime photos</span></h2><span class="photo-prog"><span class="muted" id="photoProg">0/5</span><span class="photo-earn" id="photoBonus" hidden>+1 ★ ✓</span></span></div>
       <p class="muted hint" data-k="photoLead">One photo for each spot before bed. 5 photos = +1 ★</p>
@@ -374,6 +402,13 @@ body.guide-open .top-bar{z-index:25}
   </div>
   <div id="albumBody" class="album-body"></div>
 </div>
+<div id="timesView" class="times-view" hidden>
+  <div class="times-top">
+    <span class="muted" id="timesMode"></span>
+    <button type="button" class="btn alt" id="timesClose">Close</button>
+  </div>
+  <div id="timesStage" class="times-stage"></div>
+</div>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -385,13 +420,14 @@ const CS_KEY = 'tidypop_callsign';
 const LANG_KEY = 'tidypop_lang';
 const SOUND_KEY = 'tidypop_sound';
 const GUIDE_KEY = 'tidypop_guide';
+const TIMES_POP_KEY = 'tidypop_times_pop';
 const CS_RE = /^[a-z0-9_-]{3,30}$/;
 const PIN_RE = /^[0-9]{4,8}$/;
 const ZONE_IDS = ['floor','bed','desk','dresser','toys'];
 const QUEST_IDS = ['audition','artbox','outside','labels','photo','donate'];
 const CATS = ['경험','특권','선물','용돈'];
 const LEVEL_AT = [0, 30, 80, 160, 300];
-const KNOWN_ERR = ['bad_pin','not_enough_stars','not_all_done','already_checked','callsign_taken','bad_callsign','bad_pin_format','family_not_found','bad_zone','bad_image','photo_not_found','server_error','bad_item_input','item_not_found','bad_quest_input','quest_not_found','bad_quest','bad_delta','reward_not_found','invalid_day'];
+const KNOWN_ERR = ['bad_pin','not_enough_stars','not_all_done','already_checked','callsign_taken','bad_callsign','bad_pin_format','family_not_found','bad_zone','bad_image','photo_not_found','server_error','bad_item_input','item_not_found','bad_quest_input','quest_not_found','bad_quest','bad_delta','reward_not_found','invalid_day','run_not_found','already_finished'];
 
 const STR = {
   ko: {
@@ -405,6 +441,16 @@ const STR = {
     week:'이번 주', mission:'오늘의 미션', missionSub:'자기 전 10분 · 구역마다 별 1개',
     checkDaily:'체크리스트는 매일 새로 시작해요!',
     journalLabel:'오늘 저널 썼어요',
+    timesHead:'구구단 도전',
+    timesLead:'5문제, 문제당 5초. 다 맞히면 +2 ★, 1개 틀리면 +1 ★',
+    timesStart:'도전하기', timesPractice:'연습하기',
+    timesPop:'깜짝 퀴즈! 구구단 5문제 도전할래?', timesNow:'도전!', timesLater:'나중에',
+    timesUnfinished:'오늘 도전은 끝났어요. 연습할까요?',
+    timesTodayStar:'오늘: {0}/5 · +{1} ★ ✓', timesTodayZero:'오늘: {0}/5 · 내일 다시 도전!',
+    timesPracticeTag:'연습 (별 없음)', timesAgain:'또 연습하기', timesDone:'닫기',
+    timesPerfect:'완벽해! +2 ★', timesSoClose:'아깝다! +1 ★',
+    timesZero:'연습하면 돼! 내일 또 도전하자.', timesLate:'시간이 너무 지났어요.',
+    timesPracticeScore:'연습 결과: {0}/5',
     photoHead:'자기 전 사진',
     photoLead:'자기 전에 구역마다 사진 1장. 5장 다 찍으면 +1 ★',
     photoSafe:'방만 찍어요. 얼굴은 안 나오게!',
@@ -508,6 +554,8 @@ const STR = {
       bad_image:'이 사진은 사용할 수 없어요.',
       photo_not_found:'그 사진은 이미 없어요.',
       server_error:'잠시 문제가 생겼어요. 다시 해 주세요.',
+      run_not_found:'그 도전을 찾지 못했어요.',
+      already_finished:'이미 끝난 도전이에요.',
       bad_reward:'보상 이름은 1~60자, 별은 1~1000개로 입력해 주세요.',
       network:'연결이 잠시 끊겼어요. 다시 눌러 주세요.'
     }
@@ -523,6 +571,16 @@ const STR = {
     week:'This week', mission:'Today’s mission', missionSub:'10 minutes before bed · 1 star each zone',
     checkDaily:'New checklist every day!',
     journalLabel:'I wrote my journal today',
+    timesHead:'Times Table Challenge',
+    timesLead:'5 questions, 5 seconds each. All right = +2 ★, 1 miss = +1 ★',
+    timesStart:'Start', timesPractice:'Practice',
+    timesPop:'Pop quiz time! 5 times tables?', timesNow:'Let\'s go!', timesLater:'Later',
+    timesUnfinished:'Today\'s try is over. Practice?',
+    timesTodayStar:'Today: {0}/5 · +{1} ★ ✓', timesTodayZero:'Today: {0}/5 · Try again tomorrow!',
+    timesPracticeTag:'Practice (no stars)', timesAgain:'Practice again', timesDone:'Done',
+    timesPerfect:'Perfect! +2 ★', timesSoClose:'So close! +1 ★',
+    timesZero:'Keep practicing! Try again tomorrow.', timesLate:'Time ran out.',
+    timesPracticeScore:'Practice done: {0}/5',
     photoHead:'Bedtime photos',
     photoLead:'One photo for each spot before bed. 5 photos = +1 ★',
     photoSafe:'Only your room in the photo. No faces!',
@@ -627,6 +685,8 @@ const STR = {
       bad_image:'That photo could not be used.',
       photo_not_found:'That photo is already gone.',
       server_error:'Something went wrong. Please try again.',
+      run_not_found:'That round could not be found.',
+      already_finished:'That round is already finished.',
       bad_reward:'Use a reward name of 1–60 characters and a cost from 1 to 1000.',
       network:'The connection dropped. Please try again.'
     }
@@ -676,9 +736,26 @@ let ledgerTotal = 0;
 let ledgerLoading = false;
 let ledgerErr = '';
 let ledgerToken = 0;
+let timesOn = false;
+let timesPhase = '';
+let timesToken = 0;
+let timesSent = false;
+let timesRun = '';
+let timesOfficial = false;
+let timesQs = [];
+let timesAnswers = [null, null, null, null, null];
+let timesIndex = 0;
+let timesInput = '';
+let timesCount = 3;
+let timesReveal = null;
+let timesResult = null;
+let timesTimer = 0;
+let timesCountTimer = 0;
+let timesRevealTimer = 0;
+let timesPopMem = '';
 const busyItems = new Set();
 
-function emptyState(){ return { child_name:'', stars:null, total:null, streak:0, days:[], quests:[], custom_quests:[], check_items:[], check_marks:[], photo_zones:[], rewards:[], ledger:[] }; }
+function emptyState(){ return { child_name:'', stars:null, total:null, streak:0, days:[], quests:[], custom_quests:[], check_items:[], check_marks:[], photo_zones:[], rewards:[], ledger:[], times_today:null }; }
 function $(id){ return document.getElementById(id); }
 function pad(n){ return String(n).padStart(2,'0'); }
 function dkey(d){ return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
@@ -736,6 +813,7 @@ function showReason(reason){
   if (s === '저널 쓰기 완료') return 'Journal done';
   if (s === '저널 체크 취소') return 'Journal undone';
   if (s === '자기 전 사진 5장') return 'Bedtime photos 5/5';
+  if ((m = s.match(/^구구단 도전 (\d+)\/5$/))) return 'Times tables ' + m[1] + '/5';
   if ((m = s.match(/^퀘스트: (.+)$/))) return 'Quest: ' + (QUEST_EN[m[1]] || m[1]);
   if ((m = s.match(/^(.+) 취소$/)) && QUEST_EN[m[1]]) return QUEST_EN[m[1]] + ' undone';
   if ((m = s.match(/^교환: (.+)$/))) return 'Traded: ' + (REWARD_EN[m[1]] || m[1]);
@@ -770,6 +848,7 @@ function applyLang(){
   if ($('gateErr')) setGateErr(gateErrCode);
   if (mode === 'app') render();
   if (albumOn) paintAlbum();
+  if (timesOn) paintTimesGame();
   if (ledgerOpen) paintLedger();
   if (guideAt >= 0) paintGuide();
   else if (questOpen) paintQuest();
@@ -810,8 +889,20 @@ function ensureToday(){
 function isState(res){
   return !!(res && res.ok === true && Object.prototype.hasOwnProperty.call(res, 'stars') && Number.isFinite(Number(res.stars)));
 }
+function normTimesToday(v){
+  if (!v || typeof v !== 'object') return null;
+  const correct = Number(v.correct);
+  const stars = Number(v.stars);
+  return {
+    played: v.played !== false,
+    finished: !!v.finished,
+    correct: Number.isFinite(correct) ? correct : 0,
+    stars: Number.isFinite(stars) ? stars : 0
+  };
+}
 function applyState(data){
   const days = Array.isArray(data.days) ? data.days : [];
+  const prevTimes = S && S.times_today;
   S = {
     child_name: data.child_name || '',
     stars: Number(data.stars),
@@ -832,7 +923,8 @@ function applyState(data){
     check_marks: Array.isArray(data.check_marks) ? data.check_marks.map(x => String(x)) : [],
     photo_zones: Array.isArray(data.photo_zones) ? data.photo_zones.filter(z => ZONE_IDS.includes(z)) : [],
     rewards: Array.isArray(data.rewards) ? data.rewards.map(r => ({ id:r.id, cat:r.cat, name:r.name, cost:Number(r.cost) })) : [],
-    ledger: Array.isArray(data.ledger) ? data.ledger.map(l => ({ delta:Number(l.delta), reason:l.reason || '', created_at:l.created_at })) : []
+    ledger: Array.isArray(data.ledger) ? data.ledger.map(l => ({ delta:Number(l.delta), reason:l.reason || '', created_at:l.created_at })) : [],
+    times_today: Object.prototype.hasOwnProperty.call(data, 'times_today') ? normTimesToday(data.times_today) : (prevTimes || null)
   };
   if (mode === 'app') render();
   refreshParent();
@@ -1104,6 +1196,7 @@ function render(){
   $('week').innerHTML = w;
   $('zones').innerHTML = ZONE_IDS.map(id => zoneCard(id, D)).join('');
   paintJournal(D);
+  paintTimesCard();
   paintPhotos();
   $('allPill').className = 'pill'+(D.all_bonus?' on':'');
   $('allPill').textContent = D.all_bonus ? t('allOn') : t('allOff').replace('{0}', D.zones.length);
@@ -2599,6 +2692,336 @@ function setGateErr(code){
   const el = $('gateErr');
   if (el) el.textContent = gateErrCode ? errText(gateErrCode) : '';
 }
+function paintTimesCard(){
+  const status = $('timesStatus');
+  const btn = $('timesGo');
+  if (!status || !btn) return;
+  const info = S && S.times_today;
+  if (!info){
+    status.textContent = '';
+    status.hidden = true;
+    btn.textContent = t('timesStart');
+    btn.className = 'btn';
+    return;
+  }
+  btn.textContent = t('timesPractice');
+  btn.className = 'btn alt';
+  status.hidden = false;
+  if (!info.finished){
+    status.textContent = t('timesUnfinished');
+    return;
+  }
+  status.textContent = info.stars > 0
+    ? t('timesTodayStar').replace('{0}', info.correct).replace('{1}', info.stars)
+    : t('timesTodayZero').replace('{0}', info.correct);
+}
+function timesPopSeen(){
+  if (timesPopMem === today()) return true;
+  return storeGet(TIMES_POP_KEY) === today();
+}
+function markTimesPop(){
+  timesPopMem = today();
+  storeSet(TIMES_POP_KEY, today());
+}
+function timesBusy(){
+  return albumOn || ledgerOpen || timesOn || guideAt >= 0 || questOpen || cquestOpen || !!$('scrim');
+}
+function openTimesPop(){
+  if (mode !== 'app' || !callsign || (S && S.times_today) || timesPopSeen() || timesBusy()) return;
+  markTimesPop();
+  modal('<h2>'+esc(t('timesPop'))+'</h2><div class="row"><button type="button" class="btn alt" id="timesLater">'+esc(t('timesLater'))+'</button><button type="button" class="btn star" id="timesNow">'+esc(t('timesNow'))+'</button></div>', close);
+  $('timesLater').onclick = close;
+  $('timesNow').onclick = () => { close(); beginTimes(); };
+}
+function stopTimesTimers(){
+  clearInterval(timesTimer);
+  clearInterval(timesCountTimer);
+  clearTimeout(timesRevealTimer);
+}
+function endTimes(){
+  stopTimesTimers();
+  timesOn = false;
+  timesToken++;
+  const view = $('timesView');
+  if (view) view.hidden = true;
+  document.body.classList.remove('times-open');
+}
+function abandonTimes(){
+  if (timesSent && timesPhase !== 'result') return;
+  if (!timesOn || timesPhase === 'result'){ endTimes(); return; }
+  endTimes();
+  refreshState();
+}
+function timesKey(ch){
+  if (!timesOn || timesPhase !== 'ask') return;
+  if (ch === 'del') timesInput = timesInput.slice(0, -1);
+  else if (ch === 'ok'){ finishTimesQuestion(timesToken, timesInput); return; }
+  else if (/^[0-9]$/.test(ch) && timesInput.length < 2) timesInput += ch;
+  const typed = $('timesTyped');
+  if (typed) typed.textContent = timesInput;
+}
+function paintTimesPad(parent){
+  const pad = document.createElement('div');
+  pad.className = 'times-pad';
+  [1,2,3,4,5,6,7,8,9,'del',0,'ok'].forEach(key => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.setAttribute('data-tk', String(key));
+    if (key === 'ok'){ b.className = 'ok'; b.textContent = t('ok'); }
+    else if (key === 'del') b.textContent = '⌫';
+    else b.textContent = String(key);
+    pad.appendChild(b);
+  });
+  parent.appendChild(pad);
+}
+function paintTimesGame(){
+  const view = $('timesView');
+  const stage = $('timesStage');
+  if (!view || !stage) return;
+  view.hidden = !timesOn;
+  document.body.classList.toggle('times-open', !!timesOn);
+  if (!timesOn){ stage.replaceChildren(); return; }
+  const modeEl = $('timesMode');
+  if (modeEl) modeEl.textContent = (!timesOfficial && timesQs.length) ? t('timesPracticeTag') : '';
+  const shut = $('timesClose');
+  if (shut) shut.textContent = timesPhase === 'result' ? t('timesDone') : t('close');
+  stage.replaceChildren();
+  if (timesPhase === 'loading'){
+    const wrap = document.createElement('div');
+    wrap.className = 'times-mid';
+    const spin = document.createElement('span');
+    spin.className = 'spin';
+    spin.setAttribute('aria-hidden', 'true');
+    wrap.appendChild(spin);
+    stage.appendChild(wrap);
+    return;
+  }
+  if (timesPhase === 'countdown'){
+    const wrap = document.createElement('div');
+    wrap.className = 'times-mid';
+    const n = document.createElement('p');
+    n.className = 'times-q';
+    n.textContent = String(timesCount);
+    wrap.appendChild(n);
+    stage.appendChild(wrap);
+    return;
+  }
+  if (timesPhase === 'ask'){
+    const q = timesQs[timesIndex] || { a:'', b:'' };
+    const mid = document.createElement('div');
+    mid.className = 'times-mid';
+    const h = document.createElement('p');
+    h.className = 'times-q';
+    h.textContent = q.a + ' × ' + q.b + ' = ?';
+    const typed = document.createElement('p');
+    typed.className = 'times-typed';
+    typed.id = 'timesTyped';
+    typed.textContent = timesInput;
+    mid.appendChild(h);
+    mid.appendChild(typed);
+    const track = document.createElement('div');
+    track.className = 'times-track';
+    const bar = document.createElement('i');
+    bar.id = 'timesBar';
+    track.appendChild(bar);
+    const prog = document.createElement('p');
+    prog.className = 'times-prog';
+    prog.textContent = (timesIndex + 1) + '/5';
+    stage.appendChild(mid);
+    stage.appendChild(track);
+    stage.appendChild(prog);
+    paintTimesPad(stage);
+    return;
+  }
+  if (timesPhase === 'reveal' && timesReveal){
+    const wrap = document.createElement('div');
+    wrap.className = 'times-mid';
+    const mark = document.createElement('p');
+    mark.className = 'times-q';
+    mark.textContent = timesReveal.ok ? '✅' : '❌';
+    wrap.appendChild(mark);
+    if (!timesReveal.ok){
+      const eq = document.createElement('p');
+      eq.className = 'times-typed';
+      eq.textContent = timesReveal.a + ' × ' + timesReveal.b + ' = ' + timesReveal.right;
+      wrap.appendChild(eq);
+    }
+    stage.appendChild(wrap);
+    return;
+  }
+  if (timesPhase === 'result'){
+    const res = timesResult || {};
+    const head = document.createElement('p');
+    head.className = 'times-q';
+    head.id = 'timesHeadline';
+    head.style.fontSize = 'clamp(26px, 5vh, 44px)';
+    if (res.error) head.textContent = errText(res.error);
+    else if (res.late) head.textContent = t('timesLate');
+    else if (!res.official) head.textContent = t('timesPracticeScore').replace('{0}', Number(res.correct) || 0);
+    else if (Number(res.stars) === 2) head.textContent = t('timesPerfect');
+    else if (Number(res.stars) === 1) head.textContent = t('timesSoClose');
+    else head.textContent = t('timesZero');
+    stage.appendChild(head);
+    if (!res.error){
+      const score = document.createElement('p');
+      score.className = 'times-prog';
+      score.id = 'timesScore';
+      const got = Number(res.correct) || 0;
+      const stars = Number(res.stars) || 0;
+      score.textContent = got + '/5' + (stars > 0 ? ' · +' + stars + ' ★' : '');
+      stage.appendChild(score);
+      const lines = document.createElement('div');
+      lines.className = 'times-lines';
+      (Array.isArray(res.results) ? res.results : []).forEach(row => {
+        const line = document.createElement('div');
+        line.className = 'times-line';
+        const mark = document.createElement('b');
+        mark.textContent = row && row.ok ? '✅' : '❌';
+        const eq = document.createElement('span');
+        const a = Number(row && row.a);
+        const b = Number(row && row.b);
+        const right = Number.isFinite(Number(row && row.correct_answer)) ? Number(row.correct_answer) : (a * b);
+        eq.textContent = a + ' × ' + b + ' = ' + right;
+        line.appendChild(mark);
+        line.appendChild(eq);
+        if (row && !row.ok && row.answer !== null && row.answer !== undefined && row.answer !== ''){
+          const mine = document.createElement('small');
+          mine.textContent = String(row.answer);
+          line.appendChild(mine);
+        }
+        lines.appendChild(line);
+      });
+      stage.appendChild(lines);
+    }
+    const row = document.createElement('div');
+    row.className = 'row';
+    const again = document.createElement('button');
+    again.type = 'button';
+    again.className = 'btn';
+    again.id = 'timesAgain';
+    again.textContent = t('timesAgain');
+    again.onclick = () => beginTimes();
+    const done = document.createElement('button');
+    done.type = 'button';
+    done.className = 'btn alt';
+    done.id = 'timesDoneBtn';
+    done.textContent = t('timesDone');
+    done.onclick = () => endTimes();
+    row.appendChild(again);
+    row.appendChild(done);
+    stage.appendChild(row);
+  }
+}
+function startTimesCountdown(token){
+  timesPhase = 'countdown';
+  timesCount = 3;
+  paintTimesGame();
+  clearInterval(timesCountTimer);
+  timesCountTimer = setInterval(() => {
+    if (token !== timesToken || !timesOn){ clearInterval(timesCountTimer); return; }
+    timesCount -= 1;
+    if (timesCount <= 0){
+      clearInterval(timesCountTimer);
+      startTimesQuestion(token);
+      return;
+    }
+    paintTimesGame();
+  }, 700);
+}
+function startTimesQuestion(token){
+  if (token !== timesToken || !timesOn) return;
+  timesPhase = 'ask';
+  timesInput = '';
+  paintTimesGame();
+  const started = performance.now();
+  clearInterval(timesTimer);
+  timesTimer = setInterval(() => {
+    if (token !== timesToken || !timesOn || timesPhase !== 'ask'){ clearInterval(timesTimer); return; }
+    const left = Math.max(0, 5000 - (performance.now() - started));
+    const bar = $('timesBar');
+    if (bar){
+      bar.style.width = (left / 5000 * 100) + '%';
+      bar.classList.toggle('hot', left <= 2000);
+    }
+    if (left <= 0){
+      clearInterval(timesTimer);
+      finishTimesQuestion(token, null);
+    }
+  }, 50);
+}
+function finishTimesQuestion(token, raw){
+  if (token !== timesToken || !timesOn || timesPhase !== 'ask') return;
+  clearInterval(timesTimer);
+  let answer = null;
+  if (raw !== null && raw !== undefined && String(raw) !== ''){
+    const n = Number(raw);
+    if (Number.isInteger(n)) answer = n;
+  }
+  timesAnswers[timesIndex] = answer;
+  const q = timesQs[timesIndex] || { a:0, b:0 };
+  const right = q.a * q.b;
+  const ok = answer === right;
+  timesReveal = { ok: ok, a: q.a, b: q.b, right: right, answer: answer };
+  timesPhase = 'reveal';
+  paintTimesGame();
+  if (ok && fxGate('tick')) playTick();
+  clearTimeout(timesRevealTimer);
+  timesRevealTimer = setTimeout(() => {
+    if (token !== timesToken || !timesOn) return;
+    timesIndex += 1;
+    if (timesIndex >= 5) submitTimes(token);
+    else startTimesQuestion(token);
+  }, ok ? 500 : 800);
+}
+async function submitTimes(token){
+  if (token !== timesToken || !timesOn || timesSent) return;
+  timesSent = true;
+  timesPhase = 'loading';
+  paintTimesGame();
+  const answers = [0,1,2,3,4].map(i => Number.isInteger(timesAnswers[i]) ? timesAnswers[i] : null);
+  const res = await rpc('tidy_times_submit', { p_callsign: callsign, p_today: today(), p_run: timesRun, p_answers: answers });
+  if (token !== timesToken || !timesOn) return;
+  if (!(res && res.ok)){
+    timesResult = { error: (res && res.error) || 'network' };
+    timesPhase = 'result';
+    paintTimesGame();
+    return;
+  }
+  if (res.state && isState(res.state)) applyState(res.state);
+  timesResult = res;
+  timesPhase = 'result';
+  paintTimesGame();
+  if (!res.late && Number(res.stars) === 2 && fxGate('clear')){ playClear(); confettiClear(); }
+}
+async function beginTimes(){
+  if (!callsign) return;
+  stopTimesTimers();
+  const token = ++timesToken;
+  timesOn = true;
+  timesSent = false;
+  timesOfficial = false;
+  timesQs = [];
+  timesAnswers = [null, null, null, null, null];
+  timesIndex = 0;
+  timesInput = '';
+  timesResult = null;
+  timesReveal = null;
+  timesPhase = 'loading';
+  document.body.classList.add('times-open');
+  paintTimesGame();
+  const res = await rpc('tidy_times_start', { p_callsign: callsign, p_today: today() });
+  if (token !== timesToken || !timesOn) return;
+  const questions = res && Array.isArray(res.questions) ? res.questions : [];
+  if (!(res && res.ok && questions.length === 5 && res.run_id)){
+    endTimes();
+    toast(errText((res && res.error) || 'network'));
+    return;
+  }
+  timesRun = res.run_id;
+  timesOfficial = !!res.official;
+  timesQs = questions.slice(0, 5).map(q => ({ a: Number(q.a), b: Number(q.b) }));
+  startTimesCountdown(token);
+}
 function showLoading(){ mode = 'loading'; $('loading').hidden = false; $('gate').hidden = true; $('app').hidden = true; }
 function showGate(prefill, errorCode){
   mode = 'gate';
@@ -2617,6 +3040,7 @@ function showApp(){
   $('app').hidden = false;
   render();
   if (guideAt < 0 && !questOpen && storeGet(GUIDE_KEY) !== '1') openGuide();
+  else openTimesPop();
 }
 function setGateBusy(on){
   $('loadBtn').disabled = on;
@@ -2699,6 +3123,17 @@ document.addEventListener('click', e => {
   if (r && !r.disabled){ redeem(r.getAttribute('data-r')); }
 });
 document.addEventListener('keydown', e => {
+  if (timesOn && timesPhase === 'ask'){
+    if (/^[0-9]$/.test(e.key)){ e.preventDefault(); timesKey(e.key); return; }
+    if (e.key === 'Backspace'){ e.preventDefault(); timesKey('del'); return; }
+    if (e.key === 'Enter'){ e.preventDefault(); timesKey('ok'); return; }
+  }
+  if (timesOn && e.key === 'Escape'){
+    e.preventDefault();
+    if (timesPhase === 'result') endTimes();
+    else abandonTimes();
+    return;
+  }
   if (albumOn && albumScreen === 'photos' && !albumAskId && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')){
     const tag = e.target && e.target.tagName;
     if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
@@ -2735,6 +3170,7 @@ function watchDay(){
   if (today() !== seenDay) refreshState();
 }
 document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden' && timesOn && !timesSent && timesPhase !== 'result') abandonTimes();
   if (document.visibilityState === 'visible') refreshState();
 });
 window.addEventListener('focus', refreshState);
@@ -2747,6 +3183,12 @@ $('csIn').addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDe
 $('nameIn').addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDefault(); $('pinNew').focus(); } });
 $('pinNew').addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDefault(); createFamily(); } });
 $('journalBtn').onclick = toggleJournal;
+$('timesGo').onclick = () => beginTimes();
+$('timesClose').onclick = () => { if (timesPhase === 'result') endTimes(); else abandonTimes(); };
+$('timesView').addEventListener('click', e => {
+  const b = e.target.closest('[data-tk]');
+  if (b) timesKey(b.getAttribute('data-tk'));
+});
 $('logAll').onclick = openLedger;
 $('albumViewClose').onclick = closeAlbum;
 $('photoFile').addEventListener('change', () => {
