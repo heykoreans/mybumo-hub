@@ -1609,7 +1609,7 @@ function breathSound(kind, dur, voiced = false) {
     f2.frequency.value = 1750; f2.Q.value = 1.6; g1.gain.value = 1; g2.gain.value = 0.22;
     const peak = kind === 'sigh' ? 0.34 : kind === 'ahh' ? 0.2 : 0.24;
     out.gain.setValueAtTime(0, t); out.gain.linearRampToValueAtTime(peak, t + (kind === 'ahh' ? 0.08 : 0.25)); out.gain.setTargetAtTime(0.0001, t + (kind === 'ahh' ? 0.15 : 0.45), dur * 0.3);
-    const lfo = ctx.createOscillator(), lg = ctx.createGain(); lfo.frequency.value = 5.5; lg.gain.value = 0.12; lfo.connect(lg).connect(g1.gain); lfo.start(t); lfo.stop(t + dur + 0.3); stops.push(lfo);
+    const lfo = ctx.createOscillator(), lg = ctx.createGain(); lfo.frequency.value = 5.5; lg.gain.value = 0.12; lfo.connect(lg).connect(g1.gain); lfo.start(t); lfo.stop(t + dur + 2.2); stops.push(lfo);
     if (sigh || voiced) {
       const vo = ctx.createOscillator(); vo.type = 'sawtooth';
       const f0 = kind === 'ahh' ? 200 : kind === 'sigh' ? 165 : 135;
@@ -1621,7 +1621,7 @@ function breathSound(kind, dur, voiced = false) {
       vo.connect(fa).connect(vg); vo.connect(fb).connect(vg); vg.connect(A.sfx); vo.start(t); vo.stop(t + dur + 0.3); stops.push(vo);
     }
   }
-  src.start(t, Math.random() * 1.5); src.stop(t + dur + 0.4);
+  src.start(t, Math.random() * 1.5); src.stop(t + dur + (isIn ? 0.4 : 2.2));
   return { stop() { try { const n = ctx.currentTime; out.gain.cancelScheduledValues(n); out.gain.setTargetAtTime(0, n, 0.06); stops.forEach(s => s.stop(n + 0.3)); } catch (e) {} } };
 }
 function noiseHit(t, o) {
@@ -1992,9 +1992,12 @@ function medPad(kind, dur) {
   if (!canSound()) return;
   const ctx = A.ctx, t = ctx.currentTime + 0.02, g = ctx.createGain(); g.gain.value = 0; g.connect(A.sfx);
   const fs = kind === 'in' ? [174.6, 261.6] : [164.8, 246.9];
-  for (const f of fs) { const o = ctx.createOscillator(); o.type = 'sine'; o.frequency.setValueAtTime(f, t); if (kind === 'in') o.frequency.linearRampToValueAtTime(f * 1.06, t + dur); else o.frequency.linearRampToValueAtTime(f * 0.94, t + dur); o.connect(g); o.start(t); o.stop(t + dur + 0.6); }
-  if (kind === 'in') { g.gain.linearRampToValueAtTime(0.022, t + dur); g.gain.setTargetAtTime(0.0001, t + dur, 0.5); }
-  else { g.gain.setValueAtTime(0.022, t); g.gain.linearRampToValueAtTime(0.0001, t + dur); }
+  // 소리가 0에서 부드럽게 시작하고 완전히 사라진 뒤에 멈춰야 '딱' 하는 잡음이 생기지 않는다
+  const end = kind === 'in' ? t + dur + 1.8 : t + dur + 0.3;
+  for (const f of fs) { const o = ctx.createOscillator(); o.type = 'sine'; o.frequency.setValueAtTime(f, t); if (kind === 'in') o.frequency.linearRampToValueAtTime(f * 1.06, t + dur); else o.frequency.linearRampToValueAtTime(f * 0.94, t + dur); o.connect(g); o.start(t); o.stop(end); }
+  g.gain.setValueAtTime(0, t);
+  if (kind === 'in') { g.gain.linearRampToValueAtTime(0.018, t + dur * 0.9); g.gain.linearRampToValueAtTime(0, t + dur + 1.6); }
+  else { g.gain.linearRampToValueAtTime(0.016, t + 0.7); g.gain.linearRampToValueAtTime(0, t + dur); }
 }
 function medTimeline() {
   const ev = [];
