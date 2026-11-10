@@ -223,6 +223,9 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{ou
 #gbMsg:empty{display:none}
 #gbGift{padding:10px 14px;border-radius:12px;background:#fdf1d6;border:1px solid #e9c77a;color:#6b4a0c;font-size:14px;font-weight:600}
 .tag3d.me{pointer-events:auto;cursor:pointer}
+.tag3d.place.tap{pointer-events:auto;cursor:pointer}
+#nearSit{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(98px + env(safe-area-inset-bottom,0px));z-index:19;border-radius:999px;padding:10px 20px;display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:var(--on-glass);white-space:nowrap}
+#nearSit .ico{width:18px;height:18px}
 .lab{font-size:13px;color:var(--ink-soft)}
 .drinks{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .drinks button{border:1.5px solid var(--paper-line);border-radius:14px;padding:12px;text-align:left;display:grid;gap:3px;color:var(--ink);background:#fbf8f1}
@@ -307,6 +310,7 @@ body.calm #trailCard,body.calm #hint{opacity:0;pointer-events:none}
     <div class="row"><span>걷는 속도</span><div class="seg" id="speedSeg"><button data-s="0">천천히</button><button data-s="1" aria-pressed="true">보통</button><button data-s="2">빠르게</button></div></div>
     <div class="row"><span>화질</span><div class="seg" id="qualSeg"><button data-q="0">가볍게</button><button data-q="1" aria-pressed="true">선명하게</button></div></div>
     <div class="row"><span>언어</span><div class="seg" id="langSeg"><button data-l="ko">한국어</button><button data-l="en">English</button></div></div>
+    <div class="row"><span>모닥불 라디오</span><div class="seg" id="radioSeg"><button data-r="1">켜기</button><button data-r="0">끄기</button></div></div>
     <div class="check"><label for="bubbleChk">다른 사람 말풍선 보기</label><input id="bubbleChk" type="checkbox" checked></div>
     <div class="row"><span id="roomInfo">모두와 함께 걷는 방</span><div class="seg"><button id="friendBtn">친구 방 링크 만들기</button><button id="publicBtn" hidden>모두의 방으로</button></div></div>
     <button class="linkbtn" id="unmuteBtn" hidden style="color:var(--on-glass);justify-self:start">숨긴 사람 다시 보기</button>
@@ -353,6 +357,7 @@ body.calm #trailCard,body.calm #hint{opacity:0;pointer-events:none}
     <button data-act="camp"><svg class="ico" viewBox="0 0 24 24"><path d="M3 20 12 5l9 15M12 5v15M9.5 20 12 15l2.5 5M2 20h20"/></svg><span>야영하기</span></button>
   </div>
   <div id="askBar" class="glass" hidden><span id="askTxt"></span><div><button id="askYes">하이파이브</button><button id="askNo">다음에</button></div></div>
+  <button id="nearSit" class="glass" hidden><svg class="ico" viewBox="0 0 24 24"><path d="M12 4c2 2.5 3 4 3 6a3 3 0 0 1-6 0c0-1 .5-2 1.2-2.8.3 1 .9 1.6 1.8 1.6C12 7.5 12 6 12 4zM5 19.5l14-4M19 19.5l-14-4"/></svg><span>모닥불에 앉기</span></button>
   <div id="actPill" class="glass" hidden><div><b id="actTitle"></b><small id="actSub"></small></div><button id="actStop">일어나기</button></div>
   <div id="toast" class="glass" hidden></div>
 </div>
@@ -977,7 +982,13 @@ const EN = {"센트럴파크":"Central Park",
 "메일로 받은 숫자 코드를 넣어 주세요":"Enter the code from your email",
 "확인하는 중…":"Checking…",
 "코드가 맞지 않거나 시간이 지났어요. 다시 받아 주세요":"That code is wrong or expired. Please request a new one",
-"로그아웃했어요":"Signed out"};
+"로그아웃했어요":"Signed out",
+"모닥불에 앉기":"Sit by the campfire",
+"모닥불 라디오":"Campfire radio",
+"켜기":"On",
+"끄기":"Off",
+"모닥불 라디오를 들으려면 화면을 한 번 눌러 주세요":"Tap the screen once to hear the campfire radio",
+"모닥불 라디오 · {0} · {1}":"Campfire radio · {0} · {1}"};
 function i18n(k, ...a) { if (LANG !== 'ko' && EN[k] === undefined && /[가-힣]/.test(k)) (window.__i18nMiss = window.__i18nMiss || new Set()).add(k); const s = LANG === 'ko' ? k : (EN[k] !== undefined ? EN[k] : k); return a.length ? s.replace(/\{(\d)\}/g, (m, i) => a[+i]) : s; }
 const ordinal = n => n + ((n % 100 >= 11 && n % 100 <= 13) ? 'th' : (['th', 'st', 'nd', 'rd'][n % 10] || 'th'));
 function translateDom() {   // HTML에 적힌 한국어 글자를 영어로 바꾼다
@@ -2047,7 +2058,8 @@ function initLabels() {
   for (const n of NPCS) { const L = addLabel(`<em>${NPC_TAG}</em><span></span>`, 'npc', () => [n.x, n.y + 2.4 - 0.47 * n.sit, n.z], 38); L.el.querySelector('span').textContent = n.name; L.hideIf = () => !showNpcs(); n.label = L; }
   if (!IS_PARK) addLabel(i18n('<i></i><span>구름폭포</span>'), 'place', () => [W.fallLip[0], W.fallLip[1] + 3.2, W.fallLip[2]], 110);
   else for (const [nm, x, z] of [[i18n('더 레이크'), -14, -86], [i18n('저수지'), 0, 50], [i18n('그레이트 론'), 0, -2], [i18n('쉽 메도우'), -24, -168]]) addLabel(`<i></i><span>${nm}</span>`, 'place', () => [x, 6, z], 120);
-  W.circleLabel = addLabel('<i></i><span></span>', 'place', () => [CIRCLE.x, CIRCLE.h + 5.2, CIRCLE.z], 120);
+  W.circleLabel = addLabel('<i></i><span></span>', 'place tap', () => [CIRCLE.x, CIRCLE.h + 5.2, CIRCLE.z], 120);
+  W.circleLabel.el.addEventListener('click', e => { e.stopPropagation(); goCircle(); });   // 모닥불 이름표를 누르면 그리로 가서 앉는다
   for (const cp of CPS) {
     cp.label = addLabel('<i></i><span></span>', 'place', () => [cp.x, cp.ly, cp.z], 95);
     cp.label.el.querySelector('span').textContent = cp.key === 'summit' && !IS_PARK ? `${cp.name} ${fmtAlt(SUMMIT_H)}m` : cp.name;
@@ -3335,6 +3347,88 @@ function openCircleChat() {
   addChatLog(null, i18n('자리에 앉은 사람끼리만 대화가 보여요'));
 }
 function closeCircleChat() { const bar = $('#chatBar'); bar.classList.remove('circle'); bar.hidden = true; $('#chatLog').innerHTML = ''; $('#chatInput').placeholder = i18n('가까이 있는 사람에게 한마디 (말풍선)'); $('#chatBtn').setAttribute('aria-expanded', 'false'); }
+/* ================= 모닥불 라디오 (늘 타는 모닥불) =================
+   모닥불 쉼터에는 길벗들이 만든 노래가 흐른다. 서버 없이 시계로 '지금 몇 번째 곡의 몇 초'를 계산해서
+   같은 때 온 사람은 모두 같은 곡의 같은 부분을 듣는다. 가까이 갈수록 크게 들리고, 멀어지면 멈추고 내려받지도 않는다.
+   곡을 늘리려면 music 폴더에 파일을 넣고 아래 목록에 한 줄(파일, 제목, 만든 사람, 길이 초)을 더하면 된다. */
+const RADIO_SONGS = [
+  { f: 'chrome-raincoat.mp3', t: 'Chrome Raincoat', a: 'elsalee', d: 200.41 },
+  { f: 'ya-ya-ya-catchy.mp3', t: 'Ya Ya Ya Catchy', a: 'oliviashim', d: 30.41 },
+];
+const RADIO_GAP = 5, RADIO_EPOCH = Date.UTC(2026, 10, 1) / 1000;   // 곡 사이 5초는 장작 타는 소리만
+const RADIO = { el: null, g: null, cur: -1, on: store.get('radio', true), playing: false, pending: false, blocked: false, unlocked: false, chk: 0, pt: 0, announced: -1 };
+const SILENT_WAV = 'data:audio/wav;base64,UklGRsQAAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
+const radioCanSeek = (el, t) => { try { for (let k = 0; k < el.seekable.length; k++) if (el.seekable.start(k) <= t && el.seekable.end(k) >= t) return true; } catch (e) {} return false; };
+function radioNow() {
+  const total = RADIO_SONGS.reduce((a, x) => a + x.d + RADIO_GAP, 0); if (!total) return { i: -1 };
+  let t = ((Date.now() / 1000 - RADIO_EPOCH) % total + total) % total;
+  for (let i = 0; i < RADIO_SONGS.length; i++) { const x = RADIO_SONGS[i]; if (t < x.d) return { i, off: t }; t -= x.d + RADIO_GAP; if (t < 0) return { i: -1 }; }
+  return { i: -1 };
+}
+function radioEl() {
+  if (!RADIO.el) { const el = new Audio(); el.preload = 'none'; el.addEventListener('ended', () => { RADIO.cur = -1; RADIO.playing = false; }); RADIO.el = el; }
+  if (!RADIO.g && A.ctx) {   // 거리에 따라 크기를 바꾸려고 소리를 WebAudio로 잇는다
+    RADIO.g = A.ctx.createGain(); RADIO.g.gain.value = 0; RADIO.g.connect(A.master);
+    try { A.ctx.createMediaElementSource(RADIO.el).connect(RADIO.g); } catch (e) { RADIO.g.disconnect(); RADIO.g = null; RADIO.noWA = true; }
+  }
+  return RADIO.el;
+}
+function radioUnlock() {   // 휴대폰은 사용자가 누른 순간에만 소리를 시작할 수 있어서, 입산 버튼을 누를 때 조용한 소리로 미리 열어 둔다
+  if (RADIO.unlocked) return;
+  const el = radioEl();
+  try { el.src = SILENT_WAV; const pr = el.play(); if (pr) pr.then(() => { RADIO.unlocked = true; if (RADIO.cur < 0) el.pause(); }).catch(() => {}); } catch (e) {}
+}
+function radioStart(i) {   // 고른 곡을 '지금 흘러야 할 위치'부터 튼다
+  const el = radioEl(), x = RADIO_SONGS[i];
+  RADIO.cur = i; RADIO.playing = true; clearTimeout(RADIO.pt);
+  el.preload = 'auto'; el.src = 'music/' + x.f;
+  el.addEventListener('loadedmetadata', () => { const n = radioNow(); if (n.i === i && radioCanSeek(el, n.off)) try { el.currentTime = n.off; } catch (e) {} }, { once: true });
+  radioPlay();
+}
+function radioPlay() {
+  const el = RADIO.el; RADIO.pending = true;
+  let pr; try { pr = el.play(); } catch (e) { RADIO.pending = false; return; }
+  if (!pr) { RADIO.pending = false; return; }
+  pr.then(() => { RADIO.pending = false; RADIO.blocked = false; }).catch(err => {
+    RADIO.pending = false;
+    if (err && err.name === 'NotAllowedError') { RADIO.playing = false; RADIO.cur = -1; if (!RADIO.blocked) { RADIO.blocked = true; toast(i18n('모닥불 라디오를 들으려면 화면을 한 번 눌러 주세요')); } }
+  });
+}
+function radioKick() {   // 막혀 있었다면, 화면을 누르는 바로 그 순간에 다시 튼다
+  if (!RADIO.blocked) return;
+  RADIO.blocked = false; const n = radioNow();
+  if (n.i >= 0 && RADIO.on) radioStart(n.i); else radioUnlock();
+}
+function radioStop(now) {
+  if (!RADIO.playing) return;
+  RADIO.playing = false; clearTimeout(RADIO.pt);
+  RADIO.pt = setTimeout(() => { if (!RADIO.playing && RADIO.el) try { RADIO.el.pause(); } catch (e) {} }, now ? 0 : 1300);
+}
+function radioTick(dt) {
+  RADIO.chk -= dt; if (RADIO.chk > 0) return; RADIO.chk = 0.5;
+  if (!A.ctx || !RADIO_SONGS.length) return;
+  const dc = Math.hypot(player.x - CIRCLE.x, player.z - CIRCLE.z);
+  const want = S.started && RADIO.on && !S.mute && !S.camp && !RADIO.blocked && dc < 46;
+  let vol = want ? 0.5 * Math.pow(1 - smooth(5, 44, dc), 1.3) : 0;
+  if (inCircle(player)) vol = Math.max(vol, 0.5);
+  if (player.act && player.act.type === 'meditate') vol *= 0.15;   // 명상할 때는 아주 작게
+  if (RADIO.g) RADIO.g.gain.setTargetAtTime(vol, A.ctx.currentTime, 0.8); else if (RADIO.el) try { RADIO.el.volume = clamp(vol * 1.8, 0, 1); } catch (e) {}
+  const n = radioNow();
+  if (!want || n.i < 0) { radioStop(dc > 60); if (n.i < 0) RADIO.cur = -1; return; }
+  if (RADIO.cur !== n.i) {
+    radioStart(n.i);
+    if (dc < 30 && RADIO.announced !== n.i) { RADIO.announced = n.i; const x = RADIO_SONGS[n.i]; toast(i18n('모닥불 라디오 · {0} · {1}', x.t, x.a)); }
+    return;
+  }
+  const el = RADIO.el;
+  if (!RADIO.playing || (el.paused && !RADIO.pending)) { RADIO.playing = true; clearTimeout(RADIO.pt); if (el.readyState >= 1 && radioCanSeek(el, n.off)) try { el.currentTime = n.off; } catch (e) {} radioPlay(); return; }
+  if (el.readyState >= 1 && !el.seeking && Math.abs(el.currentTime - n.off) > 3 && radioCanSeek(el, n.off)) try { el.currentTime = n.off; } catch (e) {}   // 밀렸으면 바로잡는다
+}
+function setRadio(on) {
+  RADIO.on = !!on; store.set('radio', RADIO.on);
+  document.querySelectorAll('#radioSeg button').forEach(b => b.setAttribute('aria-pressed', (b.dataset.r === '1') === RADIO.on ? 'true' : 'false'));
+  if (!RADIO.on) radioStop(false); else { RADIO.chk = 0; RADIO.announced = -1; }
+}
 function updateCircleHead() { $('#circleTxt').textContent = i18n('{0} · {1}/20명', CIRCLE_NAME, circleMembers().length); }
 /* 카페 소리 */
 const cafeSfx = {
@@ -3499,7 +3593,15 @@ function updateHud(dt) {
   updatePill();
   if (S.goCafe && !player.act && nearCafe(9)) { player.target = null; openCafeCard(); }
   if (S.goCircle && !player.act && Math.hypot(player.x - CIRCLE.x, player.z - CIRCLE.z) < 9) sitCircle();
-  if (W.circleLabel) { const n = circleMembers().length; W.circleLabel.el.querySelector('span').textContent = n ? i18n('{0} · {1}/20명', CIRCLE_NAME, n) : CIRCLE_NAME; }
+  if (W.circleLabel) {
+    const n = circleMembers().length, base = n ? i18n('{0} · {1}/20명', CIRCLE_NAME, n) : CIRCLE_NAME;
+    const song = RADIO.playing && RADIO.cur >= 0 && RADIO_SONGS[RADIO.cur] ? '  ♪ ' + RADIO_SONGS[RADIO.cur].t : '';
+    W.circleLabel.el.querySelector('span').textContent = base + song;
+  }
+  {   // 모닥불 가까이 오면 '모닥불에 앉기' 버튼
+    const dc = Math.hypot(player.x - CIRCLE.x, player.z - CIRCLE.z), show = S.started && !player.act && !S.camp && !S.breath && dc < 14;
+    if ($('#nearSit').hidden === show) $('#nearSit').hidden = !show;
+  }
   $('#greetBtn').classList.toggle('near', !!nearestOther(5));
   const hb = hudBig(); $('#altVal').textContent = hb[0]; $('#altUnit').textContent = hb[1];
   $('#distVal').textContent = (S.walked * UNIT_M / 1000).toFixed(2) + ' km';
@@ -4340,6 +4442,7 @@ function frameStep(now) {
   updateParticles(dt);
   updateMist(dt);
   updateAudio(Math.min(raw, 0.5));
+  radioTick(Math.min(raw, 0.5));
   updateHud(dt);
   render();
   requestAnimationFrame(frame);
@@ -4588,6 +4691,9 @@ function bindUI() {
   $('#gbExt').onclick = () => { location.href = 'kakaotalk://web/openExternal?url=' + encodeURIComponent(location.href); };
   W.meLabel.el.addEventListener('click', e => { e.stopPropagation(); openGb(); });   // 내 이름표를 누르면 길벗 카드
   authInit(false); renderGb();
+  $('#nearSit').onclick = e => { e.stopPropagation(); goCircle(); };
+  document.querySelectorAll('#radioSeg button').forEach(b => b.onclick = () => setRadio(b.dataset.r === '1')); setRadio(RADIO.on);
+  addEventListener('pointerdown', radioKick, true);
   $('#medGo').onclick = beginMeditate; $('#medCancel').onclick = () => { $('#medCard').hidden = true; };
   S.medMin = store.get('medMin', 5); S.medBell = store.get('medBell', true); S.medAwake = store.get('medAwake', true);
   $('#cafeCancel').onclick = () => { $('#cafeCard').hidden = true; S.goCafe = false; }; $('#campCancel').onclick = () => { $('#campCard').hidden = true; };
@@ -4612,7 +4718,7 @@ function bindUI() {
     store.set('nick', S.nick); $('#meName').textContent = S.nick;
     $('#start').hidden = true; $('#hud').hidden = false; S.started = true; S.startT = T;
     warpToStart(true); cam.pitch = 0.3; cam.dist = 9;
-    audioInit(); setMute(S.mute);
+    audioInit(); setMute(S.mute); radioUnlock();
     setTimeout(() => { $('#hint').style.opacity = 0; }, 9000);
     toast(i18n('{0}님, {1}에 오신 걸 환영해요', S.nick, COURSE_NAME));
     netStart();
