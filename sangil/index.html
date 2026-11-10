@@ -5,8 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="game.mybumo.com">
-<meta property="og:title" content="산길">
-<meta property="og:description" content="솔바람산 단풍길과 설산길, 뉴욕 센트럴파크를 천천히 걷는 온라인 산책. 5분 호흡 명상과 별 아래 야영까지">
+<meta property="og:title" content="산길 ZenTrail">
+<meta property="og:description" content="일할 땐 음악 대신, 산길. 탭 하나 열어 두면 하루 종일 바람, 새, 계곡 소리. 5분 호흡 명상과 별 아래 야영까지, 설치도 로그인도 없이.">
+<meta name="description" content="일할 땐 음악 대신, 산길(ZenTrail). 탭 하나 열어 두면 하루 종일 자연의 소리. 5분 호흡 명상, 타이머 명상, 별 아래 야영까지. Keep a mountain open in your other tab: nature sounds, guided breathing, no app or login.">
 <meta property="og:url" content="https://game.mybumo.com/sangil/">
 <meta property="og:image" content="https://game.mybumo.com/sangil/og.jpg">
 <meta property="og:image:width" content="1200">
@@ -14,7 +15,6 @@
 <meta name="twitter:card" content="summary_large_image">
 <title>산길</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<meta name="description" content="로그인 없이 들어와 단풍길과 눈 덮인 능선을 천천히 걷다 가는 온라인 산">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Gowun+Dodum&display=swap">
@@ -198,6 +198,31 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{ou
 .chips button[aria-pressed="true"]{border-color:var(--pine);background:#e9f0ea;font-weight:700}
 .chips button small{display:block;font-size:11.5px;font-weight:400;color:var(--ink-soft);margin-top:1px}
 #enterMed{margin-top:-4px}
+#gbStart{justify-self:center;margin-top:-6px}
+#gbCard{z-index:45}
+.gbHead{display:flex;align-items:center;gap:14px}
+#gbAvatar{width:76px;height:76px;border-radius:50%;flex:none}
+.gbHead .t{display:grid;gap:2px;min-width:0}
+.gbHead b{font-family:var(--font-display);font-size:24px;line-height:1.25;overflow-wrap:anywhere}
+.swatches{display:flex;flex-wrap:wrap;gap:9px}
+.swatches button{width:34px;height:34px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1.5px var(--paper-line)}
+.swatches button[aria-pressed="true"]{box-shadow:0 0 0 3px var(--pine)}
+.authbtn{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;padding:13px 12px;border-radius:12px;font-size:15px;font-weight:600;line-height:1.2}
+.authbtn.kakao{background:#FEE500;color:rgba(0,0,0,.85)}
+.authbtn.google{background:#fff;color:#1f1f1f;border:1px solid #747775}
+.authbtn.email{background:#fbf8f1;color:var(--ink);border:1.5px solid var(--paper-line)}
+.authbtn svg{width:20px;height:20px;flex:none}
+.gbRow{display:flex;gap:8px}
+.gbRow input{flex:1;min-width:0;padding:12px;border-radius:12px;border:1.5px solid var(--paper-line);font-size:16px;background:#fff;color:var(--ink)}
+.gbRow .authbtn{width:auto;padding:12px 16px;white-space:nowrap}
+.gbLogs{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;background:#f3ead8;color:var(--ink)}
+.gbLogs svg{width:30px;height:30px;flex:none}
+.gbLogs b{font-family:var(--font-display);font-size:18px}
+.gbLogs small{display:block;font-size:12.5px;color:var(--ink-soft);line-height:1.45}
+.gbWho{font-size:13px;color:var(--ink-soft);line-height:1.5;overflow-wrap:anywhere}
+#gbMsg:empty{display:none}
+#gbGift{padding:10px 14px;border-radius:12px;background:#fdf1d6;border:1px solid #e9c77a;color:#6b4a0c;font-size:14px;font-weight:600}
+.tag3d.me{pointer-events:auto;cursor:pointer}
 .lab{font-size:13px;color:var(--ink-soft)}
 .drinks{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .drinks button{border:1.5px solid var(--paper-line);border-radius:14px;padding:12px;text-align:left;display:grid;gap:3px;color:var(--ink);background:#fbf8f1}
@@ -275,6 +300,7 @@ body.calm #trailCard,body.calm #hint{opacity:0;pointer-events:none}
   </div>
   <div id="settings" class="glass" hidden>
     <h3>설정</h3>
+    <div class="row"><span>길벗 카드</span><div class="seg"><button id="gbSet">로그인하고 장작 받기</button></div></div>
     <div class="row"><label for="ambVol"><span>환경음 (바람·새·계곡)</span><span id="ambOut">70</span></label><input id="ambVol" type="range" min="0" max="100" value="70"></div>
     <div class="row"><label for="sfxVol"><span>효과음 (발소리·풍경)</span><span id="sfxOut">70</span></label><input id="sfxVol" type="range" min="0" max="100" value="70"></div>
     <div class="row"><label for="stepVol"><span>발소리 (눈·낙엽 밟는 소리)</span><span id="stepOut">80</span></label><input id="stepVol" type="range" min="0" max="100" value="80"></div>
@@ -353,6 +379,34 @@ body.calm #trailCard,body.calm #hint{opacity:0;pointer-events:none}
   </div>
 </section>
 
+<section id="gbCard" class="scrim" hidden>
+  <div class="card" role="dialog" aria-labelledby="gbNick">
+    <div class="eyebrow">길벗 카드</div>
+    <div class="gbHead"><canvas id="gbAvatar" width="152" height="152" aria-hidden="true"></canvas><div class="t"><b id="gbNick"></b><button class="linkbtn" id="gbNickBtn" style="justify-self:start;padding-left:0">다른 이름</button></div></div>
+    <div id="gbGift" hidden>로그인 선물로 장작 10개를 받았어요</div>
+    <div style="display:grid;gap:8px"><span class="lab">피부색</span><div class="swatches" id="gbSkin"></div></div>
+    <div style="display:grid;gap:8px"><span class="lab">얼굴</span><div class="chips" id="gbFace"><button data-f="0">기본</button><button data-f="1">웃는 눈</button><button data-f="2">선글라스</button><button data-f="3">수염</button></div></div>
+    <div style="display:grid;gap:8px"><span class="lab">재킷</span><div class="swatches" id="gbJacket"></div></div>
+    <div id="gbOut" style="display:grid;gap:10px">
+      <p>로그인하면 장작 10개를 선물로 드려요. 다른 기기에서도 내 이름과 모습이 그대로 이어지고, 나중에 불지기가 될 수 있어요.</p>
+      <button class="authbtn kakao" id="gbKakao"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#000" d="M12 3.6c-5 0-9 3.1-9 7 0 2.5 1.7 4.7 4.2 6l-1 3.7c-.1.3.3.6.6.4l4.4-2.9h.8c5 0 9-3.1 9-7s-4-7.2-9-7.2z"/></svg><span>카카오로 계속하기</span></button>
+      <button class="authbtn google" id="gbGoogle"><svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.6 5.4 2.7 13.3l7.9 6.1C12.5 13.6 17.8 9.5 24 9.5z"/><path fill="#4285F4" d="M46.1 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.4c-.5 2.9-2.2 5.3-4.6 6.9l7.4 5.7c4.3-4 6.9-9.9 6.9-17.1z"/><path fill="#FBBC05" d="M10.5 28.6c-.5-1.4-.8-3-.8-4.6s.3-3.2.8-4.6l-7.9-6.1C1 16.6 0 20.2 0 24s1 7.4 2.7 10.7l7.8-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.8-5.8l-7.4-5.7c-2.1 1.4-4.8 2.3-8.4 2.3-6.2 0-11.5-4.2-13.4-9.9l-7.9 6.1C6.6 42.6 14.6 48 24 48z"/></svg><span>구글로 계속하기</span></button>
+      <button class="authbtn email" id="gbEmailBtn"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2"/><path d="M3.5 7l8.5 6 8.5-6"/></svg><span>이메일로 로그인 코드 받기</span></button>
+      <form class="gbRow" id="gbEmailRow" hidden><input id="gbEmail" type="email" autocomplete="email" inputmode="email" placeholder="이메일 주소" aria-label="이메일 주소"><button class="authbtn email" type="submit">코드 받기</button></form>
+      <form class="gbRow" id="gbCodeRow" hidden><input id="gbCode" type="text" autocomplete="one-time-code" inputmode="numeric" maxlength="10" placeholder="숫자 코드" aria-label="숫자 코드"><button class="authbtn email" type="submit">로그인</button></form>
+      <p class="gbWho" id="gbNone" hidden>로그인은 곧 열려요. 조금만 기다려 주세요.</p>
+    </div>
+    <div id="gbIn" style="display:grid;gap:10px" hidden>
+      <div class="gbLogs"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="4" y="13" width="24" height="9" rx="4.5" fill="#9b6a3c" transform="rotate(-14 16 17.5)"/><ellipse cx="26.2" cy="14.6" rx="2.6" ry="4.4" fill="#e7c48f" transform="rotate(-14 26.2 14.6)"/><path d="M17 4c1.6 2 2.4 3.6 2.4 5a3.4 3.4 0 0 1-6.8 0c0-.9.4-1.8 1-2.5.2.8.7 1.3 1.5 1.3C15.6 7.8 16.6 6 17 4z" fill="#e0782f"/></svg><div><b id="gbLogsN"></b><small>예고 모닥불이 열리면 불을 이어 가는 데 쓸 수 있어요</small></div></div>
+      <div class="gbWho" id="gbWho"></div>
+      <button class="linkbtn" id="gbLogout" style="justify-self:start;padding-left:0">로그아웃</button>
+    </div>
+    <p class="gbWho" id="gbMsg" aria-live="polite"></p>
+    <button class="linkbtn" id="gbExt" hidden style="justify-self:start;padding-left:0">다른 브라우저로 열기</button>
+    <button class="secondary" id="gbClose">닫기</button>
+  </div>
+</section>
+
 <section id="medCard" class="scrim" hidden>
   <div class="card" role="dialog" aria-labelledby="medTitle">
     <div class="eyebrow">명상 · 고요히 앉기</div>
@@ -408,6 +462,7 @@ body.calm #trailCard,body.calm #hint{opacity:0;pointer-events:none}
     <div class="name"><span>오늘의 이름 <b id="nickOut">느긋한 구름</b></span><button class="linkbtn" id="nickBtn">다른 이름</button></div>
     <button class="primary" id="enterBtn" disabled>입산하기</button>
     <button class="secondary" id="enterMed" disabled>바로 명상하기</button>
+    <button class="linkbtn" id="gbStart">로그인하고 장작 10개 받기</button>
     <p class="fine">PC: 바닥 클릭 이동 · 드래그로 둘러보기 · 휠 확대, 방향키/WASD도 됩니다.<br>휴대폰: 탭으로 이동 · 드래그로 둘러보기 · 두 손가락으로 확대.</p>
   </div>
 </section>
@@ -709,7 +764,7 @@ const EN = {"센트럴파크":"Central Park",
 "{0} · {1} · {2} · 해발 {3}m":"{0} · {1} · {2} · {3}m",
 "겨울 설산길":"Winter snow trail",
 "가을 단풍길":"Autumn maple trail",
-"game.mybumo.com · 산길":"game.mybumo.com · Sangil",
+"game.mybumo.com · 산길":"game.mybumo.com · ZenTrail",
 "공원 길을 따라 저수지까지 천천히 걸어요":"Strolling the park path to the Reservoir",
 "5번가 입구까지 천천히 걸어가요":"Strolling back to the 5th Ave entrance",
 "산길을 따라 정상까지 천천히 걸어요":"Hiking slowly up to the summit",
@@ -727,8 +782,9 @@ const EN = {"센트럴파크":"Central Park",
 "입구까지 천천히 걸어가요":"Strolling back to the entrance",
 "5번가 입구로 돌아왔어요":"Back at the 5th Ave entrance",
 "산길 입구로 돌아왔어요":"Back at the trailhead",
-"산길 · 센트럴파크":"Sangil · Central Park",
-"산길":"Sangil",
+"산길 · 센트럴파크":"ZenTrail · Central Park",
+"산길":"ZenTrail",
+"山路":"산길",
 "센트럴파크 3D 산책길":"Central Park 3D walk",
 "솔바람산 3D 산길":"Mt. Solbaram 3D trail",
 "센트럴파크 가을 산책":"Central Park in autumn",
@@ -876,7 +932,53 @@ const EN = {"센트럴파크":"Central Park",
 "{0}분 명상을 시작해요. 싱잉볼이 울리면 눈을 감아 보세요":"Starting a {0}-minute meditation. Close your eyes when the singing bowl rings",
 "명상 · {0} / {1}:00":"Meditation · {0} / {1}:00",
 "{0}분 명상을 마쳤어요. 이 고요함을 안고 다시 걸어요":"{0}-minute meditation done. Carry this calm with you",
-"스트레스를 후~ 날려 보냈어요. 숨이 한결 고르네요":"Stress, blown away. Your breath feels steadier"};
+"스트레스를 후~ 날려 보냈어요. 숨이 한결 고르네요":"Stress, blown away. Your breath feels steadier",
+"로그인하고 장작 10개 받기":"Sign in for 10 free logs",
+"길벗 카드":"Hiker card",
+"로그인하고 장작 받기":"Sign in for free logs",
+"길벗 카드 보기":"Open hiker card",
+"로그인 선물로 장작 10개를 받았어요":"Welcome gift: 10 firewood logs",
+"피부색":"Skin tone",
+"얼굴":"Face",
+"기본":"Classic",
+"웃는 눈":"Smiling eyes",
+"선글라스":"Sunglasses",
+"수염":"Beard",
+"재킷":"Jacket",
+"로그인하면 장작 10개를 선물로 드려요. 다른 기기에서도 내 이름과 모습이 그대로 이어지고, 나중에 불지기가 될 수 있어요.":"Sign in and get 10 firewood logs as a gift. Your name and look follow you to any device, and later you can become a Firekeeper.",
+"카카오로 계속하기":"Login with Kakao",
+"구글로 계속하기":"Continue with Google",
+"이메일로 로그인 코드 받기":"Get a sign-in code by email",
+"이메일 주소":"Email address",
+"코드 받기":"Send code",
+"숫자 코드":"Code",
+"로그인":"Sign in",
+"로그인은 곧 열려요. 조금만 기다려 주세요.":"Sign-in is opening soon. Please check back shortly.",
+"예고 모닥불이 열리면 불을 이어 가는 데 쓸 수 있어요":"Use them to keep a scheduled campfire burning once those open",
+"로그아웃":"Sign out",
+"다른 브라우저로 열기":"Open in another browser",
+"로그인을 마치지 못했어요. 다시 시도해 주세요":"Sign-in didn't finish. Please try again",
+"피부색 {0}":"Skin tone {0}",
+"재킷 색 {0}":"Jacket color {0}",
+"장작 {0}개":"{0} firewood logs",
+"장작을 세는 중…":"Counting your logs…",
+"장작 정보를 불러오지 못했어요":"Couldn't load your logs",
+"카카오 계정으로 로그인했어요":"Signed in with Kakao",
+"구글 계정으로 로그인했어요":"Signed in with Google",
+"이메일로 로그인했어요":"Signed in with email",
+"카카오톡 안에서는 구글 로그인이 막혀 있어요. 카카오로 로그인하거나 다른 브라우저로 열어 주세요":"Google sign-in is blocked inside KakaoTalk. Sign in with Kakao, or open this page in another browser",
+"이 앱 안의 브라우저에서는 구글 로그인이 막혀 있어요. 다른 브라우저로 열어 주세요":"Google sign-in is blocked in this app's built-in browser. Please open this page in another browser",
+"로그인 화면으로 이동해요…":"Taking you to sign in…",
+"지금은 로그인할 수 없어요. 잠시 뒤 다시 시도해 주세요":"Sign-in isn't available right now. Please try again in a moment",
+"이메일 주소를 다시 확인해 주세요":"Please check the email address",
+"보내는 중…":"Sending…",
+"{0}(으)로 숫자 코드를 보냈어요. 메일에 적힌 코드를 넣어 주세요":"We sent a code to {0}. Enter the code from the email",
+"잠시 뒤 다시 시도해 주세요":"Please try again in a moment",
+"이메일 로그인은 준비 중이에요. 카카오나 구글로 로그인해 주세요":"Email sign-in is coming soon. Please use Kakao or Google",
+"메일로 받은 숫자 코드를 넣어 주세요":"Enter the code from your email",
+"확인하는 중…":"Checking…",
+"코드가 맞지 않거나 시간이 지났어요. 다시 받아 주세요":"That code is wrong or expired. Please request a new one",
+"로그아웃했어요":"Signed out"};
 function i18n(k, ...a) { if (LANG !== 'ko' && EN[k] === undefined && /[가-힣]/.test(k)) (window.__i18nMiss = window.__i18nMiss || new Set()).add(k); const s = LANG === 'ko' ? k : (EN[k] !== undefined ? EN[k] : k); return a.length ? s.replace(/\{(\d)\}/g, (m, i) => a[+i]) : s; }
 const ordinal = n => n + ((n % 100 >= 11 && n % 100 <= 13) ? 'th' : (['th', 'st', 'nd', 'rd'][n % 10] || 'th'));
 function translateDom() {   // HTML에 적힌 한국어 글자를 영어로 바꾼다
@@ -890,7 +992,10 @@ function translateDom() {   // HTML에 적힌 한국어 글자를 영어로 바�
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const coarse = matchMedia('(pointer: coarse)').matches;
 /* 코스: 솔바람산(mountain) 또는 센트럴파크(park). 주소 끝 #park 로 바로 열 수 있다 */
-const COURSE = /^#park/i.test(location.hash) ? 'park' : /^#(mountain|room-)/i.test(location.hash) ? 'mountain' : (store.get('course', 'mountain') === 'park' ? 'park' : 'mountain');
+// 로그인하고 돌아오면 주소에 ?code= 가 붙고 #park 같은 꼬리가 사라질 수 있어서, 떠나기 전에 적어 둔 꼬리를 쓴다
+const AUTH_RET = /[?&](code|error|error_description)=/.test(location.search);
+const HASH0 = (AUTH_RET && (() => { try { return sessionStorage.getItem('sangil.authHash'); } catch (e) { return ''; } })()) || location.hash;
+const COURSE = /^#park/i.test(HASH0) ? 'park' : /^#(mountain|room-)/i.test(HASH0) ? 'mountain' : (store.get('course', 'mountain') === 'park' ? 'park' : 'mountain');
 const IS_PARK = COURSE === 'park';
 store.set('course', COURSE);
 const COURSE_NAME = IS_PARK ? i18n('센트럴파크') : i18n('솔바람산');
@@ -1897,15 +2002,19 @@ let T = 0, VP = M.ident(), invVP = M.ident(), eye = [0,0,0];
 let CPS = [];
 
 const MY_JACKETS = [[0.86,0.42,0.20],[0.25,0.45,0.70],[0.35,0.55,0.40],[0.60,0.40,0.65],[0.82,0.30,0.30],[0.30,0.60,0.62],[0.95,0.70,0.25]];
+// 피부색과 얼굴은 누구나 무료로 고른다 (밝은 톤부터 깊은 톤까지 6가지, 얼굴 4가지: 기본, 웃는 눈, 선글라스, 수염)
+const SKINS = [[0.99,0.86,0.75],[0.97,0.80,0.66],[0.90,0.69,0.52],[0.77,0.55,0.38],[0.60,0.41,0.28],[0.42,0.28,0.19]];
+const FACE_N = 4;
 function initState() {
   const look = store.get('look', null) || { j: MY_JACKETS[Math.floor(Math.random() * MY_JACKETS.length)], h: HATS[Math.floor(Math.random() * HATS.length)] };
   store.set('look', look); player.jacket = look.j; player.hat = look.h;
+  player.skin = SKINS[Number.isInteger(look.s) ? look.s : 1] || SKINS[1]; player.face = Number.isInteger(look.f) ? clamp(look.f, 0, FACE_N - 1) : 0;
   player.heading = Math.atan2(TX[4] - TX[0], TZ[4] - TZ[0]);
   player.y = groundY(player.x, player.z);
   for (let i = 0; i < 6; i++) {
     NPCS.push({ s: rr(20, TN - 30), dir: R() < 0.5 ? 1 : -1, speed: IS_PARK && i % 3 === 0 ? rr(2.7, 3.2) : rr(1.2, 1.9), pause: 0, name: ADJ[i % ADJ.length].replace(i18n('천천히 걷는'), i18n('천천히')) + ' ' + NOUN[(i * 5 + 3) % NOUN.length],
       x: 0, z: 0, y: 0, heading: 0, phase: rr(0, 6), moveAmt: 1, jacket: JACKETS[i % JACKETS.length], pants: [0.24,0.26,0.30], hat: HATS[i % HATS.length], pack: [0.30,0.28,0.25], lastLand: -1,
-      sit: 0, act: null, cushion: [[0.30,0.42,0.36],[0.55,0.24,0.18],[0.42,0.34,0.52]][i % 3] });
+      sit: 0, act: null, cushion: [[0.30,0.42,0.36],[0.55,0.24,0.18],[0.42,0.34,0.52]][i % 3], skin: SKINS[(i * 4 + 1) % SKINS.length], face: [0, 1, 0, 3, 1, 2][i % 6] });
   }
   const cp = (key, name, x, z, r, ly) => { const idx = nearIdx(x, z); return { key, name, x, z, idx, r, ly: ly != null ? ly : TH[idx] + 4.2 }; };
   CPS = IS_PARK ? [
@@ -3147,6 +3256,7 @@ const DRINKS = IS_PARK ? [
 ];
 const CAFE_LINES = [i18n('한 모금씩 천천히'), i18n('김이 모락모락 올라와요'), i18n('창밖 풍경을 바라봐요'), i18n('따뜻함이 손끝까지 전해져요'), i18n('옆자리 사람에게 말을 걸어 보세요')];
 const barista = { x: 0, z: 0, y: 0, heading: 0, phase: 0, moveAmt: 0, sit: 0, act: null, jacket: IS_PARK ? [0.22, 0.38, 0.30] : [0.86, 0.80, 0.68], pants: [0.2, 0.2, 0.22], hat: IS_PARK ? [0.22, 0.38, 0.30] : [0.42, 0.30, 0.22], pack: IS_PARK ? [0.22, 0.38, 0.30] : [0.86, 0.80, 0.68] };
+barista.skin = SKINS[IS_PARK ? 4 : 2];
 { const [x, z] = CAFE.L(0.9, -2.3); barista.x = x; barista.z = z; barista.heading = CAFE.yaw; }
 function nearCafe(d = 16) { return Math.hypot(player.x - CAFE.x, player.z - CAFE.z) < d; }
 function goCafe() {
@@ -3561,7 +3671,7 @@ function drawHiker(c, isMe) {
   const p = computePose(c);
   const root = M.chain(M.T(c.x + (c.ox || 0), c.y + p.lift, c.z + (c.oz || 0)), M.Ry(c.heading), M.Rx(p.lean));
   const P2 = (local, mesh, tint) => draw(mesh, { model: M.mul(root, local), tint, flat: 0, snowable: 0 });
-  const skin = [0.97, 0.80, 0.66];
+  const skin = c.skin || SKINS[1], face = c.face | 0;
   if (p.sit > 0.02 && !p.chair) P2(M.chain(M.T(0, 0.05, -0.04), M.S(0.58 * p.sit, 0.1, 0.52 * p.sit)), W.uCyl, c.cushion || [0.55, 0.24, 0.18]);
   for (const side of [-1, 1]) {
     const leg = M.chain(M.T(0.14 * side, 0.64 - p.drop, 0), M.Ry(-side * 0.9 * p.sit * (p.chair ? 0 : 1)), M.Rx(lerp(p.sw * side, p.chair ? -1.05 : -1.5, p.sit)));
@@ -3579,9 +3689,13 @@ function drawHiker(c, isMe) {
   P2(M.chain(head, M.T(0, 0.73, 0), M.S(0.1)), W.uSphere, isMe ? [0.86, 0.42, 0.2] : c.hat);
   const ey = p.eyes;
   for (const side of [-1, 1]) {
-    P2(M.chain(head, M.T(0.14 * side, 0.24 - (1 - ey) * 0.015, 0.385), M.S(0.045 + (1 - ey) * 0.012, 0.012 + 0.048 * ey, 0.03)), W.uSphere, [0.12, 0.10, 0.10]);
-    P2(M.chain(head, M.T(0.24 * side, 0.17, 0.33), M.S(0.065, 0.04, 0.03)), W.uSphere, [0.98, 0.62, 0.58]);
+    if (face === 2) P2(M.chain(head, M.T(0.13 * side, 0.25, 0.39), M.S(0.11, 0.075, 0.035)), W.uSphere, [0.07, 0.08, 0.10]);   // 선글라스
+    else if (face === 1) for (const h of [-1, 1]) P2(M.chain(head, M.T(0.14 * side + 0.024 * h, 0.235, 0.388), M.Rz(-0.55 * h), M.S(0.032, 0.012, 0.03)), W.uSphere, [0.12, 0.10, 0.10]);   // 웃는 눈 (^ ^)
+    else P2(M.chain(head, M.T(0.14 * side, 0.24 - (1 - ey) * 0.015, 0.385), M.S(0.045 + (1 - ey) * 0.012, 0.012 + 0.048 * ey, 0.03)), W.uSphere, [0.12, 0.10, 0.10]);
+    if (face !== 3) P2(M.chain(head, M.T(0.24 * side, 0.17, 0.33), M.S(0.065, 0.04, 0.03)), W.uSphere, [0.98, 0.62, 0.58]);
   }
+  if (face === 2) P2(M.chain(head, M.T(0, 0.27, 0.415), M.S(0.07, 0.016, 0.016)), W.uBox, [0.07, 0.08, 0.10]);
+  if (face === 3) P2(M.chain(head, M.T(0, 0.07, 0.28), M.S(0.26, 0.15, 0.16)), W.uSphere, [0.30, 0.21, 0.14]);
   if (p.item) drawItem(p, P2);
   if (p.item && p.item.type === 'cup') { const R2 = p.arms[-1], h = V.add(R2.sh, V.sc(R2.dir, R2.L)), w = M.xf(root, h[0], h[1] + 0.13, h[2]); c.steamAt = [w[0], w[1], w[2], p.item.mk]; } else c.steamAt = null;
 }
@@ -3721,8 +3835,221 @@ const MUTED = new Set(store.get('muted', []));
 function realCount() { let n = 0; for (const p of NET.peers.values()) if (p.ready && !p.hidden) n++; return n; }
 function showNpcs() { return realCount() < 4; }
 function friendRoom() { const m = location.hash.match(/^#(?:park-)?room-([a-z0-9]{4,12})$/i); return m ? 'room-' + m[1].toLowerCase() : null; }
-function myPresence() { return { id: ME.id, n: S.nick, j: player.jacket, h: player.hat }; }
+function myPresence() { return { id: ME.id, n: S.nick, j: player.jacket, h: player.hat, s: Math.max(0, SKINS.indexOf(player.skin)), f: player.face | 0 }; }
 function loadScript(src) { return new Promise((res, rej) => { const s = document.createElement('script'); s.src = src; s.async = true; s.onload = res; s.onerror = rej; document.head.appendChild(s); }); }
+/* Supabase 연결 하나를 함께 걷기(실시간)와 로그인이 같이 쓴다. 로그인 정보는 이 기기에 'sangil-auth' 이름으로 남는다 */
+let SB_P = null;
+function getSB() {
+  if (!SB_P) SB_P = (async () => {
+    if (!SANGIL_SUPABASE_URL || !SANGIL_SUPABASE_ANON_KEY) throw new Error('no supabase');
+    // 새 형식 키(sb_publishable_)를 쓰려면 최근 버전이 필요하다. 못 불러오면 예전 버전으로 한 번 더 시도한다
+    if (!window.supabase) { try { await loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.1/dist/umd/supabase.js'); } catch (e) {} }
+    if (!window.supabase) await loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js');
+    return window.supabase.createClient(SANGIL_SUPABASE_URL, SANGIL_SUPABASE_ANON_KEY, {
+      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: 'pkce', storageKey: 'sangil-auth' },
+      realtime: { params: { eventsPerSecond: 10 } } });
+  })().catch(e => { SB_P = null; throw e; });
+  return SB_P;
+}
+
+/* ================= 길벗: 로그인과 내 모습 =================
+   로그인은 카카오, 구글, 이메일 숫자 코드. 처음 로그인하면 서버 함수(sangil_claim_gift)가 길벗 정보를 만들고 장작 10개를 준다.
+   장작 수는 서버 함수만 바꿀 수 있고, 페이지는 이름과 모습만 고칠 수 있다. 모습 고르기는 로그인하지 않아도 된다. */
+const AUTH = { user: null, profile: null, pending: false, err: false, gifted: false, providers: null, listening: false, email: '', returned: false };
+const IN_APP = /KAKAOTALK|Instagram|FBAN|FBAV|FB_IAB|Line\/|NAVER\(inapp|DaumApps|everytimeApp/i.test(navigator.userAgent);
+const IN_KAKAO = /KAKAOTALK/i.test(navigator.userAgent);
+const authRedirect = () => location.origin + location.pathname;
+function hasStoredAuth() { try { return !!localStorage.getItem('sangil-auth'); } catch (e) { return false; } }
+async function authInit(force) {
+  if (!force && !hasStoredAuth() && !AUTH_RET) return;
+  try {
+    const sb = await getSB();
+    if (!AUTH.listening) { AUTH.listening = true; sb.auth.onAuthStateChange((ev, session) => { setTimeout(() => onAuth(session), 0); }); }
+    const { data } = await sb.auth.getSession();
+    await onAuth(data && data.session);
+  } catch (e) { console.warn('로그인 확인 실패', e); }
+  if (AUTH_RET && !AUTH.returned) {   // 카카오나 구글에서 돌아왔다: 주소를 원래대로 돌려놓고 길벗 카드를 보여 준다
+    AUTH.returned = true;
+    const q = new URLSearchParams(location.search), err = q.get('error_description') || q.get('error');
+    let h = ''; try { h = sessionStorage.getItem('sangil.authHash') || ''; sessionStorage.removeItem('sangil.authHash'); } catch (e) {}
+    try { history.replaceState(null, '', location.pathname + (h || location.hash)); } catch (e) {}
+    openGb(err || !AUTH.user ? i18n('로그인을 마치지 못했어요. 다시 시도해 주세요') : '');
+  }
+}
+let authSeq = 0;
+async function onAuth(session) {
+  const u = (session && session.user) || null, prev = AUTH.user ? AUTH.user.id : null;
+  AUTH.user = u;
+  if (!u) { AUTH.profile = null; AUTH.pending = false; AUTH.gifted = false; renderGb(); return; }
+  if (prev === u.id && (AUTH.profile || AUTH.pending)) { renderGb(); return; }
+  const my = ++authSeq; AUTH.pending = true; AUTH.err = false; renderGb();
+  try {
+    const sb = await getSB();
+    const { data, error } = await sb.rpc('sangil_claim_gift', { p_nick: S.nick, p_look: lookToSave() });
+    if (error) throw error;
+    if (my !== authSeq) return;
+    AUTH.profile = (data && data.profile) || null; AUTH.gifted = !!(data && data.gifted);
+    if (AUTH.profile) applyProfile(AUTH.profile);
+  } catch (e) { console.warn('길벗 정보를 불러오지 못함', e); if (my === authSeq) { AUTH.profile = null; AUTH.err = true; } }
+  finally { if (my === authSeq) { AUTH.pending = false; renderGb(); } }
+}
+function lookToSave() {
+  const r = v => v.map(x => Math.round(x * 1000) / 1000);
+  return { s: Math.max(0, SKINS.indexOf(player.skin)), f: player.face | 0, j: r(player.jacket), h: r(player.hat) };
+}
+function applyProfile(pr) {
+  if (pr.nick) setNick(cleanNick(pr.nick), false);
+  if (pr.look && typeof pr.look === 'object') setLook(pr.look, false);
+}
+function setNick(n, save) {
+  S.nick = n; store.set('nick', n);
+  const me = $('#meName'); if (me) me.textContent = n; $('#nickOut').textContent = n;
+  retrack(); renderGb(); if (save) saveProfile();
+}
+function setLook(patch, save) {
+  const L = Object.assign({}, store.get('look', null) || {});
+  const col = v => Array.isArray(v) && v.length >= 3 && v.slice(0, 3).every(x => isFinite(+x)) ? v.slice(0, 3).map(x => clamp(+x, 0, 1)) : null;
+  if (Number.isInteger(patch.s) && SKINS[patch.s]) L.s = patch.s;
+  if (Number.isInteger(patch.f) && patch.f >= 0 && patch.f < FACE_N) L.f = patch.f;
+  if (col(patch.j)) L.j = col(patch.j);
+  if (col(patch.h)) L.h = col(patch.h);
+  store.set('look', L);
+  if (L.j) player.jacket = L.j; if (L.h) player.hat = L.h;
+  player.skin = SKINS[Number.isInteger(L.s) ? L.s : 1]; player.face = L.f | 0;
+  retrack(); renderGb(); if (save) saveProfile();
+}
+function retrack() {   // 바뀐 이름과 모습을 함께 걷는 사람들에게 다시 알린다
+  try {
+    if (NET.mode === 'supabase' && NET.ch) NET.ch.track(myPresence());
+    else if (NET.bc) NET.bc.postMessage(Object.assign({ k: 'hello', from: ME.id }, myPresence()));
+  } catch (e) {}
+}
+let gbSaveT = 0;
+function saveProfile() {
+  if (!AUTH.user || !AUTH.profile) return;
+  clearTimeout(gbSaveT);
+  gbSaveT = setTimeout(async () => {
+    try {
+      const sb = await getSB();
+      const { error } = await sb.from('sangil_profiles').update({ nick: S.nick, look: lookToSave(), updated_at: new Date().toISOString() }).eq('id', AUTH.user.id);
+      if (error) throw error;
+    } catch (e) { console.warn('길벗 정보 저장 실패', e); }
+  }, 700);
+}
+async function loadProviders() {   // 대시보드에서 켜 둔 로그인 방법만 버튼으로 보여 준다
+  if (AUTH.providers) return AUTH.providers;
+  try {
+    const r = await fetch(SANGIL_SUPABASE_URL + '/auth/v1/settings', { headers: { apikey: SANGIL_SUPABASE_ANON_KEY } });
+    if (!r.ok) throw new Error(r.status);
+    const ex = (await r.json()).external || {};
+    AUTH.providers = { kakao: !!ex.kakao, google: !!ex.google, email: !!ex.email };
+  } catch (e) { AUTH.providers = { kakao: true, google: true, email: true }; }
+  return AUTH.providers;
+}
+const gbMsg = t => { $('#gbMsg').textContent = t || ''; };
+function openGb(msg) {
+  closeMenus();
+  if (!$('#gbSkin').children.length) buildGb();
+  $('#gbEmailRow').hidden = true; $('#gbCodeRow').hidden = !AUTH.email || !!AUTH.user; $('#gbExt').hidden = true;
+  gbMsg(msg || ''); renderGb(); $('#gbCard').hidden = false;
+  loadProviders().then(renderGb);
+  authInit(true);
+}
+function closeGb() { $('#gbCard').hidden = true; AUTH.gifted = false; }
+function buildGb() {
+  SKINS.forEach((c, i) => { const b = document.createElement('button'); b.style.background = rgbCss(c); b.dataset.s = i; b.setAttribute('aria-label', i18n('피부색 {0}', i + 1)); b.onclick = () => setLook({ s: i }, true); $('#gbSkin').appendChild(b); });
+  MY_JACKETS.forEach((c, i) => { const b = document.createElement('button'); b.style.background = rgbCss(c); b.dataset.j = i; b.setAttribute('aria-label', i18n('재킷 색 {0}', i + 1)); b.onclick = () => setLook({ j: c }, true); $('#gbJacket').appendChild(b); });
+  document.querySelectorAll('#gbFace button').forEach(b => b.onclick = () => setLook({ f: +b.dataset.f }, true));
+}
+const rgbCss = c => `rgb(${c.map(v => Math.round(clamp(v, 0, 1) * 255)).join(',')})`;
+function renderGb() {
+  const inn = !!AUTH.user, logs = AUTH.profile ? (AUTH.profile.logs | 0) : null;
+  $('#gbSet').textContent = inn ? i18n('길벗 카드 보기') : i18n('로그인하고 장작 받기');
+  $('#gbStart').textContent = inn ? i18n('길벗 카드') : i18n('로그인하고 장작 10개 받기');
+  $('#gbNick').textContent = S.nick;
+  $('#gbOut').hidden = inn; $('#gbIn').hidden = !inn;
+  $('#gbGift').hidden = !(inn && AUTH.gifted);
+  const sk = SKINS.indexOf(player.skin);
+  document.querySelectorAll('#gbSkin button').forEach(b => b.setAttribute('aria-pressed', +b.dataset.s === sk ? 'true' : 'false'));
+  document.querySelectorAll('#gbFace button').forEach(b => b.setAttribute('aria-pressed', +b.dataset.f === (player.face | 0) ? 'true' : 'false'));
+  const jk = MY_JACKETS.findIndex(c => c.every((v, k) => Math.abs(v - player.jacket[k]) < 0.01));
+  document.querySelectorAll('#gbJacket button').forEach(b => b.setAttribute('aria-pressed', +b.dataset.j === jk ? 'true' : 'false'));
+  if (inn) {
+    $('#gbLogsN').textContent = logs !== null ? i18n('장작 {0}개', logs) : AUTH.pending ? i18n('장작을 세는 중…') : i18n('장작 정보를 불러오지 못했어요');
+    const pv = (AUTH.user.app_metadata && AUTH.user.app_metadata.provider) || 'email';
+    const how = pv === 'kakao' ? i18n('카카오 계정으로 로그인했어요') : pv === 'google' ? i18n('구글 계정으로 로그인했어요') : i18n('이메일로 로그인했어요');
+    $('#gbWho').textContent = how + (AUTH.user.email ? ' · ' + AUTH.user.email : '');
+  }
+  const P = AUTH.providers;
+  if (P) { $('#gbKakao').hidden = !P.kakao; $('#gbGoogle').hidden = !P.google; $('#gbEmailBtn').hidden = !P.email; $('#gbNone').hidden = P.kakao || P.google || P.email; }
+  drawAvatar();
+}
+function drawAvatar() {   // 길벗 카드의 작은 얼굴 그림 (3D 캐릭터와 같은 색, 같은 얼굴)
+  const cv = $('#gbAvatar'); if (!cv) return;
+  const x = cv.getContext('2d'), f = player.face | 0; if (!x) return;
+  x.clearRect(0, 0, 152, 152); x.save();
+  x.beginPath(); x.arc(76, 76, 76, 0, TAU); x.fillStyle = '#e4ece1'; x.fill(); x.clip();
+  x.fillStyle = rgbCss(player.jacket); x.beginPath(); x.ellipse(76, 156, 56, 46, 0, 0, TAU); x.fill();
+  x.fillStyle = rgbCss(player.skin || SKINS[1]); x.beginPath(); x.arc(76, 78, 36, 0, TAU); x.fill();
+  x.fillStyle = rgbCss(player.hat); x.beginPath(); x.ellipse(76, 66, 37, 28, 0, Math.PI, TAU); x.fill(); x.fillRect(39, 62, 74, 6);
+  x.fillStyle = '#db6b33'; x.beginPath(); x.arc(76, 36, 7, 0, TAU); x.fill();
+  const ink = '#1f1a19';
+  if (f !== 3) { x.fillStyle = 'rgba(250,158,148,.7)'; for (const cx of [55, 97]) { x.beginPath(); x.arc(cx, 92, 5.5, 0, TAU); x.fill(); } }
+  if (f === 2) { x.fillStyle = '#121418'; for (const cx of [62, 90]) { x.beginPath(); x.ellipse(cx, 81, 11, 7.5, 0, 0, TAU); x.fill(); } x.fillRect(70, 79, 12, 3); }
+  else if (f === 1) { x.strokeStyle = ink; x.lineWidth = 3; x.lineCap = 'round'; for (const cx of [63, 89]) { x.beginPath(); x.arc(cx, 84, 5, Math.PI * 1.15, Math.PI * 1.85); x.stroke(); } }
+  else { x.fillStyle = ink; for (const cx of [63, 89]) { x.beginPath(); x.ellipse(cx, 81, 3.4, 4.8, 0, 0, TAU); x.fill(); } }
+  if (f === 3) { x.fillStyle = '#45301f'; x.beginPath(); x.ellipse(76, 96, 25, 16, 0, 0, Math.PI); x.fill(); x.beginPath(); x.ellipse(76, 95, 25, 6, 0, 0, TAU); x.fill(); }
+  else { x.strokeStyle = ink; x.lineWidth = 2.4; x.lineCap = 'round'; x.beginPath(); x.arc(76, 92, 6, Math.PI * 0.2, Math.PI * 0.8); x.stroke(); }
+  x.restore();
+}
+async function gbOAuth(provider) {
+  if (provider === 'google' && IN_APP) {   // 구글은 카카오톡, 인스타그램 같은 앱 안 브라우저에서 로그인을 막는다
+    gbMsg(IN_KAKAO ? i18n('카카오톡 안에서는 구글 로그인이 막혀 있어요. 카카오로 로그인하거나 다른 브라우저로 열어 주세요') : i18n('이 앱 안의 브라우저에서는 구글 로그인이 막혀 있어요. 다른 브라우저로 열어 주세요'));
+    $('#gbExt').hidden = !IN_KAKAO; return;
+  }
+  gbMsg(i18n('로그인 화면으로 이동해요…'));
+  try {
+    try { sessionStorage.setItem('sangil.authHash', location.hash || ''); } catch (e) {}
+    const sb = await getSB();
+    const options = { redirectTo: authRedirect() };
+    if (provider === 'google') options.queryParams = { prompt: 'select_account' };
+    const { error } = await sb.auth.signInWithOAuth({ provider, options });
+    if (error) throw error;
+  } catch (e) { console.warn(e); gbMsg(i18n('지금은 로그인할 수 없어요. 잠시 뒤 다시 시도해 주세요')); }
+}
+async function gbSendCode(ev) {
+  ev.preventDefault();
+  const email = $('#gbEmail').value.trim();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { gbMsg(i18n('이메일 주소를 다시 확인해 주세요')); return; }
+  gbMsg(i18n('보내는 중…'));
+  try {
+    const sb = await getSB();
+    const { error } = await sb.auth.signInWithOtp({ email, options: { shouldCreateUser: true, emailRedirectTo: authRedirect() } });
+    if (error) throw error;
+    AUTH.email = email; $('#gbEmailRow').hidden = true; $('#gbCodeRow').hidden = false; $('#gbCode').value = ''; $('#gbCode').focus();
+    gbMsg(i18n('{0}(으)로 숫자 코드를 보냈어요. 메일에 적힌 코드를 넣어 주세요', email));
+  } catch (e) {
+    const m = String((e && (e.message || e.code || e.status)) || '');
+    gbMsg(/rate|429|seconds|too many/i.test(m) ? i18n('잠시 뒤 다시 시도해 주세요') : i18n('이메일 로그인은 준비 중이에요. 카카오나 구글로 로그인해 주세요'));
+  }
+}
+async function gbVerify(ev) {
+  ev.preventDefault();
+  const token = $('#gbCode').value.replace(/\D/g, '');
+  if (token.length < 6) { gbMsg(i18n('메일로 받은 숫자 코드를 넣어 주세요')); return; }
+  gbMsg(i18n('확인하는 중…'));
+  try {
+    const sb = await getSB();
+    const { data, error } = await sb.auth.verifyOtp({ email: AUTH.email, token, type: 'email' });
+    if (error) throw error;
+    AUTH.email = ''; $('#gbCodeRow').hidden = true; gbMsg('');
+    if (data && data.session) await onAuth(data.session);
+  } catch (e) { gbMsg(i18n('코드가 맞지 않거나 시간이 지났어요. 다시 받아 주세요')); }
+}
+async function gbLogout() {
+  try { const sb = await getSB(); await sb.auth.signOut(); } catch (e) {}
+  AUTH.user = null; AUTH.profile = null; AUTH.gifted = false; renderGb(); gbMsg(i18n('로그아웃했어요'));
+}
 
 async function netStart() {
   if (NET.starting || NET.on) return;
@@ -3730,10 +4057,7 @@ async function netStart() {
   try {
     if (SANGIL_SUPABASE_URL && SANGIL_SUPABASE_ANON_KEY) {
       try {
-        // 새 형식 키(sb_publishable_)를 쓰려면 최근 버전이 필요하다. 못 불러오면 예전 버전으로 한 번 더 시도한다
-        if (!window.supabase) { try { await loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.1/dist/umd/supabase.js'); } catch (e) {} }
-        if (!window.supabase) await loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js');
-        if (!NET.client) NET.client = window.supabase.createClient(SANGIL_SUPABASE_URL, SANGIL_SUPABASE_ANON_KEY, { auth: { persistSession: false }, realtime: { params: { eventsPerSecond: 10 } } });
+        if (!NET.client) NET.client = await getSB();
         NET.mode = 'supabase';
         if (await joinRooms()) return;
       } catch (e) { console.warn('함께 걷기 연결 실패', e); }
@@ -3844,6 +4168,8 @@ function ensurePeer(id, pres) {
     if (pres.n) p.nick = cleanNick(pres.n);
     const col = v => Array.isArray(v) && v.length >= 3 ? v.slice(0, 3).map(x => clamp(+x || 0, 0, 1)) : null;
     p.jacket = col(pres.j) || p.jacket; p.hat = col(pres.h) || p.hat;
+    if (Number.isInteger(pres.s) && SKINS[pres.s]) p.skin = SKINS[pres.s];
+    if (Number.isInteger(pres.f)) p.face = clamp(pres.f, 0, FACE_N - 1);
   }
   p.label.el.querySelector('span').textContent = p.nick;
   updateCount();
@@ -4252,6 +4578,15 @@ function bindUI() {
     updateSleepUI(); sleepIdleSoon();
   };
   $('#campGo').onclick = startCamp;
+  $('#gbStart').onclick = () => openGb(); $('#gbSet').onclick = e => { e.stopPropagation(); openGb(); };
+  $('#gbClose').onclick = closeGb; $('#gbCard').addEventListener('click', e => { if (e.target.id === 'gbCard') closeGb(); });
+  $('#gbNickBtn').onclick = () => setNick(nickRand(), true);
+  $('#gbKakao').onclick = () => gbOAuth('kakao'); $('#gbGoogle').onclick = () => gbOAuth('google');
+  $('#gbEmailBtn').onclick = () => { $('#gbEmailRow').hidden = false; $('#gbCodeRow').hidden = true; gbMsg(''); $('#gbEmail').focus(); };
+  $('#gbEmailRow').onsubmit = gbSendCode; $('#gbCodeRow').onsubmit = gbVerify; $('#gbLogout').onclick = gbLogout;
+  $('#gbExt').onclick = () => { location.href = 'kakaotalk://web/openExternal?url=' + encodeURIComponent(location.href); };
+  W.meLabel.el.addEventListener('click', e => { e.stopPropagation(); openGb(); });   // 내 이름표를 누르면 길벗 카드
+  authInit(false); renderGb();
   $('#medGo').onclick = beginMeditate; $('#medCancel').onclick = () => { $('#medCard').hidden = true; };
   S.medMin = store.get('medMin', 5); S.medBell = store.get('medBell', true); S.medAwake = store.get('medAwake', true);
   $('#cafeCancel').onclick = () => { $('#cafeCard').hidden = true; S.goCafe = false; }; $('#campCancel').onclick = () => { $('#campCard').hidden = true; };
@@ -4271,7 +4606,7 @@ function bindUI() {
   // start card
   $('#pickAutumn').onclick = () => setSeason(0); $('#pickWinter').onclick = () => setSeason(1);
   $('#nickOut').textContent = S.nick;
-  $('#nickBtn').onclick = () => { S.nick = nickRand(); $('#nickOut').textContent = S.nick; };
+  $('#nickBtn').onclick = () => setNick(nickRand(), true);
   $('#enterBtn').onclick = () => {
     store.set('nick', S.nick); $('#meName').textContent = S.nick;
     $('#start').hidden = true; $('#hud').hidden = false; S.started = true; S.startT = T;
