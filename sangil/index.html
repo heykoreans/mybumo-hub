@@ -256,7 +256,7 @@ body.calm #trailCard,body.calm #hint{opacity:0;pointer-events:none}
     <h3>설정</h3>
     <div class="row"><label for="ambVol"><span>환경음 (바람·새·계곡)</span><span id="ambOut">70</span></label><input id="ambVol" type="range" min="0" max="100" value="70"></div>
     <div class="row"><label for="sfxVol"><span>효과음 (발소리·풍경)</span><span id="sfxOut">70</span></label><input id="sfxVol" type="range" min="0" max="100" value="70"></div>
-    <div class="check"><label for="stepsChk">발소리</label><input id="stepsChk" type="checkbox" checked></div>
+    <div class="row"><label for="stepVol"><span>발소리 (눈·낙엽 밟는 소리)</span><span id="stepOut">80</span></label><input id="stepVol" type="range" min="0" max="100" value="80"></div>
     <div class="row"><span>걷는 속도</span><div class="seg" id="speedSeg"><button data-s="0">천천히</button><button data-s="1" aria-pressed="true">보통</button><button data-s="2">빠르게</button></div></div>
     <div class="row"><span>화질</span><div class="seg" id="qualSeg"><button data-q="0">가볍게</button><button data-q="1" aria-pressed="true">선명하게</button></div></div>
     <div class="check"><label for="voiceChk">명상 안내 목소리</label><input id="voiceChk" type="checkbox" checked></div>
@@ -1280,7 +1280,7 @@ const nickRand = () => ADJ[Math.floor(Math.random()*ADJ.length)] + ' ' + NOUN[Ma
 const SPEEDS = [1.25, 1.8, 2.7];
 const S = {
   started: false, season: store.get('season', 0), sb: 0, dusk: 0, tb: 0, auto: false, autoDir: 1, breath: false,
-  mute: store.get('mute', false), amb: store.get('amb', 0.7), sfx: store.get('sfx', 0.7), steps: store.get('steps', true),
+  mute: store.get('mute', false), amb: store.get('amb', 0.7), sfx: store.get('sfx', 0.7), steps: store.get('stepVol', 0.8) > 0, stepVol: store.get('stepVol', 0.8),
   speedIdx: store.get('speed', 1), quality: store.get('quality', 1), bubbles: store.get('bubbles', true), lost: false,
   walked: 0, startT: 0, reached: new Set(), summitShown: false, lastDrag: -10, wantPhoto: false, nick: store.get('nick', null) || nickRand(), climbMax: 0,
   breathK: 0, breathSnd: null, boostUntil: 0,
@@ -1513,15 +1513,75 @@ function bell(vol = 1) {
     g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.05 * vol / (i + 1), t + 0.008); g.gain.exponentialRampToValueAtTime(0.0001, t + 2.8 - i * 0.4);
     o.connect(g).connect(A.sfx); o.start(t); o.stop(t + 3); });
 }
+/* 발소리: 눈과 낙엽은 '알갱이' 수백 개를 직접 합성해 만든 소리를 몇 벌 미리 구워 두고 번갈아 쓴다.
+   눈: 뒤꿈치가 눌러 뽀드득 부서지는 소리 → 발바닥이 굴러가며 사각사각 → 추운 날의 뽀득 하는 마찰음.
+   낙엽: 바스락 부서지는 마른 잎 소리가 더 높고 넓게 퍼진다. */
+function synthStep(kind) {
+  const ctx = A.ctx, sr = ctx.sampleRate, snow = kind === 'snow', dur = snow ? 0.46 : 0.42, n = Math.floor(sr * dur);
+  const out = new Float32Array(n), rnd = Math.random;
+  const heel = 0.012 + rnd() * 0.012;
+  const grains = snow ? 150 + Math.floor(rnd() * 70) : 80 + Math.floor(rnd() * 40);
+  for (let g = 0; g < grains; g++) {
+    // 시간: 앞쪽 뒤꿈치에 몰리고(약 45%), 나머지는 발이 구르며 점점 성겨진다
+    const t0 = rnd() < (snow ? 0.45 : 0.3) ? heel + Math.abs((rnd() + rnd() + rnd() - 1.5) / 1.5) * 0.07 : heel + 0.06 + Math.pow(rnd(), 1.4) * (snow ? 0.26 : 0.3);
+    const f = snow ? 800 + Math.pow(rnd(), 1.3) * 4600 : 1800 + Math.pow(rnd(), 0.9) * 7000;
+    const Q = snow ? 1.4 + rnd() * 3 : 0.8 + rnd() * 1.2;
+    const amp = (snow ? 0.34 : 0.2) + Math.pow(rnd(), 4) * (snow ? 1.4 : 1.0);   // 가끔 크게 '뽀득'
+    const exc = Math.floor(sr * (0.0005 + rnd() * 0.0016)), len = Math.floor(sr * (snow ? 0.004 + rnd() * 0.008 : 0.003 + rnd() * 0.006));
+    const w0 = 2 * Math.PI * f / sr, al = Math.sin(w0) / (2 * Q), a0 = 1 + al, b0 = al / a0, b2 = -al / a0, a1 = -2 * Math.cos(w0) / a0, a2 = (1 - al) / a0;
+    let x1 = 0, x2 = 0, y1 = 0, y2 = 0; const st = Math.floor(t0 * sr), late = clamp((t0 - heel) / 0.3, 0, 1), gAmp = amp * (1 - 0.45 * late);
+    for (let i = 0; i < len && st + i < n; i++) {
+      const x = i < exc ? (rnd() * 2 - 1) * (1 - i / exc) : 0;
+      const y = b0 * x + b2 * x2 - a1 * y1 - a2 * y2; x2 = x1; x1 = x; y2 = y1; y1 = y;
+      out[st + i] += y * gAmp * Math.exp(-i / (len * 0.35));
+    }
+  }
+  // 몸무게가 실리며 눌리는 낮은 '뽀삭' (눈이 훨씬 크다)
+  { const lp = Math.exp(-2 * Math.PI * (snow ? 320 : 600) / sr); let y = 0; const st = Math.floor(heel * sr), L = Math.floor(sr * (snow ? 0.2 : 0.12));
+    for (let i = 0; i < L && st + i < n; i++) { y = y * lp + (rnd() * 2 - 1) * (1 - lp); const e = Math.min(1, i / (sr * 0.008)) * Math.exp(-i / (sr * (snow ? 0.06 : 0.035))); out[st + i] += y * e * (snow ? 1.3 : 0.9); } }
+  // 사각사각 채우는 결: 밴드 노이즈가 발이 구르는 동안 이어진다
+  { let lpY = 0, hpX = 0, hpY = 0; const c1 = Math.exp(-2 * Math.PI * (snow ? 3200 : 6000) / sr), c2 = Math.exp(-2 * Math.PI * (snow ? 900 : 1600) / sr), st = Math.floor(heel * sr), L = Math.floor(sr * (snow ? 0.32 : 0.34));
+    for (let i = 0; i < L && st + i < n; i++) { const x = rnd() * 2 - 1; lpY = lpY * c1 + x * (1 - c1); hpY = c2 * (hpY + lpY - hpX); hpX = lpY; const k = i / L; const e = Math.min(1, i / (sr * 0.01)) * Math.pow(1 - k, 1.6) * (0.6 + 0.4 * Math.sin(k * 23 + rnd() * 0.3)); out[st + i] += hpY * e * (snow ? 0.55 : 0.45); } }
+  // 추운 날 마른 눈의 '뽀득' 마찰음: 짧은 울림이 1초에 150~220번 빠르게 반복된다
+  if (snow && rnd() < 0.7) {
+    const f = 620 + rnd() * 420, rate = 150 + rnd() * 70, t0 = heel + 0.1 + rnd() * 0.1, d = 0.045 + rnd() * 0.05, st = Math.floor(t0 * sr), L = Math.floor(d * sr), per = sr / rate;
+    for (let i = 0; i < L && st + i < n; i++) { const ph = (i % per) / sr, w = Math.sin(Math.PI * i / L); out[st + i] += Math.sin(2 * Math.PI * f * ph) * Math.exp(-ph / 0.0018) * w * 0.32; }
+  }
+  let peak = 0; for (let i = 0; i < n; i++) peak = Math.max(peak, Math.abs(out[i]));
+  const fade = Math.floor(sr * 0.02); for (let i = 0; i < fade; i++) out[n - 1 - i] *= i / fade;
+  const buf = ctx.createBuffer(1, n, sr), ch = buf.getChannelData(0), k = 0.9 / (peak || 1); for (let i = 0; i < n; i++) ch[i] = out[i] * k;
+  return buf;
+}
+function stepBank() {
+  if (A.stepBank) return A.stepBank;
+  A.stepG = A.ctx.createGain(); A.stepG.gain.value = S.stepVol; A.stepG.connect(A.sfx);
+  A.stepBank = { snow: [], leaf: [] }; A.stepSide = 1; A.stepLast = -1;
+  for (let i = 0; i < 8; i++) { A.stepBank.snow.push(synthStep('snow')); A.stepBank.leaf.push(synthStep('leaf')); }
+  return A.stepBank;
+}
 function footstep() {
   if (!A.ctx || !S.steps || S.mute) return;
   const ctx = A.ctx, t = ctx.currentTime, snow = S.sb > 0.5;
-  const src = ctx.createBufferSource(); src.buffer = A.noise; src.playbackRate.value = snow ? 0.7 : 1.1 + Math.random() * 0.3;
-  const f = ctx.createBiquadFilter(), g = ctx.createGain();
-  f.type = snow ? 'lowpass' : 'bandpass'; f.frequency.value = snow ? 1200 : 1900 + Math.random() * 1100; f.Q.value = snow ? 0.4 : 0.8;
-  const dur = snow ? 0.17 : 0.11;
-  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(snow ? 0.20 : 0.13, t + 0.012); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-  src.connect(f).connect(g).connect(A.sfx); src.start(t, Math.random() * 1.5, dur + 0.05);
+  if (snow || !IS_PARK) {
+    const bank = stepBank()[snow ? 'snow' : 'leaf'];
+    let k = Math.floor(Math.random() * bank.length); if (k === A.stepLast) k = (k + 1) % bank.length; A.stepLast = k;   // 같은 소리가 연달아 나지 않게
+    const src = ctx.createBufferSource(); src.buffer = bank[k];
+    const pace = Math.pow(SPEEDS[S.speedIdx] / 1.8, 0.35); src.playbackRate.value = (0.93 + Math.random() * 0.12) * pace;
+    const g = ctx.createGain(); g.gain.value = (snow ? 0.62 : 0.4) * (0.85 + Math.random() * 0.25);
+    A.stepSide = -A.stepSide;   // 왼발 오른발이 살짝 좌우로 갈린다
+    const p = ctx.createStereoPanner ? ctx.createStereoPanner() : null;
+    if (p) { p.pan.value = 0.14 * A.stepSide; src.connect(g).connect(p).connect(A.stepG); } else src.connect(g).connect(A.stepG);
+    src.start(t + Math.random() * 0.012);
+    return;
+  }
+  // 공원 포장길: 짧은 뒤꿈치 톡 + 앞꿈치 스침
+  stepBank();
+  for (const [off, f, gg, dur] of [[0, 1700, 0.12, 0.05], [0.07, 3200, 0.05, 0.06]]) {
+    const src = ctx.createBufferSource(); src.buffer = A.noise; src.playbackRate.value = 1.1 + Math.random() * 0.3;
+    const bf = ctx.createBiquadFilter(), g = ctx.createGain(); bf.type = 'bandpass'; bf.frequency.value = f * (0.85 + Math.random() * 0.3); bf.Q.value = 1.1;
+    g.gain.setValueAtTime(0.0001, t + off); g.gain.exponentialRampToValueAtTime(gg, t + off + 0.006); g.gain.exponentialRampToValueAtTime(0.0001, t + off + dur);
+    src.connect(bf).connect(g).connect(A.stepG); src.start(t + off, Math.random() * 1.5, dur + 0.03);
+  }
 }
 function shutter() {
   if (!A.ctx || S.mute) return; const ctx = A.ctx, t = ctx.currentTime;
@@ -3021,7 +3081,8 @@ function bindUI() {
   amb.value = Math.round(S.amb * 100); sfx.value = Math.round(S.sfx * 100); $('#ambOut').textContent = amb.value; $('#sfxOut').textContent = sfx.value;
   amb.oninput = () => { S.amb = amb.value / 100; $('#ambOut').textContent = amb.value; store.set('amb', S.amb); if (A.amb) A.amb.gain.value = S.amb; };
   sfx.oninput = () => { S.sfx = sfx.value / 100; $('#sfxOut').textContent = sfx.value; store.set('sfx', S.sfx); if (A.sfx) A.sfx.gain.value = S.sfx; };
-  $('#stepsChk').checked = S.steps; $('#stepsChk').onchange = e => { S.steps = e.target.checked; store.set('steps', S.steps); };
+  const sv = $('#stepVol'); sv.value = Math.round(S.stepVol * 100); $('#stepOut').textContent = sv.value;
+  sv.oninput = () => { S.stepVol = sv.value / 100; S.steps = S.stepVol > 0; $('#stepOut').textContent = sv.value; store.set('stepVol', S.stepVol); if (A.stepG) A.stepG.gain.value = S.stepVol; };
   const segSet = (sel, attr, val) => document.querySelectorAll(sel + ' button').forEach(b => b.setAttribute('aria-pressed', b.dataset[attr] == val ? 'true' : 'false'));
   segSet('#speedSeg', 's', S.speedIdx); segSet('#qualSeg', 'q', S.quality);
   document.querySelectorAll('#speedSeg button').forEach(b => b.onclick = () => { S.speedIdx = +b.dataset.s; store.set('speed', S.speedIdx); segSet('#speedSeg', 's', S.speedIdx); });
