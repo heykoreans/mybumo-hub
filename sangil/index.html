@@ -79,7 +79,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{ou
 #trailCard{position:fixed;left:max(16px,env(safe-area-inset-left,0px));top:calc(64px + env(safe-area-inset-top,0px));z-index:15;border-radius:18px;padding:12px 14px 10px;width:218px;display:grid;gap:4px}
 #trailCard .alt{font-family:var(--font-display);font-size:30px;line-height:1;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
 #trailCard .alt small{font-size:14px;font-weight:400;margin-left:3px;color:var(--on-glass-soft)}
-#trailCard .lbl{font-size:12px;color:var(--on-glass-soft)}
+#trailCard .lbl{font-size:12px;color:var(--on-glass-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #trailCard svg{width:100%;height:46px;display:block;margin-top:4px}
 #trailCard .stats{display:flex;justify-content:space-between;font-size:12px;color:var(--on-glass-soft);font-variant-numeric:tabular-nums}
 #hint{position:fixed;top:calc(20px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);font-size:12.5px;color:var(--on-glass);text-shadow:0 1px 3px rgba(0,0,0,.55);white-space:nowrap;z-index:10;pointer-events:none;transition:opacity .8s}
@@ -104,6 +104,9 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{ou
 #chatBar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(98px + env(safe-area-inset-bottom,0px));z-index:22;border-radius:18px;padding:8px;width:min(440px,calc(100vw - 32px));background:var(--glass-strong);display:grid;gap:6px}
 #chatLog{display:grid;gap:3px;max-height:132px;overflow-y:auto;font-size:13px;line-height:1.45;padding:2px 6px;-webkit-user-select:text;user-select:text}
 #chatLog:empty{display:none}
+#chatBar:not(.circle) #chatLog,#chatBar:not(.circle) #circleHead{display:none}
+#circleHead{display:flex;align-items:center;justify-content:space-between;gap:8px;font-family:var(--font-display);font-size:13px;color:var(--ginkgo);padding:2px 2px 0 6px}
+#circleHead button{font-family:var(--font-body);font-size:12px;color:var(--on-glass);padding:5px 12px;border-radius:999px;background:rgba(255,255,255,.14);white-space:nowrap}
 #chatLog div{color:var(--on-glass)}
 #chatLog b{color:var(--ginkgo);font-weight:400;margin-right:6px}
 #chatLog .sys{color:var(--on-glass-soft);font-size:12px}
@@ -120,6 +123,10 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{ou
 #actPill small:empty{display:none}
 #actPill button{padding:8px 14px;border-radius:999px;background:rgba(255,255,255,.14);font-size:13px;white-space:nowrap}
 #actPill button:hover{background:rgba(255,255,255,.22)}
+#askBar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(98px + env(safe-area-inset-bottom,0px));z-index:23;border-radius:18px;padding:10px 10px 10px 16px;display:flex;align-items:center;gap:12px;background:var(--glass-strong);max-width:calc(100vw - 32px);font-size:14px}
+#askBar div{display:flex;gap:6px;flex:none}
+#askBar button{padding:8px 14px;border-radius:999px;font-size:13px;background:rgba(255,255,255,.14);white-space:nowrap}
+#askBar #askYes{background:var(--ginkgo);color:#2b2010;font-weight:700}
 #toast{position:fixed;left:50%;top:calc(64px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:25;padding:10px 16px;border-radius:999px;font-size:14px;white-space:nowrap;max-width:calc(100vw - 32px);overflow:hidden;text-overflow:ellipsis;transition:opacity .4s}
 
 /* world labels */
@@ -187,6 +194,11 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{ou
 .chips button{flex:1;padding:10px 4px;line-height:1.3;border:1.5px solid var(--paper-line);border-radius:12px;background:#fbf8f1;color:var(--ink);font-size:14px}
 .chips button[aria-pressed="true"]{border-color:var(--pine);background:#e9f0ea;font-weight:700}
 .lab{font-size:13px;color:var(--ink-soft)}
+.drinks{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.drinks button{border:1.5px solid var(--paper-line);border-radius:14px;padding:12px;text-align:left;display:grid;gap:3px;color:var(--ink);background:#fbf8f1}
+.drinks button b{font-family:var(--font-display);font-size:16px}
+.drinks button small{font-size:12px;color:var(--ink-soft);line-height:1.4}
+.drinks button:hover{border-color:var(--pine);background:#eef3ee}
 .pcheck{display:flex;gap:10px;align-items:flex-start;font-size:14.5px;color:var(--ink);cursor:pointer}
 .pcheck input{accent-color:var(--pine);width:20px;height:20px;flex:none;margin:1px 0 0}
 .pcheck small{display:block;color:var(--ink-soft);font-size:12px;margin-top:2px;line-height:1.5}
@@ -207,14 +219,16 @@ body.calm #trailCard,body.calm #hint{opacity:0;pointer-events:none}
 #nogl{position:fixed;inset:0;display:grid;place-items:center;z-index:60;background:var(--ground);padding:24px;text-align:center;line-height:1.7}
 @media (max-width:600px){
   #hint{display:none}
-  #trailCard{width:150px;padding:10px 12px 8px}
+  #trailCard{width:172px;padding:10px 12px 8px}
   #trailCard .alt{font-size:24px}
   #trailCard svg{height:34px}
   #courseBtn small{display:none}
   #actions{padding:5px}
   #actions button{min-width:0;padding:8px 7px 6px;font-size:11px}
   #actions button .ico{width:21px;height:21px}
-  .popmenu button{min-width:0;padding:10px 9px 8px;font-size:12px}
+  .popmenu{grid-auto-flow:row;grid-template-columns:repeat(3,minmax(0,1fr));width:min(360px,calc(100vw - 32px))}
+  .popmenu button{min-width:0;padding:10px 4px 8px;font-size:12px;white-space:normal;line-height:1.25;text-align:center}
+  #greetMenu,#sceneMenu{grid-template-columns:repeat(auto-fit,minmax(0,1fr))}
   #peopleChip{padding-right:10px}
   .title b{font-size:44px}
 }
@@ -261,7 +275,7 @@ body.calm #trailCard,body.calm #hint{opacity:0;pointer-events:none}
     <div class="row"><label for="stepVol"><span>발소리 (눈·낙엽 밟는 소리)</span><span id="stepOut">80</span></label><input id="stepVol" type="range" min="0" max="100" value="80"></div>
     <div class="row"><span>걷는 속도</span><div class="seg" id="speedSeg"><button data-s="0">천천히</button><button data-s="1" aria-pressed="true">보통</button><button data-s="2">빠르게</button></div></div>
     <div class="row"><span>화질</span><div class="seg" id="qualSeg"><button data-q="0">가볍게</button><button data-q="1" aria-pressed="true">선명하게</button></div></div>
-    <div class="check"><label for="voiceChk">명상 안내 목소리</label><input id="voiceChk" type="checkbox" checked></div>
+    <div class="row"><span>언어</span><div class="seg" id="langSeg"><button data-l="ko">한국어</button><button data-l="en">English</button></div></div>
     <div class="check"><label for="bubbleChk">다른 사람 말풍선 보기</label><input id="bubbleChk" type="checkbox" checked></div>
     <div class="row"><span id="roomInfo">모두와 함께 걷는 방</span><div class="seg"><button id="friendBtn">친구 방 링크 만들기</button><button id="publicBtn" hidden>모두의 방으로</button></div></div>
     <button class="linkbtn" id="unmuteBtn" hidden style="color:var(--on-glass);justify-self:start">숨긴 사람 다시 보기</button>
@@ -293,8 +307,9 @@ body.calm #trailCard,body.calm #hint{opacity:0;pointer-events:none}
     <button data-greet="wave"><svg class="ico" viewBox="0 0 24 24"><path d="M9 20v-8.5M9 11.5V5.5a1.5 1.5 0 0 1 3 0v5M12 10V4.5a1.5 1.5 0 0 1 3 0V11M15 11V7a1.5 1.5 0 0 1 3 0v7a6 6 0 0 1-6 6M19 3c1 .8 1.6 1.8 1.8 3M4 5.5C4.6 4.3 5.5 3.5 6.6 3"/></svg><span>손 흔들기</span></button>
   </div>
   <div id="chatBar" class="glass" hidden>
+    <div id="circleHead"><span id="circleTxt"></span><button id="circleLeave" type="button">일어나기</button></div>
     <div id="chatLog" aria-live="polite"></div>
-    <form id="chatForm" autocomplete="off"><input id="chatInput" maxlength="40" enterkeyhint="send" placeholder="같은 방 사람들에게 한마디 (40자)" aria-label="말하기"><button id="chatSend" type="submit">보내기</button></form>
+    <form id="chatForm" autocomplete="off"><input id="chatInput" maxlength="40" enterkeyhint="send" placeholder="가까이 있는 사람에게 한마디 (말풍선)" aria-label="말하기"><button id="chatSend" type="submit">보내기</button></form>
   </div>
   <div id="muteMenu" class="glass" hidden><span id="muteTxt"></span><div><button id="muteYes">내 화면에서 숨기기</button><button id="muteNo">취소</button></div></div>
   <div id="restMenu" class="popmenu glass" hidden>
@@ -302,8 +317,11 @@ body.calm #trailCard,body.calm #hint{opacity:0;pointer-events:none}
     <button data-act="meditate"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="5.5" r="2.2"/><path d="M12 8.5v5M7.5 12.5l4.5 1.5 4.5-1.5M4.5 18.5c2.2-2 4.6-2.6 7.5-2.6s5.3.6 7.5 2.6"/></svg><span>명상하기</span></button>
     <button data-act="snack"><svg class="ico" viewBox="0 0 24 24"><path d="M4.5 15.5 15 6l4.5 4.5L9 20z"/><path d="M8 12.5l3.5 3.5M10.5 10.2 14 13.7"/></svg><span>간식 먹기</span></button>
     <button data-act="water"><svg class="ico" viewBox="0 0 24 24"><path d="M10 3h4v2.5l1.6 2.2V20a1 1 0 0 1-1 1H9.4a1 1 0 0 1-1-1V7.7L10 5.5z"/><path d="M8.4 12.5h7.2"/></svg><span>물 마시기</span></button>
+    <button data-act="cafe"><svg class="ico" viewBox="0 0 24 24"><path d="M5 9h11v5a5 5 0 0 1-5 5h-1a5 5 0 0 1-5-5zM16 10.5h1.5a2.5 2.5 0 0 1 0 5H16M8 3.5c-.6.8-.6 1.7 0 2.5M11.5 3.5c-.6.8-.6 1.7 0 2.5M4 21h14"/></svg><span>카페</span></button>
+    <button data-act="circle"><svg class="ico" viewBox="0 0 24 24"><path d="M12 4c2 2.5 3 4 3 6a3 3 0 0 1-6 0c0-1 .5-2 1.2-2.8.3 1 .9 1.6 1.8 1.6C12 7.5 12 6 12 4zM5 19.5l14-4M19 19.5l-14-4"/></svg><span>모닥불 쉼터</span></button>
     <button data-act="camp"><svg class="ico" viewBox="0 0 24 24"><path d="M3 20 12 5l9 15M12 5v15M9.5 20 12 15l2.5 5M2 20h20"/></svg><span>야영하기</span></button>
   </div>
+  <div id="askBar" class="glass" hidden><span id="askTxt"></span><div><button id="askYes">하이파이브</button><button id="askNo">다음에</button></div></div>
   <div id="actPill" class="glass" hidden><div><b id="actTitle"></b><small id="actSub"></small></div><button id="actStop">일어나기</button></div>
   <div id="toast" class="glass" hidden></div>
 </div>
@@ -317,6 +335,16 @@ body.calm #trailCard,body.calm #hint{opacity:0;pointer-events:none}
   <div id="sleepVeil"></div>
   <div id="sleepBox"><b id="sleepTitle">쉿, 잠드는 중</b><small id="sleepSub"></small><button id="sleepSndBtn" class="snd"></button><button id="wakeBtn" class="glass">깨어나기</button></div>
 </div>
+
+<section id="cafeCard" class="scrim" hidden>
+  <div class="card" role="dialog" aria-labelledby="cafeTitle">
+    <div class="eyebrow" id="cafeEyebrow"></div>
+    <h2 class="title" id="cafeTitle"><b style="font-size:32px">무엇을 마실까요?</b></h2>
+    <p id="cafeDesc"></p>
+    <div class="drinks" id="cafeMenu"></div>
+    <button class="secondary" id="cafeCancel">다음에 할게요</button>
+  </div>
+</section>
 
 <section id="campCard" class="scrim" hidden>
   <div class="card" role="dialog" aria-labelledby="campTitle">
@@ -347,7 +375,7 @@ body.calm #trailCard,body.calm #hint{opacity:0;pointer-events:none}
       <button id="pickMountain" aria-pressed="true"><b>솔바람산</b><small>단풍 능선, 폭포, 정자</small></button>
       <button id="pickPark" aria-pressed="false"><b>센트럴파크</b><small>뉴욕 한가운데 숲길</small></button>
     </div>
-    <p id="startDesc">로그인 없이 들어와 천천히 걷다 가는 산입니다. 단풍 든 능선이나 상고대 핀 겨울 숲을 고르고, 폭포 소리 들리는 정자에서 쉬어 가세요. 5분 호흡 명상을 따라 하거나, 텐트를 치고 밤 산의 소리를 들으며 잠들 수도 있어요.</p>
+    <p id="startDesc">로그인 없이 들어와 천천히 걷다 가는 산입니다. 단풍 든 능선이나 상고대 핀 겨울 숲을 고르고, 폭포 소리 들리는 정자에서 쉬거나 길옆 찻집에서 차 한 잔 하고 가세요. 5분 호흡 명상을 따라 하거나, 텐트를 치고 밤 산의 소리를 들으며 잠들 수도 있어요.</p>
     <div class="profile">
       <svg id="bigProfile" viewBox="0 0 400 120" aria-label="코스 고도 단면"></svg>
       <div class="meta"><span id="courseLen">코스 3.4 km</span><span id="courseAlt">해발 380 → 1,080 m</span><span id="courseStops">쉼터 4곳</span></div>
@@ -380,7 +408,7 @@ body.calm #trailCard,body.calm #hint{opacity:0;pointer-events:none}
 <section id="photo" class="scrim" hidden>
   <div class="card" role="dialog" aria-label="사진">
     <img id="photoImg" alt="솔바람산에서 찍은 사진">
-    <p class="fine">사진을 길게 누르거나 마우스 오른쪽 버튼으로 저장하세요.</p>
+    <p class="fine" id="photoHint">사진을 길게 누르거나 마우스 오른쪽 버튼으로 저장하세요.</p>
     <button class="secondary" id="photoClose">닫기</button>
   </div>
 </section>
@@ -407,15 +435,420 @@ function rng(seed) { let a = seed >>> 0; return () => { a = a + 0x6D2B79F5 | 0; 
 const R = rng(20261110);
 const rr = (a, b) => a + (b - a) * R();
 const store = { get(k, d) { try { const v = localStorage.getItem('sangil.' + k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } }, set(k, v) { try { localStorage.setItem('sangil.' + k, JSON.stringify(v)); } catch (e) {} } };
+
+/* ================= 언어: 휴대폰(브라우저) 언어가 한국어면 한국어, 아니면 영어. 설정에서 바꿀 수 있다 ================= */
+const LANG = (() => { const v = store.get('lang', null); if (v === 'ko' || v === 'en') return v; const l = (navigator.languages && navigator.languages[0]) || navigator.language || 'ko'; return /^ko/i.test(l) ? 'ko' : 'en'; })();
+const EN = {"센트럴파크":"Central Park",
+"솔바람산":"Mt. Solbaram",
+"산책객":"Walker",
+"산객":"Hiker",
+"더 폰드":"The Pond",
+"더 레이크":"The Lake",
+"터틀 폰드":"Turtle Pond",
+"저수지":"The Reservoir",
+"할렘 미어":"Harlem Meer",
+"갭스토 브리지":"Gapstow Bridge",
+"보우 브리지":"Bow Bridge",
+"연못":"Pond",
+"보트하우스 카페":"Boathouse Café",
+"솔바람 찻집":"Solbaram Teahouse",
+"번가":"St",
+"느긋한":"Easygoing",
+"조용한":"Quiet",
+"씩씩한":"Brave",
+"포근한":"Cozy",
+"산뜻한":"Fresh",
+"천천히 걷는":"Strolling",
+"노을빛":"Sunset",
+"바람결":"Breezy",
+"다정한":"Kind",
+"말없는":"Silent",
+"반짝이는":"Sparkling",
+"숨 고르는":"Calm",
+"다람쥐":"Chipmunk",
+"구름":"Cloud",
+"도토리":"Acorn",
+"단풍잎":"Maple Leaf",
+"산새":"Songbird",
+"솔방울":"Pinecone",
+"눈송이":"Snowflake",
+"청설모":"Squirrel",
+"산들바람":"Breeze",
+"오솔길":"Footpath",
+"은행잎":"Ginkgo Leaf",
+"부엉이":"Owl",
+"천천히":"Slow",
+"5번가 입구":"5th Ave Entrance",
+"더 몰":"The Mall",
+"베데스다 분수":"Bethesda Fountain",
+"벨베데레 성":"Belvedere Castle",
+"저수지 북쪽":"Reservoir North",
+"산길 입구":"Trailhead",
+"솔숲 정자":"Pine Grove Pavilion",
+"구름 전망대":"Cloud Overlook",
+"솔바람산 정상":"Solbaram Summit",
+"<span class=\"me\">나</span><span id=\"meName\"></span>":"<span class=\"me\">Me</span><span id=\"meName\"></span>",
+"<i></i><span>구름폭포</span>":"<i></i><span>Cloud Falls</span>",
+"그레이트 론":"Great Lawn",
+"쉽 메도우":"Sheep Meadow",
+"빗소리":"Rain",
+"포근한 바람":"Soft Wind",
+"잔잔한 울림":"Gentle Hum",
+"자연 소리만":"Nature Only",
+"싸락눈 소리":"Sleet",
+"그쪽으로는 갈 수 없어요":"You can't go that way",
+"5번가 입구로 돌아왔어요. 수고하셨습니다":"Back at the 5th Ave entrance. Nice walk!",
+"산길 입구에 내려왔어요. 수고하셨습니다":"Back at the trailhead. Nice hike!",
+"바람 소리에 귀 기울여 보세요":"Listen to the wind",
+"어깨 힘을 빼고 천천히 숨 쉬어요":"Relax your shoulders and breathe slowly",
+"떠오르는 생각은 구름처럼 흘려보내요":"Let thoughts drift by like clouds",
+"방석에 닿은 몸의 무게를 느껴 보세요":"Feel your weight resting on the cushion",
+"들숨에 맑은 공기, 날숨에 긴장을 내려놓아요":"Breathe in fresh air, breathe out tension",
+"하던 걸 마저 하고 할게요":"Let me finish this first",
+"5분 호흡 명상을 시작해요. 동그라미를 따라 숨 쉬어 보세요":"Starting a 5-minute breathing meditation. Follow the circle",
+"하이파이브는 가까이 있는 사람과 할 수 있어요. 조금 더 다가가 보세요":"High fives need someone close by. Walk a little closer",
+"짝!":"Clap!",
+"꾸벅":"Bow",
+"하이파이브 대답을 기다리는 중이에요":"Waiting for a high-five answer",
+"조금 있다가 다시 청해 보세요":"Try asking again in a bit",
+"하이파이브 할래요?":"High five?",
+"{0}님에게 하이파이브를 청했어요":"You asked {0} for a high five",
+"{0}님이 아직 대답이 없어요":"{0} hasn't answered yet",
+"{0}님이 하이파이브를 청해요":"{0} wants a high five",
+"손을 들고 기다려요":"Hand up, waiting",
+"안녕하세요":"Hello",
+"좋은 산행 되세요":"Enjoy the hike",
+"반갑습니다":"Nice to meet you",
+"반가워요!":"Hi there!",
+"안녕하세요~":"Hello~",
+"조심히 다니세요":"Take care",
+"{0} 동안 명상했어요":"You meditated for {0}",
+"에너지바 하나 먹었어요. 1분 동안 조금 더 힘차게 걸어요":"Ate an energy bar. You'll walk a bit stronger for a minute",
+"따뜻한 보리차로 몸을 녹였어요":"Warm barley tea, nice and cozy",
+"시원한 물 한 모금, 개운하네요":"A sip of cool water, so refreshing",
+"천천히 일어나는 중":"Getting up slowly",
+"자리에 앉는 중":"Sitting down",
+"호흡 명상 · {0} / 5:00":"Breathing · {0} / 5:00",
+"명상을 마쳤어요":"Meditation done",
+"일어나기":"Stand up",
+"자리에서 일어나는 중":"Getting up",
+"{0}에서 준비 중이에요":"{0} is making your drink",
+"아침이에요":"Good morning",
+"텐트 치는 중":"Pitching the tent",
+"모닥불 피우는 중":"Lighting the campfire",
+"불 앞에서 쉬는 중":"Resting by the fire",
+"텐트를 걷고 있어요":"Packing up the tent",
+"{0}초 뒤 텐트로 들어가요":"Into the tent in {0}s",
+"바로 걷기":"Walk now",
+"그만":"Stop",
+"에너지바 먹는 중":"Eating an energy bar",
+"보리차 마시는 중":"Sipping barley tea",
+"물 마시는 중":"Drinking water",
+"편하게 앉았어요. 허리는 곧게 세우고, 어깨는 툭 내려놓아요.":"You're seated comfortably. Sit tall, and let your shoulders drop.",
+"눈을 살며시 감거나, 시선을 앞쪽 땅에 부드럽게 두세요.":"Gently close your eyes, or let your gaze rest softly on the ground ahead.",
+"멀리 도시의 웅성임, 가까운 새소리. 들리는 그대로 들어 보세요.":"The distant hum of the city, birds nearby. Just listen as it is.",
+"바람 소리, 물소리, 새소리. 들리는 그대로 들어 보세요.":"Wind, water, birdsong. Just listen as it is.",
+"이제 숨에 마음을 모아요. 동그라미를 따라 함께 숨 쉬어요.":"Now bring your attention to your breath. Breathe with the circle.",
+"좋아요. 내쉴 때마다 어깨와 턱의 힘이 조금씩 풀려요.":"Good. With each exhale, your shoulders and jaw soften a little more.",
+"들숨에 나무 냄새 섞인 공기가 코끝을 지나요. 날숨에 하루의 긴장을 내려놓아요.":"Breathing in, air scented with trees. Breathing out, let go of the day.",
+"들숨에 서늘한 산 공기가 코끝을 지나요. 날숨에 하루의 긴장을 내려놓아요.":"Breathing in, cool mountain air. Breathing out, let go of the day.",
+"이마, 눈가, 턱. 어깨, 가슴, 배. 차례로 편안해져요.":"Forehead, eyes, jaw. Shoulders, chest, belly. Each one relaxing in turn.",
+"생각이 떠올라도 괜찮아요. 구름처럼 흘려보내고, 다시 숨으로 돌아와요.":"If thoughts come, that's okay. Let them float by like clouds, and return to your breath.",
+"이제 호흡을 놓아 주세요. 몸이 스스로 숨 쉬도록 두세요.":"Now let go of the rhythm. Let your body breathe on its own.",
+"지금 이 고요함을 기억해 두세요. 언제든 다시 돌아올 수 있어요.":"Remember this stillness. You can come back to it anytime.",
+"천천히 손끝과 발끝을 움직여 보세요. 준비가 되면 눈을 떠요.":"Slowly move your fingers and toes. Open your eyes when you're ready.",
+"이 기기에는 한국어 목소리가 없어 글자로 안내해요":"No voice available on this device, so guidance is text only",
+"들이쉬고":"Breathe in",
+"잠시 멈추고":"Hold",
+"천천히 내쉬어요":"Breathe out slowly",
+"5분 호흡 명상을 마쳤어요. 몸이 한결 가볍죠?":"5-minute breathing meditation done. Feeling lighter?",
+"들이쉬기":"Breathe in",
+"멈춤":"Hold",
+"내쉬기":"Breathe out",
+"자리 잡기":"Settling in",
+"고요히":"Stillness",
+"마침":"Done",
+"숨 고르기까지 {0}초":"Breathing starts in {0}s",
+"잔디밭에 작은 텐트를 치고 모닥불을 피워요. 멀리 도시의 낮은 웅성임, 풀벌레 소리, 가끔 들리는 부엉이 소리를 들으며 잠들어 보세요.":"Pitch a small tent on the lawn and light a campfire. Fall asleep to the low hum of the city, crickets, and the occasional owl.",
+"눈 쌓인 숲에 텐트를 치고 모닥불을 피워요. 바람 소리와 얼음 밑 물소리, 타닥이는 불 소리를 들으며 잠들어 보세요.":"Pitch a tent in the snowy woods and light a campfire. Fall asleep to the wind, water under the ice, and a crackling fire.",
+"산속에 텐트를 치고 모닥불을 피워요. 계곡 물소리, 풀벌레, 소쩍새 소리를 들으며 잠들어 보세요.":"Pitch a tent in the mountains and light a campfire. Fall asleep to the stream, crickets, and scops owls.",
+"{0}분 동안 푹 잤어요. 상쾌한 아침이에요":"You slept {0} min. What a fresh morning",
+"잠깐 눈을 붙였어요. 다시 걸어 볼까요":"A short nap. Ready to walk again?",
+"고요한 밤":"Quiet night",
+"쉿, 잠드는 중":"Shh, falling asleep",
+"잠소리 · {0}  ›":"Sleep sound · {0}  ›",
+"{0}분째 자는 중 · 소리는 꺼졌어요":"Asleep {0} min · sounds are off",
+"소리는 {0}분 뒤에 천천히 꺼져요":"Sounds fade out in {0} min",
+"{0}분째 · 소리는 계속 이어져요":"{0} min · sounds stay on",
+"아메리카노":"Americano",
+"진하고 깔끔하게":"Bold and clean",
+"카페라테":"Caffè Latte",
+"우유 거품 듬뿍":"Lots of milk foam",
+"핫초코":"Hot Chocolate",
+"마시멜로 동동":"With marshmallows",
+"얼그레이":"Earl Grey",
+"베르가못 향 홍차":"Bergamot black tea",
+"말차라테":"Matcha Latte",
+"쌉싸름하고 부드럽게":"Earthy and smooth",
+"애플 사이다":"Hot Apple Cider",
+"뉴욕 가을의 따뜻한 사과주스":"New York fall in a cup",
+"대추차":"Jujube Tea",
+"달큰하고 진하게":"Sweet and rich",
+"쌍화차":"Ssanghwa Herbal Tea",
+"몸이 따뜻해지는":"Warms you up",
+"유자차":"Yuja Citron Tea",
+"새콤달콤 향긋하게":"Sweet, tangy, fragrant",
+"녹차":"Green Tea",
+"맑고 은은하게":"Clear and gentle",
+"핸드드립 커피":"Pour-over Coffee",
+"산 공기와 함께 천천히":"Slow, with mountain air",
+"꿀물":"Honey Water",
+"따끈한 꿀 한 잔":"A warm cup of honey",
+"한 모금씩 천천히":"One slow sip at a time",
+"김이 모락모락 올라와요":"Steam curling up",
+"창밖 풍경을 바라봐요":"Watching the view",
+"따뜻함이 손끝까지 전해져요":"Warmth reaching your fingertips",
+"옆자리 사람에게 말을 걸어 보세요":"Say hi to the next table",
+"{0}로 걸어가요":"Walking to {0}",
+"{0}는 {1}에 있어요 · 약 {2} km":"{0} is {1} · about {2} km",
+"베데스다 분수 동쪽 호숫가":"on the lakeshore east of Bethesda Fountain",
+"산길 입구에서 조금 올라간 길옆":"beside the trail, a little above the trailhead",
+"호숫가 파라솔 아래에서 따뜻한 한 잔 어때요? 앉아 있으면 지나가던 사람들과 이야기를 나눌 수도 있어요.":"How about a warm drink under a parasol by the lake? Sit a while and chat with people passing by.",
+"산길 옆 작은 찻집이에요. 툇마루에 앉아 따뜻한 차 한 잔 하고 가세요.":"A little teahouse by the trail. Sit on the porch and enjoy a warm cup.",
+"금방 준비해 드릴게요":"Coming right up!",
+"{0}에서 {1}분 쉬었어요":"You rested {1} min at {0}",
+"잘 마셨습니다":"That hit the spot",
+"좋은 산책 되세요":"Enjoy your walk",
+"반가워요":"Nice to see you",
+"정상까지 조금만 더요!":"Almost at the top!",
+"천천히 다녀오세요":"Take it easy",
+"분":"min",
+"{0}km 앞 · {1}":"{0}km · {1}",
+"모든 쉼터를 지났어요":"You've passed every stop",
+"{0}에 왔어요 · {1} 근처":"You're at {0} · near {1}",
+"{0}에 도착했어요 · 해발 {1}m":"You reached {0} · {1}m",
+"지금은 혼자 걷는 길이에요":"Walking solo for now",
+"산행 중인 분":"A hiker",
+"{0}님이 하이파이브를 했어요":"{0} gave you a high five",
+"{0}님이 목례를 건넸어요":"{0} bowed to you",
+"{0}님이 손을 흔들어요":"{0} is waving at you",
+"{0}님이 좋대요. 조금 더 가까이 가서 다시 해 보세요":"{0} said yes. Get a little closer and try again",
+"{0}님은 다음에 하자고 하네요":"{0} said maybe next time",
+"연결 중":"Connecting",
+"혼자 걷는 중":"Walking solo",
+"친구 방":"Friends' room",
+"함께 {0}명":"{0} walking together",
+"이 방엔 나뿐":"Just me here",
+"친구 방 ({0})":"Friends' room ({0})",
+"이 기기의 다른 탭과 연결됨":"Linked with other tabs on this device",
+"모두의 방 {0}번":"Public room {0}",
+"링크는 보낼 수 없어요":"Links can't be sent",
+"전화번호나 이메일은 보낼 수 없어요":"Phone numbers and emails can't be sent",
+"조금 천천히 보내 주세요":"Please slow down a little",
+"안녕하세요!":"Hello!",
+"반가워요~":"Nice to see you~",
+"화이팅!":"You got this!",
+"{0}님":"{0}",
+"이 기기에 맞게 화질을 가볍게 바꿨어요":"Switched to lighter graphics for this device",
+"코스 {0} km":"Route {0} km",
+"해발 {0} → {1} m":"Elevation {0} → {1} m",
+"명소 {0}곳":"{0} landmarks",
+"멈추기":"Stop",
+"내려가기":"Head down",
+"자동 걷기":"Auto walk",
+"가을로":"Autumn",
+"겨울로":"Winter",
+"겨울 산책":"Winter walk",
+"가을 산책":"Autumn walk",
+"설산길":"Snow trail",
+"단풍길":"Maple trail",
+"눈이 내려요. 잔디밭이 하얗게 덮이고 분수는 잠시 쉬어요":"Snow is falling. The lawns turn white and the fountain rests",
+"노란 느릅나무 잎이 흩날리는 가을 공원이에요":"Autumn in the park, golden elm leaves drifting",
+"눈이 내립니다. 능선에 상고대가 피었어요":"Snow is falling. Frost blooms on the ridge",
+"다시 단풍 든 가을 산이에요":"Back to the autumn mountain",
+"낮":"Day",
+"노을":"Sunset",
+"소리 켜기":"Sound on",
+"소리 끄기":"Sound off",
+"저수지 북쪽 끝에 도착했어요":"You reached the north end of the Reservoir",
+"걸음":"steps",
+"저수지 앞에서 사진 찍기":"Take a photo at the Reservoir",
+"걸어서 돌아가기":"Walk back",
+"여기 머물기":"Stay here",
+"먼저 크게 한숨 내쉬세요":"First, let out a big sigh",
+"하아…":"Haah…",
+"숨이 한결 고르네요":"Your breathing feels steadier",
+"코로 천천히 들이쉬세요":"Breathe in slowly through your nose",
+"입으로 길게 내쉬세요":"Breathe out long through your mouth",
+"솔바람산 정상 {0}m":"Solbaram Summit {0}m",
+"{0} · {1} · {2} 산책 · 뉴욕 {3}":"{0} · {1} · {2} walk · {3}, NYC",
+"겨울":"Winter",
+"가을":"Autumn",
+"{0} · {1} · {2} · 해발 {3}m":"{0} · {1} · {2} · {3}m",
+"겨울 설산길":"Winter snow trail",
+"가을 단풍길":"Autumn maple trail",
+"game.mybumo.com · 산길":"game.mybumo.com · Sangil",
+"공원 길을 따라 저수지까지 천천히 걸어요":"Strolling the park path to the Reservoir",
+"5번가 입구까지 천천히 걸어가요":"Strolling back to the 5th Ave entrance",
+"산길을 따라 정상까지 천천히 걸어요":"Hiking slowly up to the summit",
+"입구까지 천천히 내려가요":"Heading slowly down to the trailhead",
+"해가 능선 너머로 기웁니다":"The sun sinks behind the ridge",
+"다시 맑은 낮이에요":"Clear daylight again",
+"지금은 혼자 걷는 중이라 말풍선만 보여요":"You're walking solo, so only your own bubble shows",
+"{0}님을 내 화면에서 숨겼어요":"{0} is hidden from your screen",
+"숨긴 사람을 다시 보여요":"Hidden people are visible again",
+"친구 방 링크를 복사했어요. 같이 걸을 사람에게 보내 주세요":"Friends' room link copied. Send it to whoever you want to walk with",
+"친구 방 링크: {0}":"Friends' room link: {0}",
+"친구 방으로 옮겼어요. 링크를 받은 사람만 이 방에 들어와요":"Moved to a friends' room. Only people with the link can join",
+"모두의 방으로 돌아왔어요":"Back in the public room",
+"{0}님, {1}에 오신 걸 환영해요":"Welcome to {1}, {0}",
+"입구까지 천천히 걸어가요":"Strolling back to the entrance",
+"5번가 입구로 돌아왔어요":"Back at the 5th Ave entrance",
+"산길 입구로 돌아왔어요":"Back at the trailhead",
+"산길 · 센트럴파크":"Sangil · Central Park",
+"산길":"Sangil",
+"센트럴파크 3D 산책길":"Central Park 3D walk",
+"솔바람산 3D 산길":"Mt. Solbaram 3D trail",
+"센트럴파크 가을 산책":"Central Park in autumn",
+"솔바람산 단풍길":"Mt. Solbaram maple trail",
+"센트럴파크 겨울 산책":"Central Park in winter",
+"솔바람산 설산길":"Mt. Solbaram snow trail",
+"솔바람산 산행":"Hike Mt. Solbaram",
+"센트럴파크 산책":"Walk Central Park",
+"온라인 산책 · 뉴욕 센트럴파크":"Online walk · Central Park, New York",
+"노란 느릅나무, 낙엽 길":"Golden elms, leafy paths",
+"눈 덮인 잔디밭, 얼어붙은 호수":"Snowy lawns, frozen lake",
+"산책 시작":"Start walking",
+"바닥 클릭으로 이동 · 드래그로 둘러보기 · 휠로 확대/축소":"Click the ground to move · drag to look around · scroll to zoom",
+"센트럴파크에서 찍은 사진":"Photo taken in Central Park",
+"산길을 그리지 못했어요: ":"Couldn't draw the trail: ",
+"사진을 길게 눌러 저장하세요.":"Press and hold the photo to save it.",
+"0분":"0 min",
+"15분":"15 min",
+"1시간":"1 hour",
+"30분":"30 min",
+"PC: 바닥 클릭 이동 · 드래그로 둘러보기 · 휠 확대, 방향키/WASD도 됩니다.":"Computer: click to move · drag to look · scroll to zoom. Arrow keys and WASD work too.",
+"가볍게":"Light",
+"간식 먹기":"Snack",
+"같은 길을 걷는 사람":"People on the same trail",
+"같은 방 사람들에게 한마디 (40자)":"Say something to your room (40 chars)",
+"걷는 속도":"Walking speed",
+"걸어서 내려가기":"Walk down",
+"걸은 거리 km":"Distance km",
+"게임 허브로 나가기":"Back to the game hub",
+"계절 선택":"Choose a season",
+"그만하기":"Stop",
+"깨어나기":"Wake up",
+"끄지 않기":"Keep on",
+"내 화면에서 숨기기":"Hide on my screen",
+"눈 쌓인 능선, 상고대":"Snowy ridges, frosted trees",
+"뉴욕 한가운데 숲길":"A forest in the middle of NYC",
+"느긋한 구름":"Easygoing Cloud",
+"다른 사람 말풍선 보기":"Show other people's bubbles",
+"다른 이름":"New name",
+"다음 · 솔숲 정자":"Next · Pine Grove Pavilion",
+"다음에":"Not now",
+"다음에 할게요":"Maybe later",
+"단풍 능선, 폭포, 정자":"Maple ridges, waterfall, pavilion",
+"닫기":"Close",
+"동작":"Actions",
+"로그인 없이 들어와 단풍길과 눈 덮인 능선을 천천히 걷다 가는 온라인 산":"An online mountain to walk slowly, no login needed",
+"말하기":"Chat",
+"명상 안내 목소리":"Meditation voice guide",
+"명상하기":"Meditate",
+"모닥불 피우기":"Light a campfire",
+"모두와 함께 걷는 방":"Room shared with everyone",
+"모두의 방으로":"Back to public room",
+"목례":"Bow",
+"무엇을 마실까요?":"What would you like?",
+"물 마시기":"Drink water",
+"발소리 (눈·낙엽 밟는 소리)":"Footsteps (snow and leaves)",
+"벚꽃 둘레길":"Cherry blossom trail",
+"보내기":"Send",
+"보통":"Normal",
+"붉은 단풍, 낙엽 밟는 소리":"Red maples, crunchy leaves",
+"빠르게":"Fast",
+"사진":"Photo",
+"사진을 길게 누르거나 마우스 오른쪽 버튼으로 저장하세요.":"Press and hold the photo, or right-click it, to save.",
+"산길을 여는 중…":"Opening the trail…",
+"산행 시간 분":"Time min",
+"선명하게":"Sharp",
+"설정":"Settings",
+"소리가 천천히 꺼지는 시간":"Sounds fade out after",
+"손 흔들기":"Wave",
+"솔바람산에서 찍은 사진":"Photo taken on Mt. Solbaram",
+"숨 고르기":"Breathe",
+"숨긴 사람 다시 보기":"Show hidden people",
+"숨을 들이쉬세요":"Breathe in",
+"쉬어가기":"Rest",
+"쉼터 4곳":"4 rest stops",
+"야영 · 별 아래에서 잠들기":"Camping · sleep under the stars",
+"야영하기":"Camp",
+"오늘 밤은 여기서":"Camp here tonight",
+"오늘의 이름":"Today's name",
+"오른 높이 m":"Climbed m",
+"온라인 산행 · 솔바람산":"Online hike · Mt. Solbaram",
+"이 기기의 브라우저에서 3D(WebGL2)를 켤 수 없어요.":"This browser can't run 3D (WebGL2).",
+"인사":"Greet",
+"입구로 바로 돌아가기":"Jump back to the start",
+"입산하기":"Start hiking",
+"잠을 돕는 소리":"Sleep sound",
+"정상 인증샷 찍기":"Take a summit photo",
+"정상에 도착했어요":"You reached the summit",
+"정상에 머물기":"Stay at the top",
+"준비 중":"Soon",
+"최신 Chrome, Safari, Edge에서 다시 열어 주세요.":"Please open it again in the latest Chrome, Safari or Edge.",
+"취소":"Cancel",
+"친구 방 링크 만들기":"Make a friends' room link",
+"카페":"Café",
+"코스":"Route",
+"코스 3.4 km":"Route 3.4 km",
+"코스 고도 단면":"Route elevation profile",
+"코스 선택":"Choose a route",
+"타닥타닥 불 소리와 따뜻한 불빛":"Crackling fire and warm light",
+"텐트 치고 잠들기":"Pitch a tent and sleep",
+"풍경":"Scenery",
+"하이파이브":"High five",
+"해발 380 → 1,080 m":"Elevation 380 → 1,080 m",
+"화면 켜 두기":"Keep screen on",
+"화질":"Graphics",
+"환경음 (바람·새·계곡)":"Ambience (wind, birds, stream)",
+"효과음 (발소리·풍경)":"Effects (footsteps, chimes)",
+"휴대폰: 탭으로 이동 · 드래그로 둘러보기 · 두 손가락으로 확대.":"Phone: tap to move · drag to look · pinch to zoom.",
+"휴대폰은 화면이 꺼지면 소리도 멈춰요. 켜 두면 화면이 아주 어둡게 바뀌고, 타이머가 끝나면 다시 꺼질 수 있게 풀어 둡니다.":"Phones stop sound when the screen turns off. With this on, the screen dims way down, and it can turn off again once the timer ends.",
+"명상 안내":"Meditation guide",
+"언어":"Language",
+"로그인 없이 들어와 천천히 걷다 가는 산입니다. 단풍 든 능선이나 상고대 핀 겨울 숲을 고르고, 폭포 소리 들리는 정자에서 쉬거나 길옆 찻집에서 차 한 잔 하고 가세요. 5분 호흡 명상을 따라 하거나, 텐트를 치고 밤 산의 소리를 들으며 잠들 수도 있어요.":"A mountain you can wander slowly, no login needed. Pick the maple ridges or the frosted winter woods, rest at the pavilion by the waterfall, and stop for tea at the trailside teahouse. Try a 5-minute breathing meditation, or pitch a tent and fall asleep to the mountain at night.",
+"59번가 5번가 입구에서 출발해 갭스토 브리지, 느릅나무 터널 더 몰, 베데스다 분수와 보우 브리지, 벨베데레 성을 지나 저수지까지 걷는 길입니다. 벤치 옆에서 5분 호흡 명상을 하고, 호숫가 카페에서 커피 한 잔, 잔디밭에 텐트를 치고 도시의 밤 소리를 들으며 잠들 수도 있어요.":"Start at 5th Ave and 59th St, then pass Gapstow Bridge, the elm tunnel of The Mall, Bethesda Fountain, Bow Bridge and Belvedere Castle on the way to the Reservoir. Try a 5-minute breathing meditation by a bench, stop for coffee at the lakeside café, or pitch a tent on the lawn and fall asleep to the city at night.",
+"모닥불 쉼터":"Campfire Circle",
+"{0} · {1}/4명":"{0} · {1}/4",
+"앉은 사람끼리만 대화가 보여요":"Only people seated here can see this chat",
+"자리에 앉은 사람끼리만 대화가 보여요":"Only people seated at the fire can see this chat",
+"모닥불 자리 사람들에게 한마디 (40자)":"Say something to the circle (40 chars)",
+"가까이 있는 사람에게 한마디 (말풍선)":"Say something to people nearby (bubble)",
+"가까이 있는 사람에게만 말풍선으로 보여요":"Only people nearby see your bubble",
+"자리가 다 찼어요. 조금 있다가 다시 와 보세요":"All seats are taken. Come back in a little while",
+"쉽 메도우 동쪽 잔디밭":"on the east side of Sheep Meadow",
+"산길 중턱 길옆":"beside the trail, halfway up"};
+function i18n(k, ...a) { if (LANG !== 'ko' && EN[k] === undefined && /[가-힣]/.test(k)) (window.__i18nMiss = window.__i18nMiss || new Set()).add(k); const s = LANG === 'ko' ? k : (EN[k] !== undefined ? EN[k] : k); return a.length ? s.replace(/\{(\d)\}/g, (m, i) => a[+i]) : s; }
+const ordinal = n => n + ((n % 100 >= 11 && n % 100 <= 13) ? 'th' : (['th', 'st', 'nd', 'rd'][n % 10] || 'th'));
+function translateDom() {   // HTML에 적힌 한국어 글자를 영어로 바꾼다
+  document.documentElement.lang = LANG;
+  if (LANG === 'ko') return;
+  document.title = i18n(document.title);
+  const tw = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT); const nodes = []; while (tw.nextNode()) nodes.push(tw.currentNode);
+  for (const n of nodes) { const t = n.nodeValue.trim(); if (t && EN[t] !== undefined) n.nodeValue = n.nodeValue.replace(t, EN[t]); }
+  document.querySelectorAll('[aria-label],[title],[placeholder],[alt]').forEach(el => { for (const a of ['aria-label', 'title', 'placeholder', 'alt']) { const v = el.getAttribute(a); if (v && EN[v] !== undefined) el.setAttribute(a, EN[v]); } });
+}
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const coarse = matchMedia('(pointer: coarse)').matches;
 /* 코스: 솔바람산(mountain) 또는 센트럴파크(park). 주소 끝 #park 로 바로 열 수 있다 */
 const COURSE = /^#park/i.test(location.hash) ? 'park' : /^#(mountain|room-)/i.test(location.hash) ? 'mountain' : (store.get('course', 'mountain') === 'park' ? 'park' : 'mountain');
 const IS_PARK = COURSE === 'park';
 store.set('course', COURSE);
-const COURSE_NAME = IS_PARK ? '센트럴파크' : '솔바람산';
+const COURSE_NAME = IS_PARK ? i18n('센트럴파크') : i18n('솔바람산');
 const CHANNEL_KEY = IS_PARK ? 'centralpark' : 'solbaram';
-const NPC_TAG = IS_PARK ? '산책객' : '산객';
+const NPC_TAG = IS_PARK ? i18n('산책객') : i18n('산객');
 
 /* ---------------- matrices (column-major) ---------------- */
 const M = {
@@ -498,23 +931,23 @@ function mountainH(x, z) {
 const PARK = { hw: 55, hl: 260 };
 const PARK_WL = 1.0;
 const PARK_WATERS = [
-  { name: '더 폰드', x: 24, z: -242, rx: 17, rz: 9.5 },
-  { name: '더 레이크', x: -8, z: -98, rx: 26, rz: 12 },
-  { name: '더 레이크', x: -22, z: -78, rx: 13, rz: 13 },
-  { name: '터틀 폰드', x: 6, z: -27, rx: 14, rz: 5 },
-  { name: '저수지', x: 0, z: 66, rx: 42, rz: 47 },
-  { name: '할렘 미어', x: 26, z: 236, rx: 20, rz: 12 }
+  { name: i18n('더 폰드'), x: 24, z: -242, rx: 17, rz: 9.5 },
+  { name: i18n('더 레이크'), x: -8, z: -98, rx: 26, rz: 12 },
+  { name: i18n('더 레이크'), x: -22, z: -78, rx: 13, rz: 13 },
+  { name: i18n('터틀 폰드'), x: 6, z: -27, rx: 14, rz: 5 },
+  { name: i18n('저수지'), x: 0, z: 66, rx: 42, rz: 47 },
+  { name: i18n('할렘 미어'), x: 26, z: 236, rx: 20, rz: 12 }
 ];
 const PARK_ROCKS = [{ x: -4, z: -40, r: 8, h: 6 }, { x: -20, z: -205, r: 6, h: 3.5 }, { x: 32, z: -172, r: 5, h: 2.5 }, { x: -32, z: -126, r: 6, h: 3 },
   { x: 30, z: -76, r: 5, h: 3 }, { x: -36, z: -20, r: 5, h: 2.5 }, { x: 22, z: 152, r: 6, h: 3.5 }, { x: -30, z: 182, r: 7, h: 4 }, { x: 10, z: 204, r: 5, h: 3 }];
 const LAWNS = IS_PARK ? [{ x: -24, z: -168, rx: 20, rz: 24 }, { x: 0, z: -2, rx: 24, rz: 22 }, { x: -28, z: 142, rx: 16, rz: 30 }] : [];
 const BRIDGES = IS_PARK ? [
-  { name: '갭스토 브리지', x: 30, z: -242, yaw: 0, len: 25, w: 4.2, base: 2.15, rise: 1.5, stone: true },
-  { name: '보우 브리지', x: -2, z: -98, yaw: 0, len: 33, w: 3.6, base: 2.15, rise: 1.0, stone: false }
+  { name: i18n('갭스토 브리지'), x: 30, z: -242, yaw: 0, len: 25, w: 4.2, base: 2.15, rise: 1.5, stone: true },
+  { name: i18n('보우 브리지'), x: -2, z: -98, yaw: 0, len: 33, w: 3.6, base: 2.15, rise: 1.0, stone: false }
 ] : [];
 const FOUNTAIN = { x: 8, z: -113, r: 4.5 };
 const CASTLE = { x: -4, z: -40 };
-const WATERS = IS_PARK ? PARK_WATERS.map(w => Object.assign({ level: PARK_WL }, w)) : [{ name: '연못', x: POND.x, z: POND.z, rx: POND.r, rz: POND.r, level: WATER }];
+const WATERS = IS_PARK ? PARK_WATERS.map(w => Object.assign({ level: PARK_WL }, w)) : [{ name: i18n('연못'), x: POND.x, z: POND.z, rx: POND.r, rz: POND.r, level: WATER }];
 const waterE = (w, x, z) => Math.hypot((x - w.x) / w.rx, (z - w.z) / w.rz);
 function inWater(x, z, k = 1) { for (const w of WATERS) if (waterE(w, x, z) < k) return w; return null; }
 function parkH(x, z) {
@@ -582,6 +1015,48 @@ function trailDist(x, z) {
 const nearIdx = (x, z) => nearestTrail(x, z)[1];
 const PV = { x: 54, z: -88 };           // 솔숲 정자 (by the pond)
 const DK = { x: -37, z: -12 };          // 구름 전망대
+/* 카페: 산은 길 옆 찻집, 공원은 호수 동쪽 보트하우스 카페. f는 건물에서 테이블 쪽(손님이 앉는 앞쪽) 방향 */
+const CAFE = (() => {
+  let c;
+  if (IS_PARK) { const x = 24, z = -106, l = Math.hypot(1, 0.25); c = { x, z, fx: -1 / l, fz: -0.25 / l, h: parkH(x, z) + 0.05 }; }
+  else {
+    const i = Math.floor(TN * 0.2), a = Math.max(0, i - 3), b = Math.min(TN - 1, i + 3), tx = TX[b] - TX[a], tz = TZ[b] - TZ[a], l = Math.hypot(tx, tz), nx = tz / l, nz = -tx / l;
+    for (const sd of [1, -1]) {
+      const x = TX[i] + nx * sd * 10, z = TZ[i] + nz * sd * 10;
+      const score = Math.abs(baseH(x, z) - TH[i]) - Math.min(30, Math.hypot(x - POND.x, z - POND.z)) * 0.05;
+      if (!c || score < c.score) c = { x, z, fx: -nx * sd, fz: -nz * sd, score };
+    }
+    c.h = TH[i] + 0.12;
+  }
+  c.yaw = Math.atan2(c.fx, c.fz);
+  c.L = (lx, lz) => [c.x + c.fz * lx + c.fx * lz, c.z - c.fx * lx + c.fz * lz];   // 카페 기준 좌표 → 세상 좌표
+  c.local = (x, z) => { const dx = x - c.x, dz = z - c.z; return [dx * c.fz - dz * c.fx, dx * c.fx + dz * c.fz]; };
+  c.tables = [[-2.4, 1.4], [2.4, 1.4], [-2.4, 4.2], [2.4, 4.2]].map(([lx, lz]) => { const [x, z] = c.L(lx, lz); return { x, z, lx, lz }; });
+  c.seats = [];
+  for (const t of c.tables) for (const sd of [-1, 1]) { const [x, z] = c.L(t.lx + sd * 0.82, t.lz); c.seats.push({ x, z, heading: Math.atan2(t.x - x, t.z - z), table: t }); }
+  c.front = c.L(0, 6.6);
+  return c;
+})();
+const CAFE_NAME = IS_PARK ? i18n('보트하우스 카페') : i18n('솔바람 찻집');
+/* 모닥불 쉼터: 통나무 자리 4개. 앉은 사람끼리만 대화가 보인다 */
+const CIRCLE = (() => {
+  let c = null;
+  if (IS_PARK) c = { x: -12, z: -160, h: parkH(-12, -160) + 0.05 };
+  else {
+    const far = (x, z) => [[PV.x, PV.z, 16], [DK.x, DK.z, 14], [CAFE.x, CAFE.z, 18], [POND.x, POND.z, POND.r + 8], [CLIFF.x, CLIFF.z, 14], [TX[TN - 1], TZ[TN - 1], 16]].every(([a, b, r]) => Math.hypot(x - a, z - b) > r);
+    let best = null;
+    for (const f of [0.5, 0.45, 0.56, 0.4, 0.62, 0.35, 0.68]) for (const sd of [1, -1]) {
+      const i = Math.floor(TN * f), a = Math.max(0, i - 3), b = Math.min(TN - 1, i + 3), tx = TX[b] - TX[a], tz = TZ[b] - TZ[a], l = Math.hypot(tx, tz), nx = tz / l, nz = -tx / l;
+      const x = TX[i] + nx * sd * 8, z = TZ[i] + nz * sd * 8; if (!far(x, z)) continue;
+      const score = Math.abs(baseH(x, z) - TH[i]); if (!best || score < best.score) best = { x, z, h: TH[i] + 0.1, score };
+    }
+    c = best || { x: TX[Math.floor(TN / 2)] + 8, z: TZ[Math.floor(TN / 2)], h: TH[Math.floor(TN / 2)] };
+  }
+  c.seats = [0, 1, 2, 3].map(k => { const a = k / 4 * TAU + 0.4, x = c.x + Math.sin(a) * 2.15, z = c.z + Math.cos(a) * 2.15; return { k, x, z, heading: Math.atan2(c.x - x, c.z - z) }; });
+  c.spot = { tx: c.x, tz: c.z, ty: c.h, yaw: 0, fx: c.x, fz: c.z, fy: c.h };
+  return c;
+})();
+const CIRCLE_NAME = i18n('모닥불 쉼터');
 const pads = IS_PARK ? [
   { x: TX[1], z: TZ[1], r: 5, h: TH[1] },
   { x: 6, z: -118, r: 8.5, h: TH[nearIdx(6, -118)] },
@@ -593,6 +1068,7 @@ const pads = IS_PARK ? [
   { x: DK.x, z: DK.z, r: 6, h: TH[nearIdx(DK.x, DK.z)] + 0.1 },
   { x: TX[TN-1], z: TZ[TN-1], r: 9, h: TH[TN-1] }
 ];
+pads.push({ x: CAFE.x, z: CAFE.z, r: 7.5, h: CAFE.h }, { x: CIRCLE.x, z: CIRCLE.z, r: 4.5, h: CIRCLE.h });   // 카페와 모닥불 자리는 평평하게
 const PV_YAW = Math.atan2(POND.x - PV.x, POND.z - PV.z);
 const DK_YAW = (() => { const i = nearIdx(DK.x, DK.z); return Math.atan2(DK.x - TX[i], DK.z - TZ[i]); })();
 function propFloor(x, z) {
@@ -609,7 +1085,9 @@ const streetAt = z => Math.round(59 + clamp((z + 260) / 520, 0, 1) * 51);
 const altOf = y => Math.round(380 + (y - TH[0]) * UNIT_M);
 const fmtAlt = y => altOf(y).toLocaleString('ko-KR');
 /* 위쪽 큰 숫자: 산은 해발 고도, 공원은 지금 걷는 곳의 가로(번가) */
-const hudBig = () => IS_PARK ? [String(streetAt(player.z)), '번가'] : [fmtAlt(player.y), 'm'];
+const hudBig = () => IS_PARK ? (LANG === 'ko' ? [String(streetAt(player.z)), i18n('번가')] : [ordinal(streetAt(player.z)), 'St']) : [fmtAlt(player.y), 'm'];
+const stName = n => LANG === 'ko' ? `${n}번가` : `${ordinal(n)} St`;
+const streetName = z => stName(streetAt(z));
 
 /* ---------------- terrain grid ---------------- */
 const HG = new Float32Array(NV * NV);
@@ -841,6 +1319,47 @@ const COL = {
   stone: [0.62, 0.61, 0.58], stoneLight: [0.80, 0.79, 0.76], trunk: [0.36, 0.25, 0.18], dancheong: [0.20, 0.45, 0.40], red: [0.62, 0.20, 0.15]
 };
 const AUTUMN_LEAF = [[0.80,0.20,0.11],[0.88,0.36,0.10],[0.93,0.55,0.12],[0.95,0.73,0.18],[0.70,0.27,0.12],[0.84,0.30,0.16],[0.56,0.52,0.20]];
+
+/* 카페 건물, 데크, 테이블과 의자 */
+function buildCafe(g, glow) {
+  const C = CAFE, y = C.h, yaw = C.yaw, L = C.L;
+  const B = (lx, ly, lz, w, h, d, col, extraYaw = 0, pitch = 0) => { const [x, z] = L(lx, lz); box(g, x, y + ly, z, w, h, d, col, 0, yaw + extraYaw, pitch); };
+  if (!IS_PARK) {   // 나무 찻집: 기와 박공지붕, 툇마루 같은 데크, 등불
+    const wood = COL.wood, dark = COL.woodDark, tile = COL.tile, wall = [0.86, 0.80, 0.68];
+    B(0, -0.06, 1.8, 9.4, 0.2, 8.2, COL.board);
+    B(0, 1.35, -3.4, 7.0, 2.7, 4.0, wall);
+    for (const lx of [-3.5, -1.2, 1.2, 3.5]) B(lx, 1.4, -1.38, 0.24, 2.8, 0.24, dark);
+    B(0, 2.72, -1.38, 7.2, 0.22, 0.26, dark);
+    B(0, 1.05, -1.25, 5.2, 0.12, 0.6, wood); B(0, 0.52, -1.45, 5.2, 0.95, 0.22, dark);   // 주문대
+    B(0, 1.9, -1.32, 4.6, 0.9, 0.05, [0.14, 0.12, 0.10]);   // 안쪽 그늘
+    for (const sd of [-1, 1]) B(0, 3.25, -3.4 + sd * 1.2, 7.9, 0.16, 2.9, tile, 0, sd * 0.42);   // 앞뒤로 기운 지붕
+    B(0, 3.8, -3.4, 8.0, 0.2, 0.3, dark);
+    for (const sd of [-1, 1]) { const [x, z] = L(sd * 3.5, -3.4); for (let k = 0; k < 3; k++) box(g, x, y + 2.75 + k * 0.17, z, 0.14, 0.17, 4.0 - k * 1.25, wall, 0, yaw); }   // 박공 벽
+    B(0, 3.05, -0.28, 2.6, 0.55, 0.08, COL.board);   // 간판
+    for (const sd of [-1, 1]) { const [x, z] = L(sd * 3.0, -0.9); cyl(g, x, y + 2.35, z, 0.02, 0.02, 0.35, 4, dark); cyl(glow, x, y + 1.95, z, 0.16, 0.16, 0.42, 8, [1, 0.55, 0.3], 1); }
+    for (const t of C.tables) {
+      cyl(g, t.x, y + 0.66, t.z, 0.48, 0.48, 0.08, 12, wood); cyl(g, t.x, y, t.z, 0.08, 0.08, 0.66, 6, dark);
+      cyl(g, t.x, y + 0.74, t.z, 0.09, 0.07, 0.05, 8, [0.85, 0.82, 0.74]);
+    }
+    for (const s of C.seats) { cyl(g, s.x, y + 0.40, s.z, 0.24, 0.24, 0.08, 10, wood); cyl(g, s.x, y, s.z, 0.05, 0.05, 0.40, 6, dark); }
+  } else {   // 공원 매점형 카페: 크림색 벽, 초록 지붕, 줄무늬 차양, 파라솔
+    const cream = [0.92, 0.89, 0.80], green = [0.20, 0.38, 0.30], iron = [0.14, 0.18, 0.16];
+    B(0, -0.04, 1.8, 9.6, 0.14, 8.4, [0.72, 0.69, 0.63]);
+    B(0, 1.45, -3.4, 7.2, 2.9, 4.2, cream);
+    B(0, 3.0, -3.4, 7.6, 0.18, 4.6, green); B(0, 3.25, -3.4, 6.6, 0.32, 3.6, green);
+    B(0, 1.05, -1.2, 5.6, 0.12, 0.6, [0.55, 0.40, 0.28]); B(0, 0.52, -1.42, 5.6, 0.95, 0.22, green);
+    B(0, 1.95, -1.27, 5.0, 0.95, 0.05, [0.16, 0.15, 0.13]);
+    for (let k = 0; k < 9; k++) B(-3.4 + k * 0.85, 2.58, -0.75, 0.85, 0.06, 1.3, k % 2 ? cream : green, 0, -0.32);   // 줄무늬 차양
+    B(0, 3.0, -1.12, 3.0, 0.5, 0.06, green);   // 간판
+    for (const sd of [-1, 1]) { const [x, z] = L(sd * 3.4, -1.0); cyl(glow, x, y + 2.15, z, 0.14, 0.18, 0.32, 8, [1, 0.85, 0.6], 1); }
+    C.tables.forEach((t, k) => {
+      cyl(g, t.x, y + 0.7, t.z, 0.46, 0.46, 0.05, 14, [0.86, 0.86, 0.84]); cyl(g, t.x, y, t.z, 0.05, 0.05, 0.7, 6, iron);
+      cyl(g, t.x, y + 0.75, t.z, 0.03, 0.03, 1.55, 5, [0.85, 0.85, 0.82]); cone(g, t.x, y + 2.15, t.z, 1.3, 0.45, 10, k % 2 ? cream : green, 0);
+    });
+    for (const s of C.seats) { box(g, s.x, y + 0.44, s.z, 0.42, 0.06, 0.42, iron, 0, s.heading); const bx = s.x - Math.sin(s.heading) * 0.2, bz = s.z - Math.cos(s.heading) * 0.2; box(g, bx, y + 0.72, bz, 0.42, 0.5, 0.05, iron, 0, s.heading); for (const [a, b] of [[-0.17, -0.17], [0.17, -0.17], [-0.17, 0.17], [0.17, 0.17]]) box(g, s.x + a, y + 0.21, s.z + b, 0.04, 0.42, 0.04, iron, 0); }
+  }
+}
+function inCafeBuilding(x, z) { const [lx, lz] = CAFE.local(x, z); return Math.abs(lx) < 3.8 && lz > -5.7 && lz < -1.15; }
 
 /* ---------------- 센트럴파크 소품: 다리, 분수, 성, 가로등, 벤치, 담장, 스카이라인 ---------------- */
 const PCOL = { lamp: [0.12, 0.14, 0.13], bench: [0.22, 0.32, 0.23], iron: [0.10, 0.11, 0.11], brick: [0.60, 0.37, 0.28], lime: [0.78, 0.74, 0.65], grey: [0.56, 0.57, 0.59],
@@ -1092,6 +1611,8 @@ function buildWorld() {
     for (const [out, side, s] of rocks) { const [x, z] = at(out, side); sphere(g, x, getH(x, z) - s * 0.25, z, s, s * 0.95, s, 7, 5, mix3(COL.stone, [0.40, 0.40, 0.42], R() * 0.7), 0, false, 0.32); }
   }
   }
+  { const glow = new Geo(); buildCafe(g, glow); W.cafeGlow = upload(glow); }
+  for (const st of CIRCLE.seats) { box(g, st.x, CIRCLE.h + 0.2, st.z, 1.15, 0.38, 0.4, [0.42, 0.29, 0.18], 0, st.heading + Math.PI / 2); box(g, st.x, CIRCLE.h + 0.39, st.z, 1.05, 0.02, 0.3, [0.62, 0.48, 0.32], 0, st.heading + Math.PI / 2); }   // 통나무 의자
   W.props = upload(g);
 
   /* 구름폭포 물줄기: 위에서 아래로 바깥쪽으로 휘며 떨어지는 띠 (공원은 분수가 대신한다) */
@@ -1278,8 +1799,8 @@ function envMix(sb, tb) {
 }
 
 /* ---------------- state ---------------- */
-const ADJ = ['느긋한','조용한','씩씩한','포근한','산뜻한','천천히 걷는','노을빛','바람결','다정한','말없는','반짝이는','숨 고르는'];
-const NOUN = ['다람쥐','구름','도토리','단풍잎','산새','솔방울','눈송이','청설모','산들바람','오솔길','은행잎','부엉이'];
+const ADJ = [i18n('느긋한'),i18n('조용한'),i18n('씩씩한'),i18n('포근한'),i18n('산뜻한'),i18n('천천히 걷는'),i18n('노을빛'),i18n('바람결'),i18n('다정한'),i18n('말없는'),i18n('반짝이는'),i18n('숨 고르는')];
+const NOUN = [i18n('다람쥐'),i18n('구름'),i18n('도토리'),i18n('단풍잎'),i18n('산새'),i18n('솔방울'),i18n('눈송이'),i18n('청설모'),i18n('산들바람'),i18n('오솔길'),i18n('은행잎'),i18n('부엉이')];
 const nickRand = () => ADJ[Math.floor(Math.random()*ADJ.length)] + ' ' + NOUN[Math.floor(Math.random()*NOUN.length)];
 const SPEEDS = [1.25, 1.8, 2.7];
 const S = {
@@ -1307,38 +1828,43 @@ function initState() {
   player.heading = Math.atan2(TX[4] - TX[0], TZ[4] - TZ[0]);
   player.y = groundY(player.x, player.z);
   for (let i = 0; i < 6; i++) {
-    NPCS.push({ s: rr(20, TN - 30), dir: R() < 0.5 ? 1 : -1, speed: IS_PARK && i % 3 === 0 ? rr(2.7, 3.2) : rr(1.2, 1.9), pause: 0, name: ADJ[i % ADJ.length].replace('천천히 걷는', '천천히') + ' ' + NOUN[(i * 5 + 3) % NOUN.length],
+    NPCS.push({ s: rr(20, TN - 30), dir: R() < 0.5 ? 1 : -1, speed: IS_PARK && i % 3 === 0 ? rr(2.7, 3.2) : rr(1.2, 1.9), pause: 0, name: ADJ[i % ADJ.length].replace(i18n('천천히 걷는'), i18n('천천히')) + ' ' + NOUN[(i * 5 + 3) % NOUN.length],
       x: 0, z: 0, y: 0, heading: 0, phase: rr(0, 6), moveAmt: 1, jacket: JACKETS[i % JACKETS.length], pants: [0.24,0.26,0.30], hat: HATS[i % HATS.length], pack: [0.30,0.28,0.25], lastLand: -1,
       sit: 0, act: null, cushion: [[0.30,0.42,0.36],[0.55,0.24,0.18],[0.42,0.34,0.52]][i % 3] });
   }
   const cp = (key, name, x, z, r, ly) => { const idx = nearIdx(x, z); return { key, name, x, z, idx, r, ly: ly != null ? ly : TH[idx] + 4.2 }; };
   CPS = IS_PARK ? [
-    cp('gate', '5번가 입구', TX[2], TZ[2], 7),
-    cp('gapstow', '갭스토 브리지', BRIDGES[0].x, BRIDGES[0].z, 8, BRIDGES[0].base + BRIDGES[0].rise + 3.4),
-    cp('mall', '더 몰', 8, -160, 8),
-    cp('bethesda', '베데스다 분수', FOUNTAIN.x, FOUNTAIN.z, 9, groundY(FOUNTAIN.x, FOUNTAIN.z) + 7.4),
-    cp('bow', '보우 브리지', BRIDGES[1].x, BRIDGES[1].z, 8, BRIDGES[1].base + BRIDGES[1].rise + 3.2),
-    cp('castle', '벨베데레 성', CASTLE.x, CASTLE.z, 9, pads[2].h + 12),
-    { key: 'summit', name: '저수지 북쪽', x: TX[TN-1], z: TZ[TN-1], idx: TN - 1, r: 8, ly: TH[TN-1] + 4.5 }
+    cp('gate', i18n('5번가 입구'), TX[2], TZ[2], 7),
+    cp('gapstow', i18n('갭스토 브리지'), BRIDGES[0].x, BRIDGES[0].z, 8, BRIDGES[0].base + BRIDGES[0].rise + 3.4),
+    cp('mall', i18n('더 몰'), 8, -160, 8),
+    cp('bethesda', i18n('베데스다 분수'), FOUNTAIN.x, FOUNTAIN.z, 9, groundY(FOUNTAIN.x, FOUNTAIN.z) + 7.4),
+    cp('bow', i18n('보우 브리지'), BRIDGES[1].x, BRIDGES[1].z, 8, BRIDGES[1].base + BRIDGES[1].rise + 3.2),
+    cp('castle', i18n('벨베데레 성'), CASTLE.x, CASTLE.z, 9, pads[2].h + 12),
+    { key: 'summit', name: i18n('저수지 북쪽'), x: TX[TN-1], z: TZ[TN-1], idx: TN - 1, r: 8, ly: TH[TN-1] + 4.5 }
   ] : [
-    { key: 'gate', name: '산길 입구', x: TX[3], z: TZ[3], idx: 3, r: 7, ly: getH(TX[3], TZ[3]) + 5 },
-    { key: 'pavilion', name: '솔숲 정자', x: PV.x, z: PV.z, idx: nearIdx(PV.x, PV.z), r: 10, ly: pads[1].h + 7.2 },
-    { key: 'deck', name: '구름 전망대', x: DK.x, z: DK.z, idx: nearIdx(DK.x, DK.z), r: 9, ly: pads[2].h + 3.4 },
-    { key: 'summit', name: '솔바람산 정상', x: TX[TN-1], z: TZ[TN-1], idx: TN - 1, r: 9, ly: SUMMIT_H + 5.5 }
+    { key: 'gate', name: i18n('산길 입구'), x: TX[3], z: TZ[3], idx: 3, r: 7, ly: getH(TX[3], TZ[3]) + 5 },
+    { key: 'pavilion', name: i18n('솔숲 정자'), x: PV.x, z: PV.z, idx: nearIdx(PV.x, PV.z), r: 10, ly: pads[1].h + 7.2 },
+    { key: 'deck', name: i18n('구름 전망대'), x: DK.x, z: DK.z, idx: nearIdx(DK.x, DK.z), r: 9, ly: pads[2].h + 3.4 },
+    { key: 'summit', name: i18n('솔바람산 정상'), x: TX[TN-1], z: TZ[TN-1], idx: TN - 1, r: 9, ly: SUMMIT_H + 5.5 }
   ];
 }
 
+function addCafeCp() {
+  const idx = nearIdx(CAFE.x, CAFE.z), cp = { key: 'cafe', name: CAFE_NAME, x: CAFE.x, z: CAFE.z, idx, r: 9, ly: CAFE.h + 5.4 };
+  const at = CPS.findIndex(c => c.key !== 'summit' && c.idx > idx); CPS.splice(at < 0 ? CPS.length - 1 : at, 0, cp);
+}
 /* ---------------- labels ---------------- */
 const labelsEl = $('#labels');
 const labels = [];
 function addLabel(html, cls, getPos, maxD) { const el = document.createElement('div'); el.className = 'tag3d ' + cls; el.innerHTML = html; labelsEl.appendChild(el); const L = { el, getPos, maxD, shown: true }; labels.push(L); return L; }
 function initLabels() {
-  W.meLabel = addLabel('<span class="me">나</span><span id="meName"></span>', 'me', () => [player.x, player.y + 2.55 - 0.47 * player.sit, player.z], 60);
+  W.meLabel = addLabel(i18n('<span class="me">나</span><span id="meName"></span>'), 'me', () => [player.x, player.y + 2.55 - 0.47 * player.sit, player.z], 60);
   W.meLabel.hideIf = () => inTent(player);
   $('#meName').textContent = S.nick;
   for (const n of NPCS) { const L = addLabel(`<em>${NPC_TAG}</em><span></span>`, 'npc', () => [n.x, n.y + 2.4 - 0.47 * n.sit, n.z], 38); L.el.querySelector('span').textContent = n.name; L.hideIf = () => !showNpcs(); n.label = L; }
-  if (!IS_PARK) addLabel('<i></i><span>구름폭포</span>', 'place', () => [W.fallLip[0], W.fallLip[1] + 3.2, W.fallLip[2]], 110);
-  else for (const [nm, x, z] of [['더 레이크', -14, -86], ['저수지', 0, 50], ['그레이트 론', 0, -2], ['쉽 메도우', -24, -168]]) addLabel(`<i></i><span>${nm}</span>`, 'place', () => [x, 6, z], 120);
+  if (!IS_PARK) addLabel(i18n('<i></i><span>구름폭포</span>'), 'place', () => [W.fallLip[0], W.fallLip[1] + 3.2, W.fallLip[2]], 110);
+  else for (const [nm, x, z] of [[i18n('더 레이크'), -14, -86], [i18n('저수지'), 0, 50], [i18n('그레이트 론'), 0, -2], [i18n('쉽 메도우'), -24, -168]]) addLabel(`<i></i><span>${nm}</span>`, 'place', () => [x, 6, z], 120);
+  W.circleLabel = addLabel('<i></i><span></span>', 'place', () => [CIRCLE.x, CIRCLE.h + 3.4, CIRCLE.z], 110);
   for (const cp of CPS) {
     cp.label = addLabel('<i></i><span></span>', 'place', () => [cp.x, cp.ly, cp.z], 95);
     cp.label.el.querySelector('span').textContent = cp.key === 'summit' && !IS_PARK ? `${cp.name} ${fmtAlt(SUMMIT_H)}m` : cp.name;
@@ -1591,8 +2117,8 @@ function synthBrown() {   // 바람처럼 낮고 포근한 소리(브라운 노�
     chans.push(out); }
   return loopBuffer(chans, L, X, 0.8);
 }
-const SLEEP_SOUNDS = { rain: '빗소리', brown: '포근한 바람', drone: '잔잔한 울림', none: '자연 소리만' };
-const sleepSndName = k => k === 'rain' && S.sb > 0.5 ? '싸락눈 소리' : SLEEP_SOUNDS[k];
+const SLEEP_SOUNDS = { rain: i18n('빗소리'), brown: i18n('포근한 바람'), drone: i18n('잔잔한 울림'), none: i18n('자연 소리만') };
+const sleepSndName = k => k === 'rain' && S.sb > 0.5 ? i18n('싸락눈 소리') : SLEEP_SOUNDS[k];
 function bufFor(key) { A.bufs = A.bufs || {}; if (!A.bufs[key]) A.bufs[key] = key === 'fire' ? synthFire() : key === 'rain' ? synthRain(false) : key === 'sleet' ? synthRain(true) : synthBrown(); return A.bufs[key]; }
 function startFireLoop() {
   if (!A.ctx || A.fireSrc) return;
@@ -1804,11 +2330,15 @@ function updateAudio(dt) {
   A.cityG.gain.setTargetAtTime(IS_PARK ? (0.07 + 0.16 * edge) * (1 - 0.5 * night) * sv : 0, now, 0.8);
   A.nightG.gain.setTargetAtTime(night * sv, now, 1.5);
   A.fireG.gain.setTargetAtTime(camp && S.camp.fireOn ? 0.62 : 0, now, 1.2);
+  { const dc = Math.hypot(CIRCLE.x - player.x, CIRCLE.z - player.z);   // 모닥불 쉼터의 불 소리: 가까울수록 크게
+    if (dc < 60 && !A.circleSrc) { A.circleG = A.ctx.createGain(); A.circleG.gain.value = 0; A.circleG.connect(A.amb); const s2 = A.ctx.createBufferSource(); s2.buffer = bufFor('fire'); s2.loop = true; s2.connect(A.circleG); s2.start(now, 3.3); A.circleSrc = s2; }
+    if (A.circleG) A.circleG.gain.setTargetAtTime(0.6 * Math.pow(1 - smooth(2.5, 40, dc), 1.5) * (camp ? 0.3 : 1), now, 0.6); }
   if (A.fireLP) A.fireLP.frequency.setTargetAtTime(inTent(player) ? 2200 : 9000, now, 1.5);   // 텐트 안에서는 불 소리가 천 너머로 먹먹하게
   const med = player.act && player.act.type === 'meditate';
   A.amb.gain.setTargetAtTime(S.amb * (med ? 0.55 : 1) * (S.breath ? 0.6 : 1), now, 0.8);
   if (S.mute || (camp && S.camp.silent)) return;
   if (camp && S.camp.fireOn) { A.crackT -= 0.25; if (A.crackT <= 0) { A.crackT = 1.2 + Math.random() * 3; crackle(1 + Math.floor(Math.random() * 2)); } }
+  if (A.cafeAmb && !IS_PARK) { A.cafeAmb.chimeT -= 0.25; if (A.cafeAmb.chimeT <= 0) { A.cafeAmb.chimeT = 7 + Math.random() * 9; bell(0.22); } }   // 찻집 처마 풍경
   if (night > 0.5) {   // 밤: 새 대신 풀벌레와 소쩍새
     if (S.sb < 0.5) { A.crickT -= 0.25; if (A.crickT <= 0) { A.crickT = 0.25 + Math.random() * 0.9; cricket(); if (Math.random() < 0.4) cricket(); } }
     A.owlT -= 0.25; if (A.owlT <= 0) { A.owlT = 14 + Math.random() * 26; owl(); }
@@ -1879,6 +2409,7 @@ addEventListener('keyup', e => { const k = KEYMAP[e.code]; if (k) keys[k] = fals
 addEventListener('blur', () => { for (const k in keys) keys[k] = false; });
 
 function walkable(x, z) {
+  if (inCafeBuilding(x, z) || Math.hypot(x - CIRCLE.x, z - CIRCLE.z) < 0.9) return false;
   if (IS_PARK) {
     if (Math.abs(x) > PARK.hw - 1 || Math.abs(z) > PARK.hl - 1) return false;
     if (inWater(x, z, 1.0) && bridgeFloor(x, z) === null) return false;
@@ -1901,7 +2432,7 @@ function clickMove(cx, cy) {
   if (hit < 0) return;
   let lo = prev, hi = hit; for (let i = 0; i < 12; i++) { const m = (lo + hi) / 2, x = o[0] + d[0]*m, z = o[2] + d[2]*m; if (o[1] + d[1]*m < getH(x, z)) hi = m; else lo = m; }
   const x = o[0] + d[0]*hi, z = o[2] + d[2]*hi;
-  if (!walkable(x, z)) { toast('그쪽으로는 갈 수 없어요'); return; }
+  if (!walkable(x, z)) { toast(i18n('그쪽으로는 갈 수 없어요')); return; }
   player.target = { x, z }; S.auto = false; updateWalkBtn(); marker = { x, z, t: 0 };
 }
 
@@ -1911,7 +2442,8 @@ function movePlayer(dt) {
   const kx = (keys.d ? 1 : 0) - (keys.a ? 1 : 0), kz = (keys.w ? 1 : 0) - (keys.s ? 1 : 0);
   if (player.act) {
     if (kx || kz || player.target) cancelAct();
-    player.moveAmt = lerp(player.moveAmt, 0, 1 - Math.exp(-dt * 8)); player.y = groundY(player.x, player.z);
+    if (!(player.act.type === 'cafe' && player.act.t < 1.7)) player.moveAmt = lerp(player.moveAmt, 0, 1 - Math.exp(-dt * 8));
+    player.y = groundY(player.x, player.z);
     return;
   }
   if (kx || kz) {
@@ -1922,7 +2454,7 @@ function movePlayer(dt) {
     let [d, i] = nearestTrail(player.x, player.z, Math.max(0, player.idx - 30), Math.min(TN - 1, player.idx + 30));
     if (d > 8) [d, i] = nearestTrail(player.x, player.z);
     player.idx = i;
-    if ((S.autoDir > 0 && i >= TN - 3) || (S.autoDir < 0 && i <= 2)) { S.auto = false; updateWalkBtn(); if (S.autoDir < 0) toast(IS_PARK ? '5번가 입구로 돌아왔어요. 수고하셨습니다' : '산길 입구에 내려왔어요. 수고하셨습니다'); }
+    if ((S.autoDir > 0 && i >= TN - 3) || (S.autoDir < 0 && i <= 2)) { S.auto = false; updateWalkBtn(); if (S.autoDir < 0) toast(IS_PARK ? i18n('5번가 입구로 돌아왔어요. 수고하셨습니다') : i18n('산길 입구에 내려왔어요. 수고하셨습니다')); }
     else { const j = clamp(i + 5 * S.autoDir, 0, TN - 1); mx = TX[j] - player.x; mz = TZ[j] - player.z; }
   } else if (player.target) {
     mx = player.target.x - player.x; mz = player.target.z - player.z; dist = Math.hypot(mx, mz);
@@ -1954,20 +2486,22 @@ const ACT_EVENTS = {
   water: [[1.4, () => sfx.capOpen()], [2.55, () => sfx.gulp()], [3.15, () => sfx.gulp()], [3.75, () => sfx.gulp()], [4.35, () => sfx.gulp()], [4.95, () => breathSound('ahh', 1.0)], [5.65, () => sfx.capClose()]],
   bow: [], wave: [], hi5: [[0.5, () => sfx.clap()]]
 };
-const MED_LINES = ['바람 소리에 귀 기울여 보세요', '어깨 힘을 빼고 천천히 숨 쉬어요', '떠오르는 생각은 구름처럼 흘려보내요', '방석에 닿은 몸의 무게를 느껴 보세요', '들숨에 맑은 공기, 날숨에 긴장을 내려놓아요'];
+const MED_LINES = [i18n('바람 소리에 귀 기울여 보세요'), i18n('어깨 힘을 빼고 천천히 숨 쉬어요'), i18n('떠오르는 생각은 구름처럼 흘려보내요'), i18n('방석에 닿은 몸의 무게를 느껴 보세요'), i18n('들숨에 맑은 공기, 날숨에 긴장을 내려놓아요')];
 const fmtDur = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
 const canSound = () => A.ctx && !S.mute;
 function startAct(type) {
   if (!S.started) return;
   closeMenus();
   if (type === 'camp') { openCampCard(); return; }
+  if (type === 'cafe') { goCafe(); return; }
+  if (type === 'circle') { goCircle(); return; }
   if (type === 'breath') { if (player.act && player.act.type !== 'meditate') cancelAct(); startBreath(); return; }
   if (S.breath) stopBreath();
   if (player.act && GREETS.includes(player.act.type)) player.act = null;
-  if (player.act) { if (player.act.type === 'meditate' && type === 'meditate') standUp(); else toast('하던 걸 마저 하고 할게요'); return; }
+  if (player.act) { if (player.act.type === 'meditate' && type === 'meditate') standUp(); else toast(i18n('하던 걸 마저 하고 할게요')); return; }
   S.auto = false; player.target = null; updateWalkBtn(); S.lastDrag = -10;
   player.act = { type, t: 0, fired: 0, leaving: false, bowl: false, lastBowl: 0 };
-  if (type === 'meditate') { unlockVoice(); toast('5분 호흡 명상을 시작해요. 동그라미를 따라 숨 쉬어 보세요'); }
+  if (type === 'meditate') { toast(i18n('5분 호흡 명상을 시작해요. 동그라미를 따라 숨 쉬어 보세요')); }
   $('#actPill').hidden = false; updatePill(); netState(true);
 }
 /* 인사: 목례, 손 흔들기, 하이파이브. 가까운 사람(산객이나 실제 사람)을 향해 하고, 상대도 답한다 */
@@ -1977,13 +2511,14 @@ function nearestOther(maxD) {
   for (const p of NET.peers.values()) { if (!p.ready || p.hidden) continue; const d = Math.hypot(p.x - player.x, p.z - player.z); if (d < bd) { bd = d; best = p; } }
   return best;
 }
-function greet(kind, reply = null) {
+function greet(kind, reply = null, consented = false) {
   if (!S.started) return;
   closeMenus();
   if (S.breath) stopBreath();
-  if (player.act && !GREETS.includes(player.act.type)) { if (!reply) toast('하던 걸 마저 하고 할게요'); return; }
-  const near = reply || nearestOther(kind === 'hi5' ? 4.5 : 10);
-  if (kind === 'hi5' && !near) { toast('하이파이브는 가까이 있는 사람과 할 수 있어요. 조금 더 다가가 보세요'); return; }
+  if (player.act && !GREETS.includes(player.act.type)) { if (!reply) toast(i18n('하던 걸 마저 하고 할게요')); return; }
+  const near = reply || (consented && H5.with) || nearestOther(kind === 'hi5' ? 4.5 : 10);
+  if (kind === 'hi5' && !near) { toast(i18n('하이파이브는 가까이 있는 사람과 할 수 있어요. 조금 더 다가가 보세요')); return; }
+  if (kind === 'hi5' && near.real && !reply && !consented) { askHi5(near); return; }   // 실제 사람에게는 먼저 물어본다
   S.auto = false; player.target = null; updateWalkBtn();
   player.hiFrom = player.hiTo = null;
   if (near) {
@@ -1995,26 +2530,53 @@ function greet(kind, reply = null) {
   const fin = player.hiTo || [player.x, player.z];
   if (!reply) netSend({ k: 'emo', e: kind, to: near && near.real ? near.id : null, x: fin[0], z: fin[1], h: player.heading });
   else netSend({ k: 'emo', e: kind, to: null, r: 1, x: player.x, z: player.z, h: player.heading });
-  if (kind === 'hi5') setTimeout(() => showBubble(player, '짝!', 1.4, true), 520);
-  else if (kind === 'bow') showBubble(player, '꾸벅', 1.4, true);
+  if (kind === 'hi5') setTimeout(() => showBubble(player, i18n('짝!'), 1.4, true), 520);
+  else if (kind === 'bow') showBubble(player, i18n('꾸벅'), 1.4, true);
   if (near && !near.real && !reply) npcRespond(near, kind);
+}
+/* 하이파이브 동의: 보낸 요청(out), 받은 요청(inc), 내가 받아들인 사람(agreed: id → 유효 시각) */
+const H5 = { out: null, inc: null, agreed: {}, lastAsk: {} };
+function askHi5(p) {
+  const now = performance.now();
+  if (H5.out && now < H5.out.until) { toast(i18n('하이파이브 대답을 기다리는 중이에요')); return; }
+  if (now - (H5.lastAsk[p.id] || 0) < 20000) { toast(i18n('조금 있다가 다시 청해 보세요')); return; }
+  H5.lastAsk[p.id] = now; H5.out = { id: p.id, until: now + 12000 };
+  player.heading = Math.atan2(p.x - player.x, p.z - player.z); S.auto = false; player.target = null; updateWalkBtn();
+  netSend({ k: 'h5q', to: p.id });
+  showBubble(player, i18n('하이파이브 할래요?'), 10);
+  toast(i18n('{0}님에게 하이파이브를 청했어요', p.nick));
+  setTimeout(() => { if (H5.out && H5.out.id === p.id && performance.now() >= H5.out.until - 50) { H5.out = null; dropBubble(player); toast(i18n('{0}님이 아직 대답이 없어요', p.nick)); } }, 12100);
+}
+function showHi5Ask(p) {
+  if (H5.inc) return;
+  H5.inc = { id: p.id, p, timer: setTimeout(() => answerHi5(false, true), 11000) };
+  $('#askTxt').textContent = i18n('{0}님이 하이파이브를 청해요', p.nick);
+  $('#askBar').hidden = false; showBubble(p, i18n('하이파이브 할래요?'), 10);
+  if (canSound()) toneHit(A.ctx.currentTime + 0.01, { f: 1320, f2: 1760, dur: 0.18, g: 0.05 });
+}
+function answerHi5(ok, silent = false) {
+  const inc = H5.inc; if (!inc) return; H5.inc = null; clearTimeout(inc.timer); $('#askBar').hidden = true; dropBubble(inc.p);
+  if (silent) return;   // 대답하지 않으면 상대에게는 '아직 대답이 없어요'로만 보인다
+  if (ok) H5.agreed[inc.id] = performance.now() + 15000;
+  netSend({ k: 'h5a', to: inc.id, ok: ok ? 1 : 0 });
+  if (ok) { player.heading = Math.atan2(inc.p.x - player.x, inc.p.z - player.z); toast(i18n('손을 들고 기다려요')); }
 }
 function npcRespond(n, kind) {
   n.pause = Math.max(n.pause, 2.6); n.heading = Math.atan2(player.x - n.x, player.z - n.z);
   n.act = { type: kind, t: -0.25 }; n.greetCd = T + 40;
-  const line = kind === 'hi5' ? '짝!' : kind === 'bow' ? pickOne(['안녕하세요', '좋은 산행 되세요', '반갑습니다']) : pickOne(['반가워요!', '안녕하세요~', '조심히 다니세요']);
+  const line = kind === 'hi5' ? i18n('짝!') : kind === 'bow' ? pickOne([i18n('안녕하세요'), i18n('좋은 산행 되세요'), i18n('반갑습니다')]) : pickOne([i18n('반가워요!'), i18n('안녕하세요~'), i18n('조심히 다니세요')]);
   setTimeout(() => showBubble(n, line, kind === 'hi5' ? 1.4 : 2.6, kind === 'hi5'), kind === 'hi5' ? 520 : 400);
 }
 const pickOne = arr => arr[Math.floor(Math.random() * arr.length)];
 function standUp() {
   const a = player.act; if (!a || a.type !== 'meditate' || a.leaving) return;
   a.leaving = true; hush(); clearTimeout(medLineTimer);
-  if (!a.done) { if (canSound()) sfx.bowl(0.6); const mt = a.medStart ? medTime(a) : a.t; if (mt > 20) toast(`${fmtDur(Math.min(mt, MED.total))} 동안 명상했어요`); }
+  if (!a.done) { if (canSound()) sfx.bowl(0.6); const mt = a.medStart ? medTime(a) : a.t; if (mt > 20) toast(i18n('{0} 동안 명상했어요', fmtDur(Math.min(mt, MED.total)))); }
   updatePill();
 }
 function cancelAct() {
   const a = player.act; if (!a) return;
-  if (a.type === 'meditate') standUp(); else if (a.type === 'camp') wakeCamp(); else { player.act = null; $('#actPill').hidden = true; netState(true); }
+  if (a.type === 'meditate') standUp(); else if (a.type === 'camp') wakeCamp(); else if (a.type === 'cafe' || a.type === 'circle') leaveCafe(); else { player.act = null; $('#actPill').hidden = true; netState(true); }
 }
 function npcRest(n, dur) {
   n.pause = dur; const r = R();
@@ -2026,6 +2588,7 @@ function updateCharAct(c, dt) {
   const a = c.act;
   if (!a) { c.sit = lerp(c.sit, 0, 1 - Math.exp(-dt * 3)); return; }
   a.t += dt;
+  if (a.type === 'cafe' || a.type === 'circle') { updateCafeAct(c, a, dt); return; }
   if (a.type === 'meditate') {
     c.sit = lerp(c.sit, a.leaving ? 0 : 1, 1 - Math.exp(-dt * (a.leaving ? 3 : 2)));
     if (c === player && !a.leaving && !a.bowl && c.sit > 0.85) { a.bowl = true; if (canSound()) sfx.bowl(1); startMeditation(a); }
@@ -2049,8 +2612,8 @@ function updateCharAct(c, dt) {
     c.act = null; c.hiFrom = c.hiTo = null;
     if (c === player) {
       $('#actPill').hidden = true;
-      if (a.type === 'snack') { S.boostUntil = T + 60; toast('에너지바 하나 먹었어요. 1분 동안 조금 더 힘차게 걸어요'); }
-      else if (a.type === 'water') toast(S.sb > 0.5 ? '따뜻한 보리차로 몸을 녹였어요' : '시원한 물 한 모금, 개운하네요');
+      if (a.type === 'snack') { S.boostUntil = T + 60; toast(i18n('에너지바 하나 먹었어요. 1분 동안 조금 더 힘차게 걸어요')); }
+      else if (a.type === 'water') toast(S.sb > 0.5 ? i18n('따뜻한 보리차로 몸을 녹였어요') : i18n('시원한 물 한 모금, 개운하네요'));
       if (!GREETS.includes(a.type)) netState(true);
     }
   }
@@ -2059,17 +2622,26 @@ function updatePill() {
   const a = player.act; if (!a) return;
   if (a.type === 'meditate') {
     const mt = a.medStart ? medTime(a) : 0;
-    $('#actTitle').textContent = a.leaving ? '천천히 일어나는 중' : !a.medStart ? '자리에 앉는 중' : mt < MED.total ? `호흡 명상 · ${fmtDur(mt)} / 5:00` : '명상을 마쳤어요';
+    $('#actTitle').textContent = a.leaving ? i18n('천천히 일어나는 중') : !a.medStart ? i18n('자리에 앉는 중') : mt < MED.total ? i18n('호흡 명상 · {0} / 5:00', fmtDur(mt)) : i18n('명상을 마쳤어요');
     $('#actSub').textContent = a.leaving || a.medStart ? '' : MED_LINES[0];
-    $('#actStop').textContent = '일어나기'; $('#actStop').hidden = a.leaving;
+    $('#actStop').textContent = i18n('일어나기'); $('#actStop').hidden = a.leaving;
+  } else if (a.type === 'circle') {
+    $('#actTitle').textContent = a.leaving ? i18n('자리에서 일어나는 중') : i18n('{0} · {1}/4명', CIRCLE_NAME, circleMembers().length);
+    $('#actSub').textContent = a.leaving ? '' : i18n('앉은 사람끼리만 대화가 보여요');
+    $('#actStop').textContent = i18n('일어나기'); $('#actStop').hidden = !!a.leaving;
+    if (inCircle(player)) { updateCircleHead(); $('#actPill').hidden = true; }
+  } else if (a.type === 'cafe') {
+    $('#actTitle').textContent = a.leaving ? i18n('자리에서 일어나는 중') : `${a.drink.name} · ${fmtDur(a.t)}`;
+    $('#actSub').textContent = a.leaving ? '' : !a.served ? i18n('{0}에서 준비 중이에요', CAFE_NAME) : CAFE_LINES[Math.floor(a.t / 15) % CAFE_LINES.length];
+    $('#actStop').textContent = i18n('일어나기'); $('#actStop').hidden = !!a.leaving;
   } else if (a.type === 'camp') {
     const C = S.camp, ph = C ? C.phase : 'wake';
-    $('#actTitle').textContent = ph === 'wake' ? '아침이에요' : C.t < 2.2 ? '텐트 치는 중' : C.t < 5 && C.fire ? '모닥불 피우는 중' : '불 앞에서 쉬는 중';
-    $('#actSub').textContent = ph === 'wake' ? '텐트를 걷고 있어요' : `${Math.max(1, Math.ceil(CAMP_IN - C.t))}초 뒤 텐트로 들어가요`;
-    $('#actStop').textContent = ph === 'wake' ? '바로 걷기' : '그만'; $('#actStop').hidden = false;
+    $('#actTitle').textContent = ph === 'wake' ? i18n('아침이에요') : C.t < 2.2 ? i18n('텐트 치는 중') : C.t < 5 && C.fire ? i18n('모닥불 피우는 중') : i18n('불 앞에서 쉬는 중');
+    $('#actSub').textContent = ph === 'wake' ? i18n('텐트를 걷고 있어요') : i18n('{0}초 뒤 텐트로 들어가요', Math.max(1, Math.ceil(CAMP_IN - C.t)));
+    $('#actStop').textContent = ph === 'wake' ? i18n('바로 걷기') : i18n('그만'); $('#actStop').hidden = false;
   } else {
-    $('#actTitle').textContent = a.type === 'snack' ? '에너지바 먹는 중' : (S.sb > 0.5 ? '보리차 마시는 중' : '물 마시는 중');
-    $('#actSub').textContent = ''; $('#actStop').textContent = '그만'; $('#actStop').hidden = false;
+    $('#actTitle').textContent = a.type === 'snack' ? i18n('에너지바 먹는 중') : (S.sb > 0.5 ? i18n('보리차 마시는 중') : i18n('물 마시는 중'));
+    $('#actSub').textContent = ''; $('#actStop').textContent = i18n('그만'); $('#actStop').hidden = false;
   }
 }
 /* ================= 5분 호흡 명상 =================
@@ -2078,31 +2650,33 @@ function updatePill() {
 const MED = { total: 300, from: 40, to: 256, inS: 4, holdS: 2, outS: 6 };
 MED.cyc = MED.inS + MED.holdS + MED.outS;
 const MED_SCRIPT = () => [
-  [1.5, '편하게 앉았어요. 허리는 곧게 세우고, 어깨는 툭 내려놓아요.'],
-  [10.5, '눈을 살며시 감거나, 시선을 앞쪽 땅에 부드럽게 두세요.'],
-  [19.5, IS_PARK ? '멀리 도시의 웅성임, 가까운 새소리. 들리는 그대로 들어 보세요.' : '바람 소리, 물소리, 새소리. 들리는 그대로 들어 보세요.'],
-  [29.5, '이제 숨에 마음을 모아요. 동그라미를 따라 함께 숨 쉬어요.'],
-  [101, '좋아요. 내쉴 때마다 어깨와 턱의 힘이 조금씩 풀려요.'],
-  [149, IS_PARK ? '들숨에 나무 냄새 섞인 공기가 코끝을 지나요. 날숨에 하루의 긴장을 내려놓아요.' : '들숨에 서늘한 산 공기가 코끝을 지나요. 날숨에 하루의 긴장을 내려놓아요.'],
-  [185, '이마, 눈가, 턱. 어깨, 가슴, 배. 차례로 편안해져요.'],
-  [221, '생각이 떠올라도 괜찮아요. 구름처럼 흘려보내고, 다시 숨으로 돌아와요.'],
-  [258, '이제 호흡을 놓아 주세요. 몸이 스스로 숨 쉬도록 두세요.'],
-  [272, '지금 이 고요함을 기억해 두세요. 언제든 다시 돌아올 수 있어요.'],
-  [286, '천천히 손끝과 발끝을 움직여 보세요. 준비가 되면 눈을 떠요.']
+  [1.5, i18n('편하게 앉았어요. 허리는 곧게 세우고, 어깨는 툭 내려놓아요.')],
+  [10.5, i18n('눈을 살며시 감거나, 시선을 앞쪽 땅에 부드럽게 두세요.')],
+  [19.5, IS_PARK ? i18n('멀리 도시의 웅성임, 가까운 새소리. 들리는 그대로 들어 보세요.') : i18n('바람 소리, 물소리, 새소리. 들리는 그대로 들어 보세요.')],
+  [29.5, i18n('이제 숨에 마음을 모아요. 동그라미를 따라 함께 숨 쉬어요.')],
+  [101, i18n('좋아요. 내쉴 때마다 어깨와 턱의 힘이 조금씩 풀려요.')],
+  [149, IS_PARK ? i18n('들숨에 나무 냄새 섞인 공기가 코끝을 지나요. 날숨에 하루의 긴장을 내려놓아요.') : i18n('들숨에 서늘한 산 공기가 코끝을 지나요. 날숨에 하루의 긴장을 내려놓아요.')],
+  [185, i18n('이마, 눈가, 턱. 어깨, 가슴, 배. 차례로 편안해져요.')],
+  [221, i18n('생각이 떠올라도 괜찮아요. 구름처럼 흘려보내고, 다시 숨으로 돌아와요.')],
+  [258, i18n('이제 호흡을 놓아 주세요. 몸이 스스로 숨 쉬도록 두세요.')],
+  [272, i18n('지금 이 고요함을 기억해 두세요. 언제든 다시 돌아올 수 있어요.')],
+  [286, i18n('천천히 손끝과 발끝을 움직여 보세요. 준비가 되면 눈을 떠요.')]
 ];
 const VOICE = { ko: null, checked: false, warned: false };
 function koVoice() {
   if (!('speechSynthesis' in window)) return null;
   const vs = speechSynthesis.getVoices();
-  if (vs.length) { VOICE.checked = true; VOICE.ko = vs.find(v => /^ko/i.test(v.lang) && /yuna|sora|heami|google|female|여/i.test(v.name)) || vs.find(v => /^ko/i.test(v.lang)) || null; }
+  const want = LANG === 'ko' ? /^ko/i : /^en/i, nice = LANG === 'ko' ? /yuna|sora|heami|google|female|여/i : /samantha|ava|allison|google us|jenny|aria|female/i;
+  if (vs.length) { VOICE.checked = true; VOICE.ko = vs.find(v => want.test(v.lang) && nice.test(v.name)) || vs.find(v => want.test(v.lang)) || null; }
   return VOICE.ko;
 }
 if ('speechSynthesis' in window) { try { speechSynthesis.onvoiceschanged = koVoice; koVoice(); } catch (e) {} }
 function say(text, rate = 0.86) {
+  return;   // 기계 목소리가 어색해서 끔. 자연스러운 녹음 목소리가 생기면 여기서 재생한다
   if (!S.voice || S.mute || !('speechSynthesis' in window)) return;
   const v = koVoice();
-  if (!v) { if (VOICE.checked && !VOICE.warned) { VOICE.warned = true; toast('이 기기에는 한국어 목소리가 없어 글자로 안내해요'); } return; }
-  try { const u = new SpeechSynthesisUtterance(text); u.voice = v; u.lang = v.lang; u.rate = rate; u.pitch = 0.95; u.volume = 0.9; speechSynthesis.speak(u); } catch (e) {}
+  if (!v) { if (VOICE.checked && !VOICE.warned) { VOICE.warned = true; toast(i18n('이 기기에는 한국어 목소리가 없어 글자로 안내해요')); } return; }
+  try { const u = new SpeechSynthesisUtterance(text); u.voice = v; u.lang = v.lang; u.rate = LANG === 'ko' ? rate : rate * 1.05; u.pitch = 0.95; u.volume = 0.9; speechSynthesis.speak(u); } catch (e) {}
 }
 function hush() { try { if ('speechSynthesis' in window) speechSynthesis.cancel(); } catch (e) {} }
 function unlockVoice() { try { if ('speechSynthesis' in window && S.voice) { const u = new SpeechSynthesisUtterance(' '); u.volume = 0; speechSynthesis.speak(u); } } catch (e) {} }
@@ -2124,14 +2698,14 @@ function medTimeline() {
   const n = Math.round((MED.to - MED.from) / MED.cyc);
   for (let k = 0; k < n; k++) {
     const t0 = MED.from + k * MED.cyc, cue = k < 3 || k === 8 || k === 14;
-    ev.push([t0, () => { if (canSound()) { breathSound('in', MED.inS - 0.2); medPad('in', MED.inS); } if (cue) say('들이쉬고', 0.8); }]);
-    ev.push([t0 + MED.inS, () => { if (cue) say('잠시 멈추고', 0.8); }]);
-    ev.push([t0 + MED.inS + MED.holdS, () => { if (canSound()) { breathSound('out', MED.outS - 0.3); medPad('out', MED.outS); } if (cue) say('천천히 내쉬어요', 0.78); }]);
+    ev.push([t0, () => { if (canSound()) { breathSound('in', MED.inS - 0.2); medPad('in', MED.inS); } if (cue) say(i18n('들이쉬고'), 0.8); }]);
+    ev.push([t0 + MED.inS, () => { if (cue) say(i18n('잠시 멈추고'), 0.8); }]);
+    ev.push([t0 + MED.inS + MED.holdS, () => { if (canSound()) { breathSound('out', MED.outS - 0.3); medPad('out', MED.outS); } if (cue) say(i18n('천천히 내쉬어요'), 0.78); }]);
   }
   ev.push([MED.from - 0.6, () => { if (canSound()) sfx.bowl(0.45); }]);
   ev.push([MED.to + 1, () => { if (canSound()) sfx.bowl(0.45); }]);
   for (const t of [294, 297.5, 301]) ev.push([t, () => { if (canSound()) sfx.bowl(0.9); }]);
-  ev.push([MED.total + 3, () => { toast('5분 호흡 명상을 마쳤어요. 몸이 한결 가볍죠?'); }]);
+  ev.push([MED.total + 3, () => { toast(i18n('5분 호흡 명상을 마쳤어요. 몸이 한결 가볍죠?')); }]);
   return ev.sort((a, b) => a[0] - b[0]);
 }
 let medLineTimer = 0;
@@ -2157,8 +2731,8 @@ function updateMedGuide() {
   if (mt > MED.total + 6 && !a.done) { a.done = true; standUp(); return; }
   const p = medPhase(mt);
   let sc, ph, cnt;
-  if (p) { sc = 0.45 + 0.55 * p.s; ph = p.ph === 'in' ? '들이쉬기' : p.ph === 'hold' ? '멈춤' : '내쉬기'; cnt = String(Math.ceil(p.left)); }
-  else { sc = 0.55 + 0.05 * Math.sin(mt * 1.1); ph = mt < MED.from ? '자리 잡기' : mt < MED.total ? '고요히' : '마침'; cnt = mt < MED.from ? `숨 고르기까지 ${Math.ceil(MED.from - mt)}초` : ''; }
+  if (p) { sc = 0.45 + 0.55 * p.s; ph = p.ph === 'in' ? i18n('들이쉬기') : p.ph === 'hold' ? i18n('멈춤') : i18n('내쉬기'); cnt = String(Math.ceil(p.left)); }
+  else { sc = 0.55 + 0.05 * Math.sin(mt * 1.1); ph = mt < MED.from ? i18n('자리 잡기') : mt < MED.total ? i18n('고요히') : i18n('마침'); cnt = mt < MED.from ? i18n('숨 고르기까지 {0}초', Math.ceil(MED.from - mt)) : ''; }
   $('#medCore').style.transform = `scale(${sc.toFixed(3)})`;
   $('#medPhase').textContent = ph; $('#medCount').textContent = cnt;
   // 캐릭터도 같은 리듬으로 가슴이 오르내린다
@@ -2199,11 +2773,11 @@ function campSpot(c) {   // 근처에서 가장 평평하고 길과 나무를 �
 const inTent = c => c === player ? !!(S.camp && S.camp.phase === 'sleep') : !!(c.act && c.act.type === 'camp' && c.act.t > CAMP_IN);
 function openCampCard() {
   closeMenus();
-  if (player.act) { if (player.act.type === 'meditate') standUp(); else { toast('하던 걸 마저 하고 할게요'); return; } }
+  if (player.act) { if (player.act.type === 'meditate') standUp(); else { toast(i18n('하던 걸 마저 하고 할게요')); return; } }
   $('#campDesc').textContent = IS_PARK
-    ? '잔디밭에 작은 텐트를 치고 모닥불을 피워요. 멀리 도시의 낮은 웅성임, 풀벌레 소리, 가끔 들리는 부엉이 소리를 들으며 잠들어 보세요.'
-    : (S.sb > 0.5 ? '눈 쌓인 숲에 텐트를 치고 모닥불을 피워요. 바람 소리와 얼음 밑 물소리, 타닥이는 불 소리를 들으며 잠들어 보세요.'
-      : '산속에 텐트를 치고 모닥불을 피워요. 계곡 물소리, 풀벌레, 소쩍새 소리를 들으며 잠들어 보세요.');
+    ? i18n('잔디밭에 작은 텐트를 치고 모닥불을 피워요. 멀리 도시의 낮은 웅성임, 풀벌레 소리, 가끔 들리는 부엉이 소리를 들으며 잠들어 보세요.')
+    : (S.sb > 0.5 ? i18n('눈 쌓인 숲에 텐트를 치고 모닥불을 피워요. 바람 소리와 얼음 밑 물소리, 타닥이는 불 소리를 들으며 잠들어 보세요.')
+      : i18n('산속에 텐트를 치고 모닥불을 피워요. 계곡 물소리, 풀벌레, 소쩍새 소리를 들으며 잠들어 보세요.'));
   $('#campTimer').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', +b.dataset.m === S.campMin ? 'true' : 'false'));
   $('#campSnd').querySelectorAll('button').forEach(b => { b.setAttribute('aria-pressed', b.dataset.k === S.sleepSnd ? 'true' : 'false'); b.textContent = sleepSndName(b.dataset.k); });
   $('#campFire').checked = S.campFire; $('#campAwake').checked = S.campAwake;
@@ -2246,7 +2820,7 @@ function updateCamp(dt) {
       S.camp = null; if (a && a.type === 'camp') player.act = null;
       $('#actPill').hidden = true; netState(true);
       const mins = Math.round((C.sleptMs || 0) / 60000);
-      toast(mins >= 1 ? `${mins}분 동안 푹 잤어요. 상쾌한 아침이에요` : '잠깐 눈을 붙였어요. 다시 걸어 볼까요');
+      toast(mins >= 1 ? i18n('{0}분 동안 푹 잤어요. 상쾌한 아침이에요', mins) : i18n('잠깐 눈을 붙였어요. 다시 걸어 볼까요'));
     }
   }
 }
@@ -2294,16 +2868,155 @@ function sleepIdleSoon() { clearTimeout(sleepIdleT); $('#sleepUI').classList.rem
 function updateSleepUI() {
   const C = S.camp; if (!C || C.phase !== 'sleep') return;
   const now = performance.now(), slept = (now - C.sleepAt) / 1000;
-  $('#sleepTitle').textContent = C.silent ? '고요한 밤' : '쉿, 잠드는 중';
-  $('#sleepSndBtn').textContent = `잠소리 · ${sleepSndName(S.sleepSnd)}  ›`;
-  $('#sleepSub').textContent = C.silent ? `${Math.floor(slept / 60)}분째 자는 중 · 소리는 꺼졌어요` :
-    C.endAt ? `소리는 ${Math.max(1, Math.ceil((C.endAt - now) / 60000))}분 뒤에 천천히 꺼져요` : `${Math.floor(slept / 60)}분째 · 소리는 계속 이어져요`;
+  $('#sleepTitle').textContent = C.silent ? i18n('고요한 밤') : i18n('쉿, 잠드는 중');
+  $('#sleepSndBtn').textContent = i18n('잠소리 · {0}  ›', sleepSndName(S.sleepSnd));
+  $('#sleepSub').textContent = C.silent ? i18n('{0}분째 자는 중 · 소리는 꺼졌어요', Math.floor(slept / 60)) :
+    C.endAt ? i18n('소리는 {0}분 뒤에 천천히 꺼져요', Math.max(1, Math.ceil((C.endAt - now) / 60000))) : i18n('{0}분째 · 소리는 계속 이어져요', Math.floor(slept / 60));
 }
 async function keepAwake(on) {
   try {
     if (on && 'wakeLock' in navigator) { if (!S.wl) { S.wl = await navigator.wakeLock.request('screen'); S.wl.addEventListener('release', () => { S.wl = null; }); } }
     else if (!on && S.wl) { const w = S.wl; S.wl = null; await w.release(); }
   } catch (e) {}
+}
+
+/* ================= 카페: 메뉴 고르기 → 자리로 가서 앉기 → 한 모금씩 마시기 ================= */
+const DRINKS = IS_PARK ? [
+  { id: 'americano', name: i18n('아메리카노'), desc: i18n('진하고 깔끔하게'), liquid: [0.16, 0.09, 0.05], make: 'espresso', paper: true },
+  { id: 'latte', name: i18n('카페라테'), desc: i18n('우유 거품 듬뿍'), liquid: [0.78, 0.62, 0.45], make: 'steam', paper: true },
+  { id: 'cocoa', name: i18n('핫초코'), desc: i18n('마시멜로 동동'), liquid: [0.40, 0.22, 0.13], make: 'steam', paper: true },
+  { id: 'earlgrey', name: i18n('얼그레이'), desc: i18n('베르가못 향 홍차'), liquid: [0.55, 0.28, 0.12], make: 'pour', paper: true },
+  { id: 'matcha', name: i18n('말차라테'), desc: i18n('쌉싸름하고 부드럽게'), liquid: [0.55, 0.68, 0.32], make: 'steam', paper: true },
+  { id: 'cider', name: i18n('애플 사이다'), desc: i18n('뉴욕 가을의 따뜻한 사과주스'), liquid: [0.80, 0.50, 0.20], make: 'pour', paper: true }
+] : [
+  { id: 'jujube', name: i18n('대추차'), desc: i18n('달큰하고 진하게'), liquid: [0.45, 0.20, 0.10], make: 'pour' },
+  { id: 'ssanghwa', name: i18n('쌍화차'), desc: i18n('몸이 따뜻해지는'), liquid: [0.30, 0.15, 0.08], make: 'pour' },
+  { id: 'yuja', name: i18n('유자차'), desc: i18n('새콤달콤 향긋하게'), liquid: [0.95, 0.70, 0.20], make: 'pour' },
+  { id: 'green', name: i18n('녹차'), desc: i18n('맑고 은은하게'), liquid: [0.62, 0.70, 0.32], make: 'pour' },
+  { id: 'coffee', name: i18n('핸드드립 커피'), desc: i18n('산 공기와 함께 천천히'), liquid: [0.20, 0.11, 0.06], make: 'drip' },
+  { id: 'honey', name: i18n('꿀물'), desc: i18n('따끈한 꿀 한 잔'), liquid: [0.92, 0.72, 0.32], make: 'pour' }
+];
+const CAFE_LINES = [i18n('한 모금씩 천천히'), i18n('김이 모락모락 올라와요'), i18n('창밖 풍경을 바라봐요'), i18n('따뜻함이 손끝까지 전해져요'), i18n('옆자리 사람에게 말을 걸어 보세요')];
+const barista = { x: 0, z: 0, y: 0, heading: 0, phase: 0, moveAmt: 0, sit: 0, act: null, jacket: IS_PARK ? [0.22, 0.38, 0.30] : [0.86, 0.80, 0.68], pants: [0.2, 0.2, 0.22], hat: IS_PARK ? [0.22, 0.38, 0.30] : [0.42, 0.30, 0.22], pack: IS_PARK ? [0.22, 0.38, 0.30] : [0.86, 0.80, 0.68] };
+{ const [x, z] = CAFE.L(0.9, -2.3); barista.x = x; barista.z = z; barista.heading = CAFE.yaw; }
+function nearCafe(d = 16) { return Math.hypot(player.x - CAFE.x, player.z - CAFE.z) < d; }
+function goCafe() {
+  closeMenus();
+  if (player.act) { if (player.act.type === 'meditate') standUp(); else { toast(i18n('하던 걸 마저 하고 할게요')); return; } }
+  if (S.breath) stopBreath();
+  const d = Math.hypot(player.x - CAFE.x, player.z - CAFE.z);
+  if (d < 16) { openCafeCard(); return; }
+  if (d < 130) { const [fx, fz] = CAFE.front; player.target = { x: fx, z: fz }; S.auto = false; updateWalkBtn(); S.goCafe = true; marker = { x: fx, z: fz, t: 0 }; toast(i18n('{0}로 걸어가요', CAFE_NAME)); return; }
+  toast(i18n('{0}는 {1}에 있어요 · 약 {2} km', CAFE_NAME, i18n(IS_PARK ? i18n('베데스다 분수 동쪽 호숫가') : i18n('산길 입구에서 조금 올라간 길옆')), (d * UNIT_M / 1000).toFixed(1)));
+}
+function openCafeCard() {
+  S.goCafe = false;
+  $('#cafeEyebrow').textContent = CAFE_NAME; $('#cafeDesc').textContent = IS_PARK ? i18n('호숫가 파라솔 아래에서 따뜻한 한 잔 어때요? 앉아 있으면 지나가던 사람들과 이야기를 나눌 수도 있어요.') : i18n('산길 옆 작은 찻집이에요. 툇마루에 앉아 따뜻한 차 한 잔 하고 가세요.');
+  const m = $('#cafeMenu'); m.innerHTML = '';
+  for (const dr of DRINKS) { const b = document.createElement('button'); b.innerHTML = `<b></b><small></small>`; b.querySelector('b').textContent = dr.name; b.querySelector('small').textContent = dr.desc; b.onclick = () => startCafe(dr); m.appendChild(b); }
+  $('#cafeCard').hidden = false;
+}
+function freeSeat(from) {
+  const taken = s => [...NET.peers.values()].some(p => p.ready && !p.hidden && Math.hypot(p.x - s.x, p.z - s.z) < 0.6);
+  return CAFE.seats.filter(s => !taken(s)).sort((a, b) => Math.hypot(a.x - from.x, a.z - from.z) - Math.hypot(b.x - from.x, b.z - from.z))[0] || CAFE.seats[0];
+}
+function startCafe(dr) {
+  $('#cafeCard').hidden = true; audioInit();
+  S.auto = false; player.target = null; updateWalkBtn(); S.lastDrag = -10;
+  const seat = freeSeat(player);
+  player.act = { type: 'cafe', t: 0, seat, from: [player.x, player.z], drink: dr, fired: 0, leaving: false, nextSip: 7, sipAt: -10 };
+  barista.act = { type: 'bow', t: 0 }; showBubble(barista, IS_PARK ? 'Coming right up!' : i18n('금방 준비해 드릴게요'), 2.6);
+  if (canSound()) cafeSfx[dr.make]();
+  $('#actPill').hidden = false; updatePill(); netState(true);
+}
+function updateCafeAct(c, a, dt) {
+  const isMe = c === player, cafe = a.type === 'cafe';
+  if (isMe && a.seat) {
+    const k = smooth(0, 1.8, a.t);
+    if (a.t < 1.9 && !a.leaving) {   // 자리까지 걸어가기
+      const nx = lerp(a.from[0], a.seat.x, k), nz = lerp(a.from[1], a.seat.z, k);
+      if (a.t < 1.7) { c.heading = angLerp(c.heading, Math.atan2(a.seat.x - a.from[0], a.seat.z - a.from[1]), 1 - Math.exp(-dt * 10)); c.phase += Math.hypot(nx - c.x, nz - c.z) * 2.4; c.moveAmt = 1 - smooth(1.3, 1.8, a.t); }
+      c.x = nx; c.z = nz; c.y = groundY(c.x, c.z);
+    } else if (!a.seated) { a.seated = true; c.x = a.seat.x; c.z = a.seat.z; c.moveAmt = 0; netState(true); if (cafe) startCafeAmb(); else openCircleChat(); }
+    if (a.t > 1.6) c.heading = angLerp(c.heading, a.seat.heading, 1 - Math.exp(-dt * 6));
+    if (cafe && !a.served && a.t > 3.0) { a.served = true; if (canSound()) cafeSfx.clink(); }
+    if (a.served && !a.leaving && a.t > a.nextSip) { a.sipAt = a.t; a.nextSip = a.t + 8 + Math.random() * 6; setTimeout(() => { if (canSound() && player.act === a) { cafeSfx.sip(); if (Math.random() < 0.35) setTimeout(() => canSound() && breathSound('ahh', 0.9), 900); } }, 900); }
+  }
+  const sitting = a.leaving ? 0 : isMe ? (a.t > 1.8 ? 1 : 0) : 1;
+  c.sit = lerp(c.sit, sitting, 1 - Math.exp(-dt * (a.leaving ? 4 : 3)));
+  if (a.leaving && c.sit < 0.04) {
+    c.sit = 0; c.act = null;
+    if (isMe) { $('#actPill').hidden = true; netState(true); if (cafe) { stopCafeAmb(); const mins = Math.floor(a.t / 60); toast(mins >= 1 ? i18n('{0}에서 {1}분 쉬었어요', CAFE_NAME, mins) : i18n('잘 마셨습니다')); } else closeCircleChat(); }
+  }
+}
+function leaveCafe() { const a = player.act; if (!a || (a.type !== 'cafe' && a.type !== 'circle') || a.leaving) return; a.leaving = true; if (a.type === 'cafe' && canSound()) cafeSfx.clink(); updatePill(); }
+/* 모닥불 쉼터 */
+const inCircle = c => !!(c && c.act && c.act.type === 'circle' && !c.act.leaving && (c !== player || c.act.seated));
+function circleMembers() { return [player, ...[...NET.peers.values()].filter(p => p.ready && !p.hidden)].filter(inCircle); }
+function goCircle() {
+  closeMenus();
+  if (player.act) { if (player.act.type === 'meditate') standUp(); else { toast(i18n('하던 걸 마저 하고 할게요')); return; } }
+  if (S.breath) stopBreath();
+  const d = Math.hypot(player.x - CIRCLE.x, player.z - CIRCLE.z);
+  if (d < 12) { sitCircle(); return; }
+  if (d < 130) { const a = Math.atan2(player.x - CIRCLE.x, player.z - CIRCLE.z), fx = CIRCLE.x + Math.sin(a) * 4, fz = CIRCLE.z + Math.cos(a) * 4; player.target = { x: fx, z: fz }; S.auto = false; updateWalkBtn(); S.goCircle = true; marker = { x: fx, z: fz, t: 0 }; toast(i18n('{0}로 걸어가요', CIRCLE_NAME)); return; }
+  toast(i18n('{0}는 {1}에 있어요 · 약 {2} km', CIRCLE_NAME, i18n(IS_PARK ? '쉽 메도우 동쪽 잔디밭' : '산길 중턱 길옆'), (d * UNIT_M / 1000).toFixed(1)));
+}
+function sitCircle() {
+  S.goCircle = false;
+  const taken = st => [...NET.peers.values()].some(p => p.ready && !p.hidden && p.act && p.act.type === 'circle' && Math.hypot(p.x - st.x, p.z - st.z) < 0.7);
+  const free = CIRCLE.seats.filter(st => !taken(st)).sort((a, b) => Math.hypot(a.x - player.x, a.z - player.z) - Math.hypot(b.x - player.x, b.z - player.z));
+  if (!free.length) { toast(i18n('자리가 다 찼어요. 조금 있다가 다시 와 보세요')); return; }
+  audioInit(); S.auto = false; player.target = null; updateWalkBtn(); S.lastDrag = -10;
+  player.act = { type: 'circle', t: 0, seat: free[0], from: [player.x, player.z], fired: 0, leaving: false };
+  $('#actPill').hidden = false; updatePill(); netState(true);
+}
+function openCircleChat() {
+  const bar = $('#chatBar'); bar.classList.add('circle'); $('#chatLog').innerHTML = ''; bar.hidden = false; $('#actPill').hidden = true; $('#chatBtn').setAttribute('aria-expanded', 'true');
+  $('#chatInput').placeholder = i18n('모닥불 자리 사람들에게 한마디 (40자)'); updateCircleHead();
+  addChatLog(null, i18n('자리에 앉은 사람끼리만 대화가 보여요'));
+}
+function closeCircleChat() { const bar = $('#chatBar'); bar.classList.remove('circle'); bar.hidden = true; $('#chatLog').innerHTML = ''; $('#chatInput').placeholder = i18n('가까이 있는 사람에게 한마디 (말풍선)'); $('#chatBtn').setAttribute('aria-expanded', 'false'); }
+function updateCircleHead() { $('#circleTxt').textContent = i18n('{0} · {1}/4명', CIRCLE_NAME, circleMembers().length); }
+/* 카페 소리 */
+const cafeSfx = {
+  espresso() { const t = A.ctx.currentTime + 0.05;   // 원두 가는 소리 → 추출
+    for (let i = 0; i < 26; i++) noiseHit(t + i * 0.045, { type: 'bandpass', f: 900 + Math.random() * 500, q: 1.5, dur: 0.05, g: 0.05 });
+    noiseHit(t + 1.5, { type: 'lowpass', f: 500, q: 0.7, dur: 1.4, g: 0.05, rate: 0.6 }); },
+  steam() { const t = A.ctx.currentTime + 0.05; this.espresso(); noiseHit(t + 1.9, { type: 'highpass', f: 2600, q: 0.6, dur: 1.6, g: 0.09 }); noiseHit(t + 2.4, { type: 'bandpass', f: 1400, f2: 900, q: 1.2, dur: 1.0, g: 0.05 }); },
+  pour() { const t = A.ctx.currentTime + 0.3; noiseHit(t, { type: 'bandpass', f: 1500, f2: 650, q: 2.2, dur: 1.8, g: 0.09 }); noiseHit(t + 0.1, { type: 'lowpass', f: 400, q: 0.8, dur: 1.5, g: 0.04 }); },
+  drip() { const t = A.ctx.currentTime + 0.3; noiseHit(t, { type: 'bandpass', f: 1300, f2: 800, q: 2.5, dur: 2.2, g: 0.07 }); for (let i = 0; i < 6; i++) toneHit(t + 2.4 + i * 0.22, { f: 1600 + Math.random() * 500, f2: 900, dur: 0.05, g: 0.02 }); },
+  clink() { const t = A.ctx.currentTime + 0.01; toneHit(t, { f: 2650, dur: 0.25, g: 0.05 }); toneHit(t, { f: 4120, dur: 0.18, g: 0.03 }); noiseHit(t, { type: 'highpass', f: 3000, q: 0.7, dur: 0.02, g: 0.08 }); },
+  sip() { const t = A.ctx.currentTime + 0.01; noiseHit(t, { type: 'bandpass', f: 1100, f2: 2400, q: 1.6, dur: 0.32, g: 0.05 }); toneHit(t + 0.45, { f: 150, f2: 70, dur: 0.12, g: 0.12 }); }
+};
+function synthBabble() {   // 카페의 낮은 웅성거림: 여러 사람이 띄엄띄엄 말하는 소리 결
+  const sr = A.ctx.sampleRate, L = Math.floor(sr * 18), X = Math.floor(sr * 0.8), n = L + X, chans = [];
+  for (let ch = 0; ch < 2; ch++) {
+    const out = new Float32Array(n);
+    for (let v = 0; v < 5; v++) {
+      const f1 = bpf(450 + Math.random() * 350, 3, sr), f2 = bpf(1300 + Math.random() * 800, 4, sr), gain = 0.5 + Math.random() * 0.5;
+      let t = Math.random() * 2;
+      while (t < n / sr) {
+        const phrase = 1 + Math.random() * 2.5, st = Math.floor(t * sr), D = Math.floor(phrase * sr), syl = 3.5 + Math.random() * 2.5, ph = Math.random() * 6;
+        for (let i = 0; i < D && st + i < n; i++) { const x = Math.random() * 2 - 1, e = Math.pow(Math.max(0, Math.sin(2 * Math.PI * syl * i / sr + ph)), 2) * Math.sin(Math.PI * i / D); out[st + i] += (f1(x) + f2(x) * 0.6) * e * gain; }
+        t += phrase + 0.4 + Math.random() * 2;
+      }
+    }
+    for (let t = Math.random() * 3; t < n / sr; t += 2 + Math.random() * 5) ringAt(out, t, 2600 + Math.random() * 1500, 30, 0.25, 0.05, sr, 0.0005);   // 멀리서 잔 부딪는 소리
+    chans.push(out);
+  }
+  return loopBuffer(chans, L, X, 0.6);
+}
+function startCafeAmb() {
+  stopCafeAmb(); if (!A.ctx) return;
+  const ctx = A.ctx, t = ctx.currentTime, g = ctx.createGain(); g.gain.setValueAtTime(0, t); g.connect(A.amb);
+  const stops = [];
+  if (IS_PARK) { A.bufs = A.bufs || {}; if (!A.bufs.babble) A.bufs.babble = synthBabble(); const s = ctx.createBufferSource(); s.buffer = A.bufs.babble; s.loop = true; s.connect(g); s.start(t, Math.random() * 5); stops.push(s); g.gain.linearRampToValueAtTime(0.32, t + 3); }
+  A.cafeAmb = { g, stops, chimeT: 3 };
+}
+function stopCafeAmb() {
+  const s = A.cafeAmb; if (!s || !A.ctx) return; A.cafeAmb = null;
+  const t = A.ctx.currentTime; s.g.gain.cancelScheduledValues(t); s.g.gain.setValueAtTime(s.g.gain.value, t); s.g.gain.linearRampToValueAtTime(0, t + 1.5); s.stops.forEach(o => { try { o.stop(t + 1.6); } catch (e) {} });
 }
 
 const LANDS = () => CPS.map(c => c.idx);
@@ -2336,7 +3049,7 @@ function moveNpcs(dt) {
       if (Math.random() < 0.5) {
         n.pause = 1.9; n.heading = Math.atan2(player.x - n.x, player.z - n.z);
         n.act = { type: Math.random() < 0.6 ? 'bow' : 'wave', t: 0 };
-        showBubble(n, pickOne(IS_PARK ? ['Hi!', '안녕하세요', '좋은 산책 되세요', 'Nice day!', '반가워요'] : ['안녕하세요', '좋은 산행 되세요', '정상까지 조금만 더요!', '반가워요', '천천히 다녀오세요']), 2.6);
+        showBubble(n, pickOne(IS_PARK ? ['Hi!', i18n('안녕하세요'), i18n('좋은 산책 되세요'), 'Nice day!', i18n('반가워요')] : [i18n('안녕하세요'), i18n('좋은 산행 되세요'), i18n('정상까지 조금만 더요!'), i18n('반가워요'), i18n('천천히 다녀오세요')]), 2.6);
         $('#greetBtn').classList.add('near');
       }
     }
@@ -2380,7 +3093,7 @@ function updateCamera(dt) {
       cam.dist = lerp(cam.dist, asleep ? 10 : 6.8, k); cam.pitch = lerp(cam.pitch, asleep ? 0.2 : 0.18, k);
     }
     else if (act && !GREETS.includes(act.type) && T - S.lastDrag > 2.5) {
-      const k = 1 - Math.exp(-dt * 1.4), med = act.type === 'meditate';
+      const k = 1 - Math.exp(-dt * 1.4), med = act.type === 'meditate' || act.type === 'cafe' || act.type === 'circle';
       cam.yaw = angLerp(cam.yaw, player.heading + Math.PI - (med ? 0.35 + 0.3 * Math.sin(act.t * 0.05) : 0.6), k);
       cam.dist = lerp(cam.dist, med ? 6.5 : 4.6, k); cam.pitch = lerp(cam.pitch, med ? 0.22 : 0.1, k);
     }
@@ -2418,12 +3131,15 @@ function updateHud(dt) {
   if (marker) { marker.t += dt; if (marker.t > 1.6) marker = null; }
   hudTick -= dt; if (hudTick > 0 || !S.started) return; hudTick = 0.2;
   updatePill();
+  if (S.goCafe && !player.act && nearCafe(9)) { player.target = null; openCafeCard(); }
+  if (S.goCircle && !player.act && Math.hypot(player.x - CIRCLE.x, player.z - CIRCLE.z) < 6) sitCircle();
+  if (W.circleLabel) { const n = circleMembers().length; W.circleLabel.el.querySelector('span').textContent = n ? i18n('{0} · {1}/4명', CIRCLE_NAME, n) : CIRCLE_NAME; }
   $('#greetBtn').classList.toggle('near', !!nearestOther(5));
   const hb = hudBig(); $('#altVal').textContent = hb[0]; $('#altUnit').textContent = hb[1];
   $('#distVal').textContent = (S.walked * UNIT_M / 1000).toFixed(2) + ' km';
-  $('#timeVal').textContent = Math.floor((T - S.startT) / 60) + '분';
+  $('#timeVal').textContent = Math.floor((T - S.startT) / 60) + i18n('분');
   const next = CPS.find(c => !S.reached.has(c.key) && c.idx > player.idx) || CPS.find(c => !S.reached.has(c.key));
-  $('#nextCp').textContent = next ? `다음 · ${next.name} ${(Math.max(0, next.idx - player.idx) * TL / (TN - 1) * UNIT_M / 1000).toFixed(1)} km` : '모든 쉼터를 지났어요';
+  $('#nextCp').textContent = next ? i18n('{0}km 앞 · {1}', (Math.max(0, next.idx - player.idx) * TL / (TN - 1) * UNIT_M / 1000).toFixed(1), next.name) : i18n('모든 쉼터를 지났어요');
   const dot = $('#meDot'); if (dot) { const [x, y] = IS_PARK ? mapXY(player.x, player.z, 200, 46, 3) : profXY(player.idx, 200, 46, 4); dot.setAttribute('cx', x); dot.setAttribute('cy', y); }
   for (const cp of CPS) {
     if (S.reached.has(cp.key)) continue;
@@ -2431,7 +3147,7 @@ function updateHud(dt) {
       S.reached.add(cp.key); cp.label.el.classList.add('done');
       const m = document.querySelector(`#miniProfile [data-cp="${cp.key}"]`); if (m) m.setAttribute('fill', '#8fd1a8');
       if (cp.key === 'summit') { if (!S.summitShown) { S.summitShown = true; if (A.ctx && !S.mute) bell(1); setTimeout(showSummit, 600); } }
-      else toast(IS_PARK ? `${cp.name}에 왔어요 · ${streetAt(player.z)}번가 근처` : `${cp.name}에 도착했어요 · 해발 ${fmtAlt(player.y)}m`);
+      else toast(IS_PARK ? i18n('{0}에 왔어요 · {1} 근처', cp.name, streetName(player.z)) : i18n('{0}에 도착했어요 · 해발 {1}m', cp.name, fmtAlt(player.y)));
     }
   }
 }
@@ -2455,7 +3171,7 @@ function setCommon(env) {
 function fireLight() {
   const flick = 0.82 + 0.1 * Math.sin(T * 13.1) + 0.08 * Math.sin(T * 7.3 + 1.7);
   if (S.camp && S.camp.fireOn) { const sp = S.camp.spot; return [sp.fx, sp.fy + 0.7, sp.fz, (1.1 + 1.6 * S.night) * flick * smooth(2.4, 3.6, S.camp.t + (S.camp.phase !== 'pitch' ? 9 : 0))]; }
-  let best = null, bd = 45;
+  let best = Math.hypot(CIRCLE.x - player.x, CIRCLE.z - player.z) < 45 ? CIRCLE.spot : null, bd = best ? Math.hypot(CIRCLE.x - player.x, CIRCLE.z - player.z) : 45;
   for (const p of NET.peers.values()) { const a = p.act; if (!p.ready || !a || a.type !== 'camp' || !a.spot || a.t < 2.4) continue; const d = Math.hypot(a.spot.fx - player.x, a.spot.fz - player.z); if (d < bd) { bd = d; best = a.spot; } }
   return best ? [best.fx, best.fy + 0.7, best.fz, (0.8 + 1.6 * S.night) * flick] : [0, 0, 0, 0];
 }
@@ -2478,8 +3194,8 @@ const bump = (t, a, b, c, d) => smooth(a, b, t) * (1 - smooth(c, d, t));
 function mouthOf(p) { const v = M.xf(M.chain(M.T(0, 1.2 + p.bob - p.drop, 0), M.Rx(p.headPitch)), 0, 0.13, 0.40); return [v[0], v[1], v[2]]; }
 function computePose(c) {
   const sit = c.sit || 0, mv = c.moveAmt * (1 - sit);
-  const bob = Math.abs(Math.sin(c.phase)) * 0.07 * mv, sw = Math.sin(c.phase) * 0.55 * mv, drop = 0.47 * sit;
-  const p = { bob, sw, drop, sit, headPitch: 0, eyes: 1, chest: 1 + Math.sin(T * 2.1 + c.x) * 0.012 * (1 - c.moveAmt), arms: {}, item: null, lean: 0, lift: 0 };
+  const chair = !!(c.act && (c.act.type === 'cafe' || c.act.type === 'circle')), bob = Math.abs(Math.sin(c.phase)) * 0.07 * mv, sw = Math.sin(c.phase) * 0.55 * mv, drop = (chair ? (c.act.type === 'circle' ? 0.25 : 0.14) : 0.47) * sit;
+  const p = { chair, bob, sw, drop, sit, headPitch: 0, eyes: 1, chest: 1 + Math.sin(T * 2.1 + c.x) * 0.012 * (1 - c.moveAmt), arms: {}, item: null, lean: 0, lift: 0 };
   for (const side of [-1, 1]) {
     const sh = [0.37 * side, 1.12 + bob - drop, 0];
     let dir = angDir(-sw * side * 0.8, 0, 0.16 * side);
@@ -2492,6 +3208,23 @@ function computePose(c) {
   if (a && a.type === 'meditate' && c === player && a.medStart && !a.leaving) { const k = a.breathK || 0; p.chest = 1 + 0.06 * k * c.sit; p.headPitch += -0.06 * k; }
   if (!a || a.type === 'meditate' || a.type === 'camp') return p;
   const t = a.t, Rm = p.arms[-1], Lf = p.arms[1];
+  if (a.type === 'circle') {   // 통나무에 앉아 불을 향해 손을 녹인다
+    const warm = 0.5 + 0.5 * Math.sin(T * 0.4 + c.x);
+    p.eyes = 1; p.headPitch = 0.08 * sit;
+    for (const side of [-1, 1]) p.arms[side].dir = V.blend(p.arms[side].dir, V.norm(V.sub([0.16 * side, 0.82 + bob - drop + 0.1 * warm, 0.42], p.arms[side].sh)), sit);
+    return p;
+  }
+  if (a.type === 'cafe') {   // 의자에 앉아 컵을 들고, 가끔 한 모금
+    const ch = sit, served = c === player ? !!a.served : true;
+    const sipK = !served ? 0 : c === player ? bump(t - a.sipAt, 0, 0.7, 2.0, 2.7) : bump((T + Math.abs(c.x) * 3.7) % 12, 0, 0.7, 2.0, 2.7);
+    p.eyes = 1 - 0.7 * smooth(0.5, 1, sipK); p.headPitch = 0.05 * ch - 0.28 * sipK;
+    const mouth = mouthOf(p), rest = [-0.15, 0.84 + bob - drop + 0.14 * ch, 0.36], handM = V.add(mouth, [-0.04, -0.03, 0.1]);
+    const tgt = V.add(V.sc(rest, 1 - sipK), V.sc(handM, sipK));
+    Rm.dir = V.blend(Rm.dir, V.norm(V.sub(tgt, Rm.sh)), ch); Rm.L = lerp(ARM_L, clamp(V.len(V.sub(tgt, Rm.sh)), 0.36, 0.58), ch);
+    Lf.dir = V.blend(Lf.dir, V.norm(V.sub([0.22, 0.86 + bob - drop + 0.12 * ch, 0.34], Lf.sh)), ch);
+    if (served && ch > 0.5) p.item = { type: 'cup', mk: sipK, mouth, liquid: a.drink ? a.drink.liquid : [0.7, 0.55, 0.4], paper: IS_PARK };
+    return p;
+  }
   if (a.type === 'bow') {
     const k = bump(t, 0, 0.35, 1.05, 1.6);
     p.lean = 0.42 * k; p.headPitch += 0.28 * k; p.eyes = 1 - 0.6 * k;
@@ -2544,6 +3277,13 @@ function computePose(c) {
 }
 function drawItem(p, P2) {
   const it = p.item, Rm = p.arms[-1], hand = V.add(Rm.sh, V.sc(Rm.dir, Rm.L));
+  if (it.type === 'cup') {
+    const up = V.blend([0, 1, 0], V.norm(V.add(V.sub(it.mouth, hand), [0, 0.3, 0])), it.mk * 0.6), m = M.alignAt(V.add(hand, V.sc(up, 0.03)), up);
+    P2(M.chain(m, M.S(0.06, 0.12, 0.06)), W.uCyl, it.paper ? [0.96, 0.95, 0.92] : [0.60, 0.74, 0.66]);
+    if (it.paper) P2(M.chain(m, M.S(0.064, 0.05, 0.064)), W.uCyl, [0.55, 0.40, 0.28]);
+    P2(M.chain(m, M.T(0, 0.056, 0), M.S(0.052, 0.006, 0.052)), W.uCyl, it.liquid);
+    return;
+  }
   if (it.type === 'bar') {
     const d = V.blend(V.norm([0.25, 0.9, 0.3]), V.norm(V.sub(it.mouth, hand)), it.mk);
     const ctr = V.add(hand, V.sc(d, it.len * 0.42)), m = M.alignAt(ctr, d);
@@ -2564,9 +3304,9 @@ function drawHiker(c, isMe) {
   const root = M.chain(M.T(c.x + (c.ox || 0), c.y + p.lift, c.z + (c.oz || 0)), M.Ry(c.heading), M.Rx(p.lean));
   const P2 = (local, mesh, tint) => draw(mesh, { model: M.mul(root, local), tint, flat: 0, snowable: 0 });
   const skin = [0.97, 0.80, 0.66];
-  if (p.sit > 0.02) P2(M.chain(M.T(0, 0.05, -0.04), M.S(0.58 * p.sit, 0.1, 0.52 * p.sit)), W.uCyl, c.cushion || [0.55, 0.24, 0.18]);
+  if (p.sit > 0.02 && !p.chair) P2(M.chain(M.T(0, 0.05, -0.04), M.S(0.58 * p.sit, 0.1, 0.52 * p.sit)), W.uCyl, c.cushion || [0.55, 0.24, 0.18]);
   for (const side of [-1, 1]) {
-    const leg = M.chain(M.T(0.14 * side, 0.64 - p.drop, 0), M.Ry(-side * 0.9 * p.sit), M.Rx(lerp(p.sw * side, -1.5, p.sit)));
+    const leg = M.chain(M.T(0.14 * side, 0.64 - p.drop, 0), M.Ry(-side * 0.9 * p.sit * (p.chair ? 0 : 1)), M.Rx(lerp(p.sw * side, p.chair ? -1.05 : -1.5, p.sit)));
     P2(M.chain(leg, M.T(0, -0.27, 0), M.S(0.12, 0.5, 0.12)), W.uCyl, c.pants);
     P2(M.chain(leg, M.T(0, -0.55, 0.05), M.S(0.17, 0.12, 0.3)), W.uBox, [0.30, 0.22, 0.17]);
     const A2 = p.arms[side], am = M.alignAt(A2.sh, V.sc(A2.dir, -1));
@@ -2585,6 +3325,7 @@ function drawHiker(c, isMe) {
     P2(M.chain(head, M.T(0.24 * side, 0.17, 0.33), M.S(0.065, 0.04, 0.03)), W.uSphere, [0.98, 0.62, 0.58]);
   }
   if (p.item) drawItem(p, P2);
+  if (p.item && p.item.type === 'cup') { const R2 = p.arms[-1], h = V.add(R2.sh, V.sc(R2.dir, R2.L)), w = M.xf(root, h[0], h[1] + 0.13, h[2]); c.steamAt = [w[0], w[1], w[2], p.item.mk]; } else c.steamAt = null;
 }
 function drawShadow(x, z, s) {
   const y = groundY(x, z), n = propFloor(x, z) ? [0, 1, 0] : getN(x, z);
@@ -2618,6 +3359,7 @@ function render() {
     const lit = Math.max(S.tb * 0.75, S.night);
     draw(W.lampHeads, { mode: 1, tint: mix3([0.9, 0.88, 0.8], [1.0, 0.82, 0.5], lit), emissive: 0.15 + 1.5 * lit, flat: 0 });
   }
+  draw(W.cafeGlow, { mode: 1, tint: [1, 0.85, 0.6], emissive: 0.25 + 1.4 * Math.max(S.tb * 0.75, S.night), flat: 0 });
   draw(W.rock, { mode: 1 });
   draw(W.con, { mode: 1, wind: 1 });
   draw(W.dec, { mode: 1, wind: 1 });
@@ -2628,6 +3370,8 @@ function render() {
     if (!inTent(p)) drawHiker(p, false);
   }
   if (S.camp) drawCamp(S.camp.spot, S.camp.tentK, S.camp.fireOn, player.jacket);
+  if (Math.hypot(barista.x - eye[0], barista.z - eye[2]) < 120) drawHiker(barista, false);
+  drawCamp(CIRCLE.spot, 0, true, [1, 1, 1]);   // 모닥불 쉼터의 불은 늘 타오른다
   if (S.started && !inTent(player)) drawHiker(player, true);
   // transparent
   gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); gl.depthMask(false);
@@ -2637,6 +3381,10 @@ function render() {
   for (const p of NET.peers.values()) if (p.ready && !p.hidden && Math.hypot(p.x - eye[0], p.z - eye[2]) < 80) drawShadow(p.x + (p.ox || 0), p.z + (p.oz || 0), 0.6);
   if (marker) { const a = 1 - marker.t / 1.6, s = 0.5 + marker.t * 0.6; draw(W.uRing, { model: M.chain(M.T(marker.x, getH(marker.x, marker.z) + 0.1, marker.z), M.S(s)), tint: [1, 1, 1], alpha: a * 0.85, emissive: 0.8, flat: 0, snowable: 0 }); }
   gl.disable(gl.POLYGON_OFFSET_FILL);
+  for (const c of [player, ...NET.peers.values()]) {   // 컵에서 오르는 김
+    const st = c.steamAt; if (!st || st[3] > 0.3 || Math.hypot(st[0] - eye[0], st[2] - eye[2]) > 30) continue;
+    for (let i = 0; i < 3; i++) { const u = (T * 0.32 + i / 3) % 1; draw(W.uSphere, { model: M.chain(M.T(st[0] + Math.sin(T * 1.3 + i * 2) * 0.03 * u, st[1] + u * 0.38, st[2] + Math.cos(T * 1.1 + i) * 0.03 * u), M.S(0.025 + 0.055 * u)), tint: [1, 1, 1], alpha: 0.28 * (1 - u) * smooth(0, 0.15, u), emissive: 0.6, flat: 0, snowable: 0 }); }
+  }
   const ice = S.sb;
   const wTint = mix3([1, 1, 1], [3.9, 2.4, 2.35], ice), wAlpha = lerp(0.8, 0.96, ice);
   for (const w of WATERS) draw(W.water, { model: M.chain(M.T(w.x, w.level, w.z), M.S(w.rx * 1.12, 1, w.rz * 1.12)), tint: wTint, alpha: wAlpha, emissive: 0.18, flat: 0, snowable: 0 });
@@ -2724,7 +3472,7 @@ async function netStart() {
         NET.mode = 'supabase';
         if (await joinRooms()) return;
       } catch (e) { console.warn('함께 걷기 연결 실패', e); }
-      NET.on = false; NET.client = null; toast('지금은 혼자 걷는 길이에요');
+      NET.on = false; NET.client = null; toast(i18n('지금은 혼자 걷는 길이에요'));
       startLocal(); return;   // 서버에 못 붙으면 같은 기기 탭끼리라도 이어 준다
     }
     startLocal();
@@ -2818,7 +3566,7 @@ function netState(force = false) {
 function ensurePeer(id, pres) {
   let p = NET.peers.get(id);
   if (!p) {
-    p = { id, real: true, ready: false, nick: '산행 중인 분', x: 0, z: 0, y: 0, heading: 0, phase: Math.random() * 6, moveAmt: 0, sit: 0, act: null,
+    p = { id, real: true, ready: false, nick: i18n('산행 중인 분'), x: 0, z: 0, y: 0, heading: 0, phase: Math.random() * 6, moveAmt: 0, sit: 0, act: null,
       jacket: [0.5, 0.5, 0.55], hat: [0.9, 0.88, 0.82], pants: [0.24, 0.26, 0.30], pack: [0.30, 0.28, 0.25], cushion: [0.42, 0.34, 0.52],
       mode: 'stop', tx: 0, tz: 0, sp: 1.8, dir: 1, idx: 0, heard: performance.now(), seen: performance.now(), ox: 0, oz: 0, hidden: MUTED.has(id) };
     p.label = addLabel('<span></span>', 'real', () => [p.x + p.ox, p.y + 2.45 - 0.47 * p.sit, p.z + p.oz], 60);
@@ -2856,9 +3604,9 @@ function onNet(m) {
     if (!placePeer(p, +m.x, +m.z)) return;
     p.heading = +m.h || 0; p.mode = ['auto', 'goto', 'key', 'stop'].includes(m.m) ? m.m : 'stop';
     p.tx = +m.tx || 0; p.tz = +m.tz || 0; p.sp = clamp(+m.sp || 1.8, 0.5, 4); p.dir = m.d < 0 ? -1 : 1; p.idx = clamp(m.i | 0, 0, TN - 1);
-    const want = ['meditate', 'snack', 'water', 'camp'].includes(m.a) ? m.a : '';
+    const want = ['meditate', 'snack', 'water', 'camp', 'cafe', 'circle'].includes(m.a) ? m.a : '';
     if (want && (!p.act || p.act.type !== want)) p.act = { type: want, t: clamp(+m.at || 0, 0, want === 'camp' ? 86400 : 600), leaving: false };
-    if (!want && p.act && !GREETS.includes(p.act.type)) { if (p.act.type === 'meditate') p.act.leaving = true; else { p.act = null; p.sit = 0; } }
+    if (!want && p.act && !GREETS.includes(p.act.type)) { if (p.act.type === 'meditate' || p.act.type === 'cafe' || p.act.type === 'circle') p.act.leaving = true; else { p.act = null; p.sit = 0; } }
     const lat = clamp((Date.now() - (+m.t || Date.now())) / 1000, 0, 1.2);
     if (lat > 0.05 && !p.act) simPeer(p, lat);
   } else if (m.k === 'emo') {
@@ -2867,15 +3615,29 @@ function onNet(m) {
     const withMe = m.to === ME.id;
     p.act = { type: kind, t: 0, fired: 0, withMe: withMe || !!m.r };
     if (p.hidden) return;
-    if (kind === 'hi5') setTimeout(() => showBubble(p, '짝!', 1.4, true), 520); else if (kind === 'bow') showBubble(p, '꾸벅', 1.4, true);
+    if (kind === 'hi5') setTimeout(() => showBubble(p, i18n('짝!'), 1.4, true), 520); else if (kind === 'bow') showBubble(p, i18n('꾸벅'), 1.4, true);
     if (withMe) {
-      toast(`${p.nick}님이 ${kind === 'hi5' ? '하이파이브를 했어요' : kind === 'bow' ? '목례를 건넸어요' : '손을 흔들어요'}`);
+      if (kind === 'hi5' && !(H5.agreed[p.id] > performance.now())) return;   // 내가 받아들이지 않은 하이파이브에는 손을 내밀지 않는다
+      toast(i18n(kind === 'hi5' ? i18n('{0}님이 하이파이브를 했어요') : kind === 'bow' ? i18n('{0}님이 목례를 건넸어요') : i18n('{0}님이 손을 흔들어요'), p.nick));
       if (!player.act || GREETS.includes(player.act.type)) greet(kind, p);
     }
+  } else if (m.k === 'h5q') {   // 하이파이브 해도 될까요?
+    if (m.to !== ME.id || p.hidden || MUTED.has(p.id)) return;
+    showHi5Ask(p);
+  } else if (m.k === 'h5a') {   // 상대의 대답
+    if (m.to !== ME.id || !H5.out || H5.out.id !== p.id) return;
+    H5.out = null; dropBubble(player);
+    if (m.ok) { if (Math.hypot(p.x - player.x, p.z - player.z) < 7) { H5.with = p; greet('hi5', null, true); H5.with = null; } else toast(i18n('{0}님이 좋대요. 조금 더 가까이 가서 다시 해 보세요', p.nick)); }
+    else toast(i18n('{0}님은 다음에 하자고 하네요', p.nick));
   } else if (m.k === 'say') {
     if (p.hidden) return;
     const s = cleanText(m.text); if (!s || blockedReason(s)) return;
-    showBubble(p, s, 6); addChatLog(p.nick, s);
+    if (m.c === 'circle') {   // 모닥불 자리 대화: 나도 앉아 있고 상대도 앉아 있을 때만
+      if (!inCircle(player) || !(p.act && p.act.type === 'circle')) return;
+      showBubble(p, s, 6); addChatLog(p.nick, s); return;
+    }
+    if (Math.hypot(p.x - player.x, p.z - player.z) > CHAT_NEAR) return;   // 가까이 있는 사람 말만 말풍선으로
+    showBubble(p, s, 6);
     if ($('#chatBar').hidden) $('#chatBtn').classList.add('near');
   }
 }
@@ -2910,8 +3672,8 @@ function netTick(dt) {
 function updateCount() {
   const n = realCount(), fr = NET.room && NET.room.startsWith('room-');
   $('#peopleChip').classList.toggle('live', NET.on);
-  $('#peopleTxt').textContent = !NET.on ? (NET.starting ? '연결 중' : '혼자 걷는 중') : `${fr ? '친구 방 · ' : ''}${n ? `함께 ${n + 1}명` : '이 방엔 나뿐'}`;
-  $('#roomInfo').textContent = !NET.on ? '혼자 걷는 중' : fr ? `친구 방 (${NET.room.slice(5)})` : NET.mode === 'local' ? '이 기기의 다른 탭과 연결됨' : `모두의 방 ${NET.room}번`;
+  $('#peopleTxt').textContent = !NET.on ? (NET.starting ? i18n('연결 중') : i18n('혼자 걷는 중')) : (fr ? i18n('친구 방') + ' · ' : '') + (n ? i18n('함께 {0}명', n + 1) : i18n('이 방엔 나뿐'));
+  $('#roomInfo').textContent = !NET.on ? i18n('혼자 걷는 중') : fr ? i18n('친구 방 ({0})', NET.room.slice(5)) : NET.mode === 'local' ? i18n('이 기기의 다른 탭과 연결됨') : i18n('모두의 방 {0}번', NET.room);
   $('#publicBtn').hidden = !fr;
 }
 
@@ -2919,27 +3681,30 @@ function updateCount() {
 const BAD = ['시발', '씨발', '씨팔', '시팔', 'ㅅㅂ', 'ㅆㅂ', '병신', 'ㅂㅅ', '개새', '새끼', '좆', '존나', 'ㅈㄴ', '미친놈', '미친년', '지랄', '염병', '닥쳐', 'fuck', 'shit', 'bitch', 'cunt', 'dick', 'asshole', 'nigg', 'slut'];
 function maskBad(s) { let out = s; for (const w of BAD) out = out.replace(new RegExp(w, 'gi'), m => '○'.repeat(m.length)); return out; }
 function cleanText(s) { s = String(s == null ? '' : s).replace(/[\u0000-\u001f\u007f]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 40); return s ? maskBad(s) : null; }
-function cleanNick(n) { const s = cleanText(n); return s && !s.includes('○') ? s.slice(0, 16) : '산행 중인 분'; }
+function cleanNick(n) { const s = cleanText(n); return s && !s.includes('○') ? s.slice(0, 24) : i18n('산행 중인 분'); }
 function blockedReason(s) {
-  if (/(https?:\/\/|www\.|\.(com|net|kr|org|io|me|ly|co)\b)/i.test(s)) return '링크는 보낼 수 없어요';
-  if (/\d{2,4}[-.\s]?\d{3,4}[-.\s]?\d{4}/.test(s) || /[\w.+-]+@[\w-]+\.\w+/.test(s)) return '전화번호나 이메일은 보낼 수 없어요';
+  if (/(https?:\/\/|www\.|\.(com|net|kr|org|io|me|ly|co)\b)/i.test(s)) return i18n('링크는 보낼 수 없어요');
+  if (/\d{2,4}[-.\s]?\d{3,4}[-.\s]?\d{4}/.test(s) || /[\w.+-]+@[\w-]+\.\w+/.test(s)) return i18n('전화번호나 이메일은 보낼 수 없어요');
   return null;
 }
 let lastChat = -1e9;
+const CHAT_NEAR = 30;   // 이 거리(약 240m) 안 사람에게만 말풍선이 보인다
 function sendChat(raw) {
   const s = cleanText(raw); if (!s) return false;
   const why = blockedReason(s); if (why) { addChatLog(null, why); return false; }
-  if (performance.now() - lastChat < 2500) { addChatLog(null, '조금 천천히 보내 주세요'); return false; }
+  if (performance.now() - lastChat < 2500) { addChatLog(null, i18n('조금 천천히 보내 주세요')); return false; }
   lastChat = performance.now();
-  showBubble(player, s, 6); addChatLog(S.nick, s);
-  netSend({ k: 'say', text: s });
+  const circle = inCircle(player);
+  showBubble(player, s, 6); if (circle) addChatLog(S.nick, s);
+  netSend({ k: 'say', text: s, c: circle ? 'circle' : 'near' });
   if (/안녕|반가|하이|hi|hello|수고|화이팅|파이팅|좋은|조심/i.test(s) && showNpcs()) {
     let best = null, bd = 9; for (const n of NPCS) { const d = Math.hypot(n.x - player.x, n.z - player.z); if (d < bd) { bd = d; best = n; } }
-    if (best) setTimeout(() => showBubble(best, pickOne(['안녕하세요!', '반가워요~', '좋은 산행 되세요', '화이팅!']), 3), 900);
+    if (best) setTimeout(() => showBubble(best, pickOne([i18n('안녕하세요!'), i18n('반가워요~'), i18n('좋은 산행 되세요'), i18n('화이팅!')]), 3), 900);
   }
   return true;
 }
 function addChatLog(name, text) {
+  if (!name && !inCircle(player)) { toast(text); return; }   // 모닥불 자리가 아니면 기록창 없이 알림만
   const log = $('#chatLog'), d = document.createElement('div');
   if (name) { const b = document.createElement('b'); b.textContent = name; d.appendChild(b); d.appendChild(document.createTextNode(text)); }
   else { d.className = 'sys'; d.textContent = text; }
@@ -2948,7 +3713,7 @@ function addChatLog(name, text) {
 let muteTarget = null;
 function openMute(p, x, y) {
   muteTarget = p; const m = $('#muteMenu');
-  $('#muteTxt').textContent = `${p.nick}님`;
+  $('#muteTxt').textContent = i18n('{0}님', p.nick);
   m.hidden = false; m.style.left = clamp(x - 110, 16, innerWidth - 256) + 'px'; m.style.top = clamp(y + 14, 64, innerHeight - 150) + 'px';
 }
 
@@ -2963,7 +3728,7 @@ function frame(now) {
   const raw = (now - lastNow) / 1000, dt = Math.min(0.05, raw); lastNow = now; T += dt;
   // 화질 자동 조절: 선명하게에서 3초 넘게 버벅이면 가볍게로 바꾼다
   if (raw < 0.5) frameEma = lerp(frameEma, raw, 0.05);
-  if (S.started && S.quality && !deepSleep && !S.camp && frameEma > 0.034) { slowFor += dt; if (slowFor > 3) { slowFor = 0; S.quality = 0; store.set('quality', 0); document.querySelectorAll('#qualSeg button').forEach(b => b.setAttribute('aria-pressed', b.dataset.q === '0' ? 'true' : 'false')); toast('이 기기에 맞게 화질을 가볍게 바꿨어요'); } }
+  if (S.started && S.quality && !deepSleep && !S.camp && frameEma > 0.034) { slowFor += dt; if (slowFor > 3) { slowFor = 0; S.quality = 0; store.set('quality', 0); document.querySelectorAll('#qualSeg button').forEach(b => b.setAttribute('aria-pressed', b.dataset.q === '0' ? 'true' : 'false')); toast(i18n('이 기기에 맞게 화질을 가볍게 바꿨어요')); } }
   else slowFor = Math.max(0, slowFor - dt);
   S.sb = lerp(S.sb, S.season, 1 - Math.exp(-dt * 1.6)); if (Math.abs(S.sb - S.season) < 0.001) S.sb = S.season;
   S.tb = lerp(S.tb, S.dusk, 1 - Math.exp(-dt * 1.2)); if (Math.abs(S.tb - S.dusk) < 0.001) S.tb = S.dusk;
@@ -2972,6 +3737,7 @@ function frame(now) {
   if (S.dawn > 0) S.dawn = Math.max(0, S.dawn - dt / 14);
   recolorTrees();
   if (S.started) updateCharAct(player, dt);
+  updateCharAct(barista, dt); barista.y = groundY(barista.x, barista.z);
   updateCamp(dt);
   updateMedGuide();
   if (S.started && !S.breath) movePlayer(dt);
@@ -3016,11 +3782,11 @@ function buildProfiles() {
     const [x, y] = profXY(cp.idx, w, h - 18, pad);
     const anchor = cp.idx < 10 ? 'start' : cp.idx > TN - 10 ? 'end' : 'middle';
     svg += `<circle cx="${x}" cy="${y}" r="4" fill="#f4eee2" stroke="#24302a" stroke-width="1.5"/>`;
-    svg += `<text x="${x}" y="${h - 4}" font-size="11" fill="#5f6b62" text-anchor="${anchor}" font-family="Gowun Dodum, sans-serif">${cp.name.replace('솔바람산 ', '')}</text>`;
+    svg += `<text x="${x}" y="${h - 4}" font-size="11" fill="#5f6b62" text-anchor="${anchor}" font-family="Gowun Dodum, sans-serif">${cp.name.replace(COURSE_NAME + ' ', '')}</text>`;
   }
   big.innerHTML = svg;
-  $('#courseLen').textContent = `코스 ${(TL * UNIT_M / 1000).toFixed(1)} km`;
-  $('#courseAlt').textContent = `해발 ${fmtAlt(TH[0])} → ${fmtAlt(SUMMIT_H)} m`;
+  $('#courseLen').textContent = i18n('코스 {0} km', (TL * UNIT_M / 1000).toFixed(1));
+  $('#courseAlt').textContent = i18n('해발 {0} → {1} m', fmtAlt(TH[0]), fmtAlt(SUMMIT_H));
   const mini = $('#miniProfile'); const ml = profilePath(200, 46, 4);
   let ms = `<path d="${ml} L196 46 L4 46 Z" fill="rgba(255,255,255,.1)"/><path d="${ml}" fill="none" stroke="rgba(255,255,255,.75)" stroke-width="1.4" vector-effect="non-scaling-stroke"/>`;
   for (const cp of CPS) { const [x, y] = profXY(cp.idx, 200, 46, 4); ms += `<circle data-cp="${cp.key}" cx="${x}" cy="${y}" r="2.6" fill="#e0a52e"/>`; }
@@ -3033,13 +3799,14 @@ function buildParkMaps() {
   CPS.forEach((cp, k) => {
     const [x, y] = mapXY(cp.x, cp.z, w, mh, pad);
     svg += `<circle cx="${x}" cy="${y}" r="3.6" fill="#f4eee2" stroke="#24302a" stroke-width="1.4"/>`;
-    if (k % 2 === 0 || k === CPS.length - 1) svg += `<text x="${x}" y="${h - 4 - (k % 4 === 2 ? 11 : 0)}" font-size="10.5" fill="#5f6b62" text-anchor="${k === 0 ? 'start' : k === CPS.length - 1 ? 'end' : 'middle'}" font-family="Gowun Dodum, sans-serif">${cp.name}</text>`;
+    const li = ['gate', 'mall', 'bow', 'castle', 'summit'].indexOf(cp.key);   // 이름은 다섯 곳만, 위아래로 엇갈려서
+    if (li >= 0) svg += `<text x="${x}" y="${h - 4 - (li % 2 ? 11 : 0)}" font-size="10.5" fill="#5f6b62" text-anchor="${li === 0 ? 'start' : li === 4 ? 'end' : 'middle'}" font-family="Gowun Dodum, sans-serif">${cp.name}</text>`;
   });
-  svg += `<text x="${pad}" y="${pad + 9}" font-size="9" fill="#7a857a" font-family="Gowun Dodum, sans-serif">59번가</text><text x="${w - pad}" y="${pad + 9}" font-size="9" fill="#7a857a" text-anchor="end" font-family="Gowun Dodum, sans-serif">110번가</text>`;
+  svg += `<text x="${pad}" y="${pad + 9}" font-size="9" fill="#7a857a" font-family="Gowun Dodum, sans-serif">${stName(59)}</text><text x="${w - pad}" y="${pad + 9}" font-size="9" fill="#7a857a" text-anchor="end" font-family="Gowun Dodum, sans-serif">${stName(110)}</text>`;
   big.innerHTML = svg;
-  $('#courseLen').textContent = `코스 ${(TL * UNIT_M / 1000).toFixed(1)} km`;
-  $('#courseAlt').textContent = `${streetAt(TZ[0])}번가 → ${streetAt(TZ[TN - 1])}번가`;
-  $('#courseStops').textContent = `명소 ${CPS.length}곳`;
+  $('#courseLen').textContent = i18n('코스 {0} km', (TL * UNIT_M / 1000).toFixed(1));
+  $('#courseAlt').textContent = `${streetName(TZ[0])} → ${streetName(TZ[TN - 1])}`;
+  $('#courseStops').textContent = i18n('명소 {0}곳', CPS.length);
   let ms = parkMapSvg(200, 46, 3, false);
   for (const cp of CPS) { const [x, y] = mapXY(cp.x, cp.z, 200, 46, 3); ms += `<circle data-cp="${cp.key}" cx="${x}" cy="${y}" r="2.4" fill="#e0a52e"/>`; }
   ms += `<circle id="meDot" cx="4" cy="40" r="3.4" fill="#fff" stroke="#c24a2b" stroke-width="1.6"/>`;
@@ -3047,21 +3814,21 @@ function buildParkMaps() {
 }
 function updateWalkBtn() {
   const b = $('#walkBtn'); b.setAttribute('aria-pressed', S.auto ? 'true' : 'false');
-  $('#walkLbl').textContent = S.auto ? '멈추기' : (S.autoDir < 0 ? '내려가기' : '자동 걷기');
+  $('#walkLbl').textContent = S.auto ? i18n('멈추기') : (S.autoDir < 0 ? i18n('내려가기') : i18n('자동 걷기'));
 }
 function setSeason(s, announce) {
   S.season = s; store.set('season', s);
-  $('#seasonLbl').textContent = s ? '가을로' : '겨울로';
+  $('#seasonLbl').textContent = s ? i18n('가을로') : i18n('겨울로');
   $('#seasonPath').setAttribute('d', s ? 'M5 19C5 10 10 5 19 5c0 9-5 14-14 14zM5 19l8-8' : 'M12 3v18M4.2 7.5l15.6 9M4.2 16.5l15.6-9M9.5 4.5 12 6l2.5-1.5M9.5 19.5 12 18l2.5 1.5');
-  $('#courseName').textContent = IS_PARK ? (s ? '겨울 산책' : '가을 산책') : (s ? '설산길' : '단풍길');
+  $('#courseName').textContent = IS_PARK ? (s ? i18n('겨울 산책') : i18n('가을 산책')) : (s ? i18n('설산길') : i18n('단풍길'));
   document.querySelectorAll('#courseMenu [data-course]').forEach(b => b.setAttribute('aria-current', (b.dataset.course === 'winter') === !!s ? 'true' : 'false'));
   $('#pickAutumn').setAttribute('aria-pressed', s ? 'false' : 'true'); $('#pickWinter').setAttribute('aria-pressed', s ? 'true' : 'false');
-  if (announce) toast(IS_PARK ? (s ? '눈이 내려요. 잔디밭이 하얗게 덮이고 분수는 잠시 쉬어요' : '노란 느릅나무 잎이 흩날리는 가을 공원이에요') : (s ? '눈이 내립니다. 능선에 상고대가 피었어요' : '다시 단풍 든 가을 산이에요'));
+  if (announce) toast(IS_PARK ? (s ? i18n('눈이 내려요. 잔디밭이 하얗게 덮이고 분수는 잠시 쉬어요') : i18n('노란 느릅나무 잎이 흩날리는 가을 공원이에요')) : (s ? i18n('눈이 내립니다. 능선에 상고대가 피었어요') : i18n('다시 단풍 든 가을 산이에요')));
 }
-function setDusk(d) { S.dusk = d; $('#timeBtn').setAttribute('aria-pressed', d ? 'true' : 'false'); $('#timeLbl').textContent = d ? '낮' : '노을'; }
+function setDusk(d) { S.dusk = d; $('#timeBtn').setAttribute('aria-pressed', d ? 'true' : 'false'); $('#timeLbl').textContent = d ? i18n('낮') : i18n('노을'); }
 function closeMenus() { $('#courseMenu').hidden = true; $('#settings').hidden = true; $('#restMenu').hidden = true; $('#restBtn').setAttribute('aria-expanded', 'false');
   for (const id of ['greet', 'scene']) { $(`#${id}Menu`).hidden = true; $(`#${id}Btn`).setAttribute('aria-expanded', 'false'); } $('#muteMenu').hidden = true; $('#courseBtn').setAttribute('aria-expanded', 'false'); $('#settingsBtn').setAttribute('aria-expanded', 'false'); }
-function setMute(m) { S.mute = m; store.set('mute', m); if (A.master) A.master.gain.setTargetAtTime(m ? 0 : 1, A.ctx.currentTime, 0.1); $('#soundBtn').setAttribute('aria-pressed', m ? 'true' : 'false'); $('#soundBtn').setAttribute('aria-label', m ? '소리 켜기' : '소리 끄기'); $('#soundWave').style.display = m ? 'none' : ''; $('#soundX').style.display = m ? '' : 'none'; }
+function setMute(m) { S.mute = m; store.set('mute', m); if (A.master) A.master.gain.setTargetAtTime(m ? 0 : 1, A.ctx.currentTime, 0.1); $('#soundBtn').setAttribute('aria-pressed', m ? 'true' : 'false'); $('#soundBtn').setAttribute('aria-label', m ? i18n('소리 켜기') : i18n('소리 끄기')); $('#soundWave').style.display = m ? 'none' : ''; $('#soundX').style.display = m ? '' : 'none'; }
 function warpToStart() {
   player.act = null; player.sit = 0; $('#actPill').hidden = true; if (S.breath) stopBreath();
   setTimeout(() => netState(true), 50);
@@ -3073,9 +3840,9 @@ function warpToStart() {
 }
 function showSummit() {
   if (IS_PARK) {
-    $('#sumEyebrow').textContent = '저수지 북쪽 끝에 도착했어요'; $('#sumName').textContent = '센트럴파크'; $('#sumAlt').textContent = `${streetAt(player.z)}번가`;
-    $('#sumGain').textContent = Math.round(S.walked * UNIT_M / 0.72).toLocaleString('ko-KR'); $('#sumGainLbl').textContent = '걸음';
-    $('#sumPhoto').textContent = '저수지 앞에서 사진 찍기'; $('#sumDown').textContent = '걸어서 돌아가기'; $('#sumStay').textContent = '여기 머물기';
+    $('#sumEyebrow').textContent = i18n('저수지 북쪽 끝에 도착했어요'); $('#sumName').textContent = i18n('센트럴파크'); $('#sumAlt').textContent = streetName(player.z);
+    $('#sumGain').textContent = Math.round(S.walked * UNIT_M / 0.72).toLocaleString('ko-KR'); $('#sumGainLbl').textContent = i18n('걸음');
+    $('#sumPhoto').textContent = i18n('저수지 앞에서 사진 찍기'); $('#sumDown').textContent = i18n('걸어서 돌아가기'); $('#sumStay').textContent = i18n('여기 머물기');
     $('#sumDist').textContent = (S.walked * UNIT_M / 1000).toFixed(1); $('#sumTime').textContent = Math.max(1, Math.round((T - S.startT) / 60));
     S.auto = false; updateWalkBtn(); $('#summit').hidden = false; return;
   }
@@ -3099,13 +3866,13 @@ function startBreath() {
     const e = performance.now() - t0; let key, k;
     if (e < SIGH) {
       key = 0; const q = e / SIGH; k = q < 0.12 ? q / 0.12 * 0.7 : 0.7 * (1 - smooth(0.12, 1, q));
-      $('#breathTxt').textContent = '먼저 크게 한숨 내쉬세요'; $('#breathCnt').textContent = '하아…';
+      $('#breathTxt').textContent = i18n('먼저 크게 한숨 내쉬세요'); $('#breathCnt').textContent = i18n('하아…');
     } else {
       const e2 = e - SIGH, r = Math.floor(e2 / CYC), ph = e2 % CYC;
-      if (r >= ROUNDS) { stopBreath(); toast('숨이 한결 고르네요'); return; }
+      if (r >= ROUNDS) { stopBreath(); toast(i18n('숨이 한결 고르네요')); return; }
       const inh = ph < IN, kk = inh ? ph / IN : 1 - (ph - IN) / OUT; k = 0.5 - 0.5 * Math.cos(kk * Math.PI);
       key = 1 + r * 2 + (inh ? 0 : 1);
-      $('#breathTxt').textContent = inh ? '코로 천천히 들이쉬세요' : '입으로 길게 내쉬세요'; $('#breathCnt').textContent = `${r + 1} / ${ROUNDS}`;
+      $('#breathTxt').textContent = inh ? i18n('코로 천천히 들이쉬세요') : i18n('입으로 길게 내쉬세요'); $('#breathCnt').textContent = `${r + 1} / ${ROUNDS}`;
     }
     if (key !== lastKey) {
       lastKey = key; if (S.breathSnd) S.breathSnd.stop();
@@ -3131,10 +3898,10 @@ function composePhoto(url) {
     const nearCp = CPS.find(cp => Math.hypot(player.x - cp.x, player.z - cp.z) < cp.r + 4);
     x.fillStyle = '#f7f2e8'; x.textBaseline = 'alphabetic';
     x.font = `700 ${Math.round(base * 2)}px "Gowun Batang", serif`;
-    x.fillText(IS_PARK ? `센트럴파크${nearCp ? ' · ' + nearCp.name : ''}` : atSummit ? `솔바람산 정상 ${fmtAlt(SUMMIT_H)}m` : `솔바람산${nearCp ? ' · ' + nearCp.name : ''}`, padX, y0 - Math.round(base * 1.25));
+    x.fillText(IS_PARK ? i18n('센트럴파크') + (nearCp ? ' · ' + nearCp.name : '') : atSummit ? i18n('솔바람산 정상 {0}m', fmtAlt(SUMMIT_H)) : i18n('솔바람산') + (nearCp ? ' · ' + nearCp.name : ''), padX, y0 - Math.round(base * 1.25));
     x.font = `${base}px "Gowun Dodum", sans-serif`; x.fillStyle = 'rgba(247,242,232,.85)';
     const d = new Date(); const ds = `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
-    const line = IS_PARK ? `${ds} · ${S.nick} · ${S.season ? '겨울' : '가을'} 산책 · 뉴욕 ${streetAt(player.z)}번가` : `${ds} · ${S.nick} · ${S.season ? '겨울 설산길' : '가을 단풍길'} · 해발 ${fmtAlt(player.y)}m`, credit = 'game.mybumo.com · 산길';
+    const line = IS_PARK ? i18n('{0} · {1} · {2} 산책 · 뉴욕 {3}', ds, S.nick, i18n(S.season ? i18n('겨울') : i18n('가을')), streetName(player.z)) : i18n('{0} · {1} · {2} · 해발 {3}m', ds, S.nick, i18n(S.season ? i18n('겨울 설산길') : i18n('가을 단풍길')), fmtAlt(player.y)), credit = i18n('game.mybumo.com · 산길');
     x.fillText(line, padX, y0);
     const fits = padX * 2 + x.measureText(line).width + x.measureText(credit).width + base * 2 < w;
     x.textAlign = 'right'; x.fillStyle = 'rgba(247,242,232,.8)';
@@ -3152,22 +3919,24 @@ function bindUI() {
     S.auto = !S.auto; player.target = null;
     if (S.auto && S.autoDir > 0 && player.idx >= TN - 4) S.autoDir = -1;
     if (S.auto && S.autoDir < 0 && player.idx <= 3) S.autoDir = 1;
-    updateWalkBtn(); if (S.auto) { S.lastDrag = -10; toast(IS_PARK ? (S.autoDir > 0 ? '공원 길을 따라 저수지까지 천천히 걸어요' : '5번가 입구까지 천천히 걸어가요') : (S.autoDir > 0 ? '산길을 따라 정상까지 천천히 걸어요' : '입구까지 천천히 내려가요')); }
+    updateWalkBtn(); if (S.auto) { S.lastDrag = -10; toast(IS_PARK ? (S.autoDir > 0 ? i18n('공원 길을 따라 저수지까지 천천히 걸어요') : i18n('5번가 입구까지 천천히 걸어가요')) : (S.autoDir > 0 ? i18n('산길을 따라 정상까지 천천히 걸어요') : i18n('입구까지 천천히 내려가요'))); }
   };
   $('#breathStop').onclick = stopBreath;
   $('#restBtn').onclick = e => { e.stopPropagation(); const m = $('#restMenu'); const open = m.hidden; closeMenus(); m.hidden = !open; $('#restBtn').setAttribute('aria-expanded', open ? 'true' : 'false'); };
   document.querySelectorAll('#restMenu [data-act]').forEach(b => b.onclick = () => startAct(b.dataset.act));
   $('#actStop').onclick = cancelAct;
+  $('#circleLeave').onclick = e => { e.stopPropagation(); leaveCafe(); closeCircleChat(); };
+  $('#askYes').onclick = () => answerHi5(true); $('#askNo').onclick = () => answerHi5(false);
   $('#photoBtn').onclick = () => { shutter(); S.wantPhoto = true; };
   $('#photoClose').onclick = () => { $('#photo').hidden = true; };
   $('#seasonBtn').onclick = () => { closeMenus(); setSeason(S.season ? 0 : 1, true); };
-  $('#timeBtn').onclick = () => { closeMenus(); setDusk(S.dusk ? 0 : 1); toast(S.dusk ? '해가 능선 너머로 기웁니다' : '다시 맑은 낮이에요'); };
+  $('#timeBtn').onclick = () => { closeMenus(); setDusk(S.dusk ? 0 : 1); toast(S.dusk ? i18n('해가 능선 너머로 기웁니다') : i18n('다시 맑은 낮이에요')); };
   for (const id of ['greet', 'scene']) $(`#${id}Btn`).onclick = e => { e.stopPropagation(); const m = $(`#${id}Menu`), open = m.hidden; closeMenus(); $('#chatBar').hidden = true; m.hidden = !open; $(`#${id}Btn`).setAttribute('aria-expanded', open ? 'true' : 'false'); };
   document.querySelectorAll('#greetMenu [data-greet]').forEach(b => b.onclick = () => greet(b.dataset.greet));
   // 말하기: 말풍선 채팅
   const openChat = open => {
-    const bar = $('#chatBar'); closeMenus(); bar.hidden = !open; $('#chatBtn').setAttribute('aria-expanded', open ? 'true' : 'false');
-    if (open) { $('#chatBtn').classList.remove('near'); if (!NET.on) addChatLog(null, '지금은 혼자 걷는 중이라 말풍선만 보여요'); setTimeout(() => $('#chatInput').focus(), 30); }
+    const bar = $('#chatBar'); closeMenus(); if (!open && inCircle(player)) { $('#chatInput').blur(); return; } bar.hidden = !open; $('#chatBtn').setAttribute('aria-expanded', open ? 'true' : 'false');
+    if (open) { $('#chatBtn').classList.remove('near'); if (!NET.on) toast(i18n('지금은 혼자 걷는 중이라 말풍선만 보여요')); else if (!inCircle(player)) toast(i18n('가까이 있는 사람에게만 말풍선으로 보여요')); setTimeout(() => $('#chatInput').focus(), 30); }
     else $('#chatInput').blur();
   };
   $('#chatBtn').onclick = e => { e.stopPropagation(); openChat($('#chatBar').hidden); };
@@ -3179,20 +3948,20 @@ function bindUI() {
     vv.addEventListener('resize', place); vv.addEventListener('scroll', place);
   }
   // 숨기기
-  $('#muteYes').onclick = () => { const p = muteTarget; if (p) { MUTED.add(p.id); store.set('muted', [...MUTED].slice(-200)); p.hidden = true; dropBubble(p); updateCount(); toast(`${p.nick}님을 내 화면에서 숨겼어요`); $('#unmuteBtn').hidden = false; } $('#muteMenu').hidden = true; };
+  $('#muteYes').onclick = () => { const p = muteTarget; if (p) { MUTED.add(p.id); store.set('muted', [...MUTED].slice(-200)); p.hidden = true; dropBubble(p); updateCount(); toast(i18n('{0}님을 내 화면에서 숨겼어요', p.nick)); $('#unmuteBtn').hidden = false; } $('#muteMenu').hidden = true; };
   $('#muteNo').onclick = () => { $('#muteMenu').hidden = true; };
   $('#unmuteBtn').hidden = MUTED.size === 0;
-  $('#unmuteBtn').onclick = () => { MUTED.clear(); store.set('muted', []); for (const p of NET.peers.values()) p.hidden = false; updateCount(); $('#unmuteBtn').hidden = true; toast('숨긴 사람을 다시 보여요'); };
+  $('#unmuteBtn').onclick = () => { MUTED.clear(); store.set('muted', []); for (const p of NET.peers.values()) p.hidden = false; updateCount(); $('#unmuteBtn').hidden = true; toast(i18n('숨긴 사람을 다시 보여요')); };
   // 말풍선 보기, 친구 방
   $('#bubbleChk').checked = S.bubbles; $('#bubbleChk').onchange = e => { S.bubbles = e.target.checked; store.set('bubbles', S.bubbles); };
   $('#friendBtn').onclick = () => {
     const code = Math.random().toString(36).slice(2, 8), tag = (IS_PARK ? 'park-' : '') + 'room-' + code, url = location.href.split('#')[0] + '#' + tag;
-    const done = ok => { addChatLog(null, ok ? '친구 방 링크를 복사했어요. 같이 걸을 사람에게 보내 주세요' : `친구 방 링크: ${url}`); };
+    const done = ok => { addChatLog(null, ok ? i18n('친구 방 링크를 복사했어요. 같이 걸을 사람에게 보내 주세요') : i18n('친구 방 링크: {0}', url)); };
     try { navigator.clipboard.writeText(url).then(() => done(true), () => done(false)); } catch (e) { done(false); }
     location.hash = tag;
-    toast('친구 방으로 옮겼어요. 링크를 받은 사람만 이 방에 들어와요');
+    toast(i18n('친구 방으로 옮겼어요. 링크를 받은 사람만 이 방에 들어와요'));
   };
-  $('#publicBtn').onclick = () => { history.replaceState(null, '', location.pathname + location.search + (IS_PARK ? '#park' : '')); netStop(); netStart(); toast('모두의 방으로 돌아왔어요'); };
+  $('#publicBtn').onclick = () => { history.replaceState(null, '', location.pathname + location.search + (IS_PARK ? '#park' : '')); netStop(); netStart(); toast(i18n('모두의 방으로 돌아왔어요')); };
   $('#soundBtn').onclick = () => { audioInit(); setMute(!S.mute); };
   $('#courseBtn').onclick = e => { e.stopPropagation(); const m = $('#courseMenu'); const open = m.hidden; closeMenus(); m.hidden = !open; $('#courseBtn').setAttribute('aria-expanded', open ? 'true' : 'false'); };
   $('#settingsBtn').onclick = e => { e.stopPropagation(); const m = $('#settings'); const open = m.hidden; closeMenus(); m.hidden = !open; $('#settingsBtn').setAttribute('aria-expanded', open ? 'true' : 'false'); };
@@ -3201,7 +3970,7 @@ function bindUI() {
   $('#pickMountain').onclick = () => { if (IS_PARK) switchCourse('mountain', false); };
   $('#pickPark').onclick = () => { if (!IS_PARK) switchCourse('park', false); };
   // 명상 목소리, 야영
-  $('#voiceChk').checked = S.voice; $('#voiceChk').onchange = e => { S.voice = e.target.checked; store.set('voice', S.voice); if (!S.voice) hush(); };
+  document.querySelectorAll('#langSeg button').forEach(b => { b.setAttribute('aria-pressed', b.dataset.l === LANG ? 'true' : 'false'); b.onclick = () => { if (b.dataset.l === LANG) return; store.set('lang', b.dataset.l); location.reload(); }; });
   document.querySelectorAll('#campTimer button').forEach(b => b.onclick = () => { S.campMin = +b.dataset.m; document.querySelectorAll('#campTimer button').forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false')); });
   document.querySelectorAll('#campSnd button').forEach(b => b.onclick = () => { S.sleepSnd = b.dataset.k; store.set('sleepSnd', S.sleepSnd); document.querySelectorAll('#campSnd button').forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false')); });
   $('#sleepSndBtn').onclick = e => {   // 자는 중에도 소리를 바꿀 수 있게
@@ -3209,7 +3978,8 @@ function bindUI() {
     if (S.camp && S.camp.phase === 'sleep') startSleepSound(S.sleepSnd);
     updateSleepUI(); sleepIdleSoon();
   };
-  $('#campGo').onclick = startCamp; $('#campCancel').onclick = () => { $('#campCard').hidden = true; };
+  $('#campGo').onclick = startCamp;
+  $('#cafeCancel').onclick = () => { $('#cafeCard').hidden = true; S.goCafe = false; }; $('#campCancel').onclick = () => { $('#campCard').hidden = true; };
   $('#wakeBtn').onclick = e => { e.stopPropagation(); wakeCamp(); };
   $('#sleepUI').addEventListener('pointerdown', e => { if (e.target.id !== 'wakeBtn') sleepIdleSoon(); });
   const amb = $('#ambVol'), sfx = $('#sfxVol');
@@ -3233,7 +4003,7 @@ function bindUI() {
     warpToStart(); cam.pitch = 0.3; cam.dist = 9;
     audioInit(); setMute(S.mute);
     setTimeout(() => { $('#hint').style.opacity = 0; }, 9000);
-    toast(IS_PARK ? `${S.nick}님, 센트럴파크에 오신 걸 환영해요` : `${S.nick}님, 솔바람산에 오신 걸 환영해요`);
+    toast(i18n('{0}님, {1}에 오신 걸 환영해요', S.nick, COURSE_NAME));
     netStart();
   };
   // summit card
@@ -3251,8 +4021,8 @@ function bindUI() {
     setTimeout(() => { shutter(); S.wantPhoto = true; }, 1200);
   };
   $('#sumStay').onclick = () => { $('#summit').hidden = true; };
-  $('#sumDown').onclick = () => { $('#summit').hidden = true; S.autoDir = -1; S.auto = true; updateWalkBtn(); toast(IS_PARK ? '입구까지 천천히 걸어가요' : '입구까지 천천히 내려가요'); };
-  $('#sumWarp').onclick = () => { $('#summit').hidden = true; warpToStart(); toast(IS_PARK ? '5번가 입구로 돌아왔어요' : '산길 입구로 돌아왔어요'); };
+  $('#sumDown').onclick = () => { $('#summit').hidden = true; S.autoDir = -1; S.auto = true; updateWalkBtn(); toast(IS_PARK ? i18n('입구까지 천천히 걸어가요') : i18n('입구까지 천천히 내려가요')); };
+  $('#sumWarp').onclick = () => { $('#summit').hidden = true; warpToStart(); toast(IS_PARK ? i18n('5번가 입구로 돌아왔어요') : i18n('산길 입구로 돌아왔어요')); };
 }
 
 /* 코스 바꾸기: 세계를 새로 그려야 해서 페이지를 다시 연다 */
@@ -3262,31 +4032,33 @@ function switchCourse(c, auto) {
   location.reload();
 }
 function courseTexts() {
-  document.title = IS_PARK ? '산길 · 센트럴파크' : '산길';
-  $('#gl').setAttribute('aria-label', IS_PARK ? '센트럴파크 3D 산책길' : '솔바람산 3D 산길');
-  $('#cmA').textContent = IS_PARK ? '센트럴파크 가을 산책' : '솔바람산 단풍길'; $('#cmW').textContent = IS_PARK ? '센트럴파크 겨울 산책' : '솔바람산 설산길';
-  $('#cmOther').textContent = IS_PARK ? '솔바람산 산행' : '센트럴파크 산책';
+  document.title = IS_PARK ? i18n('산길 · 센트럴파크') : i18n('산길');
+  $('#gl').setAttribute('aria-label', IS_PARK ? i18n('센트럴파크 3D 산책길') : i18n('솔바람산 3D 산길'));
+  $('#cmA').textContent = IS_PARK ? i18n('센트럴파크 가을 산책') : i18n('솔바람산 단풍길'); $('#cmW').textContent = IS_PARK ? i18n('센트럴파크 겨울 산책') : i18n('솔바람산 설산길');
+  $('#cmOther').textContent = IS_PARK ? i18n('솔바람산 산행') : i18n('센트럴파크 산책');
   $('#courseBtn').firstChild.textContent = COURSE_NAME + ' ';
   $('#pickMountain').setAttribute('aria-pressed', IS_PARK ? 'false' : 'true'); $('#pickPark').setAttribute('aria-pressed', IS_PARK ? 'true' : 'false');
   if (!IS_PARK) return;
-  $('#startEyebrow').textContent = '온라인 산책 · 뉴욕 센트럴파크'; $('#startSub').textContent = 'Central Park';
-  $('#startDesc').textContent = '59번가 5번가 입구에서 출발해 갭스토 브리지, 느릅나무 터널 더 몰, 베데스다 분수와 보우 브리지, 벨베데레 성을 지나 저수지까지 걷는 길입니다. 벤치 옆에서 5분 호흡 명상을 하거나, 잔디밭에 텐트를 치고 도시의 밤 소리를 들으며 잠들 수도 있어요.';
-  $('#paB').textContent = '가을 산책'; $('#paS').textContent = '노란 느릅나무, 낙엽 길';
-  $('#pwB').textContent = '겨울 산책'; $('#pwS').textContent = '눈 덮인 잔디밭, 얼어붙은 호수';
-  $('#enterBtn').textContent = '산책 시작';
-  $('#hint').textContent = '바닥 클릭으로 이동 · 드래그로 둘러보기 · 휠로 확대/축소';
-  $('#photoImg').alt = '센트럴파크에서 찍은 사진';
+  $('#startEyebrow').textContent = i18n('온라인 산책 · 뉴욕 센트럴파크'); $('#startSub').textContent = 'Central Park';
+  $('#startDesc').textContent = i18n('59번가 5번가 입구에서 출발해 갭스토 브리지, 느릅나무 터널 더 몰, 베데스다 분수와 보우 브리지, 벨베데레 성을 지나 저수지까지 걷는 길입니다. 벤치 옆에서 5분 호흡 명상을 하고, 호숫가 카페에서 커피 한 잔, 잔디밭에 텐트를 치고 도시의 밤 소리를 들으며 잠들 수도 있어요.');
+  $('#paB').textContent = i18n('가을 산책'); $('#paS').textContent = i18n('노란 느릅나무, 낙엽 길');
+  $('#pwB').textContent = i18n('겨울 산책'); $('#pwS').textContent = i18n('눈 덮인 잔디밭, 얼어붙은 호수');
+  $('#enterBtn').textContent = i18n('산책 시작');
+  $('#hint').textContent = i18n('바닥 클릭으로 이동 · 드래그로 둘러보기 · 휠로 확대/축소');
+  $('#photoImg').alt = i18n('센트럴파크에서 찍은 사진');
 }
 
 /* ---------------- boot ---------------- */
 function boot() {
-  try { buildWorld(); } catch (err) { $('#loading').textContent = '산길을 그리지 못했어요: ' + err.message; console.error(err); return; }
-  initState(); initLabels(); buildProfiles(); bindUI(); courseTexts();
+  try { buildWorld(); } catch (err) { $('#loading').textContent = i18n('산길을 그리지 못했어요: ') + err.message; console.error(err); return; }
+  translateDom();
+  if (coarse) $('#photoHint').textContent = i18n('사진을 길게 눌러 저장하세요.');
+  initState(); addCafeCp(); initLabels(); buildProfiles(); bindUI(); courseTexts();
   setSeason(S.season); setMute(S.mute); updateWalkBtn();
   $('#start').hidden = false; $('#enterBtn').disabled = false;
   if (store.get('autoEnter', false)) { store.set('autoEnter', false); $('#enterBtn').focus(); }
   const ld = $('#loading'); ld.style.opacity = 0; setTimeout(() => { ld.hidden = true; }, 600);
-  window.__sangil = { S, player, TN, getH, CPS, startAct, cam, NET, NPCS, greet, sendChat, W, netState, startCamp, wakeCamp, openCampCard, MED, TX, TZ, IS_PARK };
+  window.__sangil = { CIRCLE, sitCircle, goCircle, sendChat, inCircle, S, player, TN, getH, CPS, startAct, cam, NET, NPCS, greet, sendChat, W, netState, startCamp, wakeCamp, openCampCard, goCafe, startCafe, DRINKS, CAFE, H5, answerHi5, showHi5Ask, MED, TX, TZ, IS_PARK };
   requestAnimationFrame(t => { lastNow = t; frame(t); });
 }
 setTimeout(boot, 30);
