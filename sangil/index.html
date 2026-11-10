@@ -6,7 +6,7 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="game.mybumo.com">
 <meta property="og:title" content="산길">
-<meta property="og:description" content="솔바람산 단풍길과 설산길을 천천히 걷는 온라인 산">
+<meta property="og:description" content="솔바람산 단풍길과 설산길, 뉴욕 센트럴파크를 천천히 걷는 온라인 산책. 5분 호흡 명상과 별 아래 야영까지">
 <meta property="og:url" content="https://game.mybumo.com/sangil/">
 <meta property="og:image" content="https://game.mybumo.com/sangil/og.jpg">
 <meta property="og:image:width" content="1200">
@@ -173,6 +173,33 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{ou
 #breath .txt b{font-family:var(--font-display);font-size:20px}
 #breath .txt small{font-size:13px;color:var(--on-glass-soft)}
 #breath button{pointer-events:auto;margin-top:10px;padding:8px 16px;border-radius:999px;font-size:13px}
+/* 명상 안내 */
+#medGuide{position:fixed;left:50%;top:30%;transform:translate(-50%,-50%);z-index:18;pointer-events:none;display:grid;justify-items:center;gap:16px;width:min(440px,calc(100vw - 40px));text-align:center}
+.mring{width:136px;height:136px;border-radius:50%;border:1.5px solid rgba(255,255,255,.5);display:grid;place-items:center;position:relative}
+.mcore{position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle,rgba(255,232,180,.42),rgba(255,232,180,.07) 70%);transform:scale(.45);will-change:transform}
+.mtxt{position:relative;display:grid;gap:1px;text-shadow:0 1px 4px rgba(0,0,0,.55)}
+.mtxt b{font-family:var(--font-display);font-size:18px;font-weight:700}
+.mtxt span{font-size:13px;color:var(--on-glass-soft);font-variant-numeric:tabular-nums;min-height:1.2em}
+#medLine{margin:0;font-family:var(--font-display);font-size:17px;line-height:1.65;color:#fffaf0;text-shadow:0 1px 8px rgba(0,0,0,.7);min-height:3.3em;transition:opacity .9s;text-wrap:balance}
+#medLine.fade{opacity:0}
+/* 야영 */
+.chips{display:flex;gap:6px}
+.chips button{flex:1;padding:10px 0;border:1.5px solid var(--paper-line);border-radius:12px;background:#fbf8f1;color:var(--ink);font-size:14px}
+.chips button[aria-pressed="true"]{border-color:var(--pine);background:#e9f0ea;font-weight:700}
+.lab{font-size:13px;color:var(--ink-soft)}
+.pcheck{display:flex;gap:10px;align-items:flex-start;font-size:14.5px;color:var(--ink);cursor:pointer}
+.pcheck input{accent-color:var(--pine);width:20px;height:20px;flex:none;margin:1px 0 0}
+.pcheck small{display:block;color:var(--ink-soft);font-size:12px;margin-top:2px;line-height:1.5}
+#sleepUI{position:fixed;inset:0;z-index:35}
+#hud > *{transition:opacity 2.5s}
+body.sleeping #hud > *:not(#toast){opacity:0;pointer-events:none}
+body.calm #trailCard,body.calm #hint{opacity:0;pointer-events:none}
+#sleepVeil{position:absolute;inset:0;background:#020306;opacity:0;transition:opacity 40s linear}
+#sleepBox{position:absolute;left:50%;bottom:calc(44px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);display:grid;justify-items:center;gap:8px;text-align:center;color:rgba(247,242,232,.82);transition:opacity 1.2s;width:min(360px,calc(100vw - 32px))}
+#sleepBox b{font-family:var(--font-display);font-size:18px;font-weight:400;letter-spacing:.04em}
+#sleepBox small{font-size:13px;color:rgba(247,242,232,.6);font-variant-numeric:tabular-nums}
+#sleepBox button{margin-top:6px;padding:10px 22px;border-radius:999px;font-size:14px}
+#sleepUI.idle #sleepBox{opacity:0}
 #photoImg{width:100%;border-radius:12px;display:block;-webkit-user-select:auto;user-select:auto;-webkit-touch-callout:default}
 #loading{position:fixed;inset:0;display:grid;place-items:center;z-index:50;background:var(--ground);font-family:var(--font-display);font-size:18px;color:var(--on-glass);transition:opacity .6s}
 #nogl{position:fixed;inset:0;display:grid;place-items:center;z-index:60;background:var(--ground);padding:24px;text-align:center;line-height:1.7}
@@ -212,9 +239,9 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{ou
     <span id="peopleChip" title="같은 길을 걷는 사람"><i></i><span id="peopleTxt">혼자 걷는 중</span></span>
   </div>
   <div id="courseMenu" class="menu glass" hidden>
-    <button data-course="autumn"><span>솔바람산 단풍길</span><span class="tag">가을</span></button>
-    <button data-course="winter"><span>솔바람산 설산길</span><span class="tag">겨울</span></button>
-    <button disabled><span>센트럴파크 산책</span><span class="tag">준비 중</span></button>
+    <button data-course="autumn"><span id="cmA">솔바람산 단풍길</span><span class="tag">가을</span></button>
+    <button data-course="winter"><span id="cmW">솔바람산 설산길</span><span class="tag">겨울</span></button>
+    <button id="switchCourse"><span id="cmOther">센트럴파크 산책</span><span class="tag">코스</span></button>
     <button disabled><span>벚꽃 둘레길</span><span class="tag">준비 중</span></button>
   </div>
   <div id="barR" class="bar glass">
@@ -232,13 +259,14 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{ou
     <div class="check"><label for="stepsChk">발소리</label><input id="stepsChk" type="checkbox" checked></div>
     <div class="row"><span>걷는 속도</span><div class="seg" id="speedSeg"><button data-s="0">천천히</button><button data-s="1" aria-pressed="true">보통</button><button data-s="2">빠르게</button></div></div>
     <div class="row"><span>화질</span><div class="seg" id="qualSeg"><button data-q="0">가볍게</button><button data-q="1" aria-pressed="true">선명하게</button></div></div>
+    <div class="check"><label for="voiceChk">명상 안내 목소리</label><input id="voiceChk" type="checkbox" checked></div>
     <div class="check"><label for="bubbleChk">다른 사람 말풍선 보기</label><input id="bubbleChk" type="checkbox" checked></div>
     <div class="row"><span id="roomInfo">모두와 함께 걷는 방</span><div class="seg"><button id="friendBtn">친구 방 링크 만들기</button><button id="publicBtn" hidden>모두의 방으로</button></div></div>
     <button class="linkbtn" id="unmuteBtn" hidden style="color:var(--on-glass);justify-self:start">숨긴 사람 다시 보기</button>
   </div>
   <div id="hint">바닥 클릭으로 이동 · 드래그로 둘러보기 · 휠로 확대/축소</div>
   <aside id="trailCard" class="glass" aria-live="polite">
-    <div class="alt"><span id="altVal">380</span><small>m</small></div>
+    <div class="alt"><span id="altVal">380</span><small id="altUnit">m</small></div>
     <div class="lbl" id="nextCp">다음 · 솔숲 정자</div>
     <svg id="miniProfile" viewBox="0 0 200 46" preserveAspectRatio="none" aria-hidden="true"></svg>
     <div class="stats"><span id="distVal">0.00 km</span><span id="timeVal">0분</span></div>
@@ -272,10 +300,35 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{ou
     <button data-act="meditate"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="5.5" r="2.2"/><path d="M12 8.5v5M7.5 12.5l4.5 1.5 4.5-1.5M4.5 18.5c2.2-2 4.6-2.6 7.5-2.6s5.3.6 7.5 2.6"/></svg><span>명상하기</span></button>
     <button data-act="snack"><svg class="ico" viewBox="0 0 24 24"><path d="M4.5 15.5 15 6l4.5 4.5L9 20z"/><path d="M8 12.5l3.5 3.5M10.5 10.2 14 13.7"/></svg><span>간식 먹기</span></button>
     <button data-act="water"><svg class="ico" viewBox="0 0 24 24"><path d="M10 3h4v2.5l1.6 2.2V20a1 1 0 0 1-1 1H9.4a1 1 0 0 1-1-1V7.7L10 5.5z"/><path d="M8.4 12.5h7.2"/></svg><span>물 마시기</span></button>
+    <button data-act="camp"><svg class="ico" viewBox="0 0 24 24"><path d="M3 20 12 5l9 15M12 5v15M9.5 20 12 15l2.5 5M2 20h20"/></svg><span>야영하기</span></button>
   </div>
   <div id="actPill" class="glass" hidden><div><b id="actTitle"></b><small id="actSub"></small></div><button id="actStop">일어나기</button></div>
   <div id="toast" class="glass" hidden></div>
 </div>
+
+<div id="medGuide" hidden>
+  <div class="mring"><div class="mcore" id="medCore"></div><div class="mtxt"><b id="medPhase">고요히</b><span id="medCount"></span></div></div>
+  <p id="medLine"></p>
+</div>
+
+<div id="sleepUI" hidden>
+  <div id="sleepVeil"></div>
+  <div id="sleepBox"><b id="sleepTitle">쉿, 잠드는 중</b><small id="sleepSub"></small><button id="wakeBtn" class="glass">깨어나기</button></div>
+</div>
+
+<section id="campCard" class="scrim" hidden>
+  <div class="card" role="dialog" aria-labelledby="campTitle">
+    <div class="eyebrow">야영 · 별 아래에서 잠들기</div>
+    <h2 class="title" id="campTitle"><b style="font-size:34px">오늘 밤은 여기서</b></h2>
+    <p id="campDesc"></p>
+    <div style="display:grid;gap:8px"><span class="lab">소리가 천천히 꺼지는 시간</span>
+      <div class="chips" id="campTimer"><button data-m="15">15분</button><button data-m="30" aria-pressed="true">30분</button><button data-m="60">1시간</button><button data-m="0">끄지 않기</button></div></div>
+    <label class="pcheck"><input type="checkbox" id="campFire" checked><span>모닥불 피우기<small>타닥타닥 불 소리와 따뜻한 불빛</small></span></label>
+    <label class="pcheck"><input type="checkbox" id="campAwake" checked><span>화면 켜 두기<small>휴대폰은 화면이 꺼지면 소리도 멈춰요. 켜 두면 화면이 아주 어둡게 바뀌고, 타이머가 끝나면 다시 꺼질 수 있게 풀어 둡니다.</small></span></label>
+    <button class="primary" id="campGo">텐트 치고 잠들기</button>
+    <button class="secondary" id="campCancel">다음에 할게요</button>
+  </div>
+</section>
 
 <div id="breath" hidden>
   <div class="ring" id="breathRing"></div>
@@ -284,16 +337,20 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{ou
 
 <section id="start" class="scrim" hidden>
   <div class="card" role="dialog" aria-labelledby="startTitle">
-    <div class="eyebrow">온라인 산행 · 솔바람산</div>
-    <h1 class="title" id="startTitle"><b>산길</b><span>山路</span></h1>
-    <p>로그인 없이 들어와 천천히 걷다 가는 산입니다. 단풍 든 능선이나 상고대 핀 겨울 숲을 고르고, 폭포 소리 들리는 정자에서 쉬고, 길에서 만난 사람과 목례나 하이파이브를 나눠 보세요.</p>
+    <div class="eyebrow" id="startEyebrow">온라인 산행 · 솔바람산</div>
+    <h1 class="title" id="startTitle"><b>산길</b><span id="startSub">山路</span></h1>
+    <div class="seasons" role="group" aria-label="코스 선택">
+      <button id="pickMountain" aria-pressed="true"><b>솔바람산</b><small>단풍 능선, 폭포, 정자</small></button>
+      <button id="pickPark" aria-pressed="false"><b>센트럴파크</b><small>뉴욕 한가운데 숲길</small></button>
+    </div>
+    <p id="startDesc">로그인 없이 들어와 천천히 걷다 가는 산입니다. 단풍 든 능선이나 상고대 핀 겨울 숲을 고르고, 폭포 소리 들리는 정자에서 쉬어 가세요. 5분 호흡 명상을 따라 하거나, 텐트를 치고 밤 산의 소리를 들으며 잠들 수도 있어요.</p>
     <div class="profile">
       <svg id="bigProfile" viewBox="0 0 400 120" aria-label="코스 고도 단면"></svg>
-      <div class="meta"><span id="courseLen">코스 3.4 km</span><span id="courseAlt">해발 380 → 1,080 m</span><span>쉼터 4곳</span></div>
+      <div class="meta"><span id="courseLen">코스 3.4 km</span><span id="courseAlt">해발 380 → 1,080 m</span><span id="courseStops">쉼터 4곳</span></div>
     </div>
     <div class="seasons" role="group" aria-label="계절 선택">
-      <button id="pickAutumn" aria-pressed="true"><b>가을 단풍길</b><small>붉은 단풍, 낙엽 밟는 소리</small></button>
-      <button id="pickWinter" class="w" aria-pressed="false"><b>겨울 설산길</b><small>눈 쌓인 능선, 상고대</small></button>
+      <button id="pickAutumn" aria-pressed="true"><b id="paB">가을 단풍길</b><small id="paS">붉은 단풍, 낙엽 밟는 소리</small></button>
+      <button id="pickWinter" class="w" aria-pressed="false"><b id="pwB">겨울 설산길</b><small id="pwS">눈 쌓인 능선, 상고대</small></button>
     </div>
     <div class="name"><span>오늘의 이름 <b id="nickOut">느긋한 구름</b></span><button class="linkbtn" id="nickBtn">다른 이름</button></div>
     <button class="primary" id="enterBtn" disabled>입산하기</button>
@@ -303,12 +360,12 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{ou
 
 <section id="summit" class="scrim" hidden>
   <div class="card" role="dialog" aria-labelledby="sumTitle">
-    <div class="eyebrow">정상에 도착했어요</div>
-    <h2 class="title" id="sumTitle"><b style="font-size:40px">솔바람산</b><span id="sumAlt">1,080 m</span></h2>
+    <div class="eyebrow" id="sumEyebrow">정상에 도착했어요</div>
+    <h2 class="title" id="sumTitle"><b style="font-size:40px" id="sumName">솔바람산</b><span id="sumAlt">1,080 m</span></h2>
     <div class="statgrid">
       <div><b id="sumDist">0.0</b><small>걸은 거리 km</small></div>
       <div><b id="sumTime">0</b><small>산행 시간 분</small></div>
-      <div><b id="sumGain">0</b><small>오른 높이 m</small></div>
+      <div><b id="sumGain">0</b><small id="sumGainLbl">오른 높이 m</small></div>
     </div>
     <button class="primary" id="sumPhoto">정상 인증샷 찍기</button>
     <div class="btnrow"><button class="secondary" id="sumDown">걸어서 내려가기</button><button class="secondary" id="sumStay">정상에 머물기</button></div>
@@ -348,6 +405,13 @@ const rr = (a, b) => a + (b - a) * R();
 const store = { get(k, d) { try { const v = localStorage.getItem('sangil.' + k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } }, set(k, v) { try { localStorage.setItem('sangil.' + k, JSON.stringify(v)); } catch (e) {} } };
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const coarse = matchMedia('(pointer: coarse)').matches;
+/* 코스: 솔바람산(mountain) 또는 센트럴파크(park). 주소 끝 #park 로 바로 열 수 있다 */
+const COURSE = /^#park/i.test(location.hash) ? 'park' : /^#(mountain|room-)/i.test(location.hash) ? 'mountain' : (store.get('course', 'mountain') === 'park' ? 'park' : 'mountain');
+const IS_PARK = COURSE === 'park';
+store.set('course', COURSE);
+const COURSE_NAME = IS_PARK ? '센트럴파크' : '솔바람산';
+const CHANNEL_KEY = IS_PARK ? 'centralpark' : 'solbaram';
+const NPC_TAG = IS_PARK ? '산책객' : '산객';
 
 /* ---------------- matrices (column-major) ---------------- */
 const M = {
@@ -414,7 +478,7 @@ const WATER = PONDRIM - 1.0;
 /* 구름폭포: a rock knoll on the far side of the pond; the fall drops off its pond-facing lip */
 const CLIFF = { x: 85, z: -69.5, r: 6.5, h: 14 };
 const FALL_DIR = (() => { const dx = POND.x - CLIFF.x, dz = POND.z - CLIFF.z, l = Math.hypot(dx, dz); return [dx / l, dz / l]; })();
-function rawH(x, z) {
+function mountainH(x, z) {
   let h = baseH(x, z);
   const d = Math.hypot(x - POND.x, z - POND.z);
   if (d < POND.r + 10) {
@@ -426,8 +490,53 @@ function rawH(x, z) {
   return h;
 }
 
+/* ---------- 센트럴파크: 59번가(남쪽, z=-260)부터 110번가(북쪽, z=+260), 서쪽 센트럴파크 웨스트(x=-55), 동쪽 5번가(x=+55) ---------- */
+const PARK = { hw: 55, hl: 260 };
+const PARK_WL = 1.0;
+const PARK_WATERS = [
+  { name: '더 폰드', x: 24, z: -242, rx: 17, rz: 9.5 },
+  { name: '더 레이크', x: -8, z: -98, rx: 26, rz: 12 },
+  { name: '더 레이크', x: -22, z: -78, rx: 13, rz: 13 },
+  { name: '터틀 폰드', x: 6, z: -27, rx: 14, rz: 5 },
+  { name: '저수지', x: 0, z: 66, rx: 42, rz: 47 },
+  { name: '할렘 미어', x: 26, z: 236, rx: 20, rz: 12 }
+];
+const PARK_ROCKS = [{ x: -4, z: -40, r: 8, h: 6 }, { x: -20, z: -205, r: 6, h: 3.5 }, { x: 32, z: -172, r: 5, h: 2.5 }, { x: -32, z: -126, r: 6, h: 3 },
+  { x: 30, z: -76, r: 5, h: 3 }, { x: -36, z: -20, r: 5, h: 2.5 }, { x: 22, z: 152, r: 6, h: 3.5 }, { x: -30, z: 182, r: 7, h: 4 }, { x: 10, z: 204, r: 5, h: 3 }];
+const LAWNS = IS_PARK ? [{ x: -24, z: -168, rx: 20, rz: 24 }, { x: 0, z: -2, rx: 24, rz: 22 }, { x: -28, z: 142, rx: 16, rz: 30 }] : [];
+const BRIDGES = IS_PARK ? [
+  { name: '갭스토 브리지', x: 30, z: -242, yaw: 0, len: 25, w: 4.2, base: 2.15, rise: 1.5, stone: true },
+  { name: '보우 브리지', x: -2, z: -98, yaw: 0, len: 33, w: 3.6, base: 2.15, rise: 1.0, stone: false }
+] : [];
+const FOUNTAIN = { x: 8, z: -113, r: 4.5 };
+const CASTLE = { x: -4, z: -40 };
+const WATERS = IS_PARK ? PARK_WATERS.map(w => Object.assign({ level: PARK_WL }, w)) : [{ name: '연못', x: POND.x, z: POND.z, rx: POND.r, rz: POND.r, level: WATER }];
+const waterE = (w, x, z) => Math.hypot((x - w.x) / w.rx, (z - w.z) / w.rz);
+function inWater(x, z, k = 1) { for (const w of WATERS) if (waterE(w, x, z) < k) return w; return null; }
+function parkH(x, z) {
+  const ax = Math.abs(x), az = Math.abs(z);
+  if (ax > PARK.hw + 2 || az > PARK.hl + 2) return 0.5;
+  let g = 2.0 + 1.3 * fbm(x * 0.025 + 11, z * 0.025 - 4, 3) + 0.4 * fbm(x * 0.09, z * 0.09, 2);
+  for (const r of PARK_ROCKS) { const d = Math.hypot(x - r.x, z - r.z); if (d < r.r * 1.6) g += r.h * smooth(r.r * 1.5, r.r * 0.35, d) * (0.85 + 0.3 * (fbm(x * 0.4, z * 0.4, 2) * 0.5 + 0.5)); }
+  for (const w of PARK_WATERS) { const e = waterE(w, x, z); if (e < 1.5) g = lerp(PARK_WL - 1.8, g, smooth(0.86, 1.3, e)); }
+  const edge = Math.min(smooth(PARK.hw + 1, PARK.hw - 1.5, ax), smooth(PARK.hl + 1, PARK.hl - 1.5, az));
+  return lerp(0.5, g, edge);
+}
+const rawH = IS_PARK ? parkH : mountainH;
+function bridgeFloor(x, z) {
+  let best = null;
+  for (const b of BRIDGES) {
+    const dx = x - b.x, dz = z - b.z, c = Math.cos(b.yaw), s = Math.sin(b.yaw);
+    const lx = c * dx - s * dz, lz = s * dx + c * dz;
+    if (Math.abs(lx) < b.w / 2 && Math.abs(lz) < b.len / 2) { const y = b.base + b.rise * Math.sin(Math.PI * (lz / b.len + 0.5)); if (best === null || y > best) best = y; }
+  }
+  return best;
+}
+
 /* trail: catmull-rom through control points, resampled at 1 unit */
-const CP = [[-8,-182],[4,-158],[-14,-136],[6,-116],[30,-100],[46,-80],[40,-58],[18,-44],[-6,-30],[-26,-12],[-20,8],[2,18],[26,22],[42,38],[26,52],[30,70]];
+const CP = IS_PARK
+  ? [[41,-257],[36,-256],[31,-255],[30,-253],[30,-231],[26,-223],[16,-210],[9,-196],[8,-186],[8,-160],[8,-132],[8,-124],[2,-118],[-2,-116],[-2,-114],[-2,-82],[2,-74],[8,-66],[-2,-56],[-1,-49],[8,-41],[24,-37],[32,-22],[33,-6],[30,8],[22,14],[15.6,18.5],[32.2,30.3],[42.8,48.7],[45.5,66],[42.8,83.3],[32.2,101.7],[15.6,113.5],[6,116]]
+  : [[-8,-182],[4,-158],[-14,-136],[6,-116],[30,-100],[46,-80],[40,-58],[18,-44],[-6,-30],[-26,-12],[-20,8],[2,18],[26,22],[42,38],[26,52],[30,70]];
 let TX, TZ, TH, TN, TL;
 const tb = { minX: 1e9, maxX: -1e9, minZ: 1e9, maxZ: -1e9 };
 (function buildTrail() {
@@ -447,7 +556,7 @@ const tb = { minX: 1e9, maxX: -1e9, minZ: 1e9, maxZ: -1e9 };
     while (k < cum.length - 2 && cum[k+1] < s) k++;
     const t = (s - cum[k]) / ((cum[k+1] - cum[k]) || 1);
     TX[i] = lerp(raw[k][0], raw[k+1][0], t); TZ[i] = lerp(raw[k][1], raw[k+1][1], t);
-    TH[i] = rawH(TX[i], TZ[i]);
+    TH[i] = IS_PARK ? Math.max(rawH(TX[i], TZ[i]), 2.0) : rawH(TX[i], TZ[i]);
     tb.minX = Math.min(tb.minX, TX[i]); tb.maxX = Math.max(tb.maxX, TX[i]); tb.minZ = Math.min(tb.minZ, TZ[i]); tb.maxZ = Math.max(tb.maxZ, TZ[i]);
   }
   for (let pass = 0; pass < 7; pass++) {
@@ -469,7 +578,12 @@ function trailDist(x, z) {
 const nearIdx = (x, z) => nearestTrail(x, z)[1];
 const PV = { x: 54, z: -88 };           // 솔숲 정자 (by the pond)
 const DK = { x: -37, z: -12 };          // 구름 전망대
-const pads = [
+const pads = IS_PARK ? [
+  { x: TX[1], z: TZ[1], r: 5, h: TH[1] },
+  { x: 6, z: -118, r: 8.5, h: TH[nearIdx(6, -118)] },
+  { x: CASTLE.x, z: CASTLE.z, r: 4.5, h: parkH(CASTLE.x, CASTLE.z) },
+  { x: TX[TN-1], z: TZ[TN-1], r: 5, h: TH[TN-1] }
+] : [
   { x: TX[3], z: TZ[3], r: 5, h: TH[3] },
   { x: PV.x, z: PV.z, r: 6.5, h: TH[nearIdx(PV.x, PV.z)] + 0.15 },
   { x: DK.x, z: DK.z, r: 6, h: TH[nearIdx(DK.x, DK.z)] + 0.1 },
@@ -478,28 +592,55 @@ const pads = [
 const PV_YAW = Math.atan2(POND.x - PV.x, POND.z - PV.z);
 const DK_YAW = (() => { const i = nearIdx(DK.x, DK.z); return Math.atan2(DK.x - TX[i], DK.z - TZ[i]); })();
 function propFloor(x, z) {
+  if (IS_PARK) return 0;
   const inBox = (cx, cz, yaw, hw, hd) => { const dx = x - cx, dz = z - cz, c = Math.cos(yaw), s = Math.sin(yaw); const lx = c * dx - s * dz, lz = s * dx + c * dz; return Math.abs(lx) < hw && Math.abs(lz) < hd; };
   if (inBox(PV.x, PV.z, PV_YAW, 3.0, 3.0)) return 0.77;
   if (inBox(DK.x, DK.z, DK_YAW, 3.75, 2.6)) return 0.15;
   return 0;
 }
-const groundY = (x, z) => getH(x, z) + propFloor(x, z);
+const groundY = IS_PARK ? (x, z) => { const b = bridgeFloor(x, z); const h = getH(x, z); return b === null ? h : Math.max(h, b); } : (x, z) => getH(x, z) + propFloor(x, z);
 const SUMMIT_H = TH[TN - 1];
 const SUMMIT_ARRIVE = (() => { const dx = TX[TN-1] - TX[TN-10], dz = TZ[TN-1] - TZ[TN-10], l = Math.hypot(dx, dz); return [dx / l, 0, dz / l]; })();
+const streetAt = z => Math.round(59 + clamp((z + 260) / 520, 0, 1) * 51);
 const altOf = y => Math.round(380 + (y - TH[0]) * UNIT_M);
 const fmtAlt = y => altOf(y).toLocaleString('ko-KR');
+/* 위쪽 큰 숫자: 산은 해발 고도, 공원은 지금 걷는 곳의 가로(번가) */
+const hudBig = () => IS_PARK ? [String(streetAt(player.z)), '번가'] : [fmtAlt(player.y), 'm'];
 
 /* ---------------- terrain grid ---------------- */
 const HG = new Float32Array(NV * NV);
 const TRAILAMT = new Float32Array(NV * NV);
+/* 공원 안의 다른 길: 저수지 러닝 트랙, 그레이트 론 둘레, 이스트·웨스트 드라이브 */
+function parkPaths() {
+  const ring = (cx, cz, rx, rz, w) => { const pts = []; const n = Math.ceil(TAU * Math.max(rx, rz)); for (let i = 0; i <= n; i++) { const a = i / n * TAU; pts.push([cx + Math.cos(a) * rx, cz + Math.sin(a) * rz]); } return { pts, w }; };
+  const drive = side => { const pts = []; for (let z = -246; z <= 246; z += 1) pts.push([side * (44 + 3 * Math.sin(z * 0.018 + side)), z]); return { pts, w: 3.4 }; };
+  const loopS = { pts: Array.from({ length: 90 }, (_, i) => { const a = Math.PI + i / 89 * Math.PI; return [Math.cos(a) * 45, -246 + Math.sin(a) * 12]; }), w: 3.4 };
+  const loopN = { pts: Array.from({ length: 90 }, (_, i) => { const a = i / 89 * Math.PI; return [Math.cos(a) * 45, 246 + Math.sin(a) * 10]; }), w: 3.4 };
+  return [ring(0, 66, 45.5, 50.5, 2.4), ring(0, -2, 27, 25, 2.0), drive(1), drive(-1), loopS, loopN];
+}
+let PP_GRID = null;
+function parkPathNear(x, z) {   // 다른 길 위에는 나무를 심지 않는다
+  if (!IS_PARK) return false;
+  if (!PP_GRID) { PP_GRID = new Set(); for (const p of parkPaths()) for (const [px, pz] of p.pts) for (let a = -1; a <= 1; a++) for (let b = -1; b <= 1; b++) PP_GRID.add(Math.round(px / 3 + a) + ',' + Math.round(pz / 3 + b)); }
+  return PP_GRID.has(Math.round(x / 3) + ',' + Math.round(z / 3));
+}
 function buildHeights() {
   for (let j = 0; j < NV; j++) for (let i = 0; i < NV; i++) {
     const x = -WORLD + i * CELL, z = -WORLD + j * CELL;
     let h = rawH(x, z), tr = 0;
     const [d, k] = trailDist(x, z);
-    if (d < 9) { h = lerp(h, TH[k], 1 - smooth(1.8, 6.5, d)); tr = 1 - smooth(1.1, 2.7, d); }
+    if (d < 9 && !(IS_PARK && inWater(x, z, 1.05))) { h = lerp(h, TH[k], 1 - smooth(1.8, 6.5, d)); tr = 1 - smooth(1.1, 2.7, d); }
     for (const p of pads) { const dp = Math.hypot(x - p.x, z - p.z); if (dp < p.r + 5) h = lerp(h, p.h, 1 - smooth(p.r, p.r + 5, dp)); }
     HG[j * NV + i] = h; TRAILAMT[j * NV + i] = tr;
+  }
+  if (IS_PARK) for (const path of parkPaths()) for (const [px, pz] of path.pts) {   // 다른 길은 색만 칠한다
+    const ci = Math.round((px + WORLD) / CELL), cj = Math.round((pz + WORLD) / CELL), rad = Math.ceil(path.w / CELL) + 1;
+    for (let j = cj - rad; j <= cj + rad; j++) for (let i = ci - rad; i <= ci + rad; i++) {
+      if (i < 0 || j < 0 || i > N || j > N) continue;
+      const x = -WORLD + i * CELL, z = -WORLD + j * CELL, d = Math.hypot(x - px, z - pz);
+      if (inWater(x, z, 1.02)) continue;
+      const k = j * NV + i; TRAILAMT[k] = Math.max(TRAILAMT[k], 1 - smooth(path.w * 0.45, path.w, d));
+    }
   }
 }
 function getH(x, z) {
@@ -542,6 +683,7 @@ precision highp float;
 in vec3 vNor; in vec3 vCol; in vec3 vWorld; in float vExtra;
 uniform vec3 uSunDir, uSunCol, uSkyCol, uGndCol, uFogCol, uCam, uSnowCol;
 uniform float uFogD, uSnow, uSnowLine, uAlpha, uEmissive, uFlat, uSnowable, uFlow, uFlowSpeed, uTime;
+uniform vec4 uFire;
 out vec4 o;
 void main(){
   vec3 n = normalize(vNor);
@@ -560,6 +702,10 @@ void main(){
   float diff = max(dot(n, uSunDir), 0.0);
   vec3 hemi = mix(uGndCol, uSkyCol, n.y * 0.5 + 0.5);
   vec3 col = base * (hemi * 0.62 + uSunCol * diff * 0.78) + base * uEmissive;
+  if (uFire.w > 0.0) {   // 모닥불 불빛
+    vec3 L = uFire.xyz - vWorld; float dl = max(length(L), 0.001);
+    col += base * vec3(1.0, 0.52, 0.2) * uFire.w / (1.0 + dl * dl * 0.11) * (0.3 + 0.7 * max(dot(n, L / dl), 0.0));
+  }
   float d = length(vWorld - uCam);
   float f = 1.0 - exp(-pow(d * uFogD, 1.5));
   col = mix(col, uFogCol, clamp(f, 0.0, 1.0));
@@ -570,7 +716,7 @@ layout(location=0) in vec2 aPos; out vec2 vNdc;
 void main(){ vNdc = aPos; gl_Position = vec4(aPos, 0.0, 1.0); }`;
 const SKY_FS = `#version 300 es
 precision highp float;
-in vec2 vNdc; uniform mat4 uInvVP; uniform vec3 uCam, uZen, uHor, uSunDir, uGlow, uCloud; uniform float uTime;
+in vec2 vNdc; uniform mat4 uInvVP; uniform vec3 uCam, uZen, uHor, uSunDir, uGlow, uCloud; uniform float uTime, uNight;
 out vec4 o;
 float h21(vec2 p){ p = fract(p*vec2(123.34, 456.21)); p += dot(p, p+45.32); return fract(p.x*p.y); }
 float vn(vec2 p){ vec2 i = floor(p), f = fract(p); f = f*f*(3.0-2.0*f); return mix(mix(h21(i), h21(i+vec2(1,0)), f.x), mix(h21(i+vec2(0,1)), h21(i+vec2(1,1)), f.x), f.y); }
@@ -581,10 +727,17 @@ void main(){
   float h = dir.y;
   vec3 col = mix(uHor, uZen, pow(clamp(h, 0.0, 1.0), 0.55));
   float s = max(dot(dir, uSunDir), 0.0);
-  col += uGlow * (pow(s, 6.0) * 0.28 + pow(s, 60.0) * 0.35) + vec3(1.0, 0.97, 0.9) * smoothstep(0.9993, 0.9997, s);
+  col += uGlow * (pow(s, 6.0) * 0.28 + pow(s, 60.0) * 0.35) * (1.0 - 0.7 * uNight) + mix(vec3(1.0, 0.97, 0.9), vec3(0.95, 0.96, 1.0), uNight) * smoothstep(mix(0.9993, 0.99955, uNight), mix(0.9997, 0.99972, uNight), s);
   if (h > 0.0) {
     vec2 uv = dir.xz / (h + 0.12) * 1.1 + vec2(uTime * 0.006, uTime * 0.002);
-    float c = smoothstep(0.50, 0.82, fb(uv));
+    float c = smoothstep(0.50, 0.82, fb(uv)) * (1.0 - 0.55 * uNight);
+    if (uNight > 0.01) {   // 별
+      vec2 sp = vec2(atan(dir.z, dir.x) * 150.0, asin(clamp(h, 0.0, 1.0)) * 150.0);
+      vec2 cell = floor(sp); float r = h21(cell), r2 = h21(cell + 17.3);
+      float star = step(0.982, r) * smoothstep(0.42, 0.05, length(fract(sp) - vec2(0.5) - (vec2(r2, r) - 0.5) * 0.5));
+      float tw = 0.55 + 0.45 * sin(uTime * (1.5 + r2 * 2.0) + r * 60.0);
+      col += vec3(0.88, 0.92, 1.0) * star * tw * (0.5 + r2) * uNight * smoothstep(0.03, 0.25, h) * (1.0 - c);
+    }
     col = mix(col, uCloud, c * smoothstep(0.0, 0.22, h) * 0.85);
   }
   o = vec4(col, 1.0);
@@ -595,8 +748,8 @@ function program(vs, fs, names) {
   if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p));
   const u = {}; for (const n of names) u[n] = gl.getUniformLocation(p, n); return { p, u };
 }
-const P = program(VS, FS, ['uVP','uModel','uTime','uWind','uMode','uSunDir','uSunCol','uSkyCol','uGndCol','uFogCol','uCam','uSnowCol','uFogD','uSnow','uSnowLine','uAlpha','uEmissive','uFlat','uSnowable','uFlow','uFlowSpeed']);
-const PS = program(SKY_VS, SKY_FS, ['uInvVP','uCam','uZen','uHor','uSunDir','uGlow','uCloud','uTime']);
+const P = program(VS, FS, ['uVP','uModel','uTime','uWind','uMode','uSunDir','uSunCol','uSkyCol','uGndCol','uFogCol','uCam','uSnowCol','uFogD','uSnow','uSnowLine','uAlpha','uEmissive','uFlat','uSnowable','uFlow','uFlowSpeed','uFire']);
+const PS = program(SKY_VS, SKY_FS, ['uInvVP','uCam','uZen','uHor','uSunDir','uGlow','uCloud','uTime','uNight']);
 
 /* geometry */
 class Geo {
@@ -685,6 +838,135 @@ const COL = {
 };
 const AUTUMN_LEAF = [[0.80,0.20,0.11],[0.88,0.36,0.10],[0.93,0.55,0.12],[0.95,0.73,0.18],[0.70,0.27,0.12],[0.84,0.30,0.16],[0.56,0.52,0.20]];
 
+/* ---------------- 센트럴파크 소품: 다리, 분수, 성, 가로등, 벤치, 담장, 스카이라인 ---------------- */
+const PCOL = { lamp: [0.12, 0.14, 0.13], bench: [0.22, 0.32, 0.23], iron: [0.10, 0.11, 0.11], brick: [0.60, 0.37, 0.28], lime: [0.78, 0.74, 0.65], grey: [0.56, 0.57, 0.59],
+  glass: [0.44, 0.53, 0.60], cream: [0.90, 0.88, 0.80], stone: [0.60, 0.58, 0.53], roof: [0.26, 0.28, 0.31], tank: [0.46, 0.31, 0.21] };
+function localPlacer(x, z, yaw) { const c = Math.cos(yaw), s = Math.sin(yaw); return (lx, lz) => [x + c * lx + s * lz, z - s * lx + c * lz]; }
+function lampPost(g, lg, x, z) {
+  const y = groundY(x, z);
+  cyl(g, x, y, z, 0.17, 0.15, 0.4, 8, PCOL.lamp); cyl(g, x, y + 0.35, z, 0.07, 0.06, 3.05, 6, PCOL.lamp); cyl(g, x, y + 3.35, z, 0.2, 0.1, 0.14, 8, PCOL.lamp);
+  cyl(lg, x, y + 3.48, z, 0.17, 0.25, 0.55, 8, [1, 1, 1], 1); cone(lg, x, y + 4.02, z, 0.28, 0.3, 8, [0.12, 0.13, 0.12], 0);
+}
+function bench(g, x, z, yaw) {
+  const y = groundY(x, z), L = localPlacer(x, z, yaw);
+  const [sx, sz] = L(0, 0); box(g, sx, y + 0.46, sz, 1.9, 0.1, 0.5, PCOL.bench, 0, yaw);
+  const [bx, bz] = L(0, -0.25); box(g, bx, y + 0.82, bz, 1.9, 0.5, 0.08, PCOL.bench, 0, yaw);
+  for (const sd of [-0.8, 0.8]) { const [lx, lz] = L(sd, -0.02); box(g, lx, y + 0.23, lz, 0.08, 0.46, 0.5, PCOL.iron, 0, yaw); }
+}
+function waterTower(g, x, y, z) {
+  for (const [a, b] of [[-0.8, -0.8], [0.8, -0.8], [0.8, 0.8], [-0.8, 0.8]]) box(g, x + a, y + 0.8, z + b, 0.14, 1.6, 0.14, PCOL.iron, 0);
+  cyl(g, x, y + 1.6, z, 1.25, 1.2, 2.5, 10, PCOL.tank); cone(g, x, y + 4.1, z, 1.35, 1.0, 10, [0.22, 0.20, 0.19], 0);
+}
+function bridgeGeo(g, b) {
+  const seg = 14, P = localPlacer(b.x, b.z, b.yaw), yAt = t => b.base + b.rise * Math.sin(Math.PI * t);
+  const col = b.stone ? PCOL.stone : PCOL.cream;
+  for (let i = 0; i < seg; i++) {
+    const t0 = i / seg, t1 = (i + 1) / seg, z0 = (t0 - 0.5) * b.len, z1 = (t1 - 0.5) * b.len, y0 = yAt(t0), y1 = yAt(t1), ym = (y0 + y1) / 2;
+    const [mx, mz] = P(0, (z0 + z1) / 2), pitch = -Math.atan2(y1 - y0, z1 - z0), sl = Math.hypot(z1 - z0, y1 - y0) + 0.06;
+    box(g, mx, ym - (b.stone ? 0.7 : 0.22), mz, b.w, b.stone ? 1.4 : 0.44, sl, b.stone ? col : [0.56, 0.47, 0.37], 0, b.yaw, pitch);
+    for (const sd of [-1, 1]) {
+      const [px, pz] = P(sd * (b.w / 2 - 0.12), (z0 + z1) / 2);
+      if (b.stone) box(g, px, ym + 0.42, pz, 0.32, 0.84, sl, col, 0, b.yaw, pitch);
+      else {
+        box(g, px, ym + 0.98, pz, 0.12, 0.1, sl, col, 0, b.yaw, pitch); box(g, px, ym + 0.5, pz, 0.05, 0.05, sl, col, 0, b.yaw, pitch);
+        const [fx, fz] = P(sd * (b.w / 2 + 0.02), (z0 + z1) / 2); box(g, fx, ym - 0.62, fz, 0.07, 0.62, sl, col, 0, b.yaw, pitch);
+        const [qx, qz] = P(sd * (b.w / 2 - 0.12), z0); box(g, qx, y0 + 0.52, qz, 0.13, 1.04, 0.13, col, 0, b.yaw);
+      }
+    }
+  }
+  if (b.stone) for (const e of [-0.5, 0.5]) { const [ax, az] = P(0, e * (b.len - 1.5)); box(g, ax, b.base - 1.6, az, b.w + 0.8, 3.2, 2.4, col, 0, b.yaw); }
+  else for (const e of [-0.5, 0.5]) { const [ax, az] = P(0, e * b.len); for (const sd of [-1, 1]) { const [ux, uz] = P(sd * (b.w / 2 + 0.3), e * b.len); cyl(g, ux, b.base - 0.4, uz, 0.42, 0.5, 0.9, 10, [0.34, 0.30, 0.26]); } }
+}
+function castleGeo(g) {
+  const y = pads[2].h, x = CASTLE.x, z = CASTLE.z, st = PCOL.stone, dk = PCOL.roof;
+  box(g, x + 1.4, y + 2.0, z + 0.6, 6.6, 4.0, 4.6, st, 0); box(g, x + 1.4, y + 4.15, z + 0.6, 6.8, 0.3, 4.8, dk, 0);
+  for (let i = -3; i <= 3; i++) for (const e of [-2.3, 2.3]) box(g, x + 1.4 + i * 0.95, y + 4.55, z + 0.6 + e, 0.45, 0.5, 0.3, st, 0);
+  const tx = x - 2.1, tz = z - 0.9;
+  box(g, tx, y + 4.6, tz, 3.0, 9.2, 3.0, st, 0);
+  for (const [a, b] of [[-1.2, -1.2], [1.2, -1.2], [1.2, 1.2], [-1.2, 1.2], [0, -1.2], [0, 1.2], [-1.2, 0], [1.2, 0]]) box(g, tx + a, y + 9.55, tz + b, 0.55, 0.7, 0.55, st, 0);
+  for (const wy of [3.2, 6.0]) box(g, tx, y + wy, tz + 1.52, 0.5, 0.9, 0.06, [0.15, 0.16, 0.18], 0);
+  cyl(g, x + 3.9, y, z - 1.6, 1.1, 1.0, 6.6, 12, st); cone(g, x + 3.9, y + 6.6, z - 1.6, 1.4, 2.7, 12, dk, 0);
+}
+function fountainGeo(g) {
+  const F = FOUNTAIN, y = groundY(F.x, F.z), st = PCOL.stone;
+  cyl(g, F.x, y, F.z, F.r, F.r, 0.78, 32, st);
+  cyl(g, F.x, y + 0.78, F.z, 0.95, 0.6, 1.6, 12, st);
+  cyl(g, F.x, y + 2.38, F.z, 1.15, 2.25, 0.32, 20, st);
+  cyl(g, F.x, y + 2.7, F.z, 0.36, 0.3, 1.4, 10, st);
+  cyl(g, F.x, y + 4.1, F.z, 0.45, 1.08, 0.24, 16, st);
+  cyl(g, F.x, y + 4.34, F.z, 0.24, 0.18, 0.8, 8, [0.42, 0.45, 0.40]); sphere(g, F.x, y + 5.3, F.z, 0.3, 0.32, 0.3, 8, 6, [0.42, 0.45, 0.40], 0);
+  const fg = new Geo(), curtain = (r0, r1, yt, yb) => { const n = 28; for (let i = 0; i < n; i++) { const a0 = i / n * TAU, a1 = (i + 1) / n * TAU; const P = (r, a, yy) => [F.x + Math.cos(a) * r, yy, F.z + Math.sin(a) * r]; fg.quad(P(r0, a0, yt), P(r0, a1, yt), P(r1, a1, yb), P(r1, a0, yb), [1, 1, 1], 1, [F.x, yb - 5, F.z]); } };
+  curtain(2.24, 2.62, y + 2.69, y + 0.82); curtain(1.07, 1.36, y + 4.33, y + 2.72);
+  W.fall = upload(fg); W.fallBase = [F.x, y + 0.84, F.z]; W.fallLip = [F.x, y + 5.6, F.z]; W.foamScale = 2.62; W.fallGain = 0.55; W.fallReach = 55;
+  W.basin = { x: F.x, y: y + 0.8, z: F.z, r: F.r - 0.25 };
+  const mg = new Geo(); sphere(mg, 0, 0, 0, 1, 1, 1, 6, 4, [1, 1, 1], 1, true);
+  const MMAX = 20; W.mist = makeInst(mg, MMAX); W.mist.n = MMAX; W.mistScale = 0.45;
+  W.mistS = Array.from({ length: MMAX }, () => ({ life: R() * 3, max: rr(1.6, 2.6), vx: rr(-0.4, 0.4), vz: rr(-0.4, 0.4), s: rr(0.2, 0.4) }));
+  for (let i = 0; i < MMAX; i++) W.mist.col.set([1, 1, 1, 1], i * 4);
+}
+function buildParkProps(g) {
+  const lg = new Geo();
+  for (const b of BRIDGES) bridgeGeo(g, b);
+  castleGeo(g); fountainGeo(g);
+  { // 베데스다 테라스 바닥돌과 난간
+    const y = pads[1].h; box(g, 6, y - 0.05, -118, 15, 0.16, 11, [0.70, 0.66, 0.58], 0);
+    for (const sd of [-1, 1]) box(g, 6 + sd * 7.6, y + 0.45, -121, 0.4, 0.9, 6, [0.66, 0.62, 0.54], 0);
+  }
+  // 더 몰: 양쪽 벤치와 가로등
+  for (let z = -184; z <= -134; z += 9) for (const sd of [-1, 1]) bench(g, 8 + sd * 3.7, z, sd < 0 ? Math.PI / 2 : -Math.PI / 2);
+  for (let z = -180; z <= -134; z += 13) for (const sd of [-1, 1]) lampPost(g, lg, 8 + sd * 4.4, z + 4);
+  // 산책로 가로등과 벤치
+  for (let i = 8; i < TN - 6; i += 17) {
+    if (TZ[i] > -190 && TZ[i] < -128) continue;
+    const a = Math.max(0, i - 2), b2 = Math.min(TN - 1, i + 2), yaw = Math.atan2(TX[b2] - TX[a], TZ[b2] - TZ[a]), sd = (i / 17) % 2 ? 1 : -1;
+    const px = TX[i] + Math.cos(yaw) * 3.4 * sd, pz = TZ[i] - Math.sin(yaw) * 3.4 * sd;
+    if (inWater(px, pz, 1.15) || bridgeFloor(px, pz) !== null) continue;
+    lampPost(g, lg, px, pz);
+    if ((i / 17) % 2 === 0) { const bx = TX[i] - Math.cos(yaw) * 3.0 * sd, bz = TZ[i] + Math.sin(yaw) * 3.0 * sd; if (!inWater(bx, bz, 1.15) && bridgeFloor(bx, bz) === null) bench(g, bx, bz, yaw + (sd > 0 ? -Math.PI / 2 : Math.PI / 2)); }
+  }
+  // 저수지 철책 (러닝 트랙 안쪽)
+  { const rv = PARK_WATERS[4], n = 110; let prev = null;
+    for (let i = 0; i <= n; i++) { const a = i / n * TAU, x = rv.x + Math.cos(a) * (rv.rx + 1.6), z = rv.z + Math.sin(a) * (rv.rz + 1.6), y = getH(x, z);
+      box(g, x, y + 0.55, z, 0.1, 1.1, 0.1, PCOL.iron, 0);
+      if (prev) { const mx = (x + prev[0]) / 2, mz = (z + prev[1]) / 2, len = Math.hypot(x - prev[0], z - prev[1]), yaw = Math.atan2(x - prev[0], z - prev[1]); box(g, mx, y + 1.0, mz, 0.06, 0.06, len, PCOL.iron, 0, yaw); }
+      prev = [x, z]; } }
+  // 공원 돌담 (5번가 입구는 비워 둔다)
+  for (let z = -PARK.hl; z < PARK.hl; z += 10) for (const sd of [-1, 1]) box(g, sd * (PARK.hw + 0.5), 0.9, z + 5, 0.6, 1.0, 10.02, [0.52, 0.50, 0.46], 0);
+  for (let x = -PARK.hw; x < PARK.hw; x += 10) for (const sd of [-1, 1]) { if (sd < 0 && x + 5 > 30) continue; box(g, x + 5, 0.9, sd * (PARK.hl + 0.5), 10.02, 1.0, 0.6, [0.52, 0.50, 0.46], 0); }
+  W.lampHeads = upload(lg);
+  buildCity();
+}
+function buildCity() {
+  const cg = new Geo(), Rc = rng(5907), pal = [PCOL.lime, PCOL.brick, PCOL.grey, PCOL.glass, [0.70, 0.66, 0.58], [0.52, 0.40, 0.34], [0.64, 0.60, 0.54]];
+  const bld = (x, z, w, d, h, c) => {
+    box(cg, x, h / 2, z, w, h, d, c, 0);
+    box(cg, x, h + 0.4, z, w * 0.92, 0.8, d * 0.92, mix3(c, [0.2, 0.2, 0.22], 0.35), 0);
+    if (h > 34) for (let k = 1; k < 4; k++) box(cg, x, h * k / 4, z, w + 0.08, 0.45, d + 0.08, mix3(c, [0.05, 0.05, 0.06], 0.3), 0);
+    if (h < 75 && Rc() < 0.38) waterTower(cg, x + (Rc() - 0.5) * w * 0.4, h + 0.8, z + (Rc() - 0.5) * d * 0.4);
+  };
+  for (const side of [-1, 1]) for (let row = 0; row < 5; row++) {
+    const x0 = PARK.hw + 18 + row * 34;
+    for (let z = -296; z < 296;) {
+      const wz = 8 + Rc() * 9, depth = 20 + Rc() * 9, front = row === 0;
+      const h = front ? 16 + Rc() * (side < 0 ? 38 : 28) : 24 + Rc() * (row > 2 ? 120 : 80);
+      const c = pal[Math.floor(Rc() * pal.length)];
+      bld(side * (x0 + depth / 2), z + wz / 2, depth, wz - 1, h, c);
+      if (front && side < 0 && Rc() < 0.1) for (const f of [0.28, 0.72]) box(cg, side * (x0 + depth / 2), h + 9, z + wz * f, 3.4, 18, 3.4, c, 0);   // 쌍둥이 탑 아파트
+      z += wz;
+    }
+  }
+  for (let row = 0; row < 3; row++) for (let x = -296; x < 296;) {   // 남쪽 59번가: 아주 높고 가는 타워들
+    const wx = 8 + Rc() * 9, zc = -(PARK.hl + 25 + row * 24), tall = row >= 1 && Math.abs(x) < 170 && Rc() < 0.45;
+    const h = tall ? 120 + Rc() * 120 : 22 + Rc() * 60;
+    bld(x + wx / 2, zc, tall ? 6 + Rc() * 3 : wx - 1, tall ? 7 : 18, h, tall ? (Rc() < 0.5 ? PCOL.glass : PCOL.grey) : pal[Math.floor(Rc() * pal.length)]);
+    x += wx;
+  }
+  for (let row = 0; row < 2; row++) for (let x = -296; x < 296;) {   // 북쪽 110번가: 낮은 건물
+    const wx = 8 + Rc() * 9; bld(x + wx / 2, PARK.hl + 25 + row * 24, wx - 1, 18, 12 + Rc() * 30, pal[Math.floor(Rc() * pal.length)]); x += wx;
+  }
+  W.city = upload(cg);
+}
+
 function buildWorld() {
   buildHeights();
   /* terrain */
@@ -696,7 +978,20 @@ function buildWorld() {
     let nx = hl - hr, ny = 2*CELL, nz = hd - hu; const l = Math.hypot(nx, ny, nz); nx /= l; ny /= l; nz /= l;
     nor[k*3] = nx; nor[k*3+1] = ny; nor[k*3+2] = nz;
     const n1 = fbm(x*0.05, z*0.05, 2) * 0.5 + 0.5, n2 = vnoise(x*0.19, z*0.19) * 0.5 + 0.5, Rr = Math.hypot(x, z);
-    let c = mix3([0.40,0.32,0.19], [0.64,0.33,0.13], clamp(n1 * 0.9, 0, 1));
+    let c;
+    if (IS_PARK) {
+      const ax = Math.abs(x), az = Math.abs(z), inPark = ax < PARK.hw && az < PARK.hl;
+      c = mix3([0.40, 0.48, 0.22], [0.55, 0.52, 0.26], clamp(n1 * 0.9, 0, 1));
+      c = mix3(c, [0.62, 0.44, 0.18], smooth(0.62, 0.92, n2) * 0.35);
+      for (const lw of LAWNS) { const e = Math.hypot((x - lw.x) / lw.rx, (z - lw.z) / lw.rz); c = mix3(c, [0.42, 0.56, 0.24], 1 - smooth(0.85, 1.05, e)); }
+      c = mix3(c, [0.50, 0.49, 0.46], smooth(0.86, 0.66, ny));
+      let shore = 0; for (const w of WATERS) shore = Math.max(shore, 1 - smooth(0.98, 1.15, waterE(w, x, z))); c = mix3(c, [0.42, 0.40, 0.33], shore);
+      if (!inPark) { const sidewalk = (ax < PARK.hw + 5 && az < PARK.hl + 5) || (ax > PARK.hw + 13 && ax < PARK.hw + 17) ? 1 : 0; c = sidewalk ? [0.60, 0.58, 0.55] : [0.25, 0.25, 0.27]; }
+      const tr = TRAILAMT[k]; c = mix3(c, [0.60, 0.58, 0.54], tr);
+      col[k*4] = c[0]; col[k*4+1] = c[1]; col[k*4+2] = c[2]; col[k*4+3] = inPark ? tr : 0.6;
+      continue;
+    }
+    c = mix3([0.40,0.32,0.19], [0.64,0.33,0.13], clamp(n1 * 0.9, 0, 1));
     c = mix3(c, [0.34,0.38,0.19], smooth(0.55, 0.9, n2) * 0.5);
     c = mix3(c, [0.58,0.52,0.35], smooth(70, 95, h));
     c = mix3(c, [0.33,0.34,0.27], smooth(185, 245, Rr));
@@ -714,11 +1009,12 @@ function buildWorld() {
   W.terrain = { vao, count: idx.length, indexed: true };
 
   /* water */
-  const wg = new Geo(); disc(wg, POND.r + 0.6, 40, [0.20, 0.38, 0.40], 1); W.water = upload(wg);
+  const wg = new Geo(); disc(wg, 1, 48, [0.20, 0.38, 0.40], 1); W.water = upload(wg);   // 단위 원: 물마다 크기를 늘려 그린다
 
   /* props: gate, pavilion, deck, summit, steps, fence posts */
   const g = new Geo();
   const tan = i => { const a = Math.max(0, i - 2), b = Math.min(TN - 1, i + 2); return Math.atan2(TX[b] - TX[a], TZ[b] - TZ[a]); };
+  if (IS_PARK) buildParkProps(g); else {
   { // 산길 입구 gate
     const i = 3, yaw = tan(i), y = getH(TX[i], TZ[i]), c = Math.cos(yaw), s = Math.sin(yaw);
     for (const side of [-1, 1]) { const px = TX[i] + c * 2.6 * side, pz = TZ[i] - s * 2.6 * side; box(g, px, y + 1.7, pz, 0.38, 3.4, 0.38, COL.woodDark, 0, yaw); }
@@ -791,10 +1087,11 @@ function buildWorld() {
       [CLIFF.r + 3.6, -3.4, 1.5], [CLIFF.r + 3.2, 3.9, 1.7], [CLIFF.r + 4.4, 1.6, 0.9], [CLIFF.r + 1.6, -6.8, 1.6], [CLIFF.r + 1.4, 7.0, 1.5]];
     for (const [out, side, s] of rocks) { const [x, z] = at(out, side); sphere(g, x, getH(x, z) - s * 0.25, z, s, s * 0.95, s, 7, 5, mix3(COL.stone, [0.40, 0.40, 0.42], R() * 0.7), 0, false, 0.32); }
   }
+  }
   W.props = upload(g);
 
-  /* 구름폭포 물줄기: 위에서 아래로 바깥쪽으로 휘며 떨어지는 띠 */
-  {
+  /* 구름폭포 물줄기: 위에서 아래로 바깥쪽으로 휘며 떨어지는 띠 (공원은 분수가 대신한다) */
+  if (!IS_PARK) {
     const [dx, dz] = FALL_DIR, px = -dz, pz = dx;
     const lipX = CLIFF.x + dx * (CLIFF.r - 0.6), lipZ = CLIFF.z + dz * (CLIFF.r - 0.6);
     const topY = getH(lipX, lipZ) + 0.25, botY = WATER - 0.3, widthTop = 3.2, rows = 16, cols = 6;
@@ -827,6 +1124,38 @@ function buildWorld() {
   const maxT = coarse ? 1500 : 2300;
   W.con = makeInst(con, maxT); W.dec = makeInst(dec, maxT);
   W.decA = []; W.decW = []; W.conA = []; W.conW = [];
+  const putTree = (x, z, isCon, sc, y = getH(x, z)) => {
+    const m = isCon ? W.con : W.dec; if (m.n >= m.max) return false;
+    const k = m.n++; m.off[k*4] = x; m.off[k*4+1] = y - 0.15; m.off[k*4+2] = z; m.off[k*4+3] = rr(0, TAU); m.col[k*4+3] = sc;
+    if (isCon) { const v = rr(0.8, 1.15); W.conA.push([0.17*v, 0.33*v, 0.21*v]); W.conW.push([0.14*v, 0.26*v, 0.21*v]); }
+    else { const pal = IS_PARK ? PARK_LEAF : AUTUMN_LEAF, c = pal[Math.floor(R() * pal.length)], v = rr(0.88, 1.08); W.decA.push([c[0]*v, c[1]*v, c[2]*v]); const w = rr(0.72, 0.84); W.decW.push([w, w + 0.02, w + 0.06]); }
+    return true;
+  };
+  const PARK_LEAF = [[0.86, 0.66, 0.22], [0.80, 0.55, 0.20], [0.52, 0.58, 0.24], [0.66, 0.42, 0.18], [0.92, 0.76, 0.32], [0.42, 0.50, 0.22], [0.78, 0.36, 0.16]];
+  if (IS_PARK) {
+    // 더 몰의 느릅나무 두 줄: 노란 터널
+    const ELM = [[0.86, 0.66, 0.22], [0.80, 0.58, 0.18], [0.90, 0.72, 0.30]];
+    for (let z = -188; z <= -130; z += 5.5) for (const dx of [-6.4, -10.6, 6.4, 10.6]) {
+      if (putTree(8 + dx + rr(-0.3, 0.3), z + rr(-0.4, 0.4), false, rr(1.35, 1.6))) { const c = ELM[Math.floor(R() * 3)]; W.decA[W.decA.length - 1] = c; }
+    }
+    const blocked = (x, z, pad) => inWater(x, z, 1.12) || bridgeFloor(x, z) !== null || trailDist(x, z)[0] < pad
+      || LAWNS.some(lw => Math.hypot((x - lw.x) / lw.rx, (z - lw.z) / lw.rz) < 0.95)
+      || Math.hypot(x - FOUNTAIN.x, z - FOUNTAIN.z) < 11 || Math.hypot(x - CASTLE.x, z - CASTLE.z) < 8
+      || pads.some(p => Math.hypot(x - p.x, z - p.z) < p.r + 2) || parkPathNear(x, z);
+    const parkMax = coarse ? 760 : 1050;
+    for (let t = 0; t < 9000 && W.dec.n + W.con.n < parkMax; t++) {
+      const x = rr(-PARK.hw + 2, PARK.hw - 2), z = rr(-PARK.hl + 2, PARK.hl - 2);
+      if (blocked(x, z, 4.6)) continue;
+      if (Math.abs(x - 8) < 13 && z > -192 && z < -126) continue;
+      if (Math.hypot(x - TX[0], z - TZ[0]) < 16) continue;   // 입구 앞은 트여 있게
+      const ramble = Math.hypot(x + 10, z + 68) < 26;   // 램블은 숲이 빽빽하다
+      if (!ramble && R() < 0.5) continue;
+      putTree(x, z, R() < 0.12, rr(0.85, 1.35));
+    }
+    // 길 건너 가로수
+    for (let z = -PARK.hl; z <= PARK.hl; z += 9) for (const sd of [-1, 1]) putTree(sd * (PARK.hw + 9.5), z + rr(-1, 1), false, rr(0.75, 0.95), 0.15);
+    for (let x = -PARK.hw - 12; x <= PARK.hw + 12; x += 9) for (const sd of [-1, 1]) putTree(x + rr(-1, 1), sd * (PARK.hl + 9.5), false, rr(0.75, 0.95), 0.15);
+  } else
   for (let t = 0, placed = 0; t < 11000 && placed < maxT; t++) {
     const x = rr(-288, 288), z = rr(-288, 288), Rr = Math.hypot(x, z);
     if (Rr > 290) continue;
@@ -849,10 +1178,23 @@ function buildWorld() {
     else { const c = AUTUMN_LEAF[Math.floor(R() * AUTUMN_LEAF.length)], v = rr(0.88, 1.08); W.decA.push([c[0]*v, c[1]*v, c[2]*v]); const w = rr(0.72, 0.84); W.decW.push([w, w + 0.02, w + 0.06]); }
     placed++;
   }
+  /* 카메라가 나뭇잎 속으로 들어가지 않게: 나무 위치를 칸에 나눠 둔다 */
+  W.treeGrid = new Map();
+  for (const [m, isCon] of [[W.dec, false], [W.con, true]]) for (let i = 0; i < m.n; i++) {
+    const x = m.off[i*4], y = m.off[i*4+1], z = m.off[i*4+2], sc = m.col[i*4+3];
+    const t = isCon ? [x, z, y + 1.1 * sc, y + 5.9 * sc, 1.9 * sc] : [x, z, y + 1.6 * sc, y + 5.8 * sc, 2.4 * sc];
+    const key = Math.floor(x / 8) + ',' + Math.floor(z / 8); if (!W.treeGrid.has(key)) W.treeGrid.set(key, []); W.treeGrid.get(key).push(t);
+  }
   /* rocks */
   const rk = new Geo(); sphere(rk, 0, 0.25, 0, 1, 0.7, 1, 6, 4, [1,1,1], 1, false, 0.4);
   W.rock = makeInst(rk, 340);
-  for (let t = 0; t < 4000 && W.rock.n < 340; t++) {
+  if (IS_PARK) for (const pr of PARK_ROCKS) for (let i = 0; i < 9; i++) {   // 맨해튼 편암 바위
+    const a = R() * TAU, d = R() * pr.r * 0.8, x = pr.x + Math.cos(a) * d, z = pr.z + Math.sin(a) * d;
+    if (trailDist(x, z)[0] < 2.4 || inWater(x, z, 1.05) || Math.hypot(x - CASTLE.x, z - CASTLE.z) < 6) continue;
+    const sc = rr(0.8, 2.2), k = W.rock.n++, v = rr(0.75, 0.95);
+    W.rock.off.set([x, getH(x, z) - 0.3 * sc, z, rr(0, TAU)], k*4); W.rock.col.set([0.50*v, 0.50*v, 0.50*v, sc], k*4);
+  }
+  for (let t = 0; t < 4000 && W.rock.n < 340 && !IS_PARK; t++) {
     const x = rr(-210, 210), z = rr(-210, 210);
     if (Math.hypot(x - POND.x, z - POND.z) < POND.r + 1) continue;
     if (pads.some(p => Math.hypot(x - p.x, z - p.z) < p.r + 1)) continue;
@@ -878,6 +1220,34 @@ function buildWorld() {
   const ub = new Geo(); box(ub, 0, 0, 0, 1, 1, 1, [1,1,1], 1); W.uBox = upload(ub);
   const ud = new Geo(); disc(ud, 1, 20, [1,1,1], 1); W.uDisc = upload(ud);
   const ur = new Geo(); ring(ur, 0.75, 1, 28, [1,1,1], 1); W.uRing = upload(ur);
+  /* 야영: 텐트 (문이 +z 쪽), 모닥불 받침, 불꽃 */
+  {
+    const tg = new Geo(), rx = 1.2, ry = 1.08, rz = 1.35, su = 12, sv = 5;   // 돔 텐트, 문은 +z 쪽
+    const P = (u, v, k = 1) => [Math.sin(v) * Math.cos(u) * rx * k, Math.cos(v) * ry * k, Math.sin(v) * Math.sin(u) * rz * k];
+    for (let j = 0; j < sv; j++) for (let i = 0; i < su; i++) {
+      const u0 = i / su * TAU, u1 = (i + 1) / su * TAU, v0 = j / sv * Math.PI / 2, v1 = (j + 1) / sv * Math.PI / 2;
+      tg.quad(P(u0, v0), P(u1, v0), P(u1, v1), P(u0, v1), i % 2 ? [1, 1, 1] : [0.84, 0.84, 0.84], 1, [0, 0.1, 0]);
+    }
+    for (let j = 2; j < sv; j++) for (let i = 0; i < 3; i++) {   // 문 (어두운 천)
+      const u0 = Math.PI / 2 - 0.42 + i * 0.28, u1 = u0 + 0.28, v0 = j / sv * Math.PI / 2, v1 = (j + 1) / sv * Math.PI / 2;
+      tg.quad(P(u0, v0, 1.012), P(u1, v0, 1.012), P(u1, v1, 1.012), P(u0, v1, 1.012), [0.07, 0.07, 0.08], 0, [0, 0.1, 0]);
+    }
+    for (const u of [Math.PI / 4, 3 * Math.PI / 4]) for (let j = 0; j < 8; j++) {   // 폴대 두 개가 엇갈린다
+      const v0 = -Math.PI / 2 + j / 8 * Math.PI, v1 = v0 + Math.PI / 8;
+      const p0 = P(u, Math.abs(v0), 1.02), p1 = P(u, Math.abs(v1), 1.02); if (v0 < 0) { p0[0] = -p0[0]; p0[2] = -p0[2]; } if (v1 < 0) { p1[0] = -p1[0]; p1[2] = -p1[2]; }
+      const mx = (p0[0] + p1[0]) / 2, my = (p0[1] + p1[1]) / 2, mz = (p0[2] + p1[2]) / 2, dx = p1[0] - p0[0], dy = p1[1] - p0[1], dz = p1[2] - p0[2], hl = Math.hypot(dx, dz);
+      box(tg, mx, my, mz, 0.04, 0.04, Math.hypot(hl, dy) + 0.02, [0.22, 0.22, 0.24], 0, Math.atan2(dx, dz), -Math.atan2(dy, hl));
+    }
+    for (const e of [-1, 1]) box(tg, 0, 0.32, e * (rz + 0.55), 0.02, 0.02, 1.25, [0.85, 0.82, 0.7], 0, 0, e * 0.55);   // 줄
+    W.tent = upload(tg);
+    const fg = new Geo();
+    disc(fg, 0.62, 14, [0.12, 0.1, 0.09], 0);
+    for (let i = 0; i < 9; i++) { const a = i / 9 * TAU; sphere(fg, Math.cos(a) * 0.68, 0.06, Math.sin(a) * 0.68, 0.17, 0.12, 0.15, 6, 3, mix3([0.42, 0.41, 0.4], [0.58, 0.56, 0.52], (i * 37 % 10) / 10), 0, false, 0.25); }
+    for (let i = 0; i < 5; i++) { const a = i / 5 * TAU + 0.3, r = 0.22; box(fg, Math.cos(a) * r, 0.3, Math.sin(a) * r, 0.09, 0.09, 0.78, i % 2 ? [0.36, 0.24, 0.15] : [0.28, 0.19, 0.12], 0, Math.atan2(Math.cos(a), Math.sin(a)) + Math.PI, -0.75); }
+    box(fg, 0.35, 0.12, -0.95, 1.1, 0.24, 0.26, [0.40, 0.28, 0.18], 0, 0.3);   // 땔감
+    W.fireBase = upload(fg);
+    const fl = new Geo(); cone(fl, 0, 0, 0, 1, 1, 8, [1, 1, 1], 1); W.flame = upload(fl);
+  }
   /* sky */
   const skyVao = gl.createVertexArray(); gl.bindVertexArray(skyVao); attr(0, buf(new Float32Array([-1,-1, 3,-1, -1,3])), 2); gl.bindVertexArray(null); W.sky = skyVao;
 }
@@ -889,12 +1259,16 @@ const ENV = {
   wDay:  { zen:[0.38,0.58,0.85], hor:[0.86,0.91,0.95], sun:[1.0,0.97,0.93], sky:[0.72,0.80,0.92], gnd:[0.70,0.72,0.78], cloud:[1,1,1], glow:[1.0,0.95,0.85], dir:[0.40,0.55,-0.60], fog:0.0052 },
   wDusk: { zen:[0.22,0.26,0.50], hor:[0.95,0.68,0.62], sun:[1.0,0.66,0.50], sky:[0.55,0.52,0.68], gnd:[0.62,0.55,0.62], cloud:[1,0.78,0.74], glow:[1.0,0.6,0.4], dir:[0.82,0.15,-0.55], fog:0.0055 }
 };
+/* 밤: 달빛과 별. 공원은 도시 불빛에 지평선이 살짝 붉다 */
+ENV.night = { zen:[0.015,0.025,0.07], hor: IS_PARK ? [0.17,0.13,0.15] : [0.06,0.08,0.15], sun:[0.30,0.36,0.52], sky:[0.13,0.16,0.27], gnd:[0.05,0.05,0.07], cloud: IS_PARK ? [0.22,0.17,0.19] : [0.10,0.11,0.16], glow:[0.45,0.5,0.7], dir:[-0.35,0.62,0.55], fog:0.0055 };
 function envMix(sb, tb) {
   const o = {};
+  const tbx = Math.max(tb, S.dawn * 0.85);
   for (const k of Object.keys(ENV.aDay)) {
-    if (k === 'fog') o.fog = lerp(lerp(ENV.aDay.fog, ENV.aDusk.fog, tb), lerp(ENV.wDay.fog, ENV.wDusk.fog, tb), sb);
-    else o[k] = mix3(mix3(ENV.aDay[k], ENV.aDusk[k], tb), mix3(ENV.wDay[k], ENV.wDusk[k], tb), sb);
+    if (k === 'fog') o.fog = lerp(lerp(lerp(ENV.aDay.fog, ENV.aDusk.fog, tbx), lerp(ENV.wDay.fog, ENV.wDusk.fog, tbx), sb), ENV.night.fog, S.night);
+    else o[k] = mix3(mix3(mix3(ENV.aDay[k], ENV.aDusk[k], tbx), mix3(ENV.wDay[k], ENV.wDusk[k], tbx), sb), ENV.night[k], S.night);
   }
+  if (IS_PARK) o.fog *= 0.7;
   const l = Math.hypot(...o.dir); o.dir = o.dir.map(v => v / l);
   return o;
 }
@@ -909,7 +1283,8 @@ const S = {
   mute: store.get('mute', false), amb: store.get('amb', 0.7), sfx: store.get('sfx', 0.7), steps: store.get('steps', true),
   speedIdx: store.get('speed', 1), quality: store.get('quality', 1), bubbles: store.get('bubbles', true), lost: false,
   walked: 0, startT: 0, reached: new Set(), summitShown: false, lastDrag: -10, wantPhoto: false, nick: store.get('nick', null) || nickRand(), climbMax: 0,
-  breathK: 0, breathSnd: null, boostUntil: 0
+  breathK: 0, breathSnd: null, boostUntil: 0,
+  voice: store.get('voice', true), campMin: store.get('campMin', 30), campFire: store.get('campFire', true), campAwake: store.get('campAwake', true), camp: null, night: 0, dawn: 0, wl: null
 };
 S.sb = S.season;
 const player = { x: TX[0], z: TZ[0], y: 0, heading: 0, phase: 0, moveAmt: 0, idx: 0, target: null, lastStep: 0, sit: 0, act: null,
@@ -928,15 +1303,24 @@ function initState() {
   player.heading = Math.atan2(TX[4] - TX[0], TZ[4] - TZ[0]);
   player.y = groundY(player.x, player.z);
   for (let i = 0; i < 6; i++) {
-    NPCS.push({ s: rr(20, TN - 30), dir: R() < 0.5 ? 1 : -1, speed: rr(1.2, 1.9), pause: 0, name: ADJ[i % ADJ.length].replace('천천히 걷는', '천천히') + ' ' + NOUN[(i * 5 + 3) % NOUN.length],
+    NPCS.push({ s: rr(20, TN - 30), dir: R() < 0.5 ? 1 : -1, speed: IS_PARK && i % 3 === 0 ? rr(2.7, 3.2) : rr(1.2, 1.9), pause: 0, name: ADJ[i % ADJ.length].replace('천천히 걷는', '천천히') + ' ' + NOUN[(i * 5 + 3) % NOUN.length],
       x: 0, z: 0, y: 0, heading: 0, phase: rr(0, 6), moveAmt: 1, jacket: JACKETS[i % JACKETS.length], pants: [0.24,0.26,0.30], hat: HATS[i % HATS.length], pack: [0.30,0.28,0.25], lastLand: -1,
       sit: 0, act: null, cushion: [[0.30,0.42,0.36],[0.55,0.24,0.18],[0.42,0.34,0.52]][i % 3] });
   }
-  CPS = [
-    { key: 'gate', name: '산길 입구', x: TX[3], z: TZ[3], idx: 3, r: 7 },
-    { key: 'pavilion', name: '솔숲 정자', x: PV.x, z: PV.z, idx: nearIdx(PV.x, PV.z), r: 10 },
-    { key: 'deck', name: '구름 전망대', x: DK.x, z: DK.z, idx: nearIdx(DK.x, DK.z), r: 9 },
-    { key: 'summit', name: '솔바람산 정상', x: TX[TN-1], z: TZ[TN-1], idx: TN - 1, r: 9 }
+  const cp = (key, name, x, z, r, ly) => { const idx = nearIdx(x, z); return { key, name, x, z, idx, r, ly: ly != null ? ly : TH[idx] + 4.2 }; };
+  CPS = IS_PARK ? [
+    cp('gate', '5번가 입구', TX[2], TZ[2], 7),
+    cp('gapstow', '갭스토 브리지', BRIDGES[0].x, BRIDGES[0].z, 8, BRIDGES[0].base + BRIDGES[0].rise + 3.4),
+    cp('mall', '더 몰', 8, -160, 8),
+    cp('bethesda', '베데스다 분수', FOUNTAIN.x, FOUNTAIN.z, 9, groundY(FOUNTAIN.x, FOUNTAIN.z) + 7.4),
+    cp('bow', '보우 브리지', BRIDGES[1].x, BRIDGES[1].z, 8, BRIDGES[1].base + BRIDGES[1].rise + 3.2),
+    cp('castle', '벨베데레 성', CASTLE.x, CASTLE.z, 9, pads[2].h + 12),
+    { key: 'summit', name: '저수지 북쪽', x: TX[TN-1], z: TZ[TN-1], idx: TN - 1, r: 8, ly: TH[TN-1] + 4.5 }
+  ] : [
+    { key: 'gate', name: '산길 입구', x: TX[3], z: TZ[3], idx: 3, r: 7, ly: getH(TX[3], TZ[3]) + 5 },
+    { key: 'pavilion', name: '솔숲 정자', x: PV.x, z: PV.z, idx: nearIdx(PV.x, PV.z), r: 10, ly: pads[1].h + 7.2 },
+    { key: 'deck', name: '구름 전망대', x: DK.x, z: DK.z, idx: nearIdx(DK.x, DK.z), r: 9, ly: pads[2].h + 3.4 },
+    { key: 'summit', name: '솔바람산 정상', x: TX[TN-1], z: TZ[TN-1], idx: TN - 1, r: 9, ly: SUMMIT_H + 5.5 }
   ];
 }
 
@@ -946,20 +1330,22 @@ const labels = [];
 function addLabel(html, cls, getPos, maxD) { const el = document.createElement('div'); el.className = 'tag3d ' + cls; el.innerHTML = html; labelsEl.appendChild(el); const L = { el, getPos, maxD, shown: true }; labels.push(L); return L; }
 function initLabels() {
   W.meLabel = addLabel('<span class="me">나</span><span id="meName"></span>', 'me', () => [player.x, player.y + 2.55 - 0.47 * player.sit, player.z], 60);
+  W.meLabel.hideIf = () => inTent(player);
   $('#meName').textContent = S.nick;
-  for (const n of NPCS) { const L = addLabel('<em>산객</em><span></span>', 'npc', () => [n.x, n.y + 2.4 - 0.47 * n.sit, n.z], 38); L.el.querySelector('span').textContent = n.name; L.hideIf = () => !showNpcs(); n.label = L; }
-  { const L = addLabel('<i></i><span>구름폭포</span>', 'place', () => [W.fallLip[0], W.fallLip[1] + 3.2, W.fallLip[2]], 110); }
+  for (const n of NPCS) { const L = addLabel(`<em>${NPC_TAG}</em><span></span>`, 'npc', () => [n.x, n.y + 2.4 - 0.47 * n.sit, n.z], 38); L.el.querySelector('span').textContent = n.name; L.hideIf = () => !showNpcs(); n.label = L; }
+  if (!IS_PARK) addLabel('<i></i><span>구름폭포</span>', 'place', () => [W.fallLip[0], W.fallLip[1] + 3.2, W.fallLip[2]], 110);
+  else for (const [nm, x, z] of [['더 레이크', -14, -86], ['저수지', 0, 50], ['그레이트 론', 0, -2], ['쉽 메도우', -24, -168]]) addLabel(`<i></i><span>${nm}</span>`, 'place', () => [x, 6, z], 120);
   for (const cp of CPS) {
-    const h = cp.key === 'summit' ? SUMMIT_H + 5.5 : cp.key === 'pavilion' ? pads[1].h + 7.2 : cp.key === 'gate' ? getH(cp.x, cp.z) + 5 : pads[2].h + 3.4;
-    cp.label = addLabel('<i></i><span></span>', 'place', () => [cp.x, h, cp.z], 95);
-    cp.label.el.querySelector('span').textContent = cp.key === 'summit' ? `${cp.name} ${fmtAlt(SUMMIT_H)}m` : cp.name;
+    cp.label = addLabel('<i></i><span></span>', 'place', () => [cp.x, cp.ly, cp.z], 95);
+    cp.label.el.querySelector('span').textContent = cp.key === 'summit' && !IS_PARK ? `${cp.name} ${fmtAlt(SUMMIT_H)}m` : cp.name;
   }
 }
 function updateLabels(cssW, cssH) {
+  const pa = player.act, calm = inTent(player) || !!(pa && pa.type === 'meditate' && pa.medStart && !pa.leaving);   // 명상과 잠 사이에는 이름표를 걷어 낸다
   for (const L of labels) {
     const p = L.getPos(); const c = M.xf(VP, p[0], p[1], p[2]);
     const d = Math.hypot(p[0] - eye[0], p[1] - eye[1], p[2] - eye[2]);
-    let vis = c[3] > 0.1 && d < L.maxD && S.started && !(L.hideIf && L.hideIf());
+    let vis = c[3] > 0.1 && d < L.maxD && S.started && !(L.hideIf && L.hideIf()) && !calm;
     if (vis) { const x = (c[0]/c[3]*0.5 + 0.5) * cssW, y = (1 - (c[1]/c[3]*0.5 + 0.5)) * cssH; vis = x > -100 && x < cssW + 100 && y > -40 && y < cssH + 40; if (vis) L.el.style.transform = `translate(${x.toFixed(1)}px,${y.toFixed(1)}px) translate(-50%,-100%)`; }
     if (vis !== L.shown) { L.el.style.display = vis ? '' : 'none'; L.shown = vis; }
   }
@@ -997,7 +1383,8 @@ function audioInit() {
   const C = window.AudioContext || window.webkitAudioContext; if (!C) return;
   try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) {}   // 아이폰 무음 스위치가 켜져 있어도 소리가 나게
   const ctx = new C(); A.ctx = ctx;
-  A.master = ctx.createGain(); A.master.gain.value = S.mute ? 0 : 1; A.master.connect(ctx.destination);
+  A.master = ctx.createGain(); A.master.gain.value = S.mute ? 0 : 1;
+  A.sleepG = ctx.createGain(); A.sleepG.gain.value = 1; A.master.connect(A.sleepG).connect(ctx.destination);   // 잠들기 타이머가 여기서 소리를 줄인다
   A.amb = ctx.createGain(); A.amb.gain.value = S.amb; A.amb.connect(A.master);
   A.sfx = ctx.createGain(); A.sfx.gain.value = S.sfx; A.sfx.connect(A.master);
   const len = ctx.sampleRate * 2, nb = ctx.createBuffer(1, len, ctx.sampleRate), d = nb.getChannelData(0);
@@ -1020,6 +1407,17 @@ function audioInit() {
   A.fallPan = ctx.createStereoPanner ? ctx.createStereoPanner() : null;
   if (A.fallPan) A.fallG.connect(A.fallPan).connect(A.amb); else A.fallG.connect(A.amb);
   f1.start(0, 0.3); f2.start(0, 1.1);
+  // 도시의 낮은 웅성거림 (공원에서만): 멀리서 차들이 흐르는 소리
+  const c1 = ctx.createBufferSource(); c1.buffer = nb; c1.loop = true; c1.playbackRate.value = 0.5;
+  const clp = ctx.createBiquadFilter(); clp.type = 'lowpass'; clp.frequency.value = 230; clp.Q.value = 0.3;
+  A.cityG = ctx.createGain(); A.cityG.gain.value = 0; c1.connect(clp).connect(A.cityG).connect(A.amb); c1.start(0, 0.7);
+  // 밤 소리 묶음: 모닥불, 풀벌레 (야영할 때 켜진다)
+  A.nightG = ctx.createGain(); A.nightG.gain.value = 0; A.nightG.connect(A.amb);
+  A.fireG = ctx.createGain(); A.fireG.gain.value = 0; A.fireG.connect(A.amb);
+  const fr = ctx.createBufferSource(); fr.buffer = nb; fr.loop = true; fr.playbackRate.value = 0.4;
+  const frl = ctx.createBiquadFilter(); frl.type = 'lowpass'; frl.frequency.value = 300; const frg = ctx.createGain(); frg.gain.value = 0.5;
+  fr.connect(frl).connect(frg).connect(A.fireG); fr.start(0, 0.2);
+  A.crickT = 0; A.owlT = 20; A.crackT = 0; A.hornT = 6; A.sirenT = 70; A.hoofT = 3;
 }
 /* 새소리: 짧은 지저귐, 빠른 떨림, 휘파람, 딱따구리, 겨울 박새 */
 function birdOut() { const ctx = A.ctx, out = ctx.createStereoPanner ? ctx.createStereoPanner() : ctx.createGain(); if (out.pan) out.pan.value = Math.random() * 1.8 - 0.9; const g = ctx.createGain(); g.gain.value = 0.45 + Math.random() * 0.55; out.connect(g).connect(A.amb); return out; }
@@ -1060,6 +1458,54 @@ function chirp() {
     g.gain.setValueAtTime(0.0001, st); g.gain.exponentialRampToValueAtTime(0.045, st + 0.015); g.gain.exponentialRampToValueAtTime(0.0001, st + 0.11);
     o.connect(g).connect(out); o.start(st); o.stop(st + 0.13);
   }
+}
+/* 도시와 공원의 소리 */
+function panOut(gain, pan) { const ctx = A.ctx, p = ctx.createStereoPanner ? ctx.createStereoPanner() : ctx.createGain(); if (p.pan) p.pan.value = pan; const g = ctx.createGain(); g.gain.value = gain; p.connect(g).connect(A.amb); return p; }
+function cityHorn() {
+  const ctx = A.ctx, t = ctx.currentTime + 0.02, out = panOut(0.05 + Math.random() * 0.05, Math.random() * 1.6 - 0.8), n = Math.random() < 0.4 ? 2 : 1, base = 330 + Math.random() * 120;
+  const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 900; lp.connect(out);
+  for (let i = 0; i < n; i++) { const st = t + i * 0.32, len = 0.18 + Math.random() * 0.3;
+    for (const r of [1, 1.26]) { const o = ctx.createOscillator(), g = ctx.createGain(); o.type = 'square'; o.frequency.value = base * r;
+      g.gain.setValueAtTime(0.0001, st); g.gain.exponentialRampToValueAtTime(0.05, st + 0.02); g.gain.setValueAtTime(0.05, st + len); g.gain.exponentialRampToValueAtTime(0.0001, st + len + 0.06);
+      o.connect(g).connect(lp); o.start(st); o.stop(st + len + 0.1); } }
+}
+function citySiren() {
+  const ctx = A.ctx, t = ctx.currentTime + 0.05, dur = 7, out = panOut(0.03, Math.random() * 1.4 - 0.7);
+  const o = ctx.createOscillator(), g = ctx.createGain(), lp = ctx.createBiquadFilter(); o.type = 'triangle'; lp.type = 'lowpass'; lp.frequency.value = 1500;
+  for (let k = 0; k < dur / 0.9; k++) { o.frequency.setValueAtTime(700, t + k * 0.9); o.frequency.linearRampToValueAtTime(1350, t + k * 0.9 + 0.45); o.frequency.linearRampToValueAtTime(700, t + k * 0.9 + 0.9); }
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.06, t + 2.5); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.connect(g).connect(lp).connect(out); o.start(t); o.stop(t + dur + 0.1);
+}
+function hooves() {   // 남쪽 길의 마차 말발굽 소리
+  const t = A.ctx.currentTime + 0.02;
+  for (let i = 0; i < 12; i++) { const st = t + i * 0.42; noiseHit(st, { type: 'bandpass', f: 1500, q: 2, dur: 0.035, g: 0.05 }); noiseHit(st + 0.13, { type: 'bandpass', f: 1250, q: 2, dur: 0.035, g: 0.035 }); }
+}
+function pigeon() {
+  const ctx = A.ctx, t = ctx.currentTime + 0.02, out = birdOut();
+  for (const [st, f] of [[0, 380], [0.38, 410], [0.78, 360]]) { const o = ctx.createOscillator(), g = ctx.createGain(), am = ctx.createOscillator(), ag = ctx.createGain(); o.type = 'sine';
+    o.frequency.setValueAtTime(f, t + st); o.frequency.exponentialRampToValueAtTime(f * 0.82, t + st + 0.3); am.frequency.value = 26; ag.gain.value = 0.02; am.connect(ag).connect(g.gain);
+    g.gain.setValueAtTime(0.0001, t + st); g.gain.exponentialRampToValueAtTime(0.04, t + st + 0.05); g.gain.exponentialRampToValueAtTime(0.0001, t + st + 0.32);
+    o.connect(g).connect(out); o.start(t + st); am.start(t + st); o.stop(t + st + 0.35); am.stop(t + st + 0.35); }
+}
+/* 밤 소리: 귀뚜라미, 소쩍새, 모닥불 탁탁 */
+function cricket() {
+  const ctx = A.ctx, t = ctx.currentTime + 0.02, f = 4200 + Math.random() * 600, p = ctx.createStereoPanner ? ctx.createStereoPanner() : ctx.createGain(); if (p.pan) p.pan.value = Math.random() * 1.8 - 0.9;
+  const g0 = ctx.createGain(); g0.gain.value = 0.3 + Math.random() * 0.7; p.connect(g0).connect(A.nightG);
+  const chirps = 2 + Math.floor(Math.random() * 3);
+  for (let c = 0; c < chirps; c++) for (let k = 0; k < 4; k++) { const st = t + c * 0.42 + k * 0.032, o = ctx.createOscillator(), g = ctx.createGain(); o.type = 'sine'; o.frequency.value = f;
+    g.gain.setValueAtTime(0.0001, st); g.gain.exponentialRampToValueAtTime(0.018, st + 0.006); g.gain.exponentialRampToValueAtTime(0.0001, st + 0.026); o.connect(g).connect(p); o.start(st); o.stop(st + 0.03); }
+}
+function owl() {
+  const ctx = A.ctx, t = ctx.currentTime + 0.02, p = ctx.createStereoPanner ? ctx.createStereoPanner() : ctx.createGain(); if (p.pan) p.pan.value = Math.random() * 1.6 - 0.8; p.connect(A.nightG);
+  for (const [st, f, len] of [[0, 560, 0.28], [0.55, 520, 0.42]]) { const o = ctx.createOscillator(), g = ctx.createGain(); o.type = 'sine';
+    o.frequency.setValueAtTime(f * 0.92, t + st); o.frequency.linearRampToValueAtTime(f, t + st + 0.08); o.frequency.linearRampToValueAtTime(f * 0.94, t + st + len);
+    g.gain.setValueAtTime(0.0001, t + st); g.gain.exponentialRampToValueAtTime(0.05, t + st + 0.06); g.gain.exponentialRampToValueAtTime(0.0001, t + st + len); o.connect(g).connect(p); o.start(t + st); o.stop(t + st + len + 0.05); }
+}
+function crackle(n = 1) {
+  const ctx = A.ctx, t = ctx.currentTime + 0.01;
+  for (let i = 0; i < n; i++) { const st = t + Math.random() * 0.25, s = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain(); s.buffer = A.noise; f.type = 'highpass'; f.frequency.value = 1800 + Math.random() * 2500;
+    g.gain.setValueAtTime(0.0001, st); g.gain.exponentialRampToValueAtTime(0.06 + Math.random() * 0.12, st + 0.002); g.gain.exponentialRampToValueAtTime(0.0001, st + 0.012 + Math.random() * 0.03);
+    s.connect(f).connect(g).connect(A.fireG); s.start(st, Math.random() * 1.8, 0.06); }
 }
 function bell(vol = 1) {
   const ctx = A.ctx, t = ctx.currentTime + 0.02;
@@ -1165,21 +1611,38 @@ function updateAudio(dt) {
   audioTick -= dt; if (audioTick > 0) return; audioTick = 0.25;
   const now = A.ctx.currentTime;
   const gust = 0.6 + 0.4 * Math.sin(T * 0.21) * Math.sin(T * 0.07 + 1);
-  const level = 0.09 + 0.10 * S.sb + 0.14 * smooth(40, 95, player.y);
-  A.windG.gain.setTargetAtTime(level * gust, now, 0.8);
+  const camp = !!S.camp, night = S.night, sv = 1;
+  const level = (IS_PARK ? 0.05 + 0.06 * S.sb : 0.09 + 0.10 * S.sb + 0.14 * smooth(40, 95, player.y)) * (1 - 0.45 * night);
+  A.windG.gain.setTargetAtTime(level * gust * sv, now, 0.8);
   A.windF.frequency.setTargetAtTime(280 + 300 * gust, now, 0.8);
-  const dp = Math.hypot(player.x - POND.x, player.z - POND.z);
-  // 계곡물은 산 어디서나 은은하게, 연못 가까이에서는 더 크게
-  A.streamG.gain.setTargetAtTime(lerp(0.16, 0.09, S.sb) + 0.4 * (1 - smooth(8, 50, dp)) * (1 - 0.6 * S.sb), now, 0.6);
+  let dw = 1e9; for (const w of WATERS) dw = Math.min(dw, (waterE(w, player.x, player.z) - 1) * Math.min(w.rx, w.rz));
+  // 산: 계곡물은 어디서나 은은하게, 연못 가까이에서는 더 크게 / 공원: 물가에서만 찰랑
+  const stream = IS_PARK ? 0.03 + 0.16 * (1 - smooth(2, 26, dw)) * (1 - 0.7 * S.sb) : lerp(0.16, 0.09, S.sb) + 0.4 * (1 - smooth(8, 50, Math.max(0, dw))) * (1 - 0.6 * S.sb);
+  A.streamG.gain.setTargetAtTime(stream * (camp ? 1.15 : 1) * sv, now, 0.6);
   const fb = W.fallBase, fx = fb[0] - player.x, fz = fb[2] - player.z, df = Math.hypot(fx, fz) || 1;
-  A.fallG.gain.setTargetAtTime(1.1 * Math.pow(1 - smooth(4, 110, df), 1.6) * (1 - 0.94 * S.sb), now, 0.6);
+  A.fallG.gain.setTargetAtTime((W.fallGain || 1.1) * Math.pow(1 - smooth(4, W.fallReach || 110, df), 1.6) * (1 - 0.94 * S.sb) * sv, now, 0.6);
   if (A.fallPan) A.fallPan.pan.setTargetAtTime(clamp(((fx / df) * -Math.cos(cam.yaw) + (fz / df) * Math.sin(cam.yaw)) * 0.75, -0.9, 0.9), now, 0.3);
-  A.amb.gain.setTargetAtTime(S.amb * (player.act && player.act.type === 'meditate' ? 0.55 : 1) * (S.breath ? 0.6 : 1), now, 0.8);
-  if (S.mute) return;
+  const edge = IS_PARK ? 1 - smooth(4, 40, Math.min(PARK.hw - Math.abs(player.x), PARK.hl - Math.abs(player.z))) : 0;
+  A.cityG.gain.setTargetAtTime(IS_PARK ? (0.07 + 0.16 * edge) * (1 - 0.5 * night) * sv : 0, now, 0.8);
+  A.nightG.gain.setTargetAtTime(night * sv, now, 1.5);
+  A.fireG.gain.setTargetAtTime(camp && S.camp.fireOn ? 0.5 : 0, now, 1.2);
+  const med = player.act && player.act.type === 'meditate';
+  A.amb.gain.setTargetAtTime(S.amb * (med ? 0.55 : 1) * (S.breath ? 0.6 : 1), now, 0.8);
+  if (S.mute || (camp && S.camp.silent)) return;
+  if (camp && S.camp.fireOn) { A.crackT -= 0.25; if (A.crackT <= 0) { A.crackT = 0.15 + Math.random() * 0.9; crackle(1 + Math.floor(Math.random() * 3)); } }
+  if (night > 0.5) {   // 밤: 새 대신 풀벌레와 소쩍새
+    if (S.sb < 0.5) { A.crickT -= 0.25; if (A.crickT <= 0) { A.crickT = 0.25 + Math.random() * 0.9; cricket(); if (Math.random() < 0.4) cricket(); } }
+    A.owlT -= 0.25; if (A.owlT <= 0) { A.owlT = 14 + Math.random() * 26; owl(); }
+    if (IS_PARK) { A.sirenT -= 0.25; if (A.sirenT <= 0) { A.sirenT = 120 + Math.random() * 160; if (Math.random() < 0.5) citySiren(); } }
+    return;
+  }
   A.birdT -= 0.25;
   if (A.birdT <= 0) {
     const high = player.y > 85 ? 2 : 1, dusk = 1 + 1.6 * S.tb;
-    if (S.sb < 0.5) {
+    if (IS_PARK) {
+      A.birdT = (1.6 + Math.random() * 3) * dusk * (S.sb > 0.5 ? 2 : 1);
+      const r = Math.random(); if (r < 0.4) chirp(); else if (r < 0.62) pigeon(); else if (r < 0.82) (S.sb < 0.5 ? trill : tit)(); else whistle();
+    } else if (S.sb < 0.5) {
       A.birdT = (1.0 + Math.random() * 2.2) * high * dusk;
       const r = Math.random();
       if (r < 0.34) chirp(); else if (r < 0.6) trill(); else if (r < 0.86) whistle(); else if (S.tb < 0.6) woodpecker(); else chirp();
@@ -1188,13 +1651,22 @@ function updateAudio(dt) {
       if (Math.random() < 0.75) tit(); else if (Math.random() < 0.5) woodpecker();
     }
   }
+  if (IS_PARK) {
+    if (!med && !camp) {
+      A.hornT -= 0.25; if (A.hornT <= 0) { A.hornT = 7 + Math.random() * 16; if (Math.random() < 0.35 + 0.5 * edge) cityHorn(); }
+      A.sirenT -= 0.25; if (A.sirenT <= 0) { A.sirenT = 80 + Math.random() * 120; citySiren(); }
+      A.hoofT -= 0.25; if (A.hoofT <= 0) { A.hoofT = 18 + Math.random() * 20; if (player.z < -200) hooves(); }
+    }
+    return;
+  }
   A.bellT -= 0.25;
   const dpv = Math.hypot(player.x - PV.x, player.z - PV.z);
   if (A.bellT <= 0) { A.bellT = 5 + Math.random() * 8; if (dpv < 30) bell(0.5 + 0.5 * (1 - dpv / 30)); }
 }
 document.addEventListener('visibilitychange', () => {
-  if (document.hidden) { if (A.ctx) A.ctx.suspend(); if (S.started) netPause(); }
-  else if (S.started) { if (A.ctx) A.ctx.resume(); netResume(); }
+  const asleep = S.camp && S.camp.phase === 'sleep';   // 잠자는 중에는 소리를 멈추지 않는다
+  if (document.hidden) { if (A.ctx && !asleep) A.ctx.suspend(); if (S.started) netPause(); }
+  else if (S.started) { if (A.ctx) A.ctx.resume(); netResume(); if (asleep && S.campAwake && !S.camp.silent) keepAwake(true); }
 });
 
 /* ---------------- input ---------------- */
@@ -1228,6 +1700,13 @@ addEventListener('keyup', e => { const k = KEYMAP[e.code]; if (k) keys[k] = fals
 addEventListener('blur', () => { for (const k in keys) keys[k] = false; });
 
 function walkable(x, z) {
+  if (IS_PARK) {
+    if (Math.abs(x) > PARK.hw - 1 || Math.abs(z) > PARK.hl - 1) return false;
+    if (inWater(x, z, 1.0) && bridgeFloor(x, z) === null) return false;
+    if (Math.hypot(x - FOUNTAIN.x, z - FOUNTAIN.z) < FOUNTAIN.r + 0.3) return false;
+    if (Math.abs(x - CASTLE.x - 0.4) < 5.6 && Math.abs(z - CASTLE.z + 0.2) < 3.6) return false;
+    return true;
+  }
   if (Math.hypot(x, z) > 205) return false;
   if (Math.hypot(x - POND.x, z - POND.z) < POND.r + 0.4 && getH(x, z) < WATER + 0.3) return false;
   return true;
@@ -1264,7 +1743,7 @@ function movePlayer(dt) {
     let [d, i] = nearestTrail(player.x, player.z, Math.max(0, player.idx - 30), Math.min(TN - 1, player.idx + 30));
     if (d > 8) [d, i] = nearestTrail(player.x, player.z);
     player.idx = i;
-    if ((S.autoDir > 0 && i >= TN - 3) || (S.autoDir < 0 && i <= 2)) { S.auto = false; updateWalkBtn(); if (S.autoDir < 0) toast('산길 입구에 내려왔어요. 수고하셨습니다'); }
+    if ((S.autoDir > 0 && i >= TN - 3) || (S.autoDir < 0 && i <= 2)) { S.auto = false; updateWalkBtn(); if (S.autoDir < 0) toast(IS_PARK ? '5번가 입구로 돌아왔어요. 수고하셨습니다' : '산길 입구에 내려왔어요. 수고하셨습니다'); }
     else { const j = clamp(i + 5 * S.autoDir, 0, TN - 1); mx = TX[j] - player.x; mz = TZ[j] - player.z; }
   } else if (player.target) {
     mx = player.target.x - player.x; mz = player.target.z - player.z; dist = Math.hypot(mx, mz);
@@ -1302,12 +1781,14 @@ const canSound = () => A.ctx && !S.mute;
 function startAct(type) {
   if (!S.started) return;
   closeMenus();
+  if (type === 'camp') { openCampCard(); return; }
   if (type === 'breath') { if (player.act && player.act.type !== 'meditate') cancelAct(); startBreath(); return; }
   if (S.breath) stopBreath();
   if (player.act && GREETS.includes(player.act.type)) player.act = null;
   if (player.act) { if (player.act.type === 'meditate' && type === 'meditate') standUp(); else toast('하던 걸 마저 하고 할게요'); return; }
   S.auto = false; player.target = null; updateWalkBtn(); S.lastDrag = -10;
   player.act = { type, t: 0, fired: 0, leaving: false, bowl: false, lastBowl: 0 };
+  if (type === 'meditate') { unlockVoice(); toast('5분 호흡 명상을 시작해요. 동그라미를 따라 숨 쉬어 보세요'); }
   $('#actPill').hidden = false; updatePill(); netState(true);
 }
 /* 인사: 목례, 손 흔들기, 하이파이브. 가까운 사람(산객이나 실제 사람)을 향해 하고, 상대도 답한다 */
@@ -1348,13 +1829,13 @@ function npcRespond(n, kind) {
 const pickOne = arr => arr[Math.floor(Math.random() * arr.length)];
 function standUp() {
   const a = player.act; if (!a || a.type !== 'meditate' || a.leaving) return;
-  a.leaving = true; if (canSound()) sfx.bowl(0.6);
-  if (a.t > 20) toast(`${fmtDur(a.t)} 동안 명상했어요`);
+  a.leaving = true; hush(); clearTimeout(medLineTimer);
+  if (!a.done) { if (canSound()) sfx.bowl(0.6); const mt = a.medStart ? medTime(a) : a.t; if (mt > 20) toast(`${fmtDur(Math.min(mt, MED.total))} 동안 명상했어요`); }
   updatePill();
 }
 function cancelAct() {
   const a = player.act; if (!a) return;
-  if (a.type === 'meditate') standUp(); else { player.act = null; $('#actPill').hidden = true; netState(true); }
+  if (a.type === 'meditate') standUp(); else if (a.type === 'camp') wakeCamp(); else { player.act = null; $('#actPill').hidden = true; netState(true); }
 }
 function npcRest(n, dur) {
   n.pause = dur; const r = R();
@@ -1368,11 +1849,14 @@ function updateCharAct(c, dt) {
   a.t += dt;
   if (a.type === 'meditate') {
     c.sit = lerp(c.sit, a.leaving ? 0 : 1, 1 - Math.exp(-dt * (a.leaving ? 3 : 2)));
-    if (c === player && !a.leaving) {
-      if (!a.bowl && c.sit > 0.85) { a.bowl = true; a.lastBowl = a.t; if (canSound()) sfx.bowl(1); }
-      else if (a.bowl && a.t - a.lastBowl > 90) { a.lastBowl = a.t; if (canSound()) sfx.bowl(0.5); }
-    }
+    if (c === player && !a.leaving && !a.bowl && c.sit > 0.85) { a.bowl = true; if (canSound()) sfx.bowl(1); startMeditation(a); }
     if (a.leaving && c.sit < 0.03) { c.sit = 0; c.act = null; if (c === player) { $('#actPill').hidden = true; netState(true); } }
+    return;
+  }
+  if (a.type === 'camp') {
+    if (!a.spot) a.spot = c === player && S.camp ? S.camp.spot : campSpot(c);
+    const sitting = c === player ? !!(S.camp && S.camp.phase === 'pitch' && a.t > 1.2) : a.t > 1.2 && a.t < CAMP_IN;
+    c.sit = lerp(c.sit, sitting ? 1 : 0, 1 - Math.exp(-dt * 2));
     return;
   }
   if (a.type === 'hi5' && c.hiTo) {
@@ -1395,14 +1879,246 @@ function updateCharAct(c, dt) {
 function updatePill() {
   const a = player.act; if (!a) return;
   if (a.type === 'meditate') {
-    $('#actTitle').textContent = a.leaving ? '천천히 일어나는 중' : `명상 중 · ${fmtDur(a.t)}`;
-    $('#actSub').textContent = a.leaving ? '' : MED_LINES[Math.floor(a.t / 20) % MED_LINES.length];
+    const mt = a.medStart ? medTime(a) : 0;
+    $('#actTitle').textContent = a.leaving ? '천천히 일어나는 중' : !a.medStart ? '자리에 앉는 중' : mt < MED.total ? `호흡 명상 · ${fmtDur(mt)} / 5:00` : '명상을 마쳤어요';
+    $('#actSub').textContent = a.leaving || a.medStart ? '' : MED_LINES[0];
     $('#actStop').textContent = '일어나기'; $('#actStop').hidden = a.leaving;
+  } else if (a.type === 'camp') {
+    const C = S.camp, ph = C ? C.phase : 'wake';
+    $('#actTitle').textContent = ph === 'wake' ? '아침이에요' : C.t < 2.2 ? '텐트 치는 중' : C.t < 5 && C.fire ? '모닥불 피우는 중' : '불 앞에서 쉬는 중';
+    $('#actSub').textContent = ph === 'wake' ? '텐트를 걷고 있어요' : `${Math.max(1, Math.ceil(CAMP_IN - C.t))}초 뒤 텐트로 들어가요`;
+    $('#actStop').textContent = ph === 'wake' ? '바로 걷기' : '그만'; $('#actStop').hidden = false;
   } else {
     $('#actTitle').textContent = a.type === 'snack' ? '에너지바 먹는 중' : (S.sb > 0.5 ? '보리차 마시는 중' : '물 마시는 중');
     $('#actSub').textContent = ''; $('#actStop').textContent = '그만'; $('#actStop').hidden = false;
   }
 }
+/* ================= 5분 호흡 명상 =================
+   앉고 나면 300초 동안 진행한다. 0~40초 자리 잡기, 40~256초 4초 들숨 · 2초 멈춤 · 6초 날숨을 18번,
+   그 뒤 호흡을 놓아 주고 싱잉볼 세 번으로 마친다. 시간은 실제 시계로 잰다 (화면이 버벅여도 리듬이 늘어지지 않게). */
+const MED = { total: 300, from: 40, to: 256, inS: 4, holdS: 2, outS: 6 };
+MED.cyc = MED.inS + MED.holdS + MED.outS;
+const MED_SCRIPT = () => [
+  [1.5, '편하게 앉았어요. 허리는 곧게 세우고, 어깨는 툭 내려놓아요.'],
+  [10.5, '눈을 살며시 감거나, 시선을 앞쪽 땅에 부드럽게 두세요.'],
+  [19.5, IS_PARK ? '멀리 도시의 웅성임, 가까운 새소리. 들리는 그대로 들어 보세요.' : '바람 소리, 물소리, 새소리. 들리는 그대로 들어 보세요.'],
+  [29.5, '이제 숨에 마음을 모아요. 동그라미를 따라 함께 숨 쉬어요.'],
+  [101, '좋아요. 내쉴 때마다 어깨와 턱의 힘이 조금씩 풀려요.'],
+  [149, IS_PARK ? '들숨에 나무 냄새 섞인 공기가 코끝을 지나요. 날숨에 하루의 긴장을 내려놓아요.' : '들숨에 서늘한 산 공기가 코끝을 지나요. 날숨에 하루의 긴장을 내려놓아요.'],
+  [185, '이마, 눈가, 턱. 어깨, 가슴, 배. 차례로 편안해져요.'],
+  [221, '생각이 떠올라도 괜찮아요. 구름처럼 흘려보내고, 다시 숨으로 돌아와요.'],
+  [258, '이제 호흡을 놓아 주세요. 몸이 스스로 숨 쉬도록 두세요.'],
+  [272, '지금 이 고요함을 기억해 두세요. 언제든 다시 돌아올 수 있어요.'],
+  [286, '천천히 손끝과 발끝을 움직여 보세요. 준비가 되면 눈을 떠요.']
+];
+const VOICE = { ko: null, checked: false, warned: false };
+function koVoice() {
+  if (!('speechSynthesis' in window)) return null;
+  const vs = speechSynthesis.getVoices();
+  if (vs.length) { VOICE.checked = true; VOICE.ko = vs.find(v => /^ko/i.test(v.lang) && /yuna|sora|heami|google|female|여/i.test(v.name)) || vs.find(v => /^ko/i.test(v.lang)) || null; }
+  return VOICE.ko;
+}
+if ('speechSynthesis' in window) { try { speechSynthesis.onvoiceschanged = koVoice; koVoice(); } catch (e) {} }
+function say(text, rate = 0.86) {
+  if (!S.voice || S.mute || !('speechSynthesis' in window)) return;
+  const v = koVoice();
+  if (!v) { if (VOICE.checked && !VOICE.warned) { VOICE.warned = true; toast('이 기기에는 한국어 목소리가 없어 글자로 안내해요'); } return; }
+  try { const u = new SpeechSynthesisUtterance(text); u.voice = v; u.lang = v.lang; u.rate = rate; u.pitch = 0.95; u.volume = 0.9; speechSynthesis.speak(u); } catch (e) {}
+}
+function hush() { try { if ('speechSynthesis' in window) speechSynthesis.cancel(); } catch (e) {} }
+function unlockVoice() { try { if ('speechSynthesis' in window && S.voice) { const u = new SpeechSynthesisUtterance(' '); u.volume = 0; speechSynthesis.speak(u); } } catch (e) {} }
+/* 숨을 따라가는 낮은 울림: 들숨에 차오르고 날숨에 잦아든다 */
+function medPad(kind, dur) {
+  if (!canSound()) return;
+  const ctx = A.ctx, t = ctx.currentTime + 0.02, g = ctx.createGain(); g.gain.value = 0; g.connect(A.sfx);
+  const fs = kind === 'in' ? [174.6, 261.6] : [164.8, 246.9];
+  for (const f of fs) { const o = ctx.createOscillator(); o.type = 'sine'; o.frequency.setValueAtTime(f, t); if (kind === 'in') o.frequency.linearRampToValueAtTime(f * 1.06, t + dur); else o.frequency.linearRampToValueAtTime(f * 0.94, t + dur); o.connect(g); o.start(t); o.stop(t + dur + 0.6); }
+  if (kind === 'in') { g.gain.linearRampToValueAtTime(0.022, t + dur); g.gain.setTargetAtTime(0.0001, t + dur, 0.5); }
+  else { g.gain.setValueAtTime(0.022, t); g.gain.linearRampToValueAtTime(0.0001, t + dur); }
+}
+function medTimeline() {
+  const ev = [];
+  for (const [t, line] of MED_SCRIPT()) ev.push([t, () => { showMedLine(line); say(line); }]);
+  const n = Math.round((MED.to - MED.from) / MED.cyc);
+  for (let k = 0; k < n; k++) {
+    const t0 = MED.from + k * MED.cyc, cue = k < 3 || k === 8 || k === 14;
+    ev.push([t0, () => { if (canSound()) { breathSound('in', MED.inS - 0.2); medPad('in', MED.inS); } if (cue) say('들이쉬고', 0.8); }]);
+    ev.push([t0 + MED.inS, () => { if (cue) say('잠시 멈추고', 0.8); }]);
+    ev.push([t0 + MED.inS + MED.holdS, () => { if (canSound()) { breathSound('out', MED.outS - 0.3); medPad('out', MED.outS); } if (cue) say('천천히 내쉬어요', 0.78); }]);
+  }
+  ev.push([MED.from - 0.6, () => { if (canSound()) sfx.bowl(0.45); }]);
+  ev.push([MED.to + 1, () => { if (canSound()) sfx.bowl(0.45); }]);
+  for (const t of [294, 297.5, 301]) ev.push([t, () => { if (canSound()) sfx.bowl(0.9); }]);
+  ev.push([MED.total + 3, () => { toast('5분 호흡 명상을 마쳤어요. 몸이 한결 가볍죠?'); }]);
+  return ev.sort((a, b) => a[0] - b[0]);
+}
+let medLineTimer = 0;
+function showMedLine(text) {
+  const el = $('#medLine'); el.classList.add('fade'); clearTimeout(medLineTimer);
+  medLineTimer = setTimeout(() => { el.textContent = text; el.classList.remove('fade'); medLineTimer = setTimeout(() => el.classList.add('fade'), 9500); }, 450);
+}
+function medPhase(mt) {   // 지금 몇 번째 숨의 어느 단계인지
+  if (mt < MED.from || mt >= MED.to) return null;
+  const k = Math.floor((mt - MED.from) / MED.cyc), u = (mt - MED.from) - k * MED.cyc;
+  if (u < MED.inS) return { k, ph: 'in', u, left: MED.inS - u, s: smooth(0, 1, u / MED.inS) };
+  if (u < MED.inS + MED.holdS) return { k, ph: 'hold', u, left: MED.inS + MED.holdS - u, s: 1 };
+  return { k, ph: 'out', u, left: MED.cyc - u, s: 1 - smooth(0, 1, (u - MED.inS - MED.holdS) / MED.outS) };
+}
+function medTime(a) { return a.medStart ? (performance.now() - a.medStart) / 1000 : 0; }
+function updateMedGuide() {
+  const a = player.act, el = $('#medGuide');
+  const on = !!(a && a.type === 'meditate' && a.guide && !a.leaving && a.medStart);
+  if (el.hidden === on) { el.hidden = !on; document.body.classList.toggle('calm', on); }
+  if (!on) return;
+  const mt = medTime(a);
+  while (a.ev && a.evI < a.ev.length && mt >= a.ev[a.evI][0]) { const e = a.ev[a.evI++]; if (mt - e[0] < 2.5) e[1](); }
+  if (mt > MED.total + 6 && !a.done) { a.done = true; standUp(); return; }
+  const p = medPhase(mt);
+  let sc, ph, cnt;
+  if (p) { sc = 0.45 + 0.55 * p.s; ph = p.ph === 'in' ? '들이쉬기' : p.ph === 'hold' ? '멈춤' : '내쉬기'; cnt = String(Math.ceil(p.left)); }
+  else { sc = 0.55 + 0.05 * Math.sin(mt * 1.1); ph = mt < MED.from ? '자리 잡기' : mt < MED.total ? '고요히' : '마침'; cnt = mt < MED.from ? `숨 고르기까지 ${Math.ceil(MED.from - mt)}초` : ''; }
+  $('#medCore').style.transform = `scale(${sc.toFixed(3)})`;
+  $('#medPhase').textContent = ph; $('#medCount').textContent = cnt;
+  // 캐릭터도 같은 리듬으로 가슴이 오르내린다
+  a.breathK = p ? p.s : 0.5 + 0.5 * Math.sin(mt * 0.9);
+}
+function startMeditation(a) {
+  a.guide = true; a.ev = medTimeline(); a.evI = 0; a.medStart = performance.now();
+  $('#medLine').textContent = ''; $('#medLine').classList.add('fade');
+}
+
+/* ================= 야영: 텐트 치고 잠들기 =================
+   0~2초 텐트를 치고, 2초에 모닥불을 붙이고, 불 앞에 앉아 있는 동안 밤이 내려앉는다.
+   12초에 텐트로 들어가 잠든다. 소리는 고른 시간 동안 이어지다 마지막 몇 분에 걸쳐 천천히 꺼진다. */
+const CAMP_IN = 12;
+function campSpot(c) {   // 근처에서 가장 평평하고 길과 나무를 비켜난 자리에 텐트를, 내 앞에 모닥불을 둔다
+  const flat = (x, z, r) => { let lo = 1e9, hi = -1e9; for (const [a, b] of [[r, 0], [-r, 0], [0, r], [0, -r], [r * 0.7, r * 0.7], [-r * 0.7, r * 0.7], [r * 0.7, -r * 0.7], [-r * 0.7, -r * 0.7], [0, 0]]) { const h = groundY(x + a, z + b); lo = Math.min(lo, h); hi = Math.max(hi, h); } return hi - lo; };
+  const treeNear = (x, z, r) => { for (let i = -1; i <= 1; i++) for (let j = -1; j <= 1; j++) { const cell = W.treeGrid && W.treeGrid.get((Math.floor(x / 8) + i) + ',' + (Math.floor(z / 8) + j)); if (cell) for (const t of cell) if (Math.hypot(x - t[0], z - t[1]) < r) return 1; } return 0; };
+  const ok = (x, z) => walkable(x, z) && !(IS_PARK && (inWater(x, z, 1.25) || bridgeFloor(x, z) !== null));
+  let best = null, bs = 1e9;
+  for (let k = 0; k < 16; k++) for (const d of [3.2, 4.4]) {
+    const a = k / 16 * TAU + c.heading, x = c.x + Math.sin(a) * d, z = c.z + Math.cos(a) * d;
+    if (!ok(x, z)) continue;
+    const sc = flat(x, z, 1.4) * 4 + (trailDist(x, z)[0] < 2.6 ? 3 : 0) + treeNear(x, z, 2.0) * 5 + d * 0.2;
+    if (sc < bs) { bs = sc; best = [x, z]; }
+  }
+  if (!best) best = [c.x + Math.cos(c.heading) * 3, c.z - Math.sin(c.heading) * 3];
+  let fb = null, fs = 1e9;
+  for (let k = 0; k < 12; k++) {
+    const a = k / 12 * TAU + c.heading, x = c.x + Math.sin(a) * 1.8, z = c.z + Math.cos(a) * 1.8;
+    if (!ok(x, z) || Math.hypot(x - best[0], z - best[1]) < 2.7) continue;
+    const sc = flat(x, z, 0.7) * 3 + treeNear(x, z, 1.6) * 4 + Math.abs(Math.hypot(x - best[0], z - best[1]) - 3.2) * 0.3;
+    if (sc < fs) { fs = sc; fb = [x, z]; }
+  }
+  if (!fb) fb = [c.x + Math.sin(c.heading) * 1.8, c.z + Math.cos(c.heading) * 1.8];
+  const [tx, tz] = best, [fx, fz] = fb;
+  return { tx, tz, ty: groundY(tx, tz) - 0.06, yaw: Math.atan2(fx - tx, fz - tz), fx, fz, fy: groundY(fx, fz) };
+}
+const inTent = c => c === player ? !!(S.camp && S.camp.phase === 'sleep') : !!(c.act && c.act.type === 'camp' && c.act.t > CAMP_IN);
+function openCampCard() {
+  closeMenus();
+  if (player.act) { if (player.act.type === 'meditate') standUp(); else { toast('하던 걸 마저 하고 할게요'); return; } }
+  $('#campDesc').textContent = IS_PARK
+    ? '잔디밭에 작은 텐트를 치고 모닥불을 피워요. 멀리 도시의 낮은 웅성임, 풀벌레 소리, 가끔 들리는 부엉이 소리를 들으며 잠들어 보세요.'
+    : (S.sb > 0.5 ? '눈 쌓인 숲에 텐트를 치고 모닥불을 피워요. 바람 소리와 얼음 밑 물소리, 타닥이는 불 소리를 들으며 잠들어 보세요.'
+      : '산속에 텐트를 치고 모닥불을 피워요. 계곡 물소리, 풀벌레, 소쩍새 소리를 들으며 잠들어 보세요.');
+  $('#campTimer').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', +b.dataset.m === S.campMin ? 'true' : 'false'));
+  $('#campFire').checked = S.campFire; $('#campAwake').checked = S.campAwake;
+  $('#campCard').hidden = false;
+}
+function startCamp() {
+  $('#campCard').hidden = true; audioInit();
+  if (S.breath) stopBreath();
+  S.auto = false; player.target = null; updateWalkBtn(); S.lastDrag = -10;
+  S.campFire = $('#campFire').checked; S.campAwake = $('#campAwake').checked; store.set('campFire', S.campFire); store.set('campAwake', S.campAwake); store.set('campMin', S.campMin);
+  S.camp = { spot: campSpot(player), phase: 'pitch', t: 0, fire: S.campFire, fireOn: false, min: S.campMin, tentK: 0, silent: false, sleepAt: 0, endAt: 0, pitched: false };
+  player.act = { type: 'camp', t: 0 };
+  player.heading = Math.atan2(S.camp.spot.fx - player.x, S.camp.spot.fz - player.z); cam.lim = 0;
+  $('#actPill').hidden = false; updatePill(); netState(true);
+  if (canSound()) { campSfx.rustle(); setTimeout(() => canSound() && campSfx.stakes(), 700); }
+}
+const campSfx = {
+  rustle() { const t = A.ctx.currentTime + 0.02; for (let i = 0; i < 14; i++) noiseHit(t + Math.random() * 1.4, { type: 'bandpass', f: 900 + Math.random() * 1600, q: 0.6, dur: 0.06 + Math.random() * 0.12, g: 0.05 + Math.random() * 0.06, rate: 0.7 }); },
+  stakes() { const t = A.ctx.currentTime + 0.02; for (let i = 0; i < 4; i++) { noiseHit(t + i * 0.28, { type: 'lowpass', f: 600, q: 1, dur: 0.05, g: 0.22 }); toneHit(t + i * 0.28, { f: 220, f2: 150, dur: 0.06, g: 0.06 }); } },
+  strike() { const t = A.ctx.currentTime + 0.02; noiseHit(t, { type: 'highpass', f: 2500, q: 0.7, dur: 0.18, g: 0.22, rate: 1.4 }); noiseHit(t + 0.15, { type: 'lowpass', f: 800, f2: 300, q: 0.5, dur: 0.9, g: 0.12, rate: 0.6 }); },
+  zip(up = true) { const t = A.ctx.currentTime + 0.02; for (let i = 0; i < 22; i++) noiseHit(t + i * 0.035, { type: 'bandpass', f: (up ? 1400 : 3200) + (up ? 1 : -1) * i * 80, q: 3, dur: 0.02, g: 0.06 }); }
+};
+function updateCamp(dt) {
+  const C = S.camp; if (!C) return;
+  C.t += dt; const a = player.act;
+  if (C.phase === 'pitch') {
+    C.tentK = smooth(0, 1.8, C.t);
+    if (!C.fireOn && C.fire && C.t > 2.4) { C.fireOn = true; if (canSound()) { campSfx.strike(); crackle(4); } }
+    if (C.t > CAMP_IN) enterTent();
+  } else if (C.phase === 'sleep') {
+    const now = performance.now();
+    if (C.endAt && !C.silent && now > C.endAt) { C.silent = true; $('#sleepVeil').style.transition = 'opacity 8s linear'; $('#sleepVeil').style.opacity = '0.97'; keepAwake(false); }
+    C.uiT = (C.uiT || 0) - dt; if (C.uiT <= 0) { C.uiT = 1; updateSleepUI(); }
+  } else if (C.phase === 'wake') {
+    if (C.t > 4.5) C.tentK = 1 - smooth(4.5, 6, C.t);
+    if (C.t > 4.5) C.fireOn = false;
+    if (C.t > 6.2) {
+      S.camp = null; if (a && a.type === 'camp') player.act = null;
+      $('#actPill').hidden = true; netState(true);
+      const mins = Math.round((C.sleptMs || 0) / 60000);
+      toast(mins >= 1 ? `${mins}분 동안 푹 잤어요. 상쾌한 아침이에요` : '잠깐 눈을 붙였어요. 다시 걸어 볼까요');
+    }
+  }
+}
+function enterTent() {
+  const C = S.camp; C.phase = 'sleep'; C.sleepAt = performance.now();
+  C.endAt = C.min ? C.sleepAt + C.min * 60000 : 0;
+  if (canSound()) campSfx.zip(true);
+  $('#actPill').hidden = true;
+  const ui = $('#sleepUI'); ui.hidden = false; ui.classList.remove('idle'); document.body.classList.add('sleeping'); closeMenus();
+  const veil = $('#sleepVeil'); veil.style.transition = 'none'; veil.style.opacity = '0';
+  requestAnimationFrame(() => { veil.style.transition = 'opacity 40s linear'; veil.style.opacity = '0.86'; });
+  sleepIdleSoon(); updateSleepUI();
+  if (A.ctx && A.sleepG) {   // 소리 끄기 타이머: 오디오 엔진 안에서 미리 예약해 두면 화면이 쉬어도 그대로 진행된다
+    const g = A.sleepG.gain, now = A.ctx.currentTime; g.cancelScheduledValues(now); g.setValueAtTime(1, now);
+    if (C.min) { const dur = C.min * 60, fade = Math.min(300, dur * 0.35); g.setValueAtTime(1, now + dur - fade); g.linearRampToValueAtTime(0.0001, now + dur); }
+  }
+  if (C.awake !== false && S.campAwake) keepAwake(true);
+  netState(true);
+}
+function wakeCamp() {
+  const C = S.camp; if (!C) return;
+  if (C.phase === 'wake') { C.t = Math.max(C.t, 6.3); return; }
+  const wasAsleep = C.phase === 'sleep';
+  C.sleptMs = wasAsleep ? performance.now() - C.sleepAt : 0;
+  C.phase = 'wake'; C.t = wasAsleep ? 0 : 4.5; C.silent = false;
+  keepAwake(false);
+  if (A.ctx && A.sleepG) { const g = A.sleepG.gain, now = A.ctx.currentTime; g.cancelScheduledValues(now); g.setValueAtTime(Math.max(0.0001, g.value), now); g.linearRampToValueAtTime(1, now + 1.2); }
+  const ui = $('#sleepUI'); ui.hidden = true; $('#sleepVeil').style.opacity = '0'; document.body.classList.remove('sleeping');
+  if (wasAsleep) {
+    if (canSound()) { campSfx.zip(false); setTimeout(dawnChorus, 900); }
+    S.dawn = 1;
+    const sp = C.spot; player.x = lerp(sp.tx, sp.fx, 0.42); player.z = lerp(sp.tz, sp.fz, 0.42); player.y = groundY(player.x, player.z);
+    player.heading = Math.atan2(sp.fx - sp.tx, sp.fz - sp.tz); player.sit = 0;
+  }
+  $('#actPill').hidden = false; updatePill();
+}
+function dawnChorus() {
+  if (!canSound()) return;
+  const winter = S.sb > 0.5;
+  for (let i = 0; i < 12; i++) setTimeout(() => { if (!canSound()) return; if (winter) tit(); else if (IS_PARK && Math.random() < 0.3) pigeon(); else { const r = Math.random(); (r < 0.4 ? chirp : r < 0.7 ? trill : whistle)(); } }, i * 650 + Math.random() * 500);
+}
+let sleepIdleT = 0;
+function sleepIdleSoon() { clearTimeout(sleepIdleT); $('#sleepUI').classList.remove('idle'); sleepIdleT = setTimeout(() => $('#sleepUI').classList.add('idle'), 5000); }
+function updateSleepUI() {
+  const C = S.camp; if (!C || C.phase !== 'sleep') return;
+  const now = performance.now(), slept = (now - C.sleepAt) / 1000;
+  $('#sleepTitle').textContent = C.silent ? '고요한 밤' : '쉿, 잠드는 중';
+  $('#sleepSub').textContent = C.silent ? `${Math.floor(slept / 60)}분째 자는 중 · 소리는 꺼졌어요` :
+    C.endAt ? `소리는 ${Math.max(1, Math.ceil((C.endAt - now) / 60000))}분 뒤에 천천히 꺼져요` : `${Math.floor(slept / 60)}분째 · 소리는 계속 이어져요`;
+}
+async function keepAwake(on) {
+  try {
+    if (on && 'wakeLock' in navigator) { if (!S.wl) { S.wl = await navigator.wakeLock.request('screen'); S.wl.addEventListener('release', () => { S.wl = null; }); } }
+    else if (!on && S.wl) { const w = S.wl; S.wl = null; await w.release(); }
+  } catch (e) {}
+}
+
 const LANDS = () => CPS.map(c => c.idx);
 function moveNpcs(dt) {
   const lands = LANDS();
@@ -1424,7 +2140,7 @@ function moveNpcs(dt) {
     const bx = lerp(TX[i], TX[i2], t), bz = lerp(TZ[i], TZ[i2], t);
     const tx = TX[i2] - TX[i], tz = TZ[i2] - TZ[i], tl = Math.hypot(tx, tz) || 1;
     const side = 0.75 * n.dir;
-    n.x = bx + (tz / tl) * side; n.z = bz - (tx / tl) * side; n.y = getH(n.x, n.z);
+    n.x = bx + (tz / tl) * side; n.z = bz - (tx / tl) * side; n.y = groundY(n.x, n.z);
     if (moving) n.heading = angLerp(n.heading, Math.atan2(tx * n.dir, tz * n.dir), 1 - Math.exp(-dt * 6));
     n.moveAmt = lerp(n.moveAmt, moving ? 1 : 0, 1 - Math.exp(-dt * 6));
     // 지나가며 먼저 인사하는 산객
@@ -1433,7 +2149,7 @@ function moveNpcs(dt) {
       if (Math.random() < 0.5) {
         n.pause = 1.9; n.heading = Math.atan2(player.x - n.x, player.z - n.z);
         n.act = { type: Math.random() < 0.6 ? 'bow' : 'wave', t: 0 };
-        showBubble(n, pickOne(['안녕하세요', '좋은 산행 되세요', '정상까지 조금만 더요!', '반가워요', '천천히 다녀오세요']), 2.6);
+        showBubble(n, pickOne(IS_PARK ? ['Hi!', '안녕하세요', '좋은 산책 되세요', 'Nice day!', '반가워요'] : ['안녕하세요', '좋은 산행 되세요', '정상까지 조금만 더요!', '반가워요', '천천히 다녀오세요']), 2.6);
         $('#greetBtn').classList.add('near');
       }
     }
@@ -1471,7 +2187,12 @@ function updateCamera(dt) {
   let tgt, desired;
   if (S.started) {
     const act = player.act;
-    if (act && !GREETS.includes(act.type) && T - S.lastDrag > 2.5) {
+    if (act && act.type === 'camp' && act.spot) {
+      const sp = act.spot, asleep = inTent(player), k = 1 - Math.exp(-dt * (asleep ? 0.5 : 1.2));
+      if (T - S.lastDrag > 2.5) cam.yaw = asleep ? cam.yaw + dt * 0.035 : angLerp(cam.yaw, player.heading + Math.PI - 0.75, k);
+      cam.dist = lerp(cam.dist, asleep ? 10 : 6.8, k); cam.pitch = lerp(cam.pitch, asleep ? 0.2 : 0.18, k);
+    }
+    else if (act && !GREETS.includes(act.type) && T - S.lastDrag > 2.5) {
       const k = 1 - Math.exp(-dt * 1.4), med = act.type === 'meditate';
       cam.yaw = angLerp(cam.yaw, player.heading + Math.PI - (med ? 0.35 + 0.3 * Math.sin(act.t * 0.05) : 0.6), k);
       cam.dist = lerp(cam.dist, med ? 6.5 : 4.6, k); cam.pitch = lerp(cam.pitch, med ? 0.22 : 0.1, k);
@@ -1479,11 +2200,26 @@ function updateCamera(dt) {
     else if (S.breath) cam.yaw += dt * 0.09;
     else if (player.moveAmt > 0.3 && T - S.lastDrag > 2.5) cam.yaw = angLerp(cam.yaw, player.heading, 1 - Math.exp(-dt * 1.1));
     tgt = [player.x, player.y + 1.5 - 0.5 * player.sit - (act && act.type !== 'meditate' ? 0.1 : 0), player.z];
+    if (act && act.type === 'camp' && act.spot) { const sp = act.spot, m = inTent(player) ? 1 : 0.35; tgt = [lerp(tgt[0], (sp.tx + sp.fx) / 2, m), lerp(tgt[1], (sp.ty + sp.fy) / 2 + 0.8, m), lerp(tgt[2], (sp.tz + sp.fz) / 2, m)]; }
     const cp = Math.cos(cam.pitch), sp = Math.sin(cam.pitch);
     desired = [tgt[0] - Math.sin(cam.yaw) * cam.dist * cp, tgt[1] + cam.dist * sp, tgt[2] - Math.cos(cam.yaw) * cam.dist * cp];
   } else {
-    const a = T * 0.035 + 2.2; tgt = [10, 34, -30];
-    desired = [tgt[0] + Math.cos(a) * 185, 118, tgt[2] + Math.sin(a) * 185];
+    const a = T * 0.035 + 2.2;
+    if (IS_PARK) { tgt = [0, 6, -70 - Math.cos(a) * 60]; desired = [Math.sin(a) * 34, 62, -70 + Math.cos(a) * 165]; }
+    else { tgt = [10, 34, -30]; desired = [tgt[0] + Math.cos(a) * 185, 118, tgt[2] + Math.sin(a) * 185]; }
+  }
+  if (S.started) {   // 나무에 가리면 카메라를 앞으로 당긴다
+    const dx = desired[0] - tgt[0], dy = desired[1] - tgt[1], dz = desired[2] - tgt[2], L = Math.hypot(dx, dy, dz);
+    let lim = L;
+    for (let s2 = 1.6; s2 < L; s2 += 0.6) {
+      const x = tgt[0] + dx * s2 / L, y = tgt[1] + dy * s2 / L, z = tgt[2] + dz * s2 / L, cell = W.treeGrid.get(Math.floor(x / 8) + ',' + Math.floor(z / 8));
+      let hit = false;
+      if (cell) for (const t of cell) if (y > t[2] && y < t[3] && Math.hypot(x - t[0], z - t[1]) < t[4]) { hit = true; break; }
+      if (!hit) for (const [ox, oz] of [[8, 0], [-8, 0], [0, 8], [0, -8]]) { const c2 = W.treeGrid.get(Math.floor((x + ox * 0.35) / 8) + ',' + Math.floor((z + oz * 0.35) / 8)); if (c2 && c2 !== cell) for (const t of c2) if (y > t[2] && y < t[3] && Math.hypot(x - t[0], z - t[1]) < t[4]) { hit = true; break; } if (hit) break; }
+      if (hit) { lim = Math.max(2.6, s2 - 0.8); break; }
+    }
+    cam.lim = lerp(cam.lim || L, lim, 1 - Math.exp(-dt * (lim < (cam.lim || L) ? 10 : 2)));
+    if (cam.lim < L) { const k2 = cam.lim / L; desired = [tgt[0] + dx * k2, tgt[1] + dy * k2, tgt[2] + dz * k2]; }
   }
   const gh = getH(desired[0], desired[2]) + 1.1; if (desired[1] < gh) desired[1] = gh;
   const k = 1 - Math.exp(-dt * (S.started ? 6 : 3));
@@ -1496,19 +2232,19 @@ function updateHud(dt) {
   hudTick -= dt; if (hudTick > 0 || !S.started) return; hudTick = 0.2;
   updatePill();
   $('#greetBtn').classList.toggle('near', !!nearestOther(5));
-  $('#altVal').textContent = fmtAlt(player.y);
+  const hb = hudBig(); $('#altVal').textContent = hb[0]; $('#altUnit').textContent = hb[1];
   $('#distVal').textContent = (S.walked * UNIT_M / 1000).toFixed(2) + ' km';
   $('#timeVal').textContent = Math.floor((T - S.startT) / 60) + '분';
   const next = CPS.find(c => !S.reached.has(c.key) && c.idx > player.idx) || CPS.find(c => !S.reached.has(c.key));
   $('#nextCp').textContent = next ? `다음 · ${next.name} ${(Math.max(0, next.idx - player.idx) * TL / (TN - 1) * UNIT_M / 1000).toFixed(1)} km` : '모든 쉼터를 지났어요';
-  const dot = $('#meDot'); if (dot) { const [x, y] = profXY(player.idx, 200, 46, 4); dot.setAttribute('cx', x); dot.setAttribute('cy', y); }
+  const dot = $('#meDot'); if (dot) { const [x, y] = IS_PARK ? mapXY(player.x, player.z, 200, 46, 3) : profXY(player.idx, 200, 46, 4); dot.setAttribute('cx', x); dot.setAttribute('cy', y); }
   for (const cp of CPS) {
     if (S.reached.has(cp.key)) continue;
     if (Math.hypot(player.x - cp.x, player.z - cp.z) < cp.r) {
       S.reached.add(cp.key); cp.label.el.classList.add('done');
       const m = document.querySelector(`#miniProfile [data-cp="${cp.key}"]`); if (m) m.setAttribute('fill', '#8fd1a8');
       if (cp.key === 'summit') { if (!S.summitShown) { S.summitShown = true; if (A.ctx && !S.mute) bell(1); setTimeout(showSummit, 600); } }
-      else toast(`${cp.name}에 도착했어요 · 해발 ${fmtAlt(player.y)}m`);
+      else toast(IS_PARK ? `${cp.name}에 왔어요 · ${streetAt(player.z)}번가 근처` : `${cp.name}에 도착했어요 · 해발 ${fmtAlt(player.y)}m`);
     }
   }
 }
@@ -1527,6 +2263,14 @@ function setCommon(env) {
   gl.uniform3fv(u.uSunDir, env.dir); gl.uniform3fv(u.uSunCol, env.sun); gl.uniform3fv(u.uSkyCol, env.sky); gl.uniform3fv(u.uGndCol, env.gnd);
   gl.uniform3fv(u.uFogCol, env.hor); gl.uniform3fv(u.uCam, eye); gl.uniform3fv(u.uSnowCol, [0.95, 0.97, 1.0]);
   gl.uniform1f(u.uFogD, env.fog); gl.uniform1f(u.uSnow, S.sb); gl.uniform1f(u.uSnowLine, lerp(122, 60, S.sb));
+  const f = fireLight(); gl.uniform4f(u.uFire, f[0], f[1], f[2], f[3]);
+}
+function fireLight() {
+  const flick = 0.82 + 0.1 * Math.sin(T * 13.1) + 0.08 * Math.sin(T * 7.3 + 1.7);
+  if (S.camp && S.camp.fireOn) { const sp = S.camp.spot; return [sp.fx, sp.fy + 0.7, sp.fz, (1.1 + 1.6 * S.night) * flick * smooth(2.4, 3.6, S.camp.t + (S.camp.phase !== 'pitch' ? 9 : 0))]; }
+  let best = null, bd = 45;
+  for (const p of NET.peers.values()) { const a = p.act; if (!p.ready || !a || a.type !== 'camp' || !a.spot || a.t < 2.4) continue; const d = Math.hypot(a.spot.fx - player.x, a.spot.fz - player.z); if (d < bd) { bd = d; best = a.spot; } }
+  return best ? [best.fx, best.fy + 0.7, best.fz, (0.8 + 1.6 * S.night) * flick] : [0, 0, 0, 0];
 }
 const ID = M.ident();
 function draw(m, o = {}) {
@@ -1557,7 +2301,9 @@ function computePose(c) {
   }
   if (sit > 0.001) { p.headPitch = 0.12 * sit; p.eyes = 1 - smooth(0.55, 1, sit); p.chest = lerp(p.chest, 1 + 0.03 * Math.sin(T * 1.2), sit); }
   if (c === player && S.breath) { const k = S.breathK; p.chest = 1 + 0.07 * k; p.headPitch += -0.12 * k; p.arms[-1].sh[1] += 0.04 * k; p.arms[1].sh[1] += 0.04 * k; }
-  const a = c.act; if (!a || a.type === 'meditate') return p;
+  const a = c.act;
+  if (a && a.type === 'meditate' && c === player && a.medStart && !a.leaving) { const k = a.breathK || 0; p.chest = 1 + 0.06 * k * c.sit; p.headPitch += -0.06 * k; }
+  if (!a || a.type === 'meditate' || a.type === 'camp') return p;
   const t = a.t, Rm = p.arms[-1], Lf = p.arms[1];
   if (a.type === 'bow') {
     const k = bump(t, 0, 0.35, 1.05, 1.6);
@@ -1673,36 +2419,49 @@ function render() {
   gl.disable(gl.DEPTH_TEST); gl.depthMask(false);
   gl.useProgram(PS.p);
   gl.uniformMatrix4fv(PS.u.uInvVP, false, invVP); gl.uniform3fv(PS.u.uCam, eye); gl.uniform3fv(PS.u.uZen, env.zen); gl.uniform3fv(PS.u.uHor, env.hor);
-  gl.uniform3fv(PS.u.uSunDir, env.dir); gl.uniform3fv(PS.u.uGlow, env.glow); gl.uniform3fv(PS.u.uCloud, env.cloud); gl.uniform1f(PS.u.uTime, T);
+  gl.uniform3fv(PS.u.uSunDir, env.dir); gl.uniform3fv(PS.u.uGlow, env.glow); gl.uniform3fv(PS.u.uCloud, env.cloud); gl.uniform1f(PS.u.uTime, T); gl.uniform1f(PS.u.uNight, S.night);
   gl.bindVertexArray(W.sky); gl.drawArrays(gl.TRIANGLES, 0, 3);
   gl.enable(gl.DEPTH_TEST); gl.depthMask(true); gl.disable(gl.BLEND);
   setCommon(env);
   gl.vertexAttrib4f(3, 0, 0, 0, 0);
   draw(W.terrain, { mode: 0 });
   draw(W.props, { mode: 1 });
+  if (IS_PARK) {
+    draw(W.city, { mode: 1, emissive: 0.04 * S.night });
+    const lit = Math.max(S.tb * 0.75, S.night);
+    draw(W.lampHeads, { mode: 1, tint: mix3([0.9, 0.88, 0.8], [1.0, 0.82, 0.5], lit), emissive: 0.15 + 1.5 * lit, flat: 0 });
+  }
   draw(W.rock, { mode: 1 });
   draw(W.con, { mode: 1, wind: 1 });
   draw(W.dec, { mode: 1, wind: 1 });
   const npcOn = showNpcs();
   if (npcOn) for (const n of NPCS) if (Math.hypot(n.x - eye[0], n.z - eye[2]) < 140) drawHiker(n, false);
-  for (const p of NET.peers.values()) if (p.ready && !p.hidden && Math.hypot(p.x - eye[0], p.z - eye[2]) < 160) drawHiker(p, false);
-  if (S.started) drawHiker(player, true);
+  for (const p of NET.peers.values()) if (p.ready && !p.hidden && Math.hypot(p.x - eye[0], p.z - eye[2]) < 160) {
+    if (p.act && p.act.type === 'camp' && p.act.spot) drawCamp(p.act.spot, smooth(0, 1.8, p.act.t), p.act.t > 2.4, p.jacket);
+    if (!inTent(p)) drawHiker(p, false);
+  }
+  if (S.camp) drawCamp(S.camp.spot, S.camp.tentK, S.camp.fireOn, player.jacket);
+  if (S.started && !inTent(player)) drawHiker(player, true);
   // transparent
   gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); gl.depthMask(false);
   gl.enable(gl.POLYGON_OFFSET_FILL); gl.polygonOffset(-2, -2);
-  if (S.started) drawShadow(player.x, player.z, 0.62);
+  if (S.started && !inTent(player)) drawShadow(player.x, player.z, 0.62);
   if (npcOn) for (const n of NPCS) if (Math.hypot(n.x - eye[0], n.z - eye[2]) < 80) drawShadow(n.x, n.z, 0.6);
   for (const p of NET.peers.values()) if (p.ready && !p.hidden && Math.hypot(p.x - eye[0], p.z - eye[2]) < 80) drawShadow(p.x + (p.ox || 0), p.z + (p.oz || 0), 0.6);
   if (marker) { const a = 1 - marker.t / 1.6, s = 0.5 + marker.t * 0.6; draw(W.uRing, { model: M.chain(M.T(marker.x, getH(marker.x, marker.z) + 0.1, marker.z), M.S(s)), tint: [1, 1, 1], alpha: a * 0.85, emissive: 0.8, flat: 0, snowable: 0 }); }
   gl.disable(gl.POLYGON_OFFSET_FILL);
   const ice = S.sb;
-  draw(W.water, { model: M.T(POND.x, WATER, POND.z), tint: mix3([1, 1, 1], [3.9, 2.4, 2.35], ice), alpha: lerp(0.8, 0.96, ice), emissive: 0.18, flat: 0, snowable: 0 });
-  if (Math.hypot(W.fallBase[0] - eye[0], W.fallBase[2] - eye[2]) < 260) {
+  const wTint = mix3([1, 1, 1], [3.9, 2.4, 2.35], ice), wAlpha = lerp(0.8, 0.96, ice);
+  for (const w of WATERS) draw(W.water, { model: M.chain(M.T(w.x, w.level, w.z), M.S(w.rx * 1.12, 1, w.rz * 1.12)), tint: wTint, alpha: wAlpha, emissive: 0.18, flat: 0, snowable: 0 });
+  if (W.basin) draw(W.water, { model: M.chain(M.T(W.basin.x, W.basin.y, W.basin.z), M.S(W.basin.r, 1, W.basin.r)), tint: wTint, alpha: wAlpha, emissive: 0.2, flat: 0, snowable: 0 });
+  const fountainOff = IS_PARK && ice > 0.5;   // 겨울에는 분수를 잠근다
+  if (!fountainOff && Math.hypot(W.fallBase[0] - eye[0], W.fallBase[2] - eye[2]) < 260) {
     draw(W.fall, { tint: mix3([0.55, 0.78, 0.86], [0.84, 0.93, 1.0], ice), alpha: lerp(0.84, 0.96, ice), emissive: 0.4, flat: 0, snowable: 0, flow: 1, flowSpeed: ice > 0.5 ? 0 : 1.6 });
     if (ice < 0.95) {
       gl.enable(gl.POLYGON_OFFSET_FILL);
-      draw(W.uDisc, { model: M.chain(M.T(W.fallBase[0], W.fallBase[1], W.fallBase[2]), M.S(2.3 + 0.25 * Math.sin(T * 3.1))), tint: [1, 1, 1], alpha: 0.6 * (1 - ice), emissive: 0.7, flat: 0, snowable: 0 });
-      draw(W.uRing, { model: M.chain(M.T(W.fallBase[0], W.fallBase[1] + 0.01, W.fallBase[2]), M.S(3.4 + 0.5 * Math.sin(T * 1.7 + 1))), tint: [1, 1, 1], alpha: 0.35 * (1 - ice), emissive: 0.7, flat: 0, snowable: 0 });
+      const fs = W.foamScale ? W.foamScale / 3.4 : 1;
+      if (!IS_PARK) draw(W.uDisc, { model: M.chain(M.T(W.fallBase[0], W.fallBase[1], W.fallBase[2]), M.S(2.3 + 0.25 * Math.sin(T * 3.1))), tint: [1, 1, 1], alpha: 0.6 * (1 - ice), emissive: 0.7, flat: 0, snowable: 0 });
+      draw(W.uRing, { model: M.chain(M.T(W.fallBase[0], W.fallBase[1] + 0.01, W.fallBase[2]), M.S((3.4 + 0.5 * Math.sin(T * 1.7 + 1)) * fs)), tint: [1, 1, 1], alpha: 0.35 * (1 - ice), emissive: 0.7, flat: 0, snowable: 0 });
       gl.disable(gl.POLYGON_OFFSET_FILL);
       draw(W.mist, { alpha: 0.3 * (1 - ice), emissive: 0.85, flat: 0, snowable: 0 });
     }
@@ -1715,18 +2474,38 @@ function render() {
   updateLabels(canvas.clientWidth, canvas.clientHeight);
 }
 
+/* 모닥불과 텐트 그리기 */
+function drawCamp(sp, tentK, fireOn, color) {
+  if (Math.hypot(sp.tx - eye[0], sp.tz - eye[2]) > 160) return;
+  if (tentK > 0.01) {
+    const k = smooth(0, 1, tentK), glow = inTent(player) && S.camp && S.camp.spot === sp ? 0.16 * S.night : 0;
+    draw(W.tent, { model: M.chain(M.T(sp.tx, sp.ty, sp.tz), M.Ry(sp.yaw), M.S(lerp(0.6, 1, k), k, lerp(0.8, 1, k))), mode: 1, tint: mix3(color, [1, 1, 1], 0.12), emissive: glow, snowable: 0 });
+  }
+  draw(W.fireBase, { model: M.chain(M.T(sp.fx, sp.fy, sp.fz), M.Ry(sp.yaw)), mode: 1, snowable: 0 });
+  if (!fireOn) return;
+  const f = (a, b) => 1 + 0.18 * Math.sin(T * a + b) + 0.1 * Math.sin(T * (a * 1.9) + b * 2.3);
+  for (const [ox, oz, s, h, c, e, ph] of [[0, 0, 0.3, 0.95, [1.0, 0.36, 0.08], 0.95, 0], [0.09, 0.05, 0.2, 0.7, [1.0, 0.56, 0.14], 1.0, 1.7], [-0.08, -0.06, 0.17, 0.55, [1.0, 0.8, 0.38], 1.1, 3.1]]) {
+    draw(W.flame, { model: M.chain(M.T(sp.fx + ox, sp.fy + 0.12, sp.fz + oz), M.Ry(T * 0.7 + ph), M.S(s * (0.9 + 0.1 * f(9, ph)), h * f(11, ph), s)), tint: c, emissive: e, flat: 0, snowable: 0 });
+  }
+  for (let i = 0; i < 5; i++) {   // 불티
+    const u = (T * 0.45 + i * 0.21) % 1, a = i * 2.4 + T * 0.3;
+    draw(W.uSphere, { model: M.chain(M.T(sp.fx + Math.cos(a) * 0.25 * u, sp.fy + 0.4 + u * 2.4, sp.fz + Math.sin(a) * 0.25 * u), M.S(0.025 * (1 - u))), tint: [1, 0.6, 0.2], emissive: 2.2, flat: 0, snowable: 0 });
+  }
+}
+
 /* ---------------- 폭포 물보라 ---------------- */
 function updateMist(dt) {
   const m = W.mist, b = W.fallBase; if (!m) return;
-  if (Math.hypot(b[0] - eye[0], b[2] - eye[2]) > 260 || S.sb > 0.95) return;
+  if (Math.hypot(b[0] - eye[0], b[2] - eye[2]) > 260 || S.sb > (IS_PARK ? 0.5 : 0.95)) return;
+  const dirX = IS_PARK ? 0 : FALL_DIR[0], dirZ = IS_PARK ? 0 : FALL_DIR[1], ms = W.mistScale || 1;
   for (let i = 0; i < m.n; i++) {
     const p = W.mistS[i]; p.life += dt;
-    if (p.life > p.max) { p.life = 0; p.max = rr(2.2, 3.6); p.vx = rr(-0.6, 0.6); p.vz = rr(-0.6, 0.6); }
-    const k = p.life / p.max;
-    m.off[i * 4] = b[0] + p.vx * p.life * 1.4 + FALL_DIR[0] * p.life * 0.7;
-    m.off[i * 4 + 1] = b[1] + 0.15 + p.life * 0.85;
-    m.off[i * 4 + 2] = b[2] + p.vz * p.life * 1.4 + FALL_DIR[1] * p.life * 0.7;
-    m.col[i * 4 + 3] = p.s * (0.6 + k * 1.6) * Math.sin(Math.PI * Math.min(1, k * 1.1)) + 0.0001;
+    if (p.life > p.max) { p.life = 0; p.max = rr(2.2, 3.6) * (IS_PARK ? 0.7 : 1); p.vx = rr(-0.6, 0.6); p.vz = rr(-0.6, 0.6); p.a = R() * TAU; }
+    const k = p.life / p.max, ring = IS_PARK ? 2.45 : 0, a = p.a || 0;
+    m.off[i * 4] = b[0] + Math.cos(a) * ring + p.vx * p.life * 1.4 * ms + dirX * p.life * 0.7;
+    m.off[i * 4 + 1] = b[1] + 0.15 + p.life * 0.85 * ms;
+    m.off[i * 4 + 2] = b[2] + Math.sin(a) * ring + p.vz * p.life * 1.4 * ms + dirZ * p.life * 0.7;
+    m.col[i * 4 + 3] = p.s * ms * (0.6 + k * 1.6) * Math.sin(Math.PI * Math.min(1, k * 1.1)) + 0.0001;
   }
   syncInst(m, true);
 }
@@ -1741,7 +2520,7 @@ const NET = { mode: 'off', on: false, client: null, ch: null, bc: null, room: nu
 const MUTED = new Set(store.get('muted', []));
 function realCount() { let n = 0; for (const p of NET.peers.values()) if (p.ready && !p.hidden) n++; return n; }
 function showNpcs() { return realCount() < 4; }
-function friendRoom() { const m = location.hash.match(/^#room-([a-z0-9]{4,12})$/i); return m ? 'room-' + m[1].toLowerCase() : null; }
+function friendRoom() { const m = location.hash.match(/^#(?:park-)?room-([a-z0-9]{4,12})$/i); return m ? 'room-' + m[1].toLowerCase() : null; }
 function myPresence() { return { id: ME.id, n: S.nick, j: player.jacket, h: player.hat }; }
 function loadScript(src) { return new Promise((res, rej) => { const s = document.createElement('script'); s.src = src; s.async = true; s.onload = res; s.onerror = rej; document.head.appendChild(s); }); }
 
@@ -1771,7 +2550,7 @@ async function joinRooms() {
 }
 function tryRoom(r) {
   return new Promise(resolve => {
-    const ch = NET.client.channel(`sangil:solbaram:${r}`, { config: { presence: { key: ME.id }, broadcast: { self: false } } });
+    const ch = NET.client.channel(`sangil:${CHANNEL_KEY}:${r}`, { config: { presence: { key: ME.id }, broadcast: { self: false } } });
     let settled = false;
     const done = v => { if (settled) return; settled = true; clearTimeout(timer); if (v !== 'ok') NET.client.removeChannel(ch); resolve(v); };
     const timer = setTimeout(() => done('error'), 9000);
@@ -1888,9 +2667,9 @@ function onNet(m) {
     if (!placePeer(p, +m.x, +m.z)) return;
     p.heading = +m.h || 0; p.mode = ['auto', 'goto', 'key', 'stop'].includes(m.m) ? m.m : 'stop';
     p.tx = +m.tx || 0; p.tz = +m.tz || 0; p.sp = clamp(+m.sp || 1.8, 0.5, 4); p.dir = m.d < 0 ? -1 : 1; p.idx = clamp(m.i | 0, 0, TN - 1);
-    const want = ['meditate', 'snack', 'water'].includes(m.a) ? m.a : '';
-    if (want && (!p.act || p.act.type !== want)) p.act = { type: want, t: clamp(+m.at || 0, 0, 600), leaving: false };
-    if (!want && p.act && !GREETS.includes(p.act.type)) { if (p.act.type === 'meditate') p.act.leaving = true; else p.act = null; }
+    const want = ['meditate', 'snack', 'water', 'camp'].includes(m.a) ? m.a : '';
+    if (want && (!p.act || p.act.type !== want)) p.act = { type: want, t: clamp(+m.at || 0, 0, want === 'camp' ? 86400 : 600), leaving: false };
+    if (!want && p.act && !GREETS.includes(p.act.type)) { if (p.act.type === 'meditate') p.act.leaving = true; else { p.act = null; p.sit = 0; } }
     const lat = clamp((Date.now() - (+m.t || Date.now())) / 1000, 0, 1.2);
     if (lat > 0.05 && !p.act) simPeer(p, lat);
   } else if (m.k === 'emo') {
@@ -1989,24 +2768,30 @@ let lastNow = performance.now(), frameEma = 0.016, slowFor = 0;
 function frame(now) {
   if (S.lost) { requestAnimationFrame(frame); return; }
   // 프레임 상한: 가볍게 30fps, 휴대폰 선명하게 60fps (배터리·발열)
-  const minGap = S.quality ? (coarse ? 15 : 6) : 31;
+  const deepSleep = S.camp && S.camp.phase === 'sleep' && performance.now() - S.camp.sleepAt > 45000;   // 화면이 어두워지면 배터리를 아낀다
+  const minGap = deepSleep ? 160 : S.quality ? (coarse ? 15 : 6) : 31;
   if (now - lastNow < minGap) { requestAnimationFrame(frame); return; }
   const raw = (now - lastNow) / 1000, dt = Math.min(0.05, raw); lastNow = now; T += dt;
   // 화질 자동 조절: 선명하게에서 3초 넘게 버벅이면 가볍게로 바꾼다
   if (raw < 0.5) frameEma = lerp(frameEma, raw, 0.05);
-  if (S.started && S.quality && frameEma > 0.034) { slowFor += dt; if (slowFor > 3) { slowFor = 0; S.quality = 0; store.set('quality', 0); document.querySelectorAll('#qualSeg button').forEach(b => b.setAttribute('aria-pressed', b.dataset.q === '0' ? 'true' : 'false')); toast('이 기기에 맞게 화질을 가볍게 바꿨어요'); } }
+  if (S.started && S.quality && !deepSleep && !S.camp && frameEma > 0.034) { slowFor += dt; if (slowFor > 3) { slowFor = 0; S.quality = 0; store.set('quality', 0); document.querySelectorAll('#qualSeg button').forEach(b => b.setAttribute('aria-pressed', b.dataset.q === '0' ? 'true' : 'false')); toast('이 기기에 맞게 화질을 가볍게 바꿨어요'); } }
   else slowFor = Math.max(0, slowFor - dt);
   S.sb = lerp(S.sb, S.season, 1 - Math.exp(-dt * 1.6)); if (Math.abs(S.sb - S.season) < 0.001) S.sb = S.season;
   S.tb = lerp(S.tb, S.dusk, 1 - Math.exp(-dt * 1.2)); if (Math.abs(S.tb - S.dusk) < 0.001) S.tb = S.dusk;
+  const nightTgt = S.camp && S.camp.phase !== 'wake' && S.camp.t > 1.5 ? 1 : 0;
+  S.night = lerp(S.night, nightTgt, 1 - Math.exp(-dt * (nightTgt ? 0.32 : 0.55))); if (S.night < 0.001) S.night = 0;
+  if (S.dawn > 0) S.dawn = Math.max(0, S.dawn - dt / 14);
   recolorTrees();
   if (S.started) updateCharAct(player, dt);
+  updateCamp(dt);
+  updateMedGuide();
   if (S.started && !S.breath) movePlayer(dt);
   moveNpcs(dt);
   netTick(dt);
   updateCamera(dt);
   updateParticles(dt);
   updateMist(dt);
-  updateAudio(dt);
+  updateAudio(Math.min(raw, 0.5));
   updateHud(dt);
   render();
   requestAnimationFrame(frame);
@@ -2015,12 +2800,25 @@ function frame(now) {
 /* ---------------- UI ---------------- */
 let toastTimer = 0;
 function toast(msg) { const el = $('#toast'); el.textContent = msg; el.hidden = false; el.style.opacity = 1; clearTimeout(toastTimer); toastTimer = setTimeout(() => { el.style.opacity = 0; setTimeout(() => { el.hidden = true; }, 400); }, 2800); }
+/* 공원은 고도 대신 지도: 왼쪽이 남쪽(59번가), 오른쪽이 북쪽 */
+function mapXY(x, z, w, h, pad) { return [(pad + (z + PARK.hl) / (PARK.hl * 2) * (w - 2 * pad)).toFixed(1), (pad + (x + PARK.hw) / (PARK.hw * 2) * (h - 2 * pad)).toFixed(1)]; }
+function parkMapSvg(w, h, pad, big) {
+  const sx = (w - 2 * pad) / (PARK.hl * 2), sy = (h - 2 * pad) / (PARK.hw * 2);
+  let s = `<rect x="${pad}" y="${pad}" width="${w - 2 * pad}" height="${h - 2 * pad}" rx="3" fill="${big ? '#dfe6cf' : 'rgba(143,209,168,.16)'}" stroke="${big ? '#b9c4a6' : 'rgba(255,255,255,.3)'}"/>`;
+  for (const lw of LAWNS) { const [cx, cy] = mapXY(lw.x, lw.z, w, h, pad); s += `<ellipse cx="${cx}" cy="${cy}" rx="${(lw.rz * sx).toFixed(1)}" ry="${(lw.rx * sy).toFixed(1)}" fill="${big ? '#cbd9b1' : 'rgba(255,255,255,.08)'}"/>`; }
+  for (const wt of WATERS) { const [cx, cy] = mapXY(wt.x, wt.z, w, h, pad); s += `<ellipse cx="${cx}" cy="${cy}" rx="${(wt.rz * sx).toFixed(1)}" ry="${(wt.rx * sy).toFixed(1)}" fill="${big ? '#9fc1c9' : 'rgba(159,193,201,.55)'}"/>`; }
+  let d = ''; for (let i = 0; i < TN; i += 2) { const [x, y] = mapXY(TX[i], TZ[i], w, h, pad); d += (i ? 'L' : 'M') + x + ' ' + y; }
+  s += `<path d="${d}" fill="none" stroke="${big ? '#9c3820' : 'rgba(255,255,255,.85)'}" stroke-width="${big ? 2 : 1.4}" stroke-linejoin="round" stroke-dasharray="${big ? '0' : '0'}" vector-effect="non-scaling-stroke"/>`;
+  return s;
+}
 function profXY(i, w, h, pad) {
+  if (IS_PARK) return mapXY(TX[i], TZ[i], w, h, pad);
   const minH = TH[0] - 3, maxH = SUMMIT_H + 4;
   return [(pad + (i / (TN - 1)) * (w - 2 * pad)).toFixed(1), (h - pad - ((TH[i] - minH) / (maxH - minH)) * (h - 2 * pad)).toFixed(1)];
 }
 function profilePath(w, h, pad) { let d = ''; for (let i = 0; i < TN; i += 2) { const [x, y] = profXY(i, w, h, pad); d += (i ? 'L' : 'M') + x + ' ' + y; } const [x, y] = profXY(TN - 1, w, h, pad); return d + 'L' + x + ' ' + y; }
 function buildProfiles() {
+  if (IS_PARK) return buildParkMaps();
   const big = $('#bigProfile'), w = 400, h = 120, pad = 10;
   const line = profilePath(w, h - 18, pad);
   let svg = `<defs><linearGradient id="pf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c24a2b" stop-opacity=".28"/><stop offset="1" stop-color="#c24a2b" stop-opacity="0"/></linearGradient></defs>`;
@@ -2040,6 +2838,24 @@ function buildProfiles() {
   ms += `<circle id="meDot" cx="4" cy="40" r="3.6" fill="#fff" stroke="#c24a2b" stroke-width="1.6"/>`;
   mini.innerHTML = ms;
 }
+function buildParkMaps() {
+  const big = $('#bigProfile'), w = 400, h = 120, pad = 8, mh = h - 26;
+  let svg = parkMapSvg(w, mh, pad, true);
+  CPS.forEach((cp, k) => {
+    const [x, y] = mapXY(cp.x, cp.z, w, mh, pad);
+    svg += `<circle cx="${x}" cy="${y}" r="3.6" fill="#f4eee2" stroke="#24302a" stroke-width="1.4"/>`;
+    if (k % 2 === 0 || k === CPS.length - 1) svg += `<text x="${x}" y="${h - 4 - (k % 4 === 2 ? 11 : 0)}" font-size="10.5" fill="#5f6b62" text-anchor="${k === 0 ? 'start' : k === CPS.length - 1 ? 'end' : 'middle'}" font-family="Gowun Dodum, sans-serif">${cp.name}</text>`;
+  });
+  svg += `<text x="${pad}" y="${pad + 9}" font-size="9" fill="#7a857a" font-family="Gowun Dodum, sans-serif">59번가</text><text x="${w - pad}" y="${pad + 9}" font-size="9" fill="#7a857a" text-anchor="end" font-family="Gowun Dodum, sans-serif">110번가</text>`;
+  big.innerHTML = svg;
+  $('#courseLen').textContent = `코스 ${(TL * UNIT_M / 1000).toFixed(1)} km`;
+  $('#courseAlt').textContent = `${streetAt(TZ[0])}번가 → ${streetAt(TZ[TN - 1])}번가`;
+  $('#courseStops').textContent = `명소 ${CPS.length}곳`;
+  let ms = parkMapSvg(200, 46, 3, false);
+  for (const cp of CPS) { const [x, y] = mapXY(cp.x, cp.z, 200, 46, 3); ms += `<circle data-cp="${cp.key}" cx="${x}" cy="${y}" r="2.4" fill="#e0a52e"/>`; }
+  ms += `<circle id="meDot" cx="4" cy="40" r="3.4" fill="#fff" stroke="#c24a2b" stroke-width="1.6"/>`;
+  $('#miniProfile').innerHTML = ms;
+}
 function updateWalkBtn() {
   const b = $('#walkBtn'); b.setAttribute('aria-pressed', S.auto ? 'true' : 'false');
   $('#walkLbl').textContent = S.auto ? '멈추기' : (S.autoDir < 0 ? '내려가기' : '자동 걷기');
@@ -2048,10 +2864,10 @@ function setSeason(s, announce) {
   S.season = s; store.set('season', s);
   $('#seasonLbl').textContent = s ? '가을로' : '겨울로';
   $('#seasonPath').setAttribute('d', s ? 'M5 19C5 10 10 5 19 5c0 9-5 14-14 14zM5 19l8-8' : 'M12 3v18M4.2 7.5l15.6 9M4.2 16.5l15.6-9M9.5 4.5 12 6l2.5-1.5M9.5 19.5 12 18l2.5 1.5');
-  $('#courseName').textContent = s ? '설산길' : '단풍길';
+  $('#courseName').textContent = IS_PARK ? (s ? '겨울 산책' : '가을 산책') : (s ? '설산길' : '단풍길');
   document.querySelectorAll('#courseMenu [data-course]').forEach(b => b.setAttribute('aria-current', (b.dataset.course === 'winter') === !!s ? 'true' : 'false'));
   $('#pickAutumn').setAttribute('aria-pressed', s ? 'false' : 'true'); $('#pickWinter').setAttribute('aria-pressed', s ? 'true' : 'false');
-  if (announce) toast(s ? '눈이 내립니다. 능선에 상고대가 피었어요' : '다시 단풍 든 가을 산이에요');
+  if (announce) toast(IS_PARK ? (s ? '눈이 내려요. 잔디밭이 하얗게 덮이고 분수는 잠시 쉬어요' : '노란 느릅나무 잎이 흩날리는 가을 공원이에요') : (s ? '눈이 내립니다. 능선에 상고대가 피었어요' : '다시 단풍 든 가을 산이에요'));
 }
 function setDusk(d) { S.dusk = d; $('#timeBtn').setAttribute('aria-pressed', d ? 'true' : 'false'); $('#timeLbl').textContent = d ? '낮' : '노을'; }
 function closeMenus() { $('#courseMenu').hidden = true; $('#settings').hidden = true; $('#restMenu').hidden = true; $('#restBtn').setAttribute('aria-expanded', 'false');
@@ -2067,6 +2883,13 @@ function warpToStart() {
   updateWalkBtn();
 }
 function showSummit() {
+  if (IS_PARK) {
+    $('#sumEyebrow').textContent = '저수지 북쪽 끝에 도착했어요'; $('#sumName').textContent = '센트럴파크'; $('#sumAlt').textContent = `${streetAt(player.z)}번가`;
+    $('#sumGain').textContent = Math.round(S.walked * UNIT_M / 0.72).toLocaleString('ko-KR'); $('#sumGainLbl').textContent = '걸음';
+    $('#sumPhoto').textContent = '저수지 앞에서 사진 찍기'; $('#sumDown').textContent = '걸어서 돌아가기'; $('#sumStay').textContent = '여기 머물기';
+    $('#sumDist').textContent = (S.walked * UNIT_M / 1000).toFixed(1); $('#sumTime').textContent = Math.max(1, Math.round((T - S.startT) / 60));
+    S.auto = false; updateWalkBtn(); $('#summit').hidden = false; return;
+  }
   $('#sumAlt').textContent = fmtAlt(SUMMIT_H) + ' m';
   $('#sumDist').textContent = (S.walked * UNIT_M / 1000).toFixed(1);
   $('#sumTime').textContent = Math.max(1, Math.round((T - S.startT) / 60));
@@ -2119,10 +2942,10 @@ function composePhoto(url) {
     const nearCp = CPS.find(cp => Math.hypot(player.x - cp.x, player.z - cp.z) < cp.r + 4);
     x.fillStyle = '#f7f2e8'; x.textBaseline = 'alphabetic';
     x.font = `700 ${Math.round(base * 2)}px "Gowun Batang", serif`;
-    x.fillText(atSummit ? `솔바람산 정상 ${fmtAlt(SUMMIT_H)}m` : `솔바람산${nearCp ? ' · ' + nearCp.name : ''}`, padX, y0 - Math.round(base * 1.25));
+    x.fillText(IS_PARK ? `센트럴파크${nearCp ? ' · ' + nearCp.name : ''}` : atSummit ? `솔바람산 정상 ${fmtAlt(SUMMIT_H)}m` : `솔바람산${nearCp ? ' · ' + nearCp.name : ''}`, padX, y0 - Math.round(base * 1.25));
     x.font = `${base}px "Gowun Dodum", sans-serif`; x.fillStyle = 'rgba(247,242,232,.85)';
     const d = new Date(); const ds = `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
-    const line = `${ds} · ${S.nick} · ${S.season ? '겨울 설산길' : '가을 단풍길'} · 해발 ${fmtAlt(player.y)}m`, credit = 'game.mybumo.com · 산길';
+    const line = IS_PARK ? `${ds} · ${S.nick} · ${S.season ? '겨울' : '가을'} 산책 · 뉴욕 ${streetAt(player.z)}번가` : `${ds} · ${S.nick} · ${S.season ? '겨울 설산길' : '가을 단풍길'} · 해발 ${fmtAlt(player.y)}m`, credit = 'game.mybumo.com · 산길';
     x.fillText(line, padX, y0);
     const fits = padX * 2 + x.measureText(line).width + x.measureText(credit).width + base * 2 < w;
     x.textAlign = 'right'; x.fillStyle = 'rgba(247,242,232,.8)';
@@ -2140,7 +2963,7 @@ function bindUI() {
     S.auto = !S.auto; player.target = null;
     if (S.auto && S.autoDir > 0 && player.idx >= TN - 4) S.autoDir = -1;
     if (S.auto && S.autoDir < 0 && player.idx <= 3) S.autoDir = 1;
-    updateWalkBtn(); if (S.auto) { S.lastDrag = -10; toast(S.autoDir > 0 ? '산길을 따라 정상까지 천천히 걸어요' : '입구까지 천천히 내려가요'); }
+    updateWalkBtn(); if (S.auto) { S.lastDrag = -10; toast(IS_PARK ? (S.autoDir > 0 ? '공원 길을 따라 저수지까지 천천히 걸어요' : '5번가 입구까지 천천히 걸어가요') : (S.autoDir > 0 ? '산길을 따라 정상까지 천천히 걸어요' : '입구까지 천천히 내려가요')); }
   };
   $('#breathStop').onclick = stopBreath;
   $('#restBtn').onclick = e => { e.stopPropagation(); const m = $('#restMenu'); const open = m.hidden; closeMenus(); m.hidden = !open; $('#restBtn').setAttribute('aria-expanded', open ? 'true' : 'false'); };
@@ -2174,17 +2997,26 @@ function bindUI() {
   // 말풍선 보기, 친구 방
   $('#bubbleChk').checked = S.bubbles; $('#bubbleChk').onchange = e => { S.bubbles = e.target.checked; store.set('bubbles', S.bubbles); };
   $('#friendBtn').onclick = () => {
-    const code = Math.random().toString(36).slice(2, 8), url = location.href.split('#')[0] + '#room-' + code;
+    const code = Math.random().toString(36).slice(2, 8), tag = (IS_PARK ? 'park-' : '') + 'room-' + code, url = location.href.split('#')[0] + '#' + tag;
     const done = ok => { addChatLog(null, ok ? '친구 방 링크를 복사했어요. 같이 걸을 사람에게 보내 주세요' : `친구 방 링크: ${url}`); };
     try { navigator.clipboard.writeText(url).then(() => done(true), () => done(false)); } catch (e) { done(false); }
-    location.hash = 'room-' + code;
+    location.hash = tag;
     toast('친구 방으로 옮겼어요. 링크를 받은 사람만 이 방에 들어와요');
   };
-  $('#publicBtn').onclick = () => { history.replaceState(null, '', location.pathname + location.search); netStop(); netStart(); toast('모두의 방으로 돌아왔어요'); };
+  $('#publicBtn').onclick = () => { history.replaceState(null, '', location.pathname + location.search + (IS_PARK ? '#park' : '')); netStop(); netStart(); toast('모두의 방으로 돌아왔어요'); };
   $('#soundBtn').onclick = () => { audioInit(); setMute(!S.mute); };
   $('#courseBtn').onclick = e => { e.stopPropagation(); const m = $('#courseMenu'); const open = m.hidden; closeMenus(); m.hidden = !open; $('#courseBtn').setAttribute('aria-expanded', open ? 'true' : 'false'); };
   $('#settingsBtn').onclick = e => { e.stopPropagation(); const m = $('#settings'); const open = m.hidden; closeMenus(); m.hidden = !open; $('#settingsBtn').setAttribute('aria-expanded', open ? 'true' : 'false'); };
   document.querySelectorAll('#courseMenu [data-course]').forEach(b => b.onclick = () => { setSeason(b.dataset.course === 'winter' ? 1 : 0, true); closeMenus(); });
+  $('#switchCourse').onclick = () => switchCourse(IS_PARK ? 'mountain' : 'park', true);
+  $('#pickMountain').onclick = () => { if (IS_PARK) switchCourse('mountain', false); };
+  $('#pickPark').onclick = () => { if (!IS_PARK) switchCourse('park', false); };
+  // 명상 목소리, 야영
+  $('#voiceChk').checked = S.voice; $('#voiceChk').onchange = e => { S.voice = e.target.checked; store.set('voice', S.voice); if (!S.voice) hush(); };
+  document.querySelectorAll('#campTimer button').forEach(b => b.onclick = () => { S.campMin = +b.dataset.m; document.querySelectorAll('#campTimer button').forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false')); });
+  $('#campGo').onclick = startCamp; $('#campCancel').onclick = () => { $('#campCard').hidden = true; };
+  $('#wakeBtn').onclick = e => { e.stopPropagation(); wakeCamp(); };
+  $('#sleepUI').addEventListener('pointerdown', e => { if (e.target.id !== 'wakeBtn') sleepIdleSoon(); });
   const amb = $('#ambVol'), sfx = $('#sfxVol');
   amb.value = Math.round(S.amb * 100); sfx.value = Math.round(S.sfx * 100); $('#ambOut').textContent = amb.value; $('#sfxOut').textContent = sfx.value;
   amb.oninput = () => { S.amb = amb.value / 100; $('#ambOut').textContent = amb.value; store.set('amb', S.amb); if (A.amb) A.amb.gain.value = S.amb; };
@@ -2205,29 +3037,60 @@ function bindUI() {
     warpToStart(); cam.pitch = 0.3; cam.dist = 9;
     audioInit(); setMute(S.mute);
     setTimeout(() => { $('#hint').style.opacity = 0; }, 9000);
-    toast(`${S.nick}님, 솔바람산에 오신 걸 환영해요`);
+    toast(IS_PARK ? `${S.nick}님, 센트럴파크에 오신 걸 환영해요` : `${S.nick}님, 솔바람산에 오신 걸 환영해요`);
     netStart();
   };
   // summit card
   $('#sumPhoto').onclick = () => {
-    $('#summit').hidden = true; const a = SUMMIT_ARRIVE; player.act = null; player.sit = 0; $('#actPill').hidden = true;
+    $('#summit').hidden = true;
+    if (IS_PARK) {   // 저수지를 등지고 남쪽 빌딩 숲이 보이게
+      player.act = null; player.sit = 0; $('#actPill').hidden = true; player.target = null; S.auto = false; updateWalkBtn(); netState(true);
+      const rv = PARK_WATERS[4], dx = rv.x - player.x, dz = rv.z - player.z;
+      player.heading = Math.atan2(-dx, -dz); cam.yaw = Math.atan2(dx, dz); cam.pitch = 0.12; cam.dist = 6.5; S.lastDrag = T + 3;
+      setTimeout(() => { shutter(); S.wantPhoto = true; }, 1200); return;
+    }
+    const a = SUMMIT_ARRIVE; player.act = null; player.sit = 0; $('#actPill').hidden = true;
     player.x = TX[TN-1] + a[0] * 1.6; player.z = TZ[TN-1] + a[2] * 1.6; player.target = null; S.auto = false; updateWalkBtn(); netState(true);
     player.heading = Math.atan2(-a[0], -a[2]); cam.yaw = Math.atan2(a[0], a[2]); cam.pitch = 0.14; cam.dist = 6.5; S.lastDrag = T + 3;
     setTimeout(() => { shutter(); S.wantPhoto = true; }, 1200);
   };
   $('#sumStay').onclick = () => { $('#summit').hidden = true; };
-  $('#sumDown').onclick = () => { $('#summit').hidden = true; S.autoDir = -1; S.auto = true; updateWalkBtn(); toast('입구까지 천천히 내려가요'); };
-  $('#sumWarp').onclick = () => { $('#summit').hidden = true; warpToStart(); toast('산길 입구로 돌아왔어요'); };
+  $('#sumDown').onclick = () => { $('#summit').hidden = true; S.autoDir = -1; S.auto = true; updateWalkBtn(); toast(IS_PARK ? '입구까지 천천히 걸어가요' : '입구까지 천천히 내려가요'); };
+  $('#sumWarp').onclick = () => { $('#summit').hidden = true; warpToStart(); toast(IS_PARK ? '5번가 입구로 돌아왔어요' : '산길 입구로 돌아왔어요'); };
+}
+
+/* 코스 바꾸기: 세계를 새로 그려야 해서 페이지를 다시 연다 */
+function switchCourse(c, auto) {
+  store.set('course', c); if (auto) store.set('autoEnter', true);
+  location.hash = c === 'park' ? 'park' : 'mountain';
+  location.reload();
+}
+function courseTexts() {
+  document.title = IS_PARK ? '산길 · 센트럴파크' : '산길';
+  $('#gl').setAttribute('aria-label', IS_PARK ? '센트럴파크 3D 산책길' : '솔바람산 3D 산길');
+  $('#cmA').textContent = IS_PARK ? '센트럴파크 가을 산책' : '솔바람산 단풍길'; $('#cmW').textContent = IS_PARK ? '센트럴파크 겨울 산책' : '솔바람산 설산길';
+  $('#cmOther').textContent = IS_PARK ? '솔바람산 산행' : '센트럴파크 산책';
+  $('#courseBtn').firstChild.textContent = COURSE_NAME + ' ';
+  $('#pickMountain').setAttribute('aria-pressed', IS_PARK ? 'false' : 'true'); $('#pickPark').setAttribute('aria-pressed', IS_PARK ? 'true' : 'false');
+  if (!IS_PARK) return;
+  $('#startEyebrow').textContent = '온라인 산책 · 뉴욕 센트럴파크'; $('#startSub').textContent = 'Central Park';
+  $('#startDesc').textContent = '59번가 5번가 입구에서 출발해 갭스토 브리지, 느릅나무 터널 더 몰, 베데스다 분수와 보우 브리지, 벨베데레 성을 지나 저수지까지 걷는 길입니다. 벤치 옆에서 5분 호흡 명상을 하거나, 잔디밭에 텐트를 치고 도시의 밤 소리를 들으며 잠들 수도 있어요.';
+  $('#paB').textContent = '가을 산책'; $('#paS').textContent = '노란 느릅나무, 낙엽 길';
+  $('#pwB').textContent = '겨울 산책'; $('#pwS').textContent = '눈 덮인 잔디밭, 얼어붙은 호수';
+  $('#enterBtn').textContent = '산책 시작';
+  $('#hint').textContent = '바닥 클릭으로 이동 · 드래그로 둘러보기 · 휠로 확대/축소';
+  $('#photoImg').alt = '센트럴파크에서 찍은 사진';
 }
 
 /* ---------------- boot ---------------- */
 function boot() {
   try { buildWorld(); } catch (err) { $('#loading').textContent = '산길을 그리지 못했어요: ' + err.message; console.error(err); return; }
-  initState(); initLabels(); buildProfiles(); bindUI();
+  initState(); initLabels(); buildProfiles(); bindUI(); courseTexts();
   setSeason(S.season); setMute(S.mute); updateWalkBtn();
   $('#start').hidden = false; $('#enterBtn').disabled = false;
+  if (store.get('autoEnter', false)) { store.set('autoEnter', false); $('#enterBtn').focus(); }
   const ld = $('#loading'); ld.style.opacity = 0; setTimeout(() => { ld.hidden = true; }, 600);
-  window.__sangil = { S, player, TN, getH, CPS, startAct, cam, NET, NPCS, greet, sendChat, W, netState };
+  window.__sangil = { S, player, TN, getH, CPS, startAct, cam, NET, NPCS, greet, sendChat, W, netState, startCamp, wakeCamp, openCampCard, MED, TX, TZ, IS_PARK };
   requestAnimationFrame(t => { lastNow = t; frame(t); });
 }
 setTimeout(boot, 30);
