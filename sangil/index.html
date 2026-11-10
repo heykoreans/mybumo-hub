@@ -189,11 +189,15 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{ou
 .mtxt span{font-size:13px;color:rgba(255,250,240,.85);font-variant-numeric:tabular-nums;min-height:1.2em}
 #medLine{margin:0;font-family:var(--font-display);font-size:17px;line-height:1.65;color:#fffaf0;text-shadow:0 1px 3px rgba(0,0,0,.5);transition:opacity .9s;text-wrap:balance;background:rgba(18,24,21,.62);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-radius:16px;padding:10px 16px;border:1px solid rgba(255,255,255,.12)}
 #medLine:empty{visibility:hidden}
+#medLeft{font-size:13px;color:#fffaf0;font-variant-numeric:tabular-nums;background:rgba(18,24,21,.5);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:4px 12px;text-shadow:0 1px 2px rgba(0,0,0,.4)}
+#medLeft:empty{display:none}
 #medLine.fade{opacity:0}
 /* 야영 */
 .chips{display:flex;gap:6px}
 .chips button{flex:1;padding:10px 4px;line-height:1.3;border:1.5px solid var(--paper-line);border-radius:12px;background:#fbf8f1;color:var(--ink);font-size:14px}
 .chips button[aria-pressed="true"]{border-color:var(--pine);background:#e9f0ea;font-weight:700}
+.chips button small{display:block;font-size:11.5px;font-weight:400;color:var(--ink-soft);margin-top:1px}
+#enterMed{margin-top:-4px}
 .lab{font-size:13px;color:var(--ink-soft)}
 .drinks{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .drinks button{border:1.5px solid var(--paper-line);border-radius:14px;padding:12px;text-align:left;display:grid;gap:3px;color:var(--ink);background:#fbf8f1}
@@ -330,6 +334,7 @@ body.calm #trailCard,body.calm #hint{opacity:0;pointer-events:none}
 
 <div id="medGuide" hidden>
   <div class="mring"><div class="mcore" id="medCore"></div><div class="mtxt"><b id="medPhase">고요히</b><span id="medCount"></span></div></div>
+  <span id="medLeft"></span>
   <p id="medLine"></p>
 </div>
 
@@ -345,6 +350,20 @@ body.calm #trailCard,body.calm #hint{opacity:0;pointer-events:none}
     <p id="cafeDesc"></p>
     <div class="drinks" id="cafeMenu"></div>
     <button class="secondary" id="cafeCancel">다음에 할게요</button>
+  </div>
+</section>
+
+<section id="medCard" class="scrim" hidden>
+  <div class="card" role="dialog" aria-labelledby="medTitle">
+    <div class="eyebrow">명상 · 고요히 앉기</div>
+    <h2 class="title" id="medTitle"><b style="font-size:32px">얼마나 앉아 있을까요?</b></h2>
+    <p>5분은 목소리가 호흡을 함께 이끌어 줘요. 더 오래 앉고 싶다면 타이머를 고르세요. 시작과 끝은 싱잉볼이 알려 주고, 그 사이에는 자연 소리만 남아요.</p>
+    <div style="display:grid;gap:8px"><span class="lab">명상 시간</span>
+      <div class="chips" id="medTimer"><button data-m="5" aria-pressed="true">5분<small>목소리 안내</small></button><button data-m="10">10분<small>타이머</small></button><button data-m="20">20분<small>타이머</small></button><button data-m="30">30분<small>타이머</small></button></div></div>
+    <label class="pcheck" id="medBellRow"><input type="checkbox" id="medBell" checked><span>5분마다 작은 종소리<small>시간이 얼마나 흘렀는지 눈을 감은 채로 알 수 있어요</small></span></label>
+    <label class="pcheck"><input type="checkbox" id="medAwake" checked><span>화면 켜 두기<small>휴대폰은 화면이 꺼지면 소리와 타이머도 멈춰요</small></span></label>
+    <button class="primary" id="medGo">자리에 앉기</button>
+    <button class="secondary" id="medCancel">다음에 할게요</button>
   </div>
 </section>
 
@@ -388,6 +407,7 @@ body.calm #trailCard,body.calm #hint{opacity:0;pointer-events:none}
     </div>
     <div class="name"><span>오늘의 이름 <b id="nickOut">느긋한 구름</b></span><button class="linkbtn" id="nickBtn">다른 이름</button></div>
     <button class="primary" id="enterBtn" disabled>입산하기</button>
+    <button class="secondary" id="enterMed" disabled>바로 명상하기</button>
     <p class="fine">PC: 바닥 클릭 이동 · 드래그로 둘러보기 · 휠 확대, 방향키/WASD도 됩니다.<br>휴대폰: 탭으로 이동 · 드래그로 둘러보기 · 두 손가락으로 확대.</p>
   </div>
 </section>
@@ -837,7 +857,26 @@ const EN = {"센트럴파크":"Central Park",
 "비 그치기":"Stop rain",
 "겨울에는 비 대신 눈이 내려요":"In winter it snows instead of raining",
 "비가 내리기 시작해요. 빗소리를 들으며 천천히 걸어 보세요":"It's starting to rain. Take a slow walk and listen",
-"비가 그쳤어요. 공기가 맑아요":"The rain stopped. The air feels fresh"};
+"비가 그쳤어요. 공기가 맑아요":"The rain stopped. The air feels fresh",
+"명상 · 고요히 앉기":"Meditation · Sitting still",
+"얼마나 앉아 있을까요?":"How long will you sit?",
+"5분은 목소리가 호흡을 함께 이끌어 줘요. 더 오래 앉고 싶다면 타이머를 고르세요. 시작과 끝은 싱잉볼이 알려 주고, 그 사이에는 자연 소리만 남아요.":"The 5-minute session has a voice guiding your breath. To sit longer, pick a timer. A singing bowl marks the start and the end, and in between there is only the sound of nature.",
+"명상 시간":"Length",
+"목소리 안내":"Guided",
+"타이머":"Timer",
+"5분":"5 min",
+"10분":"10 min",
+"20분":"20 min",
+"5분마다 작은 종소리":"A soft bell every 5 minutes",
+"시간이 얼마나 흘렀는지 눈을 감은 채로 알 수 있어요":"Know how much time has passed without opening your eyes",
+"휴대폰은 화면이 꺼지면 소리와 타이머도 멈춰요":"On phones, sound and the timer stop when the screen turns off",
+"자리에 앉기":"Sit down",
+"바로 명상하기":"Go straight to meditation",
+"남은 시간 {0}":"{0} left",
+"{0}분 명상을 시작해요. 싱잉볼이 울리면 눈을 감아 보세요":"Starting a {0}-minute meditation. Close your eyes when the singing bowl rings",
+"명상 · {0} / {1}:00":"Meditation · {0} / {1}:00",
+"{0}분 명상을 마쳤어요. 이 고요함을 안고 다시 걸어요":"{0}-minute meditation done. Carry this calm with you",
+"스트레스를 후~ 날려 보냈어요. 숨이 한결 고르네요":"Stress, blown away. Your breath feels steadier"};
 function i18n(k, ...a) { if (LANG !== 'ko' && EN[k] === undefined && /[가-힣]/.test(k)) (window.__i18nMiss = window.__i18nMiss || new Set()).add(k); const s = LANG === 'ko' ? k : (EN[k] !== undefined ? EN[k] : k); return a.length ? s.replace(/\{(\d)\}/g, (m, i) => a[+i]) : s; }
 const ordinal = n => n + ((n % 100 >= 11 && n % 100 <= 13) ? 'th' : (['th', 'st', 'nd', 'rd'][n % 10] || 'th'));
 function translateDom() {   // HTML에 적힌 한국어 글자를 영어로 바꾼다
@@ -2654,19 +2693,24 @@ const ACT_EVENTS = {
 const MED_LINES = [i18n('바람 소리에 귀 기울여 보세요'), i18n('어깨 힘을 빼고 천천히 숨 쉬어요'), i18n('떠오르는 생각은 구름처럼 흘려보내요'), i18n('방석에 닿은 몸의 무게를 느껴 보세요'), i18n('들숨에 맑은 공기, 날숨에 긴장을 내려놓아요')];
 const fmtDur = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
 const canSound = () => A.ctx && !S.mute;
-function startAct(type) {
+function startAct(type, go) {
   if (!S.started) return;
   closeMenus();
   if (type === 'camp') { openCampCard(); return; }
   if (type === 'cafe') { goCafe(); return; }
   if (type === 'circle') { goCircle(); return; }
   if (type === 'breath') { if (player.act && player.act.type !== 'meditate') cancelAct(); startBreath(); return; }
+  if (type === 'meditate' && !go && !(player.act && player.act.type === 'meditate')) { openMedCard(); return; }
   if (S.breath) stopBreath();
   if (player.act && GREETS.includes(player.act.type)) player.act = null;
   if (player.act) { if (player.act.type === 'meditate' && type === 'meditate') standUp(); else toast(i18n('하던 걸 마저 하고 할게요')); return; }
   S.auto = false; player.target = null; updateWalkBtn(); S.lastDrag = -10;
   player.act = { type, t: 0, fired: 0, leaving: false, bowl: false, lastBowl: 0 };
-  if (type === 'meditate') { audioInit(); loadVoice(); toast(i18n('5분 호흡 명상을 시작해요. 동그라미를 따라 숨 쉬어 보세요')); }
+  if (type === 'meditate') {
+    const min = S.medMin || 5; player.act.min = min; player.act.total = min === 5 ? MED.total : min * 60;
+    audioInit(); loadVoice(); if (S.medAwake) keepAwake(true);
+    toast(min === 5 ? i18n('5분 호흡 명상을 시작해요. 동그라미를 따라 숨 쉬어 보세요') : i18n('{0}분 명상을 시작해요. 싱잉볼이 울리면 눈을 감아 보세요', min));
+  }
   $('#actPill').hidden = false; updatePill(); netState(true);
 }
 /* 인사: 목례, 손 흔들기, 하이파이브. 가까운 사람(산객이나 실제 사람)을 향해 하고, 상대도 답한다 */
@@ -2735,8 +2779,8 @@ function npcRespond(n, kind) {
 const pickOne = arr => arr[Math.floor(Math.random() * arr.length)];
 function standUp() {
   const a = player.act; if (!a || a.type !== 'meditate' || a.leaving) return;
-  a.leaving = true; hush(); clearTimeout(medLineTimer);
-  if (!a.done) { if (canSound()) sfx.bowl(0.6); const mt = a.medStart ? medTime(a) : a.t; if (mt > 20) toast(i18n('{0} 동안 명상했어요', fmtDur(Math.min(mt, MED.total)))); }
+  a.leaving = true; hush(); clearTimeout(medLineTimer); if (!S.camp) keepAwake(false);
+  if (!a.done) { if (canSound()) sfx.bowl(0.6); const mt = a.medStart ? medTime(a) : a.t; if (mt > 20) toast(i18n('{0} 동안 명상했어요', fmtDur(Math.min(mt, a.total || MED.total)))); }
   updatePill();
 }
 function cancelAct() {
@@ -2787,7 +2831,7 @@ function updatePill() {
   const a = player.act; if (!a) return;
   if (a.type === 'meditate') {
     const mt = a.medStart ? medTime(a) : 0;
-    $('#actTitle').textContent = a.leaving ? i18n('천천히 일어나는 중') : !a.medStart ? i18n('자리에 앉는 중') : mt < MED.total ? i18n('호흡 명상 · {0} / 5:00', fmtDur(mt)) : i18n('명상을 마쳤어요');
+    $('#actTitle').textContent = a.leaving ? i18n('천천히 일어나는 중') : !a.medStart ? i18n('자리에 앉는 중') : mt < (a.total || MED.total) ? ((a.min || 5) === 5 ? i18n('호흡 명상 · {0} / 5:00', fmtDur(mt)) : i18n('명상 · {0} / {1}:00', fmtDur(mt), a.min)) : i18n('명상을 마쳤어요');
     $('#actSub').textContent = a.leaving || a.medStart ? '' : MED_LINES[0];
     $('#actStop').textContent = i18n('일어나기'); $('#actStop').hidden = a.leaving;
   } else if (a.type === 'circle') {
@@ -2885,6 +2929,31 @@ function medTimeline() {
   ev.push([MED.total + 3, () => { toast(i18n('5분 호흡 명상을 마쳤어요. 몸이 한결 가볍죠?')); }]);
   return ev.sort((a, b) => a[0] - b[0]);
 }
+/* 타이머 명상 (10·20·30분): 처음 1분은 목소리가 자리를 잡아 주고, 그 뒤로는 자연 소리와 천천히 숨 쉬는 동그라미만 남는다.
+   5분마다 작은 종(고를 수 있음), 끝나기 1분 전 마무리 안내, 싱잉볼 세 번으로 마친다. */
+function medTimerTimeline(total, min) {
+  const ev = [], L = MED_SCRIPT(), say = (t, i) => ev.push([t, () => { showMedLine(L[i][1]); playVoice('med_' + String(i + 1).padStart(2, '0')); }]);
+  say(1.5, 0); say(14, 1); say(28, 2);
+  if (S.medBell) for (let t = 300; t < total - 70; t += 300) ev.push([t, () => { if (canSound()) sfx.bowl(0.32); }]);
+  say(total - 52, 9); say(total - 26, 10);
+  for (const t of [total - 6, total - 2.5, total + 1]) ev.push([t, () => { if (canSound()) sfx.bowl(0.9); }]);
+  ev.push([total + 3, () => { toast(i18n('{0}분 명상을 마쳤어요. 이 고요함을 안고 다시 걸어요', min)); }]);
+  return ev.sort((a, b) => a[0] - b[0]);
+}
+function openMedCard() {
+  closeMenus();
+  if (player.act && !GREETS.includes(player.act.type)) { toast(i18n('하던 걸 마저 하고 할게요')); return; }
+  const pick = m => { S.medMin = m; document.querySelectorAll('#medTimer button').forEach(b => b.setAttribute('aria-pressed', +b.dataset.m === m ? 'true' : 'false')); $('#medBellRow').style.display = m === 5 ? 'none' : ''; };
+  document.querySelectorAll('#medTimer button').forEach(b => b.onclick = () => pick(+b.dataset.m));
+  pick(S.medMin || 5); $('#medBell').checked = S.medBell; $('#medAwake').checked = S.medAwake;
+  $('#medCard').hidden = false;
+}
+function beginMeditate() {
+  $('#medCard').hidden = true;
+  S.medBell = $('#medBell').checked; S.medAwake = $('#medAwake').checked;
+  store.set('medMin', S.medMin); store.set('medBell', S.medBell); store.set('medAwake', S.medAwake);
+  startAct('meditate', true);
+}
 let medLineTimer = 0;
 function showMedLine(text) {
   const el = $('#medLine'); el.classList.add('fade'); clearTimeout(medLineTimer);
@@ -2905,18 +2974,21 @@ function updateMedGuide() {
   if (!on) return;
   const mt = medTime(a);
   while (a.ev && a.evI < a.ev.length && mt >= a.ev[a.evI][0]) { const e = a.ev[a.evI++]; if (mt - e[0] < 2.5) e[1](); }
-  if (mt > MED.total + 6 && !a.done) { a.done = true; standUp(); return; }
-  const p = medPhase(mt);
+  const total = a.total || MED.total, timer = (a.min || 5) !== 5;
+  if (mt > total + 6 && !a.done) { a.done = true; standUp(); return; }
+  $('#medLeft').textContent = mt < total ? i18n('남은 시간 {0}', fmtDur(Math.ceil(total - mt))) : '';
+  const p = timer ? null : medPhase(mt);
   let sc, ph, cnt;
   if (p) { sc = 0.45 + 0.55 * p.s; ph = p.ph === 'in' ? i18n('들이쉬기') : p.ph === 'hold' ? i18n('멈춤') : i18n('내쉬기'); cnt = String(Math.ceil(p.left)); }
+  else if (timer) { const b = 0.5 - 0.5 * Math.cos(mt / 11 * TAU); sc = 0.5 + 0.3 * b; ph = mt < total ? i18n('고요히') : i18n('마침'); cnt = ''; a.breathK = b; }   // 정해진 박자 없이 느긋하게 (약 11초에 한 번)
   else { sc = 0.55 + 0.05 * Math.sin(mt * 1.1); ph = mt < MED.from ? i18n('자리 잡기') : mt < MED.total ? i18n('고요히') : i18n('마침'); cnt = mt < MED.from ? i18n('숨 고르기까지 {0}초', Math.ceil(MED.from - mt)) : ''; }
   $('#medCore').style.transform = `scale(${sc.toFixed(3)})`;
   $('#medPhase').textContent = ph; $('#medCount').textContent = cnt;
   // 캐릭터도 같은 리듬으로 가슴이 오르내린다
-  a.breathK = p ? p.s : 0.5 + 0.5 * Math.sin(mt * 0.9);
+  if (!timer) a.breathK = p ? p.s : 0.5 + 0.5 * Math.sin(mt * 0.9);
 }
 function startMeditation(a) {
-  a.guide = true; a.ev = medTimeline(); a.evI = 0; a.medStart = performance.now();
+  a.total = a.total || MED.total; a.guide = true; a.ev = (a.min || 5) === 5 ? medTimeline() : medTimerTimeline(a.total, a.min); a.evI = 0; a.medStart = performance.now();
   $('#medLine').textContent = ''; $('#medLine').classList.add('fade');
 }
 
@@ -4068,7 +4140,7 @@ function startBreath() {
       $('#breathTxt').textContent = i18n('먼저 크게 한숨 내쉬세요'); $('#breathCnt').textContent = i18n('하아…');
     } else {
       const e2 = e - SIGH, r = Math.floor(e2 / CYC), ph = e2 % CYC;
-      if (r >= ROUNDS) { stopBreath(); toast(i18n('숨이 한결 고르네요')); return; }
+      if (r >= ROUNDS) { stopBreath(); toast(i18n('스트레스를 후~ 날려 보냈어요. 숨이 한결 고르네요')); return; }
       const inh = ph < IN, kk = inh ? ph / IN : 1 - (ph - IN) / OUT; k = 0.5 - 0.5 * Math.cos(kk * Math.PI);
       key = 1 + r * 2 + (inh ? 0 : 1);
       $('#breathTxt').textContent = inh ? i18n('코로 천천히 들이쉬세요') : i18n('입으로 길게 내쉬세요'); $('#breathCnt').textContent = `${r + 1} / ${ROUNDS}`;
@@ -4180,6 +4252,8 @@ function bindUI() {
     updateSleepUI(); sleepIdleSoon();
   };
   $('#campGo').onclick = startCamp;
+  $('#medGo').onclick = beginMeditate; $('#medCancel').onclick = () => { $('#medCard').hidden = true; };
+  S.medMin = store.get('medMin', 5); S.medBell = store.get('medBell', true); S.medAwake = store.get('medAwake', true);
   $('#cafeCancel').onclick = () => { $('#cafeCard').hidden = true; S.goCafe = false; }; $('#campCancel').onclick = () => { $('#campCard').hidden = true; };
   $('#wakeBtn').onclick = e => { e.stopPropagation(); wakeCamp(); };
   $('#sleepUI').addEventListener('pointerdown', e => { if (e.target.id !== 'wakeBtn') sleepIdleSoon(); });
@@ -4207,6 +4281,7 @@ function bindUI() {
     toast(i18n('{0}님, {1}에 오신 걸 환영해요', S.nick, COURSE_NAME));
     netStart();
   };
+  $('#enterMed').onclick = () => { $('#enterBtn').onclick(); setTimeout(openMedCard, 500); };   // 명상하러 온 사람은 들어오자마자 시간을 고른다
   // summit card
   $('#sumPhoto').onclick = () => {
     $('#summit').hidden = true;
@@ -4256,7 +4331,7 @@ function boot() {
   if (coarse) $('#photoHint').textContent = i18n('사진을 길게 눌러 저장하세요.');
   initState(); addCafeCp(); initLabels(); buildProfiles(); bindUI(); courseTexts();
   setSeason(S.season); setMute(S.mute); updateWalkBtn(); setRain(S.rain && !S.season, false);
-  $('#start').hidden = false; $('#enterBtn').disabled = false;
+  $('#start').hidden = false; $('#enterBtn').disabled = false; $('#enterMed').disabled = false;
   if (store.get('autoEnter', false)) { store.set('autoEnter', false); $('#enterBtn').focus(); }
   const ld = $('#loading'); ld.style.opacity = 0; setTimeout(() => { ld.hidden = true; }, 600);
   window.__sangil = { keys, setRain, hitObstacle, OBS, CIRCLE, sitCircle, goCircle, sendChat, inCircle, S, player, TN, getH, CPS, startAct, cam, NET, NPCS, greet, sendChat, W, netState, startCamp, wakeCamp, openCampCard, goCafe, startCafe, DRINKS, CAFE, H5, answerHi5, showHi5Ask, MED, TX, TZ, IS_PARK };
