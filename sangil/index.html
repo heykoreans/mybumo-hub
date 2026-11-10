@@ -335,7 +335,6 @@ body.calm #trailCard,body.calm #hint{opacity:0;pointer-events:none}
   </div>
   <div id="greetMenu" class="popmenu glass" hidden>
     <button data-greet="bow"><svg class="ico" viewBox="0 0 24 24"><circle cx="13.5" cy="6.5" r="2.2"/><path d="M12 9l-3.5 4.5L10 20M8.5 13.5 14 15M10 20h3"/></svg><span>목례</span></button>
-    <button data-greet="hi5"><svg class="ico" viewBox="0 0 24 24"><path d="M5 20l2.5-7.5L9 6.5a1.2 1.2 0 0 1 2.3.6L10.5 11M19 20l-2.5-7.5L15 6.5a1.2 1.2 0 0 0-2.3.6L13.5 11M12 3v1.5M9.5 3.8l.6 1.2M14.5 3.8l-.6 1.2"/></svg><span>하이파이브</span></button>
     <button data-greet="wave"><svg class="ico" viewBox="0 0 24 24"><path d="M9 20v-8.5M9 11.5V5.5a1.5 1.5 0 0 1 3 0v5M12 10V4.5a1.5 1.5 0 0 1 3 0V11M15 11V7a1.5 1.5 0 0 1 3 0v7a6 6 0 0 1-6 6M19 3c1 .8 1.6 1.8 1.8 3M4 5.5C4.6 4.3 5.5 3.5 6.6 3"/></svg><span>손 흔들기</span></button>
   </div>
   <div id="chatBar" class="glass" hidden>
@@ -2744,8 +2743,8 @@ function clickMove(cx, cy) {
 function movePlayer(dt) {
   let mx = 0, mz = 0, dist = Infinity;
   const kx = (keys.d ? 1 : 0) - (keys.a ? 1 : 0), kz = (keys.w ? 1 : 0) - (keys.s ? 1 : 0);
+  if (player.act && (kx || kz || player.target)) cancelAct();   // 인사·간식·물 마시기는 여기서 바로 끝나고(act = null) 그대로 걷기로 이어진다
   if (player.act) {
-    if (kx || kz || player.target) cancelAct();
     if (!(player.act.type === 'cafe' && player.act.t < 1.7)) player.moveAmt = lerp(player.moveAmt, 0, 1 - Math.exp(-dt * 8));
     player.y = groundY(player.x, player.z);
     return;
@@ -4213,8 +4212,7 @@ function onNet(m) {
       if (!player.act || GREETS.includes(player.act.type)) greet(kind, p);
     }
   } else if (m.k === 'h5q') {   // 하이파이브 해도 될까요?
-    if (m.to !== ME.id || p.hidden || MUTED.has(p.id)) return;
-    showHi5Ask(p);
+    return;   // 하이파이브는 없앴다: 예전 화면에서 오는 요청은 보여 주지 않는다
   } else if (m.k === 'h5a') {   // 상대의 대답
     if (m.to !== ME.id || !H5.out || H5.out.id !== p.id) return;
     H5.out = null; dropBubble(player);
@@ -4310,7 +4308,10 @@ function openMute(p, x, y) {
 
 /* ---------------- loop ---------------- */
 let lastNow = performance.now(), frameEma = 0.016, slowFor = 0;
-function frame(now) {
+function frame(now) {   // 한 프레임에서 오류가 나도 다음 프레임은 계속 돈다 (화면이 굳지 않게)
+  try { frameStep(now); } catch (e) { console.error('frame', e); requestAnimationFrame(frame); }
+}
+function frameStep(now) {
   if (S.lost) { requestAnimationFrame(frame); return; }
   // 프레임 상한: 가볍게 30fps, 휴대폰 선명하게 60fps (배터리·발열)
   const deepSleep = S.camp && S.camp.phase === 'sleep' && performance.now() - S.camp.sleepAt > 45000;   // 화면이 어두워지면 배터리를 아낀다
