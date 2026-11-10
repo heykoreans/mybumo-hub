@@ -184,7 +184,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{ou
 #medLine.fade{opacity:0}
 /* 야영 */
 .chips{display:flex;gap:6px}
-.chips button{flex:1;padding:10px 0;border:1.5px solid var(--paper-line);border-radius:12px;background:#fbf8f1;color:var(--ink);font-size:14px}
+.chips button{flex:1;padding:10px 4px;line-height:1.3;border:1.5px solid var(--paper-line);border-radius:12px;background:#fbf8f1;color:var(--ink);font-size:14px}
 .chips button[aria-pressed="true"]{border-color:var(--pine);background:#e9f0ea;font-weight:700}
 .lab{font-size:13px;color:var(--ink-soft)}
 .pcheck{display:flex;gap:10px;align-items:flex-start;font-size:14.5px;color:var(--ink);cursor:pointer}
@@ -200,6 +200,8 @@ body.calm #trailCard,body.calm #hint{opacity:0;pointer-events:none}
 #sleepBox small{font-size:13px;color:rgba(247,242,232,.6);font-variant-numeric:tabular-nums}
 #sleepBox button{margin-top:6px;padding:10px 22px;border-radius:999px;font-size:14px}
 #sleepUI.idle #sleepBox{opacity:0}
+@media (max-width:400px){.chips button{font-size:13px}}
+#sleepBox button.snd{margin-top:0;padding:6px 14px;font-size:13px;color:rgba(247,242,232,.75);border:1px solid rgba(247,242,232,.22);background:none}
 #photoImg{width:100%;border-radius:12px;display:block;-webkit-user-select:auto;user-select:auto;-webkit-touch-callout:default}
 #loading{position:fixed;inset:0;display:grid;place-items:center;z-index:50;background:var(--ground);font-family:var(--font-display);font-size:18px;color:var(--on-glass);transition:opacity .6s}
 #nogl{position:fixed;inset:0;display:grid;place-items:center;z-index:60;background:var(--ground);padding:24px;text-align:center;line-height:1.7}
@@ -313,7 +315,7 @@ body.calm #trailCard,body.calm #hint{opacity:0;pointer-events:none}
 
 <div id="sleepUI" hidden>
   <div id="sleepVeil"></div>
-  <div id="sleepBox"><b id="sleepTitle">쉿, 잠드는 중</b><small id="sleepSub"></small><button id="wakeBtn" class="glass">깨어나기</button></div>
+  <div id="sleepBox"><b id="sleepTitle">쉿, 잠드는 중</b><small id="sleepSub"></small><button id="sleepSndBtn" class="snd"></button><button id="wakeBtn" class="glass">깨어나기</button></div>
 </div>
 
 <section id="campCard" class="scrim" hidden>
@@ -323,6 +325,8 @@ body.calm #trailCard,body.calm #hint{opacity:0;pointer-events:none}
     <p id="campDesc"></p>
     <div style="display:grid;gap:8px"><span class="lab">소리가 천천히 꺼지는 시간</span>
       <div class="chips" id="campTimer"><button data-m="15">15분</button><button data-m="30" aria-pressed="true">30분</button><button data-m="60">1시간</button><button data-m="0">끄지 않기</button></div></div>
+    <div style="display:grid;gap:8px"><span class="lab">잠을 돕는 소리</span>
+      <div class="chips" id="campSnd"><button data-k="rain" aria-pressed="true">빗소리</button><button data-k="brown">포근한 바람</button><button data-k="drone">잔잔한 울림</button><button data-k="none">자연 소리만</button></div></div>
     <label class="pcheck"><input type="checkbox" id="campFire" checked><span>모닥불 피우기<small>타닥타닥 불 소리와 따뜻한 불빛</small></span></label>
     <label class="pcheck"><input type="checkbox" id="campAwake" checked><span>화면 켜 두기<small>휴대폰은 화면이 꺼지면 소리도 멈춰요. 켜 두면 화면이 아주 어둡게 바뀌고, 타이머가 끝나면 다시 꺼질 수 있게 풀어 둡니다.</small></span></label>
     <button class="primary" id="campGo">텐트 치고 잠들기</button>
@@ -1284,7 +1288,7 @@ const S = {
   speedIdx: store.get('speed', 1), quality: store.get('quality', 1), bubbles: store.get('bubbles', true), lost: false,
   walked: 0, startT: 0, reached: new Set(), summitShown: false, lastDrag: -10, wantPhoto: false, nick: store.get('nick', null) || nickRand(), climbMax: 0,
   breathK: 0, breathSnd: null, boostUntil: 0,
-  voice: store.get('voice', true), campMin: store.get('campMin', 30), campFire: store.get('campFire', true), campAwake: store.get('campAwake', true), camp: null, night: 0, dawn: 0, wl: null
+  voice: store.get('voice', true), campMin: store.get('campMin', 30), campFire: store.get('campFire', true), campAwake: store.get('campAwake', true), sleepSnd: store.get('sleepSnd', 'rain'), camp: null, night: 0, dawn: 0, wl: null
 };
 S.sb = S.season;
 const player = { x: TX[0], z: TZ[0], y: 0, heading: 0, phase: 0, moveAmt: 0, idx: 0, target: null, lastStep: 0, sit: 0, act: null,
@@ -1414,9 +1418,7 @@ function audioInit() {
   // 밤 소리 묶음: 모닥불, 풀벌레 (야영할 때 켜진다)
   A.nightG = ctx.createGain(); A.nightG.gain.value = 0; A.nightG.connect(A.amb);
   A.fireG = ctx.createGain(); A.fireG.gain.value = 0; A.fireG.connect(A.amb);
-  const fr = ctx.createBufferSource(); fr.buffer = nb; fr.loop = true; fr.playbackRate.value = 0.4;
-  const frl = ctx.createBiquadFilter(); frl.type = 'lowpass'; frl.frequency.value = 300; const frg = ctx.createGain(); frg.gain.value = 0.5;
-  fr.connect(frl).connect(frg).connect(A.fireG); fr.start(0, 0.2);
+  // 모닥불 소리는 야영을 시작할 때 합성한다 (startFireLoop)
   A.crickT = 0; A.owlT = 20; A.crackT = 0; A.hornT = 6; A.sirenT = 70; A.hoofT = 3;
 }
 /* 새소리: 짧은 지저귐, 빠른 떨림, 휘파람, 딱따구리, 겨울 박새 */
@@ -1507,6 +1509,122 @@ function crackle(n = 1) {
     g.gain.setValueAtTime(0.0001, st); g.gain.exponentialRampToValueAtTime(0.06 + Math.random() * 0.12, st + 0.002); g.gain.exponentialRampToValueAtTime(0.0001, st + 0.012 + Math.random() * 0.03);
     s.connect(f).connect(g).connect(A.fireG); s.start(st, Math.random() * 1.8, 0.06); }
 }
+/* ================= 모닥불과 잠소리: 몇십 초짜리 소리를 직접 합성해 이음매 없이 반복한다 ================= */
+function bpf(f, Q, sr) {   // 대역 통과 필터 한 개 (계수 계산 + 상태)
+  const w0 = 2 * Math.PI * f / sr, al = Math.sin(w0) / (2 * Q), a0 = 1 + al, b0 = al / a0, b2 = -al / a0, a1 = -2 * Math.cos(w0) / a0, a2 = (1 - al) / a0;
+  let x1 = 0, x2 = 0, y1 = 0, y2 = 0;
+  return x => { const y = b0 * x + b2 * x2 - a1 * y1 - a2 * y2; x2 = x1; x1 = x; y2 = y1; y1 = y; return y; };
+}
+function ringAt(out, t, f, Q, amp, dec, sr, exc = 0.0012) {   // 잡음 한 번 튀겨서 울리는 '톡' 소리
+  const st = Math.floor(t * sr); if (st >= out.length) return;
+  const p = bpf(f, Q, sr), E = Math.max(2, Math.floor(exc * sr)), L = Math.floor(dec * sr * 5);
+  for (let i = 0; i < L && st + i < out.length; i++) { const x = i < E ? (Math.random() * 2 - 1) * (1 - i / E) : 0; out[st + i] += p(x) * amp * Math.exp(-i / (dec * sr)); }
+}
+function thupAt(out, t, f, amp, dec, sr) {   // 천막이 '툭' 울리는 낮은 소리
+  const st = Math.floor(t * sr), L = Math.floor(dec * sr * 4);
+  for (let i = 0; i < L && st + i < out.length; i++) out[st + i] += Math.sin(2 * Math.PI * f * i / sr) * amp * Math.exp(-i / (dec * sr)) * Math.min(1, i / (sr * 0.002));
+}
+function loopBuffer(chans, L, X, peakTo) {   // 끝부분을 앞부분에 겹쳐 이음매를 없애고 버퍼로 만든다
+  const ctx = A.ctx, buf = ctx.createBuffer(chans.length, L, ctx.sampleRate);
+  let peak = 0; for (const c of chans) for (let i = 0; i < L; i++) peak = Math.max(peak, Math.abs(c[i]));
+  chans.forEach((c, k) => { const d = buf.getChannelData(k), g = peakTo / (peak || 1);
+    for (let i = 0; i < L; i++) { let v = c[i]; if (i < X) { const w = i / X; v = c[i] * Math.sqrt(w) + c[L + i] * Math.sqrt(1 - w); } d[i] = v * g; } });
+  return buf;
+}
+function synthFire() {
+  const sr = A.ctx.sampleRate, L = Math.floor(sr * 22), X = Math.floor(sr * 0.8), n = L + X, rnd = Math.random, chans = [];
+  for (let ch = 0; ch < 2; ch++) {
+    const out = new Float32Array(n), roar = bpf(520 + ch * 60, 0.55, sr), ph = [rnd() * 9, rnd() * 9, rnd() * 9];
+    let lo = 0; const cl = Math.exp(-2 * Math.PI * 130 / sr);
+    for (let i = 0; i < n; i++) {   // 불꽃이 일렁이는 '화르르' 바탕
+      const t = i / sr, fl = 0.55 + 0.22 * Math.sin(t * 1.7 + ph[0]) + 0.14 * Math.sin(t * 0.47 + ph[1]) + 0.09 * Math.sin(t * 4.1 + ph[2]);
+      const x = rnd() * 2 - 1; lo = lo * cl + x * (1 - cl);
+      out[i] = roar(x) * 0.2 * fl + lo * 0.75 * fl;
+    }
+    let t = 0;
+    while (t < n / sr) {   // 타닥 (가끔 몇 개가 몰려서)
+      t += -Math.log(1 - rnd()) / 6.5;
+      const cluster = rnd() < 0.08 ? 3 + Math.floor(rnd() * 7) : 1;
+      for (let k = 0; k < cluster; k++) ringAt(out, t + k * (0.012 + rnd() * 0.05), 1300 + Math.pow(rnd(), 1.6) * 5200, 2.5 + rnd() * 6, 0.12 + Math.pow(rnd(), 4) * 1.1, 0.003 + rnd() * 0.014, sr);
+    }
+    t = rnd() * 4;
+    while (t < n / sr) {   // 굵은 나무가 '탁' 갈라지는 소리와 장작이 내려앉는 '툭'
+      ringAt(out, t, 450 + rnd() * 700, 1.8, 1.4 + rnd() * 0.8, 0.03 + rnd() * 0.03, sr, 0.003);
+      if (rnd() < 0.4) thupAt(out, t + 0.02, 70 + rnd() * 40, 0.5, 0.06, sr);
+      t += 5 + rnd() * 9;
+    }
+    t = 3 + rnd() * 6;
+    while (t < n / sr - 3) {   // 젖은 나무에서 '치이익' 김 빠지는 소리
+      const st = Math.floor(t * sr), D = Math.floor(sr * (1.2 + rnd() * 1.8)), hs = bpf(3500 + rnd() * 2500, 1.2, sr);
+      for (let i = 0; i < D && st + i < n; i++) { const w = Math.sin(Math.PI * i / D); out[st + i] += hs(rnd() * 2 - 1) * 0.1 * w * w; }
+      t += 8 + rnd() * 10;
+    }
+    chans.push(out);
+  }
+  return loopBuffer(chans, L, X, 0.85);
+}
+function synthRain(sleet) {   // 텐트 천 위에 떨어지는 비 (겨울엔 싸락눈)
+  const sr = A.ctx.sampleRate, L = Math.floor(sr * 20), X = Math.floor(sr * 0.8), n = L + X, rnd = Math.random, chans = [];
+  for (let ch = 0; ch < 2; ch++) {
+    const out = new Float32Array(n);
+    let hp = 0, hpx = 0, lp = 0; const ch1 = Math.exp(-2 * Math.PI * 350 / sr), cl = Math.exp(-2 * Math.PI * (sleet ? 6000 : 3200) / sr);
+    for (let i = 0; i < n; i++) {   // 멀리서 쏴아 하는 빗줄기 바탕
+      const x = rnd() * 2 - 1; lp = lp * cl + x * (1 - cl); hp = ch1 * (hp + lp - hpx); hpx = lp;
+      out[i] = hp * (sleet ? 0.09 : 0.3) * (0.9 + 0.1 * Math.sin(i / sr * 0.31 + ch));
+    }
+    let t = 0; const rate = sleet ? 26 : 42;
+    while (t < n / sr) {   // 천에 떨어지는 빗방울 '톡' + 천이 울리는 '툭'
+      t += -Math.log(1 - rnd()) / rate;
+      const a = 0.08 + Math.pow(rnd(), 3.5) * 0.6;
+      ringAt(out, t, sleet ? 3500 + rnd() * 5000 : 1400 + rnd() * 3200, 1.2 + rnd() * 2, a, sleet ? 0.002 + rnd() * 0.003 : 0.003 + rnd() * 0.006, sr, 0.0008);
+      if (!sleet) thupAt(out, t, 150 + rnd() * 160, a * 0.28, 0.02 + rnd() * 0.02, sr);
+    }
+    if (!sleet) { t = rnd(); while (t < n / sr) { ringAt(out, t, 900 + rnd() * 600, 1.5, 0.5, 0.008, sr); thupAt(out, t, 120 + rnd() * 80, 0.55, 0.05, sr); t += 1 + rnd() * 3; } }   // 나뭇가지에서 모여 떨어지는 큰 물방울
+    chans.push(out);
+  }
+  return loopBuffer(chans, L, X, 0.8);
+}
+function synthBrown() {   // 바람처럼 낮고 포근한 소리(브라운 노이즈)
+  const sr = A.ctx.sampleRate, L = Math.floor(sr * 16), X = Math.floor(sr * 1), n = L + X, chans = [];
+  for (let ch = 0; ch < 2; ch++) { const out = new Float32Array(n); let b = 0, lp = 0; const cl = Math.exp(-2 * Math.PI * 900 / sr);
+    for (let i = 0; i < n; i++) { b = (b + 0.02 * (Math.random() * 2 - 1)) / 1.02; lp = lp * cl + b * (1 - cl); out[i] = lp * (0.85 + 0.15 * Math.sin(i / sr * 0.13 + ch * 2)); }
+    chans.push(out); }
+  return loopBuffer(chans, L, X, 0.8);
+}
+const SLEEP_SOUNDS = { rain: '빗소리', brown: '포근한 바람', drone: '잔잔한 울림', none: '자연 소리만' };
+const sleepSndName = k => k === 'rain' && S.sb > 0.5 ? '싸락눈 소리' : SLEEP_SOUNDS[k];
+function bufFor(key) { A.bufs = A.bufs || {}; if (!A.bufs[key]) A.bufs[key] = key === 'fire' ? synthFire() : key === 'rain' ? synthRain(false) : key === 'sleet' ? synthRain(true) : synthBrown(); return A.bufs[key]; }
+function startFireLoop() {
+  if (!A.ctx || A.fireSrc) return;
+  A.fireLP = A.ctx.createBiquadFilter(); A.fireLP.type = 'lowpass'; A.fireLP.frequency.value = 9000; A.fireLP.connect(A.fireG);
+  const s = A.ctx.createBufferSource(); s.buffer = bufFor('fire'); s.loop = true; s.connect(A.fireLP); s.start(); A.fireSrc = s;
+}
+function startSleepSound(key) {
+  stopSleepSound(0.8);
+  if (!A.ctx || key === 'none') return;
+  const ctx = A.ctx, t = ctx.currentTime, g = ctx.createGain(), stops = [];
+  g.gain.setValueAtTime(0, t); g.connect(A.amb);
+  if (key === 'drone') {   // 아주 느리게 맴도는 낮은 화음
+    const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 700; lp.connect(g);
+    for (const [f, a] of [[98, 0.05], [98.4, 0.05], [146.8, 0.035], [147.3, 0.035], [196, 0.02], [220.2, 0.012]]) {
+      const o = ctx.createOscillator(), og = ctx.createGain(), l = ctx.createOscillator(), lg = ctx.createGain(); o.type = 'sine'; o.frequency.value = f; og.gain.value = a;
+      l.frequency.value = 0.03 + Math.random() * 0.05; lg.gain.value = a * 0.6; l.connect(lg).connect(og.gain);
+      o.connect(og).connect(lp); o.start(t); l.start(t); stops.push(o, l);
+    }
+    g.gain.linearRampToValueAtTime(0.9, t + 8);
+  } else {
+    const s = ctx.createBufferSource(); s.buffer = bufFor(key === 'rain' ? (S.sb > 0.5 ? 'sleet' : 'rain') : 'brown'); s.loop = true; s.loopStart = 0;
+    s.connect(g); s.start(t, Math.random() * 5); stops.push(s);
+    g.gain.linearRampToValueAtTime(key === 'rain' ? 0.5 : 0.42, t + 8);
+  }
+  A.sleepSnd = { g, stops };
+}
+function stopSleepSound(fade = 2) {
+  const s = A.sleepSnd; if (!s || !A.ctx) return; A.sleepSnd = null;
+  const t = A.ctx.currentTime; s.g.gain.cancelScheduledValues(t); s.g.gain.setValueAtTime(s.g.gain.value, t); s.g.gain.linearRampToValueAtTime(0, t + fade);
+  s.stops.forEach(o => { try { o.stop(t + fade + 0.1); } catch (e) {} });
+}
+
 function bell(vol = 1) {
   const ctx = A.ctx, t = ctx.currentTime + 0.02;
   [1318, 1976, 2637, 3520].forEach((f, i) => { const o = ctx.createOscillator(), g = ctx.createGain(); o.type = 'sine'; o.frequency.value = f * (1 + (Math.random() - 0.5) * 0.004);
@@ -1685,11 +1803,12 @@ function updateAudio(dt) {
   const edge = IS_PARK ? 1 - smooth(4, 40, Math.min(PARK.hw - Math.abs(player.x), PARK.hl - Math.abs(player.z))) : 0;
   A.cityG.gain.setTargetAtTime(IS_PARK ? (0.07 + 0.16 * edge) * (1 - 0.5 * night) * sv : 0, now, 0.8);
   A.nightG.gain.setTargetAtTime(night * sv, now, 1.5);
-  A.fireG.gain.setTargetAtTime(camp && S.camp.fireOn ? 0.5 : 0, now, 1.2);
+  A.fireG.gain.setTargetAtTime(camp && S.camp.fireOn ? 0.62 : 0, now, 1.2);
+  if (A.fireLP) A.fireLP.frequency.setTargetAtTime(inTent(player) ? 2200 : 9000, now, 1.5);   // 텐트 안에서는 불 소리가 천 너머로 먹먹하게
   const med = player.act && player.act.type === 'meditate';
   A.amb.gain.setTargetAtTime(S.amb * (med ? 0.55 : 1) * (S.breath ? 0.6 : 1), now, 0.8);
   if (S.mute || (camp && S.camp.silent)) return;
-  if (camp && S.camp.fireOn) { A.crackT -= 0.25; if (A.crackT <= 0) { A.crackT = 0.15 + Math.random() * 0.9; crackle(1 + Math.floor(Math.random() * 3)); } }
+  if (camp && S.camp.fireOn) { A.crackT -= 0.25; if (A.crackT <= 0) { A.crackT = 1.2 + Math.random() * 3; crackle(1 + Math.floor(Math.random() * 2)); } }
   if (night > 0.5) {   // 밤: 새 대신 풀벌레와 소쩍새
     if (S.sb < 0.5) { A.crickT -= 0.25; if (A.crickT <= 0) { A.crickT = 0.25 + Math.random() * 0.9; cricket(); if (Math.random() < 0.4) cricket(); } }
     A.owlT -= 0.25; if (A.owlT <= 0) { A.owlT = 14 + Math.random() * 26; owl(); }
@@ -2086,6 +2205,7 @@ function openCampCard() {
     : (S.sb > 0.5 ? '눈 쌓인 숲에 텐트를 치고 모닥불을 피워요. 바람 소리와 얼음 밑 물소리, 타닥이는 불 소리를 들으며 잠들어 보세요.'
       : '산속에 텐트를 치고 모닥불을 피워요. 계곡 물소리, 풀벌레, 소쩍새 소리를 들으며 잠들어 보세요.');
   $('#campTimer').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', +b.dataset.m === S.campMin ? 'true' : 'false'));
+  $('#campSnd').querySelectorAll('button').forEach(b => { b.setAttribute('aria-pressed', b.dataset.k === S.sleepSnd ? 'true' : 'false'); b.textContent = sleepSndName(b.dataset.k); });
   $('#campFire').checked = S.campFire; $('#campAwake').checked = S.campAwake;
   $('#campCard').hidden = false;
 }
@@ -2099,6 +2219,8 @@ function startCamp() {
   player.heading = Math.atan2(S.camp.spot.fx - player.x, S.camp.spot.fz - player.z); cam.lim = 0;
   $('#actPill').hidden = false; updatePill(); netState(true);
   if (canSound()) { campSfx.rustle(); setTimeout(() => canSound() && campSfx.stakes(), 700); }
+  setTimeout(() => { if (A.ctx && S.campFire) startFireLoop(); }, 60);   // 소리를 미리 만들어 둔다 (한 번에 몰리지 않게 나눠서)
+  setTimeout(() => { if (A.ctx && S.sleepSnd !== 'none' && S.sleepSnd !== 'drone') bufFor(S.sleepSnd === 'rain' ? (S.sb > 0.5 ? 'sleet' : 'rain') : 'brown'); }, 5000);
 }
 const campSfx = {
   rustle() { const t = A.ctx.currentTime + 0.02; for (let i = 0; i < 14; i++) noiseHit(t + Math.random() * 1.4, { type: 'bandpass', f: 900 + Math.random() * 1600, q: 0.6, dur: 0.06 + Math.random() * 0.12, g: 0.05 + Math.random() * 0.06, rate: 0.7 }); },
@@ -2111,7 +2233,7 @@ function updateCamp(dt) {
   C.t += dt; const a = player.act;
   if (C.phase === 'pitch') {
     C.tentK = smooth(0, 1.8, C.t);
-    if (!C.fireOn && C.fire && C.t > 2.4) { C.fireOn = true; if (canSound()) { campSfx.strike(); crackle(4); } }
+    if (!C.fireOn && C.fire && C.t > 2.4) { C.fireOn = true; startFireLoop(); if (canSound()) { campSfx.strike(); crackle(4); } }
     if (C.t > CAMP_IN) enterTent();
   } else if (C.phase === 'sleep') {
     const now = performance.now();
@@ -2132,6 +2254,7 @@ function enterTent() {
   const C = S.camp; C.phase = 'sleep'; C.sleepAt = performance.now();
   C.endAt = C.min ? C.sleepAt + C.min * 60000 : 0;
   if (canSound()) campSfx.zip(true);
+  startSleepSound(S.sleepSnd);
   $('#actPill').hidden = true;
   const ui = $('#sleepUI'); ui.hidden = false; ui.classList.remove('idle'); document.body.classList.add('sleeping'); closeMenus();
   const veil = $('#sleepVeil'); veil.style.transition = 'none'; veil.style.opacity = '0';
@@ -2150,7 +2273,7 @@ function wakeCamp() {
   const wasAsleep = C.phase === 'sleep';
   C.sleptMs = wasAsleep ? performance.now() - C.sleepAt : 0;
   C.phase = 'wake'; C.t = wasAsleep ? 0 : 4.5; C.silent = false;
-  keepAwake(false);
+  keepAwake(false); stopSleepSound(2.5);
   if (A.ctx && A.sleepG) { const g = A.sleepG.gain, now = A.ctx.currentTime; g.cancelScheduledValues(now); g.setValueAtTime(Math.max(0.0001, g.value), now); g.linearRampToValueAtTime(1, now + 1.2); }
   const ui = $('#sleepUI'); ui.hidden = true; $('#sleepVeil').style.opacity = '0'; document.body.classList.remove('sleeping');
   if (wasAsleep) {
@@ -2172,6 +2295,7 @@ function updateSleepUI() {
   const C = S.camp; if (!C || C.phase !== 'sleep') return;
   const now = performance.now(), slept = (now - C.sleepAt) / 1000;
   $('#sleepTitle').textContent = C.silent ? '고요한 밤' : '쉿, 잠드는 중';
+  $('#sleepSndBtn').textContent = `잠소리 · ${sleepSndName(S.sleepSnd)}  ›`;
   $('#sleepSub').textContent = C.silent ? `${Math.floor(slept / 60)}분째 자는 중 · 소리는 꺼졌어요` :
     C.endAt ? `소리는 ${Math.max(1, Math.ceil((C.endAt - now) / 60000))}분 뒤에 천천히 꺼져요` : `${Math.floor(slept / 60)}분째 · 소리는 계속 이어져요`;
 }
@@ -3079,6 +3203,12 @@ function bindUI() {
   // 명상 목소리, 야영
   $('#voiceChk').checked = S.voice; $('#voiceChk').onchange = e => { S.voice = e.target.checked; store.set('voice', S.voice); if (!S.voice) hush(); };
   document.querySelectorAll('#campTimer button').forEach(b => b.onclick = () => { S.campMin = +b.dataset.m; document.querySelectorAll('#campTimer button').forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false')); });
+  document.querySelectorAll('#campSnd button').forEach(b => b.onclick = () => { S.sleepSnd = b.dataset.k; store.set('sleepSnd', S.sleepSnd); document.querySelectorAll('#campSnd button').forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false')); });
+  $('#sleepSndBtn').onclick = e => {   // 자는 중에도 소리를 바꿀 수 있게
+    e.stopPropagation(); const keys = Object.keys(SLEEP_SOUNDS); S.sleepSnd = keys[(keys.indexOf(S.sleepSnd) + 1) % keys.length]; store.set('sleepSnd', S.sleepSnd);
+    if (S.camp && S.camp.phase === 'sleep') startSleepSound(S.sleepSnd);
+    updateSleepUI(); sleepIdleSoon();
+  };
   $('#campGo').onclick = startCamp; $('#campCancel').onclick = () => { $('#campCard').hidden = true; };
   $('#wakeBtn').onclick = e => { e.stopPropagation(); wakeCamp(); };
   $('#sleepUI').addEventListener('pointerdown', e => { if (e.target.id !== 'wakeBtn') sleepIdleSoon(); });
