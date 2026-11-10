@@ -388,8 +388,8 @@ body.calm #trailCard,body.calm #hint{opacity:0;pointer-events:none}
    여러 기기의 사람들이 서로 보이게 하려면 Supabase 프로젝트의 주소와 공개(anon) 키를 넣으세요.
    Supabase 대시보드 → Project Settings → API 에 있습니다.
    service_role 키는 절대 넣지 마세요. 비워 두면 같은 기기의 브라우저 탭끼리만 연결됩니다. */
-const SANGIL_SUPABASE_URL = '';
-const SANGIL_SUPABASE_ANON_KEY = '';
+const SANGIL_SUPABASE_URL = 'https://tlpzztuxttsobhqprosk.supabase.co';
+const SANGIL_SUPABASE_ANON_KEY = 'sb_publishable_TjVcFMDYPGeBHZ82YuQrYw_YJTr44iz';   // 공개용(publishable) 키. secret/service_role 키는 절대 넣지 말 것
 /* ===================================================== */
 const ROOM_CAP = 20, MAX_ROOMS = 30;
 const $ = s => document.querySelector(s);
@@ -2593,13 +2593,15 @@ async function netStart() {
   try {
     if (SANGIL_SUPABASE_URL && SANGIL_SUPABASE_ANON_KEY) {
       try {
+        // 새 형식 키(sb_publishable_)를 쓰려면 최근 버전이 필요하다. 못 불러오면 예전 버전으로 한 번 더 시도한다
+        if (!window.supabase) { try { await loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.1/dist/umd/supabase.js'); } catch (e) {} }
         if (!window.supabase) await loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js');
         if (!NET.client) NET.client = window.supabase.createClient(SANGIL_SUPABASE_URL, SANGIL_SUPABASE_ANON_KEY, { auth: { persistSession: false }, realtime: { params: { eventsPerSecond: 10 } } });
         NET.mode = 'supabase';
         if (await joinRooms()) return;
       } catch (e) { console.warn('함께 걷기 연결 실패', e); }
-      NET.mode = 'off'; NET.on = false; toast('지금은 혼자 걷는 길이에요');
-      return;
+      NET.on = false; NET.client = null; toast('지금은 혼자 걷는 길이에요');
+      startLocal(); return;   // 서버에 못 붙으면 같은 기기 탭끼리라도 이어 준다
     }
     startLocal();
   } finally { NET.starting = false; updateCount(); }
