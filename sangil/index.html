@@ -2306,12 +2306,12 @@ function synthBrook() {   // 시냇물: 돌 사이로 흐르는 물의 '졸졸, 
   const sr = A.ctx.sampleRate, L = Math.floor(sr * 13), X = Math.floor(sr * 1), n = L + X, rnd = Math.random, chans = [];
   for (let c = 0; c < 2; c++) {
     const out = new Float32Array(n), wash = bpf(800 + c * 90, 0.6, sr), hi = bpf(2600, 0.8, sr), ph = rnd() * 9;
-    for (let i = 0; i < n; i++) { const x = rnd() * 2 - 1, m = 0.8 + 0.12 * Math.sin(i / sr * 0.7 + ph) + 0.08 * Math.sin(i / sr * 2.3 + ph * 2); out[i] = (wash(x) * 0.22 + hi(x) * 0.05) * m; }
+    for (let i = 0; i < n; i++) { const x = rnd() * 2 - 1, m = 0.8 + 0.12 * Math.sin(i / sr * 0.7 + ph) + 0.08 * Math.sin(i / sr * 2.3 + ph * 2); out[i] = (wash(x) * 0.3 + hi(x) * 0.08) * m; }
     let t = 0;
     while (t < n / sr) {
-      t += -Math.log(1 - rnd()) / 34;
-      const k = rnd() < 0.2 ? 3 + Math.floor(rnd() * 5) : 1;   // 가끔 '꼴꼴꼴' 몰려서
-      for (let j = 0; j < k; j++) bubbleAt(out, t + j * (0.025 + rnd() * 0.04), 280 + Math.pow(rnd(), 1.6) * 1300, 0.012 + rnd() * 0.03, 0.08 + Math.pow(rnd(), 3) * 0.32, sr, 0.18 + rnd() * 0.3);
+      t += -Math.log(1 - rnd()) / 16;
+      const k = rnd() < 0.1 ? 2 + Math.floor(rnd() * 3) : 1;   // 가끔 '꼴꼴꼴' 몰려서
+      for (let j = 0; j < k; j++) bubbleAt(out, t + j * (0.025 + rnd() * 0.04), 280 + Math.pow(rnd(), 1.6) * 1300, 0.012 + rnd() * 0.03, 0.04 + Math.pow(rnd(), 3) * 0.14, sr, 0.12 + rnd() * 0.2);
     }
     chans.push(out);
   }
@@ -2470,7 +2470,8 @@ function updateAudio(dt) {
   A.windF.frequency.setTargetAtTime(280 + 300 * gust, now, 0.8);
   let dw = 1e9; for (const w of WATERS) dw = Math.min(dw, (waterE(w, player.x, player.z) - 1) * Math.min(w.rx, w.rz));
   // 산: 계곡물은 어디서나 은은하게, 연못 가까이에서는 더 크게 / 공원: 물가에서만 찰랑
-  const stream = IS_PARK ? 0.03 + 0.16 * (1 - smooth(2, 26, dw)) * (1 - 0.7 * S.sb) : lerp(0.16, 0.09, S.sb) + 0.4 * (1 - smooth(8, 50, Math.max(0, dw))) * (1 - 0.6 * S.sb);
+  // 물소리는 물가에서만 들린다 (어디서나 깔리던 바탕 물소리는 없앰)
+  const stream = IS_PARK ? 0.12 * (1 - smooth(2, 18, dw)) * (1 - 0.7 * S.sb) : 0.38 * (1 - smooth(6, 40, Math.max(0, dw))) * (1 - 0.6 * S.sb);
   A.streamG.gain.setTargetAtTime(stream * (camp ? 1.15 : 1) * sv, now, 0.6);
   const fb = W.fallBase, fx = fb[0] - player.x, fz = fb[2] - player.z, df = Math.hypot(fx, fz) || 1;
   A.fallG.gain.setTargetAtTime((W.fallGain || 1.1) * Math.pow(1 - smooth(4, W.fallReach || 110, df), 1.6) * (1 - 0.94 * S.sb) * sv, now, 0.6);
