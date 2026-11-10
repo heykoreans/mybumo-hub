@@ -4056,7 +4056,7 @@ function showSummit() {
 let breathRaf = 0;
 function startBreath() {
   if (S.breath) return stopBreath();
-  audioInit();
+  audioInit(); loadVoice();   // 명상과 같은 녹음 목소리로 '들이쉬고 / 천천히 내쉬어요'를 안내한다
   S.breath = true; S.breathK = 0; S.auto = false; player.target = null; updateWalkBtn(); $('#breath').hidden = false;
   const t0 = performance.now(), SIGH = 3000, IN = 4000, OUT = 6000, CYC = IN + OUT, ROUNDS = 4;
   const ring = $('#breathRing'); let lastKey = -1;
@@ -4076,6 +4076,7 @@ function startBreath() {
     if (key !== lastKey) {
       lastKey = key; if (S.breathSnd) S.breathSnd.stop();
       S.breathSnd = key === 0 ? breathSound('sigh', 2.8) : key % 2 === 1 ? breathSound('in', IN / 1000 - 0.1) : breathSound('out', OUT / 1000 - 0.3, key === ROUNDS * 2);
+      if (key > 0) playVoice(key % 2 === 1 ? 'cue_in' : 'cue_out');
     }
     S.breathK = k; ring.style.transform = `scale(${(0.6 + 0.45 * k).toFixed(3)})`;
     breathRaf = requestAnimationFrame(step);
