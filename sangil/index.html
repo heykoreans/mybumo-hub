@@ -79,6 +79,11 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{ou
 #trailCard{position:fixed;left:max(16px,env(safe-area-inset-left,0px));top:calc(64px + env(safe-area-inset-top,0px));z-index:15;border-radius:18px;padding:12px 14px 10px;width:218px;display:grid;gap:4px}
 #trailCard .alt{font-family:var(--font-display);font-size:30px;line-height:1;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
 #trailCard .alt small{font-size:14px;font-weight:400;margin-left:3px;color:var(--on-glass-soft)}
+#trailCard .enr{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--on-glass-soft)}
+#trailCard .enr .bar{flex:1;height:6px;border-radius:99px;background:rgba(255,255,255,.16);overflow:hidden}
+#trailCard .enr .bar b{display:block;height:100%;width:100%;border-radius:99px;background:#8fd1a8;transition:width .4s,background .6s}
+#trailCard .enr .enb{display:flex;align-items:center;gap:3px;font-variant-numeric:tabular-nums;white-space:nowrap}
+#trailCard .enr .enb svg{width:13px;height:13px}
 #trailCard .lbl{font-size:12px;color:var(--on-glass-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #trailCard svg{width:100%;height:46px;display:block;margin-top:4px}
 #trailCard .stats{display:flex;justify-content:space-between;font-size:12px;color:var(--on-glass-soft);font-variant-numeric:tabular-nums}
@@ -401,6 +406,7 @@ body.calm #trailCard,body.calm #hint{opacity:0;pointer-events:none}
     <div class="lbl" id="nextCp">다음 · 솔숲 정자</div>
     <svg id="miniProfile" viewBox="0 0 200 46" preserveAspectRatio="none" aria-hidden="true"></svg>
     <div class="stats"><span id="distVal">0.00 km</span><span id="timeVal">0분</span></div>
+    <div class="enr" id="enRow" title="기운"><span class="enl">기운</span><span class="bar"><b id="enFill"></b></span><span class="enb" id="enBars" title="에너지바"></span></div>
   </aside>
   <nav id="actions" class="glass" aria-label="동작">
     <button id="walkBtn" aria-pressed="false">
@@ -432,7 +438,7 @@ body.calm #trailCard,body.calm #hint{opacity:0;pointer-events:none}
     <button data-act="focus"><svg class="ico" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="9.5" rx="1.2"/><path d="M3 18.5h18M9.5 9.8c.8-1.2 1.6-1.8 2.5-1.8s1.7.6 2.5 1.8"/></svg><span>집중 모드</span></button>
     <button data-act="breath"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.5"/></svg><span>숨 고르기</span></button>
     <button data-act="meditate"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="5.5" r="2.2"/><path d="M12 8.5v5M7.5 12.5l4.5 1.5 4.5-1.5M4.5 18.5c2.2-2 4.6-2.6 7.5-2.6s5.3.6 7.5 2.6"/></svg><span>명상하기</span></button>
-    <button data-act="snack"><svg class="ico" viewBox="0 0 24 24"><path d="M4.5 15.5 15 6l4.5 4.5L9 20z"/><path d="M8 12.5l3.5 3.5M10.5 10.2 14 13.7"/></svg><span>간식 먹기</span></button>
+    <button data-act="snack"><svg class="ico" viewBox="0 0 24 24"><path d="M4.5 15.5 15 6l4.5 4.5L9 20z"/><path d="M8 12.5l3.5 3.5M10.5 10.2 14 13.7"/></svg><span id="snackLbl">에너지바</span></button>
     <button data-act="water"><svg class="ico" viewBox="0 0 24 24"><path d="M10 3h4v2.5l1.6 2.2V20a1 1 0 0 1-1 1H9.4a1 1 0 0 1-1-1V7.7L10 5.5z"/><path d="M8.4 12.5h7.2"/></svg><span>물 마시기</span></button>
     <button data-act="cafe"><svg class="ico" viewBox="0 0 24 24"><path d="M5 9h11v5a5 5 0 0 1-5 5h-1a5 5 0 0 1-5-5zM16 10.5h1.5a2.5 2.5 0 0 1 0 5H16M8 3.5c-.6.8-.6 1.7 0 2.5M11.5 3.5c-.6.8-.6 1.7 0 2.5M4 21h14"/></svg><span>카페</span></button>
     <button data-act="circle"><svg class="ico" viewBox="0 0 24 24"><path d="M12 4c2 2.5 3 4 3 6a3 3 0 0 1-6 0c0-1 .5-2 1.2-2.8.3 1 .9 1.6 1.8 1.6C12 7.5 12 6 12 4zM5 19.5l14-4M19 19.5l-14-4"/></svg><span>모닥불 쉼터</span></button>
@@ -477,9 +483,11 @@ body.calm #trailCard,body.calm #hint{opacity:0;pointer-events:none}
     <div style="display:grid;gap:8px"><span class="lab">모습</span><div class="chips" id="gbGender"><button data-g="0">남자</button><button data-g="1">여자</button></div></div>
     <div style="display:grid;gap:8px"><span class="lab">얼굴</span><div class="chips" id="gbFace"><button data-f="0">기본</button><button data-f="1">웃는 눈</button><button data-f="2">선글라스</button><button data-f="3">수염</button></div></div>
     <div style="display:grid;gap:8px"><span class="lab">재킷</span><div class="swatches" id="gbJacket"></div></div>
+    <div style="display:grid;gap:8px"><span class="lab">가방 키링</span><div class="chips" id="gbKey"><button data-k="0">없이</button><button data-k="1">반달곰</button><button data-k="2">다람쥐</button><button data-k="3">토끼</button><button data-k="4">도토리</button></div></div>
     <div style="display:grid;gap:8px"><span class="lab" id="gbDogLab">함께 걷는 강아지</span><div class="chips" id="gbDog"><button data-d="0">없이</button><button data-d="1">황구</button><button data-d="2">백구</button><button data-d="3">흑구</button><button data-d="4">몰티즈</button><button data-d="5">푸들</button><button data-d="6">포메라니안</button></div>
       <label class="pcheck" id="gbLeashRow"><input type="checkbox" id="gbLeash" checked><span>목줄 채우기<small>함께 걸을 때는 목줄을 해 주세요</small></span></label></div>
     <div class="gbMed" id="gbMed"></div>
+    <div class="gbMed" id="gbFocus"></div>
     <div style="display:grid;gap:8px"><span class="lab" id="gbNoteLab">쪽지</span><div class="gbNotes" id="gbNotes"></div></div>
     <div style="display:grid;gap:8px"><span class="lab" id="gbBagLab">주머니</span><div class="bag" id="gbBag"></div></div>
     <div id="gbOut" style="display:grid;gap:10px">
@@ -1283,6 +1291,53 @@ const EN = {"센트럴파크":"Central Park",
 "쪽지 · 오늘 남은 {0}/{1}":"Notes · {0}/{1} left today",
 "이 길에 남긴 내 쪽지 {0}장 · 고마워요 {1}":"Your notes on this trail: {0} · thanks: {1}",
 "{0}님이 건넨 쪽지":"from {0}",
+"기운":"Energy",
+"에너지바":"Energy bar",
+"에너지바 {0}개":"Energy bars: {0}",
+"기운 {0}%":"Energy {0}%",
+"숨이 차요. 잠깐 쉬거나 물을 마시면 기운이 돌아와요":"You're out of breath. Rest a moment or drink some water to recover.",
+"기운이 다 떨어졌어요. 쉬어가기에서 에너지바를 먹어 보세요":"You're out of energy. Try an energy bar from Rest.",
+"기운이 다 떨어졌어요. 앉아서 쉬거나 약수를 마셔 보세요":"You're out of energy. Sit and rest, or drink from the spring.",
+"헉헉":"Huff, puff",
+"에너지바 하나 먹었어요. 기운이 가득 차고, 1분 동안 힘차게 걸어요":"You ate an energy bar. Energy full, and you walk stronger for a minute.",
+"차가운 약수 한 바가지, 정신이 번쩍 들어요. 기운이 가득 찼어요":"A dipper of icy spring water wakes you right up. Energy full.",
+"약수 한 바가지, 기운이 가득 찼어요":"A dipper of spring water. Energy full.",
+"에너지바가 없어요. 카페에 들르면 하루에 하나씩 챙겨 줘요":"No energy bars left. The café gives you one each day you visit.",
+"바리스타가 에너지바 하나를 챙겨 줬어요 · {0}개":"The barista slipped you an energy bar · {0} now",
+"음수대에서 물 마시기":"Drink from the fountain",
+"약수 마시기":"Drink from the spring",
+"첫 숨":"First Breath",
+"연꽃 배지":"a lotus badge",
+"고요를 아는 이":"Knower of Stillness",
+"작은 싱잉볼":"a small singing bowl",
+"향기로운 길벗":"Fragrant Companion",
+"향 한 자루":"a stick of incense",
+"연꽃 위의 길벗":"Companion on the Lotus",
+"연꽃 방석":"a lotus cushion",
+"백팔 번의 고요":"108 Stillnesses",
+"백팔 염주":"108-bead prayer beads",
+"집중 새싹":"Focus Sprout",
+"나무 머그컵":"a wooden mug",
+"몰입 산책자":"Flow Walker",
+"헤드폰":"headphones",
+"깊은 몰입":"Deep Flow",
+"작은 화분":"a small potted plant",
+"밤을 밝히는 이":"Lamplighter",
+"등불":"a lantern",
+"산속 연구자":"Mountain Scholar",
+"노트와 만년필":"a notebook and fountain pen",
+"몰입의 달인":"Master of Flow",
+"반딧불이":"fireflies",
+"{0}시간 {1}분":"{0}h {1}m",
+"{0}분":"{0} min",
+"집중 {0}! {1}을(를) 얻었어요 · {2}":"{0} of focus! You earned {1} · {2}",
+"집중 {0} · {1}":"Focused {0} · {1}",
+"집중 {0}":"Focused {0}",
+"{0} 더 집중하면 {1}":"{0} more for {1}",
+"집중의 모든 선물을 얻었어요":"You've earned every focus gift",
+"가방 키링":"Bag charm",
+"반달곰":"Moon bear",
+"토끼":"Rabbit",
 "가방 풍경":"a little bell for your pack",
 "구름 방석":"a cloud cushion",
 "누르면 빼요":"Tap to take it off",
@@ -2225,6 +2280,7 @@ function buildWorld() {
   { const CUSH = [[0.70, 0.22, 0.18], [0.20, 0.30, 0.48], [0.86, 0.62, 0.20], [0.30, 0.48, 0.34], [0.55, 0.32, 0.52]];   // 자리마다 방석
     for (const st of CIRCLE.seats) cyl(g, st.x, CIRCLE.h + 0.4, st.z, 0.3, 0.28, 0.07, 12, CUSH[(st.k * 7) % CUSH.length]); }
   for (let k = 0; k < 14; k++) { const a = k / 14 * TAU; sphere(g, CIRCLE.x + Math.sin(a) * 1.7, CIRCLE.h + 0.1, CIRCLE.z + Math.cos(a) * 1.7, 0.3, 0.2, 0.26, 6, 3, mix3([0.42, 0.41, 0.4], [0.58, 0.56, 0.52], (k * 37 % 10) / 10), 0, false, 0.25); }   // 큰 돌 테두리
+  buildSpring(g);
   W.props = upload(g);
 
   /* 구름폭포 물줄기: 위에서 아래로 바깥쪽으로 휘며 떨어지는 띠 (공원은 분수가 대신한다) */
@@ -2270,7 +2326,8 @@ function buildWorld() {
     return g2;
   })();
   const maxT = coarse ? 1500 : 2300;
-  W.con = makeInst(con, maxT); W.dec = makeInst(decR, maxT);
+  W.con = makeInst(con, maxT); W.dec = makeInst(decR, maxT);   // W.dec은 모든 나무의 자리와 색을 담아 두는 곳
+  W.decNear = makeInst(decR, coarse ? 450 : 800); W.decFar = makeInst(dec, maxT);   // 가까운 나무는 잎 덩어리가 많은 모양, 먼 나무는 가벼운 모양
   W.conS = makeInst(con, 520); W.decS = makeInst(decR, 520);   // 그림자용: 내 주변 나무만
   W.decA = []; W.decW = []; W.conA = []; W.conW = [];
   const putTree = (x, z, isCon, sc, y = getH(x, z)) => {
@@ -2484,7 +2541,7 @@ function initState() {
   if (!(Array.isArray(look.h) && look.h.length >= 3)) look.h = HATS[Math.floor(Math.random() * HATS.length)];
   store.set('look', look); player.jacket = look.j; player.hat = look.h;
   if (look.g !== 0 && look.g !== 1) { look.g = wasLook ? 0 : (Math.random() < 0.5 ? 1 : 0); store.set('look', look); }   // 예전 길벗은 지금 모습 그대로, 새로 온 길벗은 반반
-  player.g = look.g;
+  player.g = look.g; player.keyring = Number.isInteger(look.kr) ? clamp(look.kr, 0, 4) : 0;
   player.skin = SKINS[Number.isInteger(look.s) ? look.s : 1] || SKINS[1]; player.face = Number.isInteger(look.f) ? clamp(look.f, 0, FACE_N - 1) : 0;
   player.heading = Math.atan2(TX[4] - TX[0], TZ[4] - TZ[0]);
   player.y = groundY(player.x, player.z);
@@ -3236,6 +3293,7 @@ function clickMove(cx, cy) {
 
 /* ---------------- simulation ---------------- */
 function movePlayer(dt) {
+  S.movedNow = false;
   let mx = 0, mz = 0, dist = Infinity;
   const kx = (keys.d ? 1 : 0) - (keys.a ? 1 : 0), kz = (keys.w ? 1 : 0) - (keys.s ? 1 : 0);
   if (player.act && (kx || kz || player.target)) cancelAct();   // 인사·간식·물 마시기는 여기서 바로 끝나고(act = null) 그대로 걷기로 이어진다
@@ -3265,7 +3323,8 @@ function movePlayer(dt) {
     mx /= l; mz /= l;
     const ahead = groundY(player.x + mx * 0.8, player.z + mz * 0.8) - player.y;
     const sf = clamp(1 - ahead * 0.35, 0.6, 1.15);
-    const step = Math.min(SPEEDS[S.speedIdx] * (T < S.boostUntil ? 1.2 : 1) * sf * dt, dist);
+    const step = Math.min(SPEEDS[S.speedIdx] * (T < S.boostUntil ? 1.2 : 1) * sf * (S.auto ? 1 : energySpeed()) * dt, dist);
+    S.slopeNow = ahead / 0.8;
     // 앞이 막히면 조금씩 옆으로 틀어 보며 미끄러지듯 돌아간다 (나무, 바위, 물가, 다리 난간)
     const side = S.slideSign || 1; let fx = mx, fz = mz;
     for (const da of [0, 0.35, -0.35, 0.7, -0.7, 1.05, -1.05, 1.4, -1.4, 1.7, -1.7, 2.0, -2.0]) {
@@ -3280,15 +3339,102 @@ function movePlayer(dt) {
     else { S.stuckT = (S.stuckT || 0) + dt; if (S.stuckT > 0.5) { player.target = null; if (S.auto) { S.auto = false; updateWalkBtn(); } } }
     player.heading = angLerp(player.heading, Math.atan2(fx, fz), 1 - Math.exp(-dt * 9));
   }
-  player.moveAmt = lerp(player.moveAmt, moving ? 1 : 0, 1 - Math.exp(-dt * 8));
+  player.moveAmt = lerp(player.moveAmt, moving ? 1 : 0, 1 - Math.exp(-dt * 8)); S.movedNow = moving;
   player.y = groundY(player.x, player.z);
-  const st = Math.floor(player.phase / Math.PI); if (st !== player.lastStep) { player.lastStep = st; if (moving) { footstep(); if (st % 4 === 0 && Math.random() < 0.6 && medTierOf(medN()) >= 2 && !(medHideMask() & 4)) bagBell(); } }
+  const st = Math.floor(player.phase / Math.PI); if (st !== player.lastStep) { player.lastStep = st; if (moving) { footstep(); if (st % 4 === 0 && Math.random() < 0.6 && tierHas(MED_TIERS, medTierOf(medN()), medHideMask())('bell')) bagBell(); } }
   if (!S.auto) { const [d, i] = nearestTrail(player.x, player.z, Math.max(0, player.idx - 40), Math.min(TN - 1, player.idx + 40)); if (d < 12) player.idx = i; }
   S.climbMax = Math.max(S.climbMax, player.y);
 }
 /* ---------------- rest actions: meditate, snack, water ---------------- */
 const SNACK_BITES = [3.4, 4.9, 6.4];
 const ACT_DUR = { snack: 8.0, water: 7.0, bow: 1.6, wave: 2.1, hi5: 1.45 };
+/* 기운: 직접 걸어 오르막을 오르면 줄고, 바닥나도 막히지 않고 숨이 차서 조금 느려질 뿐이다.
+   자동 걷기 중에는 줄지 않는다. 서 있으면 천천히, 앉아 쉬거나 명상·집중하면 빨리 차오른다. 물과 약수는 바로 채운다.
+   에너지바: 처음 2개, 카페에 들르면 하루 1개씩 (최대 5개). 먹으면 기운이 가득 차고 1분 동안 힘차게 걷는다. */
+const ENERGY = { e: 100, savedAt: 0, huffT: 0, warnT: -1e9, emptyTold: false, puffT: 0, lean: 0 };
+(function loadEnergy() {
+  const v = store.get('energy', null);
+  if (v && isFinite(+v.e)) ENERGY.e = clamp(+v.e + Math.max(0, (Date.now() - (+v.t || 0)) / 60000) * 4, 0, 100);   // 떠나 있던 동안 쉬었다
+  if (store.get('ebar', null) === null) store.set('ebar', 2);
+})();
+const ebarN = () => clamp(store.get('ebar', 0) | 0, 0, 5);
+function energySpeed() { return ENERGY.e >= 35 ? 1 : lerp(0.72, 1, ENERGY.e / 35); }
+function updateEnergy(dt) {
+  if (!S.started) return;
+  const a = player.act, before = ENERGY.e;
+  if (S.movedNow && !S.auto) {
+    const up = Math.max(0, S.slopeNow || 0), fast = S.speedIdx === 2 ? 1.5 : S.speedIdx === 0 ? 0.7 : 1;
+    ENERGY.e -= dt * ((IS_PARK ? 0.02 : 0.05) + up * 4.2) * fast;
+  } else if (a && (RESTING.includes(a.type) || a.type === 'snack' || a.type === 'water')) ENERGY.e += dt * 3.2;
+  else if (!S.movedNow) ENERGY.e += dt * 1.1;
+  ENERGY.e = clamp(ENERGY.e, 0, 100);
+  if (before >= 25 && ENERGY.e < 25 && T - ENERGY.warnT > 240) { ENERGY.warnT = T; toast(i18n('숨이 차요. 잠깐 쉬거나 물을 마시면 기운이 돌아와요')); }
+  if (ENERGY.e <= 0.5 && !ENERGY.emptyTold) { ENERGY.emptyTold = true; toast(ebarN() ? i18n('기운이 다 떨어졌어요. 쉬어가기에서 에너지바를 먹어 보세요') : i18n('기운이 다 떨어졌어요. 앉아서 쉬거나 약수를 마셔 보세요')); }
+  if (ENERGY.e > 40) ENERGY.emptyTold = false;
+  const tired = S.movedNow && ENERGY.e < 25;
+  ENERGY.lean = lerp(ENERGY.lean, tired ? 0.16 : 0, 1 - Math.exp(-dt * 2));
+  if (tired && !S.auto) { ENERGY.huffT -= dt; if (ENERGY.huffT <= 0) { ENERGY.huffT = 9 + Math.random() * 6; showBubble(player, i18n('헉헉'), 1.4, true); } }
+  if (Date.now() - ENERGY.savedAt > 10000) { ENERGY.savedAt = Date.now(); store.set('energy', { e: Math.round(ENERGY.e), t: Date.now() }); }
+}
+const wTintS = () => mix3([1, 1, 1], [3.9, 2.4, 2.35], S.sb);
+function energyFill(v, msg) { ENERGY.e = clamp(Math.max(ENERGY.e, v), 0, 100); if (msg) toast(msg); }
+const EBAR_ICO = '<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="2" y="5" width="12" height="6" rx="1.6" fill="#d9a35b"/><path d="M5 5v6M8 5v6M11 5v6" stroke="#9a6a2f" stroke-width="1"/></svg>';
+let enShown = { w: -1, n: -1 };
+function updateEnergyHud() {
+  const w = Math.round(ENERGY.e), n = ebarN();
+  if (w !== enShown.w) { const f = $('#enFill'); f.style.width = w + '%'; f.style.background = w > 50 ? '#8fd1a8' : w > 25 ? '#e5c06a' : '#e58a6a'; $('#enRow').title = i18n('기운 {0}%', w); enShown.w = w; }
+  if (n !== enShown.n) { $('#enBars').innerHTML = EBAR_ICO + '<span></span>'; $('#enBars').querySelector('span').textContent = n; $('#snackLbl').textContent = i18n('에너지바 {0}개', n); enShown.n = n; }
+}
+/* 겨울에는 걸을 때 하얀 입김 (숨이 차면 더 자주) */
+const PUFFS = [];
+function updatePuffs(dt) {
+  if (S.started && S.sb > 0.5 && S.movedNow && !inTent(player)) {
+    ENERGY.puffT -= dt;
+    if (ENERGY.puffT <= 0) { ENERGY.puffT = ENERGY.e < 25 ? 0.7 : 1.7; const h = player.heading; PUFFS.push({ x: player.x + Math.sin(h) * 0.45, y: player.y + 1.45, z: player.z + Math.cos(h) * 0.45, vx: Math.sin(h) * 0.3, vz: Math.cos(h) * 0.3, t: 0 }); }
+  }
+  for (const q of PUFFS) { q.t += dt; q.x += q.vx * dt; q.z += q.vz * dt; q.y += 0.18 * dt; }
+  while (PUFFS.length && PUFFS[0].t > 1.6) PUFFS.shift();
+}
+function drawPuffs() { for (const q of PUFFS) { const k = q.t / 1.6; draw(W.uSphere, { model: M.chain(M.T(q.x, q.y, q.z), M.S(0.05 + 0.14 * k)), tint: [1, 1, 1], alpha: 0.42 * (1 - k), emissive: 0.6, flat: 0, snowable: 0 }); } }
+/* 약수터: 산 중턱 바위 아래 돌확과 대나무 대롱, 바가지. 공원은 무쇠 음수대. 마시면 기운이 가득 찬다 */
+let SPRING = null;
+function buildSpring(g) {
+  let best = null;
+  for (let i = Math.floor(TN * (IS_PARK ? 0.36 : 0.42)); i < Math.floor(TN * (IS_PARK ? 0.6 : 0.62)) && !best; i += 2) for (const sd of [1, -1]) {
+    const a = Math.max(0, i - 2), b2 = Math.min(TN - 1, i + 2), yaw = Math.atan2(TX[b2] - TX[a], TZ[b2] - TZ[a]), px = TX[i] + Math.cos(yaw) * 3.1 * sd, pz = TZ[i] - Math.sin(yaw) * 3.1 * sd;
+    if (!walkable(px, pz) || inWater(px, pz, 1.3) || hitObstacle(px, pz, 0.8) || pads.some(p => Math.hypot(px - p.x, pz - p.z) < p.r + 2) || Math.hypot(px - CAFE.x, pz - CAFE.z) < 14 || Math.hypot(px - CIRCLE.x, pz - CIRCLE.z) < CIRCLE.R + 4) continue;
+    if (IS_PARK && (bridgeFloor(px, pz) !== null || parkPathNear(px, pz) && trailDist(px, pz)[0] < 2.2)) continue;
+    if (!IS_PARK && getN(px, pz)[1] < 0.8) continue;
+    best = { x: px, z: pz, face: Math.atan2(TX[i] - px, TZ[i] - pz), idx: i };
+  }
+  if (!best) return;
+  const y = groundY(best.x, best.z), f = best.face, fx = Math.sin(f), fz = Math.cos(f), L = localPlacer(best.x, best.z, f);
+  SPRING = { x: best.x, z: best.z, y, idx: best.idx };
+  addObstacle(best.x, best.z, IS_PARK ? 0.4 : 0.75);
+  if (IS_PARK) {   // 센트럴파크 음수대: 초록 무쇠 기둥과 둥근 대야
+    cyl(g, best.x, y, best.z, 0.32, 0.22, 0.2, 10, [0.18, 0.3, 0.22]); cyl(g, best.x, y + 0.2, best.z, 0.17, 0.2, 0.72, 10, [0.2, 0.33, 0.24]);
+    cyl(g, best.x, y + 0.92, best.z, 0.25, 0.4, 0.14, 14, [0.22, 0.36, 0.26]); cyl(g, best.x, y + 1.06, best.z, 0.03, 0.03, 0.1, 6, [0.7, 0.66, 0.5]);
+    SPRING.water = { x: best.x, y: y + 1.04, z: best.z, r: 0.33 }; SPRING.spout = null;
+  } else {
+    const [rx, rz] = L(0, -0.75);
+    const lr = rng(8080); sphereL(g, rx, y + 0.35, rz, 1.0, 0.95, 0.8, 7, 5, [0.46, 0.45, 0.42], 0, 0.25, lr);   // 뒤 바위 (세상 배치 난수를 건드리지 않게 따로 받은 난수)
+    cyl(g, best.x, y - 0.05, best.z, 0.58, 0.52, 0.5, 12, [0.6, 0.58, 0.54]);   // 돌확
+    const [sx, sz] = L(0, -0.38); box(g, sx, y + 0.95, sz, 0.08, 0.9, 0.08, [0.48, 0.62, 0.3], 0, f, Math.PI / 2 - 0.12);   // 대나무 대롱
+    const [kx, kz] = L(0.42, 0.18); sphereL(g, kx, y + 0.5, kz, 0.17, 0.08, 0.17, 7, 3, [0.78, 0.6, 0.34], 0, 0, lr); box(g, kx + fx * 0.02, y + 0.55, kz + fz * 0.02, 0.05, 0.04, 0.32, [0.7, 0.52, 0.3], 0, f + 0.6);   // 바가지
+    const [bx, bz] = L(-0.85, 0.1); box(g, bx, y + 0.55, bz, 0.08, 1.1, 0.08, COL.woodDark, 0, f); box(g, bx, y + 1.05, bz, 0.52, 0.26, 0.05, COL.board, 0, f);   // '약수터' 나무 팻말
+    SPRING.water = { x: best.x, y: y + 0.42, z: best.z, r: 0.46 }; SPRING.spout = [best.x + fx * 0.08, y + 0.93, best.z + fz * 0.08];
+  }
+}
+function drinkSpring() {
+  if (!SPRING || !S.started) return;
+  closeMenus(); if (S.breath) stopBreath();
+  if (player.act) { if (GREETS.includes(player.act.type)) player.act = null; else { toast(i18n('하던 걸 마저 하고 할게요')); return; } }
+  S.auto = false; player.target = null; updateWalkBtn();
+  player.heading = Math.atan2(SPRING.x - player.x, SPRING.z - player.z);
+  player.act = { type: 'water', t: 0, fired: 0, leaving: false, spring: true };
+  $('#actPill').hidden = false; updatePill(); netState(true);
+}
+
 const GREETS = ['bow', 'wave', 'hi5'];
 const ACT_EVENTS = {
   snack: [[1.6, () => sfx.crinkle()], ...SNACK_BITES.map(b => [b - 0.03, () => sfx.bite()])],
@@ -3310,6 +3456,7 @@ function startAct(type, go) {
   if (S.breath) stopBreath();
   if (player.act && GREETS.includes(player.act.type)) player.act = null;
   if (player.act) { if (player.act.type === 'meditate' && type === 'meditate') standUp(); else toast(i18n('하던 걸 마저 하고 할게요')); return; }
+  if (type === 'snack') { const n = ebarN(); if (!n) { toast(i18n('에너지바가 없어요. 카페에 들르면 하루에 하나씩 챙겨 줘요')); return; } store.set('ebar', n - 1); }
   S.auto = false; player.target = null; updateWalkBtn(); S.lastDrag = -10;
   player.act = { type, t: 0, fired: 0, leaving: false, bowl: false, lastBowl: 0 };
   if (type === 'meditate') {
@@ -3433,8 +3580,9 @@ function updateCharAct(c, dt) {
     c.act = null; c.hiFrom = c.hiTo = null;
     if (c === player) {
       $('#actPill').hidden = true;
-      if (a.type === 'snack') { S.boostUntil = T + 60; toast(i18n('에너지바 하나 먹었어요. 1분 동안 조금 더 힘차게 걸어요')); }
-      else if (a.type === 'water') toast(S.sb > 0.5 ? i18n('따뜻한 보리차로 몸을 녹였어요') : i18n('시원한 물 한 모금, 개운하네요'));
+      if (a.type === 'snack') { S.boostUntil = T + 60; energyFill(100, i18n('에너지바 하나 먹었어요. 기운이 가득 차고, 1분 동안 힘차게 걸어요')); }
+      else if (a.type === 'water' && a.spring) energyFill(100, S.sb > 0.5 ? i18n('차가운 약수 한 바가지, 정신이 번쩍 들어요. 기운이 가득 찼어요') : i18n('약수 한 바가지, 기운이 가득 찼어요'));
+      else if (a.type === 'water') energyFill(ENERGY.e + 35, S.sb > 0.5 ? i18n('따뜻한 보리차로 몸을 녹였어요') : i18n('시원한 물 한 모금, 개운하네요'));
       if (!GREETS.includes(a.type)) netState(true);
     }
   }
@@ -3807,6 +3955,7 @@ function startCafe(dr) {
   const seat = freeSeat(pref || player);
   player.act = { type: 'cafe', t: 0, seat, from: [player.x, player.z], drink: dr, fired: 0, leaving: false, nextSip: 7, sipAt: -10 };
   barista.act = { type: 'bow', t: 0 }; showBubble(barista, IS_PARK ? 'Coming right up!' : i18n('금방 준비해 드릴게요'), 2.6);
+  if (store.get('ebarDay', '') !== todayKey() && ebarN() < 5) { store.set('ebarDay', todayKey()); store.set('ebar', ebarN() + 1); setTimeout(() => toast(i18n('바리스타가 에너지바 하나를 챙겨 줬어요 · {0}개', ebarN())), 3200); }
   if (canSound()) cafeSfx[dr.make]();
   if (dr.brew) setTimeout(() => { if (player.act && player.act.type === 'cafe' && !player.act.served) toast(i18n('핸드드립은 1분쯤 걸려요. 기다리는 동안 숨을 골라 볼까요?')); }, 2600);
   $('#actPill').hidden = false; updatePill(); netState(true);
@@ -4084,6 +4233,7 @@ function recolorTrees() {
   for (let i = 0; i < W.dec.n; i++) { const c = mix3(W.decA[i], W.decW[i], S.sb); W.dec.col[i*4] = c[0]; W.dec.col[i*4+1] = c[1]; W.dec.col[i*4+2] = c[2]; }
   for (let i = 0; i < W.con.n; i++) { const c = mix3(W.conA[i], W.conW[i], S.sb); W.con.col[i*4] = c[0]; W.con.col[i*4+1] = c[1]; W.con.col[i*4+2] = c[2]; }
   syncInst(W.dec, lastSb < 0.0001 || !W.dec.offSynced); syncInst(W.con, !W.con.offSynced); W.dec.offSynced = W.con.offSynced = true;
+  treeLOD(true); shTreeAt = null;
 }
 function updateCamera(dt) {
   let tgt, desired;
@@ -4148,11 +4298,13 @@ function updateHud(dt) {
   }
   {   // 모닥불 가까이 오면 '모닥불에 앉기' 버튼
     const dc = Math.hypot(player.x - CIRCLE.x, player.z - CIRCLE.z), dk = Math.hypot(player.x - CAFE.x, player.z - CAFE.z), free = S.started && !player.act && !S.camp && !S.breath;
-    const kind = free && dc < 14 ? 'circle' : free && dk < 15 ? 'cafe' : '';
-    if ($('#nearSit').dataset.k !== kind) { $('#nearSit').dataset.k = kind; $('#nearSitTxt').textContent = kind === 'cafe' ? i18n('카페 들어가기') : i18n('모닥불에 앉기'); }
+    const ds = SPRING ? Math.hypot(player.x - SPRING.x, player.z - SPRING.z) : 99;
+    const kind = free && ds < 5 ? 'spring' : free && dc < 14 ? 'circle' : free && dk < 15 ? 'cafe' : '';
+    if ($('#nearSit').dataset.k !== kind) { $('#nearSit').dataset.k = kind; $('#nearSitTxt').textContent = kind === 'cafe' ? i18n('카페 들어가기') : kind === 'spring' ? (IS_PARK ? i18n('음수대에서 물 마시기') : i18n('약수 마시기')) : i18n('모닥불에 앉기'); }
     if ($('#nearSit').hidden === !!kind) $('#nearSit').hidden = !kind;
   }
   $('#greetBtn').classList.toggle('near', !!nearestOther(5));
+  updateEnergyHud();
   const hb = hudBig(); $('#altVal').textContent = hb[0]; $('#altUnit').textContent = hb[1];
   $('#distVal').textContent = (S.walked * UNIT_M / 1000).toFixed(2) + ' km';
   $('#timeVal').textContent = Math.floor((T - S.startT) / 60) + i18n('분');
@@ -4196,6 +4348,17 @@ function shadowInit() {
     SHADOW.tex = t; SHADOW.fb = fb;
   } catch (e) { SHADOW.ok = false; console.warn('그림자 준비 실패', e); }
 }
+let lodAt = null;
+function treeLOD(force) {   // 가까운 나무만 풍성한 모양으로 (8m 넘게 움직였거나 색이 바뀌었을 때만 다시 나눈다)
+  if (!force && lodAt && Math.hypot(player.x - lodAt[0], player.z - lodAt[1]) < 8 && lodAt[2] === S.quality) return;
+  lodAt = [player.x, player.z, S.quality];
+  const rn = !S.quality ? 34 : coarse ? 40 : 52, src = W.dec, A = W.decNear, B = W.decFar, r2 = rn * rn; let a = 0, b = 0;   // '가볍게'와 휴대폰은 더 가까이만
+  for (let i = 0; i < src.n; i++) {
+    const dx = src.off[i * 4] - player.x, dz = src.off[i * 4 + 2] - player.z, near = dx * dx + dz * dz < r2 && a < A.max, m = near ? A : B, k = near ? a++ : b++;
+    for (let j = 0; j < 4; j++) { m.off[k * 4 + j] = src.off[i * 4 + j]; m.col[k * 4 + j] = src.col[i * 4 + j]; }
+  }
+  A.n = a; B.n = b; syncInst(A, true); syncInst(B, true);
+}
 let shTreeAt = null;
 /* 풀포기: 6m 칸마다 정해진 자리(칸 번호로 만든 난수)를 한 번 계산해 두고, 내 주변 칸만 모아 그린다 */
 const GRASS = { cell: 6, rad: 4, cache: new Map(), at: '', sb: -1 };
@@ -4225,11 +4388,11 @@ function grassCell(cx, cz) {
 }
 function updateGrass() {
   if (!S.started || !W.grass) return;
-  const cx = Math.floor(player.x / GRASS.cell), cz = Math.floor(player.z / GRASS.cell), key = cx + ',' + cz;
+  const cx = Math.floor(player.x / GRASS.cell), cz = Math.floor(player.z / GRASS.cell), R2 = !S.quality ? 2 : coarse ? 3 : GRASS.rad, key = cx + ',' + cz + ',' + R2;
   if (key === GRASS.at) return;
   GRASS.at = key;
   const fill = (m, list) => { let k = 0; for (const it of list) { if (k >= m.max) break; m.off.set([it[0], it[1], it[2], it[3]], k * 4); m.col.set([it[4], it[5], it[6], it[7]], k * 4); k++; } m.n = k; syncInst(m, true); };
-  const G = [], Fl = [], Rd = [], R2 = GRASS.rad;
+  const G = [], Fl = [], Rd = [];
   for (let dz = -R2; dz <= R2; dz++) for (let dx = -R2; dx <= R2; dx++) { if (dx * dx + dz * dz > R2 * R2 + 1) continue; const c = grassCell(cx + dx, cz + dz); G.push(...c.g); Fl.push(...c.f); Rd.push(...c.r); }
   const d2 = it => (it[0] - player.x) ** 2 + (it[2] - player.z) ** 2;
   if (G.length > W.grass.max) G.sort((a, b) => d2(a) - d2(b));
@@ -4424,12 +4587,18 @@ function drawItem(p, P2) {
 }
 function drawHiker(c, isMe) {
   const p = computePose(c);
-  const root = M.chain(M.T(c.x + (c.ox || 0), c.y + p.lift, c.z + (c.oz || 0)), M.Ry(c.heading), M.Rx(p.lean));
+  const root = M.chain(M.T(c.x + (c.ox || 0), c.y + p.lift, c.z + (c.oz || 0)), M.Ry(c.heading), M.Rx(p.lean + (isMe ? ENERGY.lean : 0)));
   const P2 = (local, mesh, tint) => draw(mesh, { model: M.mul(root, local), tint, flat: 0, snowable: 0 });
   const skin = c.skin || SKINS[1], face = c.face | 0;
-  const tier = isMe ? medTierOf(medN()) : (c.medTier || 0), hideM = isMe ? medHideMask() : (c.medHide || 0), has = t => tier >= t && !(hideM & (1 << t));
+  const tier = isMe ? medTierOf(medN()) : (c.medTier || 0), has = tierHas(MED_TIERS, tier, isMe ? medHideMask() : (c.medHide || 0));
+  const ftier = isMe ? focusTierOf(focusMinN()) : (c.focTier || 0), fhas = tierHas(FOCUS_TIERS, ftier, isMe ? focusHideMask() : (c.focHide || 0));
+  const medSit = !!(c.act && c.act.type === 'meditate' && p.sit > 0.4);
   if (p.sit > 0.02 && !p.chair) {
-    if (has(4) && c.act && c.act.type === 'meditate') for (const [cx, cz, cs] of [[0, 0, 0.42], [0.3, -0.05, 0.28], [-0.3, -0.05, 0.28], [0.12, 0.22, 0.24], [-0.14, -0.25, 0.26]]) P2(M.chain(M.T(cx, 0.1 + 0.03 * Math.sin(T * 1.3 + cx * 5), cz - 0.04), M.S(cs * p.sit, cs * 0.45, cs * p.sit)), W.uSphere, [0.98, 0.98, 1]);   // 구름 방석
+    if (has('cloud') && c.act && c.act.type === 'meditate') for (const [cx, cz, cs] of [[0, 0, 0.42], [0.3, -0.05, 0.28], [-0.3, -0.05, 0.28], [0.12, 0.22, 0.24], [-0.14, -0.25, 0.26]]) P2(M.chain(M.T(cx, 0.1 + 0.03 * Math.sin(T * 1.3 + cx * 5), cz - 0.04), M.S(cs * p.sit, cs * 0.45, cs * p.sit)), W.uSphere, [0.98, 0.98, 1]);   // 구름 방석
+    else if (has('lotusSeat') && medSit) {   // 연꽃 방석: 분홍 꽃잎이 둘러싼다
+      P2(M.chain(M.T(0, 0.05, -0.04), M.S(0.56 * p.sit, 0.1, 0.5 * p.sit)), W.uCyl, [0.96, 0.86, 0.88]);
+      for (let k = 0; k < 10; k++) { const a = k / 10 * TAU; P2(M.chain(M.T(Math.sin(a) * 0.42, 0.1, Math.cos(a) * 0.38 - 0.04), M.Ry(a), M.Rx(-0.5), M.S(0.12, 0.05, 0.2)), W.uSphere, k % 2 ? [0.95, 0.62, 0.72] : [0.98, 0.76, 0.82]); }
+    }
     else P2(M.chain(M.T(0, 0.05, -0.04), M.S(0.58 * p.sit, 0.1, 0.52 * p.sit)), W.uCyl, c.cushion || [0.55, 0.24, 0.18]);
   }
   for (const side of [-1, 1]) {
@@ -4463,15 +4632,17 @@ function drawHiker(c, isMe) {
   }
   if (face === 2) P2(M.chain(head, M.T(0, 0.27, 0.415), M.S(0.07, 0.016, 0.016)), W.uBox, [0.07, 0.08, 0.10]);
   if (face === 3) P2(M.chain(head, M.T(0, 0.07, 0.28), M.S(0.26, 0.15, 0.16)), W.uSphere, [0.30, 0.21, 0.14]);
-  if (tier) drawSage(c, p, P2, head, has);
+  if (tier) drawSage(c, p, P2, head, has, medSit);
+  if (c.keyring) drawKeyring(c, p, P2);
   if (p.laptop > 0.4) {   // 집중 모드 노트북
     const ly = 0.5 - p.drop;
     P2(M.chain(M.T(0, ly, 0.36), M.S(0.42, 0.025, 0.28)), W.uBox, [0.62, 0.64, 0.68]);
     P2(M.chain(M.T(0, ly + 0.14, 0.5), M.Rx(-0.32), M.S(0.42, 0.27, 0.02)), W.uBox, [0.56, 0.58, 0.62]);
     draw(W.uBox, { model: M.mul(root, M.chain(M.T(0, ly + 0.14, 0.488), M.Rx(-0.32), M.S(0.38, 0.23, 0.005))), tint: [0.62, 0.78, 0.95], flat: 0, snowable: 0, emissive: 0.6 });
   }
+  if (p.laptop > 0.4 && ftier) drawFocusGear(c, p, P2, head, root, fhas);
   if (p.item) drawItem(p, P2);
-  if (p.item && p.item.type === 'cup') { const R2 = p.arms[-1], h = V.add(R2.sh, V.sc(R2.dir, R2.L)), w = M.xf(root, h[0], h[1] + 0.13, h[2]); c.steamAt = [w[0], w[1], w[2], p.item.mk]; } else c.steamAt = null;
+  if (p.item && p.item.type === 'cup') { const R2 = p.arms[-1], h = V.add(R2.sh, V.sc(R2.dir, R2.L)), w = M.xf(root, h[0], h[1] + 0.13, h[2]); c.steamAt = [w[0], w[1], w[2], p.item.mk]; } else if (p.laptop > 0.4 && fhas('mug')) { const w = M.xf(root, 0.34, 0.5 - p.drop + 0.2, 0.42); c.steamAt = [w[0], w[1], w[2], 0]; } else c.steamAt = null;
 }
 function drawShadow(x, z, s) {
   const y = groundY(x, z), n = propFloor(x, z) ? [0, 1, 0] : getN(x, z);
@@ -4491,7 +4662,8 @@ function drawOpaque(shadowPass) {   // 땅, 나무, 바위, 사람, 강아지 (�
   draw(W.cafeGlow, { mode: 1, tint: [1, 0.85, 0.6], emissive: 0.25 + 1.4 * Math.max(S.tb * 0.75, S.night), flat: 0 });
   draw(W.rock, { mode: 1, detail: 0.9, moss: IS_PARK ? 0.45 : 0.85 });
   draw(shadowPass ? W.conS : W.con, { mode: 1, wind: 1, detail: 0.45 });
-  draw(shadowPass ? W.decS : W.dec, { mode: 1, wind: 1, detail: 0.45 });
+  if (shadowPass) draw(W.decS, { mode: 1, wind: 1 });
+  else { treeLOD(false); draw(W.decNear, { mode: 1, wind: 1, detail: 0.45 }); draw(W.decFar, { mode: 1, wind: 1, detail: 0.45 }); }
   if (!shadowPass) drawGrass();
   const npcOn = showNpcs();
   if (npcOn) for (const n of NPCS) if (Math.hypot(n.x - eye[0], n.z - eye[2]) < 140) drawHiker(n, false);
@@ -4544,6 +4716,11 @@ function render() {
   }
   const ice = S.sb;
   const wTint = mix3([1, 1, 1], [3.9, 2.4, 2.35], ice), wAlpha = lerp(0.8, 0.96, ice);
+  if (SPRING && SPRING.water && Math.hypot(SPRING.x - eye[0], SPRING.z - eye[2]) < 70) {
+    const sw = SPRING.water; draw(W.water, { model: M.chain(M.T(sw.x, sw.y, sw.z), M.S(sw.r, 1, sw.r)), tint: wTintS(), alpha: 0.85, emissive: 0.2, flat: 0, snowable: 0, water: S.sb > 0.5 ? 0.2 : 1.4 });
+    if (SPRING.spout && S.sb < 0.7) { const sp = SPRING.spout, h = sp[1] - sw.y; draw(W.uCyl, { model: M.chain(M.T(sp[0], sw.y + h / 2, sp[2]), M.S(0.03, h, 0.03)), tint: [0.8, 0.9, 1], alpha: 0.6, emissive: 0.5, flat: 0, snowable: 0, flow: 1, flowSpeed: 2.2 }); }
+  }
+  drawPuffs();
   for (const w of WATERS) draw(W.water, { model: M.chain(M.T(w.x, w.level, w.z), M.S(w.rx * 1.12, 1, w.rz * 1.12)), tint: wTint, alpha: wAlpha, emissive: 0.18, flat: 0, snowable: 0, water: 1 - 0.85 * ice });
   if (W.basin) draw(W.water, { model: M.chain(M.T(W.basin.x, W.basin.y, W.basin.z), M.S(W.basin.r, 1, W.basin.r)), tint: wTint, alpha: wAlpha, emissive: 0.2, flat: 0, snowable: 0, water: 1.3 - 1.1 * ice });
   const fountainOff = IS_PARK && ice > 0.5;   // 겨울에는 분수를 잠근다
@@ -4658,7 +4835,7 @@ function inviteMeet() {   // 부른 사람이 보이면 그 곁으로
     }
   }
 }
-function myPresence() { return { id: ME.id, n: S.nick, j: player.jacket, h: player.hat, s: Math.max(0, SKINS.indexOf(player.skin)), f: player.face | 0, g: player.g | 0, dg: myDog(), ls: DOG.leash ? 1 : 0, md: medTierOf(medN()), mh: medHideMask() }; }
+function myPresence() { return { id: ME.id, n: S.nick, j: player.jacket, h: player.hat, s: Math.max(0, SKINS.indexOf(player.skin)), f: player.face | 0, g: player.g | 0, dg: myDog(), ls: DOG.leash ? 1 : 0, md: Math.min(4, [0, 0, 1, 1, 2, 2, 3, 3, 4, 4][medTierOf(medN())]), m2: medTierOf(medN()), mh2: medHideMask(), fc: focusTierOf(focusMinN()), fh: focusHideMask(), kr: player.keyring | 0 }; }
 function loadScript(src) { return new Promise((res, rej) => { const s = document.createElement('script'); s.src = src; s.async = true; s.onload = res; s.onerror = rej; document.head.appendChild(s); }); }
 /* Supabase 연결 하나를 함께 걷기(실시간)와 로그인이 같이 쓴다. 로그인 정보는 이 기기에 'sangil-auth' 이름으로 남는다 */
 let SB_P = null;
@@ -4680,15 +4857,55 @@ function getSB() {
 
 /* ================= 명상 횟수와 '도인'이 되어 가는 모습 =================
    3분 넘게 앉았거나 끝까지 한 명상을 센다. 횟수에 따라 모습이 하나씩 더해진다(다른 사람에게도 보인다). */
-const MED_TIERS = [
-  { n: 3, name: '마음 산책자', gift: '염주 목걸이' },
-  { n: 10, name: '고요한 길벗', gift: '가방 풍경' },
-  { n: 20, name: '산중 도인', gift: '나무 지팡이' },
-  { n: 40, name: '구름 위 신선', gift: '구름 방석' },
+const MED_TIERS = [   // 처음에는 자주, 갈수록 띄엄띄엄. 108번은 백팔번뇌
+  { n: 1, id: 'lotus', name: '첫 숨', gift: '연꽃 배지' },
+  { n: 3, id: 'beads', name: '마음 산책자', gift: '염주 목걸이' },
+  { n: 6, id: 'bowl', name: '고요를 아는 이', gift: '작은 싱잉볼' },
+  { n: 10, id: 'bell', name: '고요한 길벗', gift: '가방 풍경' },
+  { n: 15, id: 'incense', name: '향기로운 길벗', gift: '향 한 자루' },
+  { n: 20, id: 'staff', name: '산중 도인', gift: '나무 지팡이' },
+  { n: 30, id: 'lotusSeat', name: '연꽃 위의 길벗', gift: '연꽃 방석' },
+  { n: 40, id: 'cloud', name: '구름 위 신선', gift: '구름 방석' },
+  { n: 108, id: 'beads108', name: '백팔 번의 고요', gift: '백팔 염주' },
 ];
 const medTierOf = n => MED_TIERS.filter(t => n >= t.n).length;
-/* 받은 선물은 생김새를 바꾸지 않는 물건이고, 길벗 카드에서 하나씩 빼거나 다시 찰 수 있다 (medHide: 숨긴 단계 번호의 비트) */
-const medHideMask = () => (store.get('medHide', 0) | 0) & 30;
+/* 받은 선물은 생김새를 바꾸지 않는 물건이고, 길벗 카드에서 하나씩 빼거나 다시 찰 수 있다 (숨긴 단계 번호의 비트) */
+if (store.get('medHide2', null) === null) { const o = store.get('medHide', 0) | 0; let m = 0; [[1, 2], [2, 4], [3, 6], [4, 8]].forEach(([a, b]) => { if (o & (1 << a)) m |= 1 << b; }); store.set('medHide2', m); }   // 예전 4단계에서 옮기기
+const medHideMask = () => (store.get('medHide2', 0) | 0) & 0x3FE;
+const tierHas = (list, tier, mask) => id => { const i = list.findIndex(t => t.id === id) + 1; return i > 0 && tier >= i && !(mask & (1 << i)); };
+const FOCUS_TIERS = [   // 집중 모드로 쌓은 시간 (쉬는 시간은 빼고)
+  { h: 1, id: 'mug', name: '집중 새싹', gift: '나무 머그컵' },
+  { h: 5, id: 'phones', name: '몰입 산책자', gift: '헤드폰' },
+  { h: 10, id: 'plant', name: '깊은 몰입', gift: '작은 화분' },
+  { h: 25, id: 'lantern', name: '밤을 밝히는 이', gift: '등불' },
+  { h: 50, id: 'notebook', name: '산속 연구자', gift: '노트와 만년필' },
+  { h: 100, id: 'fireflies', name: '몰입의 달인', gift: '반딧불이' },
+];
+const focusTierOf = m => FOCUS_TIERS.filter(t => m >= t.h * 60).length;
+const focusHideMask = () => (store.get('focusHide', 0) | 0) & 0x7E;
+const focusServer = () => !!(AUTH.user && AUTH.profile && Number.isInteger(AUTH.profile.focus_minutes));
+function focusMinN() { return focusServer() ? AUTH.profile.focus_minutes : (store.get('focusAnon', 0) | 0); }
+const fmtHM = m => m >= 60 ? i18n('{0}시간 {1}분', Math.floor(m / 60), m % 60) : i18n('{0}분', m);
+async function focusPush(mins) {
+  const sb = await getSB(), { data, error } = await sb.rpc('sangil_add_focus', { p_minutes: mins });
+  if (error) throw error;
+  if (data && Number.isInteger(data.minutes) && AUTH.profile) AUTH.profile.focus_minutes = data.minutes;
+}
+function focusRecord(mins) {   // 집중한 분을 더한다. 단계가 오르면 선물
+  if (mins < 1) return;
+  const before = focusMinN(), after = before + mins;
+  if (focusServer()) { AUTH.profile.focus_minutes = after; focusPush(mins).then(() => { retrack(); renderGb(); }).catch(e => { console.warn('집중 기록 실패', e); AUTH.profile.focus_minutes = before; store.set('focusAnon', (store.get('focusAnon', 0) | 0) + mins); renderGb(); }); }
+  else store.set('focusAnon', (store.get('focusAnon', 0) | 0) + mins);
+  const b4 = focusTierOf(before), t = focusTierOf(after);
+  if (t > b4) { const x = FOCUS_TIERS[t - 1]; toast(i18n('집중 {0}! {1}을(를) 얻었어요 · {2}', fmtHM(x.h * 60), i18n(x.gift), i18n(x.name))); if (canSound()) sfx.bowl(0.6); }
+  retrack(); renderGb();
+}
+async function focusMerge() {
+  const k = store.get('focusAnon', 0) | 0; if (!focusServer() || k <= 0) return;
+  store.set('focusAnon', 0);
+  try { await focusPush(Math.min(k, 6000)); } catch (e) { store.set('focusAnon', (store.get('focusAnon', 0) | 0) + k); }
+  retrack(); renderGb();
+}
 const MED_LEAF = '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M6 11c-3-1.2-4.4-3.6-4-7.4C5.4 3.4 8 5 8.4 8.2M6 11c2.4-.8 4-2.6 4-6.2-1 .1-1.9.4-2.7.9" fill="currentColor"/></svg>';
 function setLvBadge(el, tier) {   // 이름표 옆 작은 잎사귀와 단계 숫자
   if (!el) return;
@@ -4734,25 +4951,82 @@ function medRecord(mt) {
   else setTimeout(() => toast(i18n('{0}번째 명상이었어요', n)), 2600);
   retrack(); renderGb();
 }
-function drawSage(c, p, P2, head, has) {   // 염주, 가방 풍경, 나무 지팡이 (구름 방석은 앉을 때 방석 자리에)
-  if (has(1)) {   // 염주: 큰 머리에 가리지 않게 가슴 앞으로 늘어뜨린다 (가슴 둥근 면을 따라)
-    const cy = 0.93 + p.bob - p.drop, rx = 0.35 * p.chest * (c.g === 1 ? 0.93 : 1), ry = 0.41 * p.chest, rz = 0.29, N = 13;
+function drawSage(c, p, P2, head, has, medSit) {   // 명상 선물: 염주, 싱잉볼, 가방 풍경, 향, 지팡이, 백팔 염주 (방석은 앉는 자리에서)
+  if (has('beads') || has('beads108')) {   // 염주: 큰 머리에 가리지 않게 가슴 앞으로 늘어뜨린다. 108번이면 더 길고 알이 많은 백팔 염주
+    const big = has('beads108'), cy = 0.93 + p.bob - p.drop, rx = 0.35 * p.chest * (c.g === 1 ? 0.93 : 1), ry = 0.41 * p.chest, rz = 0.29, N = big ? 23 : 13, drop = big ? 0.24 : 0.16, wid = big ? 0.24 : 0.21;
     for (let k = 0; k < N; k++) {
-      const t = k / (N - 1) * 2 - 1, x = 0.21 * t, y = cy - 0.07 + 0.16 * t * t, q = 1 - (x / rx) ** 2 - ((y - cy) / ry) ** 2, z = rz * Math.sqrt(Math.max(0, q)) + 0.022;
-      P2(M.chain(M.T(x, y, z), M.S(k === (N - 1) / 2 ? 0.05 : 0.034)), W.uSphere, k === (N - 1) / 2 ? [0.62, 0.14, 0.12] : [0.36, 0.21, 0.11]);
+      const t = k / (N - 1) * 2 - 1, x = wid * t, y = cy - (big ? 0.12 : 0.07) + drop * t * t, q = 1 - (x / rx) ** 2 - ((y - cy) / ry) ** 2, z = rz * Math.sqrt(Math.max(0, q)) + 0.022, mid = k === (N - 1) / 2;
+      P2(M.chain(M.T(x, y, z), M.S(mid ? 0.05 : big ? 0.03 : 0.034)), W.uSphere, mid ? [0.62, 0.14, 0.12] : big ? (k % 2 ? [0.26, 0.15, 0.08] : [0.42, 0.26, 0.13]) : [0.36, 0.21, 0.11]);
     }
-    const ty = cy - 0.13, tz = rz * Math.sqrt(Math.max(0, 1 - ((ty - cy) / ry) ** 2)) + 0.02;
-    P2(M.chain(M.T(0, ty, tz), M.S(0.026, 0.07, 0.02)), W.uSphere, [0.72, 0.18, 0.15]);   // 술
+    const ty = cy - (big ? 0.19 : 0.13), tz = rz * Math.sqrt(Math.max(0, 1 - ((ty - cy) / ry) ** 2)) + 0.02;
+    P2(M.chain(M.T(0, ty, tz), M.S(0.026, big ? 0.09 : 0.07, 0.02)), W.uSphere, big ? [0.86, 0.66, 0.22] : [0.72, 0.18, 0.15]);   // 술
   }
-  if (has(2)) {   // 가방 옆에 매단 작은 풍경 (걸을 때 흔들린다)
+  if (has('bell')) {   // 가방 옆에 매단 작은 풍경 (걸을 때 흔들린다)
     const sw = 0.5 * Math.sin((c.phase || 0) * 2) * (c.moveAmt || 0), top = M.chain(M.T(0.13, 0.84 + p.bob - p.drop, -0.4), M.Rz(sw), M.Rx(sw * 0.6));
     P2(M.chain(top, M.T(0, -0.05, 0), M.S(0.008, 0.1, 0.008)), W.uCyl, [0.72, 0.18, 0.15]);
     P2(M.chain(top, M.T(0, -0.14, 0), M.S(0.066, 0.072, 0.066)), W.uSphere, [0.86, 0.66, 0.26]);
     P2(M.chain(top, M.T(0, -0.185, 0), M.S(0.082, 0.014, 0.082)), W.uCyl, [0.78, 0.58, 0.2]);
   }
-  if (has(3)) {
+  if (has('staff')) {
     if (p.sit < 0.3) { const sw = 0.12 * Math.sin(c.phase || 0) * (c.moveAmt || 0); P2(M.chain(M.T(0.34, 0.02, 0.2), M.Rx(sw), M.T(0, 0.8, 0), M.S(0.035, 1.6, 0.035)), W.uCyl, [0.45, 0.31, 0.18]); P2(M.chain(M.T(0.34, 0.02, 0.2), M.Rx(sw), M.T(0, 1.62, 0), M.S(0.06)), W.uSphere, [0.36, 0.24, 0.14]); }
     else P2(M.chain(M.T(0.55, 0.06, 0.1), M.Rx(Math.PI / 2), M.S(0.035, 1.6, 0.035)), W.uCyl, [0.45, 0.31, 0.18]);
+  }
+  if (medSit && has('bowl')) {   // 앞에 놓인 작은 싱잉볼과 받침
+    P2(M.chain(M.T(0, 0.03, 0.62), M.S(0.24, 0.05, 0.24)), W.uCyl, [0.62, 0.22, 0.2]);
+    P2(M.chain(M.T(0, 0.11, 0.62), M.S(0.15, 0.09, 0.15)), W.uSphere, [0.78, 0.6, 0.3]);
+    P2(M.chain(M.T(0, 0.16, 0.62), M.S(0.12, 0.012, 0.12)), W.uCyl, [0.36, 0.26, 0.14]);
+  }
+  if (medSit && has('incense')) {   // 향 한 자루: 붉게 타는 끝과 피어오르는 연기
+    P2(M.chain(M.T(-0.42, 0.04, 0.48), M.S(0.12, 0.08, 0.12)), W.uCyl, [0.5, 0.48, 0.44]);
+    P2(M.chain(M.T(-0.42, 0.24, 0.48), M.S(0.012, 0.36, 0.012)), W.uCyl, [0.55, 0.38, 0.22]);
+    draw(W.uSphere, { model: M.mul(M.chain(M.T(c.x, c.y, c.z), M.Ry(c.heading)), M.chain(M.T(-0.42, 0.42, 0.48), M.S(0.018))), tint: [1, 0.35, 0.15], emissive: 1.6, flat: 0, snowable: 0 });
+    for (let k = 0; k < 3; k++) { const u = (T * 0.22 + k / 3) % 1; P2(M.chain(M.T(-0.42 + Math.sin(T * 1.3 + k * 2) * 0.06 * u, 0.46 + u * 0.55, 0.48 + Math.cos(T + k) * 0.04 * u), M.S(0.012 + 0.026 * u)), W.uSphere, [0.88, 0.88, 0.9]); }
+  }
+}
+function drawFocusGear(c, p, P2, head, root, has) {   // 집중 선물: 노트북 옆에 놓이는 것들
+  const ly = 0.5 - p.drop;
+  if (has('mug')) { P2(M.chain(M.T(0.34, ly + 0.08, 0.42), M.S(0.1, 0.16, 0.1)), W.uCyl, [0.55, 0.36, 0.2]); P2(M.chain(M.T(0.4, ly + 0.08, 0.42), M.S(0.03, 0.06, 0.02)), W.uSphere, [0.5, 0.32, 0.18]); P2(M.chain(M.T(0.34, ly + 0.155, 0.42), M.S(0.085, 0.01, 0.085)), W.uCyl, [0.3, 0.18, 0.1]); }
+  if (has('phones')) {   // 헤드폰: 모자 위로 머리띠, 양쪽 귀에 둥근 덮개
+    for (let k = 0; k < 14; k++) { const a0 = -Math.PI / 2 + k / 14 * Math.PI, a1 = a0 + Math.PI / 14, am = (a0 + a1) / 2, len = 0.47 * Math.PI / 14 + 0.01; P2(M.chain(head, M.T(Math.sin(am) * 0.47, 0.3 + Math.cos(am) * 0.47, -0.02), M.Rz(-am), M.S(len, 0.045, 0.07)), W.uBox, [0.16, 0.17, 0.2]); }
+    for (const sd of [-1, 1]) { P2(M.chain(head, M.T(0.45 * sd, 0.22, -0.02), M.Rz(Math.PI / 2), M.S(0.16, 0.08, 0.16)), W.uCyl, [0.2, 0.21, 0.25]); P2(M.chain(head, M.T(0.5 * sd, 0.22, -0.02), M.Rz(Math.PI / 2), M.S(0.12, 0.02, 0.12)), W.uCyl, [0.82, 0.42, 0.2]); }
+  }
+  if (has('plant')) { P2(M.chain(M.T(-0.66, 0.1, 0.32), M.S(0.2, 0.2, 0.2)), W.uCyl, [0.72, 0.38, 0.24]); for (const [x, y, z, r] of [[-0.66, 0.3, 0.32, 0.12], [-0.6, 0.38, 0.36, 0.09], [-0.72, 0.36, 0.28, 0.09], [-0.66, 0.46, 0.32, 0.07]]) P2(M.chain(M.T(x, y, z), M.S(r, r * 1.2, r)), W.uSphere, [0.3, 0.55, 0.26]); }
+  if (has('lantern')) {   // 등불: 해가 지면 더 밝다
+    P2(M.chain(M.T(0.72, 0.02, 0.2), M.S(0.18, 0.04, 0.18)), W.uBox, [0.25, 0.18, 0.12]); P2(M.chain(M.T(0.72, 0.34, 0.2), M.S(0.18, 0.04, 0.18)), W.uBox, [0.25, 0.18, 0.12]);
+    for (const [a, b] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) P2(M.chain(M.T(0.72 + a * 0.08, 0.18, 0.2 + b * 0.08), M.S(0.02, 0.3, 0.02)), W.uBox, [0.25, 0.18, 0.12]);
+    draw(W.uBox, { model: M.mul(root, M.chain(M.T(0.72, 0.18, 0.2), M.S(0.13, 0.26, 0.13))), tint: [1, 0.8, 0.45], emissive: 0.6 + 1.4 * Math.max(S.tb, S.night), flat: 0, snowable: 0 });
+  }
+  if (has('notebook')) { P2(M.chain(M.T(-0.34, ly + 0.02, 0.4), M.Ry(0.25), M.S(0.2, 0.03, 0.26)), W.uBox, [0.32, 0.4, 0.5]); P2(M.chain(M.T(-0.34, ly + 0.037, 0.4), M.Ry(0.25), M.S(0.18, 0.005, 0.24)), W.uBox, [0.96, 0.94, 0.88]); P2(M.chain(M.T(-0.3, ly + 0.05, 0.42), M.Ry(0.9), M.Rz(Math.PI / 2), M.S(0.012, 0.2, 0.012)), W.uCyl, [0.12, 0.12, 0.14]); }
+  if (has('fireflies')) for (let k = 0; k < 7; k++) {   // 반딧불이: 주변을 천천히 맴돈다
+    const a = T * (0.3 + k * 0.04) + k * 0.9, r = 0.9 + 0.3 * Math.sin(T * 0.7 + k), y = 0.8 + 0.5 * Math.sin(T * 0.9 + k * 1.7), tw = 0.5 + 0.5 * Math.sin(T * 3 + k * 2.1);
+    draw(W.uSphere, { model: M.mul(M.chain(M.T(c.x, c.y, c.z)), M.chain(M.T(Math.cos(a) * r, y, Math.sin(a) * r), M.S(0.025 + 0.015 * tw))), tint: [0.8, 0.95, 0.3], emissive: 0.5 + 0.9 * tw, flat: 0, snowable: 0 });
+  }
+}
+/* 가방 키링 인형: 반달곰, 다람쥐, 토끼, 도토리. 가방 뒤 왼쪽 아래에 달려 걸을 때 흔들린다 */
+const KEYRINGS = [null, { id: 'bear', name: '반달곰' }, { id: 'squirrel', name: '다람쥐' }, { id: 'rabbit', name: '토끼' }, { id: 'acorn', name: '도토리' }];
+function drawKeyring(c, p, P2) {
+  const K = KEYRINGS[c.keyring]; if (!K) return;
+  const sw = 0.55 * Math.sin((c.phase || 0) * 2 + 1.3) * (c.moveAmt || 0) + 0.05 * Math.sin(T * 1.7);
+  const top = M.chain(M.T(-0.13, 0.88 + p.bob - p.drop, -0.4), M.Rz(sw), M.Rx(-sw * 0.5));
+  P2(M.chain(top, M.Rx(Math.PI / 2), M.S(0.035, 1, 0.035)), W.uRing, [0.8, 0.8, 0.82]);
+  P2(M.chain(top, M.T(0, -0.06, 0), M.S(0.007, 0.09, 0.007)), W.uCyl, [0.75, 0.75, 0.78]);
+  const d = M.chain(top, M.T(0, -0.24, -0.02), M.Ry(Math.PI), M.S(1.8)), D = (loc, col) => P2(M.chain(d, loc), W.uSphere, col), eye = [0.05, 0.04, 0.04];
+  if (K.id === 'bear') {   // 반달가슴곰: 검은 몸, 가슴의 흰 반달
+    D(M.S(0.06, 0.055, 0.05), [0.12, 0.11, 0.11]); D(M.chain(M.T(0, 0.075, 0), M.S(0.05)), [0.13, 0.12, 0.12]);
+    for (const sd of [-1, 1]) { D(M.chain(M.T(0.035 * sd, 0.115, 0), M.S(0.018)), [0.13, 0.12, 0.12]); D(M.chain(M.T(0.016 * sd, 0.085, 0.045), M.S(0.007)), eye); D(M.chain(M.T(0.03 * sd, 0.012, 0.045), M.Rz(0.5 * sd), M.S(0.022, 0.008, 0.008)), [0.96, 0.95, 0.9]); }
+    D(M.chain(M.T(0, 0.065, 0.045), M.S(0.02, 0.016, 0.015)), [0.72, 0.6, 0.46]);
+  } else if (K.id === 'squirrel') {   // 다람쥐: 큰 꼬리
+    D(M.S(0.045, 0.055, 0.042), [0.62, 0.38, 0.2]); D(M.chain(M.T(0, 0.07, 0.005), M.S(0.042)), [0.66, 0.42, 0.22]); D(M.chain(M.T(0, 0.0, 0.03), M.S(0.03, 0.04, 0.02)), [0.95, 0.86, 0.7]);
+    D(M.chain(M.T(0, 0.06, -0.06), M.S(0.04, 0.075, 0.035)), [0.55, 0.33, 0.17]);
+    for (const sd of [-1, 1]) { D(M.chain(M.T(0.025 * sd, 0.108, 0), M.S(0.012, 0.018, 0.01)), [0.55, 0.33, 0.17]); D(M.chain(M.T(0.016 * sd, 0.078, 0.038), M.S(0.007)), eye); }
+  } else if (K.id === 'rabbit') {   // 토끼: 긴 귀
+    D(M.S(0.05, 0.05, 0.045), [0.97, 0.96, 0.95]); D(M.chain(M.T(0, 0.07, 0), M.S(0.043)), [0.98, 0.97, 0.96]);
+    for (const sd of [-1, 1]) { D(M.chain(M.T(0.018 * sd, 0.135, -0.005), M.Rz(-0.15 * sd), M.S(0.012, 0.045, 0.01)), [0.98, 0.97, 0.96]); D(M.chain(M.T(0.016 * sd, 0.078, 0.038), M.S(0.007)), eye); }
+    D(M.chain(M.T(0, 0.064, 0.042), M.S(0.008, 0.006, 0.006)), [0.95, 0.55, 0.6]);
+  } else {   // 도토리: 모자와 꼭지, 작은 얼굴
+    D(M.chain(M.T(0, 0.01, 0), M.S(0.048, 0.06, 0.048)), [0.66, 0.42, 0.2]); D(M.chain(M.T(0, 0.055, 0), M.S(0.055, 0.03, 0.055)), [0.42, 0.28, 0.16]);
+    P2(M.chain(d, M.T(0, 0.09, 0), M.S(0.008, 0.03, 0.008)), W.uCyl, [0.36, 0.24, 0.13]);
+    for (const sd of [-1, 1]) D(M.chain(M.T(0.016 * sd, 0.015, 0.045), M.S(0.007)), eye);
   }
 }
 
@@ -4923,13 +5197,19 @@ function beginFocus() {
   if (player.act && GREETS.includes(player.act.type)) player.act = null;
   S.auto = false; player.target = null; updateWalkBtn(); S.lastDrag = -10;
   player.act = { type: 'focus', t: 0, leaving: false };
-  FOCUS.on = true; FOCUS.phase = 'work'; FOCUS.start = FOCUS.phaseStart = Date.now(); FOCUS.rounds = 0; FOCUS.title = document.title;
+  FOCUS.on = true; FOCUS.phase = 'work'; FOCUS.start = FOCUS.phaseStart = FOCUS.last = Date.now(); FOCUS.acc = 0; FOCUS.rounds = 0; FOCUS.title = document.title;
   focusSound(FOCUS.snd); clearInterval(FOCUS.iv); FOCUS.iv = setInterval(focusTick, 1000);
   toast(i18n('집중 모드를 시작해요. 다른 탭에서 일해도 소리는 계속 나와요'));
   $('#actPill').hidden = false; updatePill(); netState(true);
 }
+function focusCount(flushAll) {   // 일한 시간만 모아 5분마다 기록 (다른 탭에서 타이머가 느려져도 실제 흐른 시간으로)
+  const now = Date.now(), dt = clamp((now - (FOCUS.last || now)) / 1000, 0, 75); FOCUS.last = now;
+  if (FOCUS.phase === 'work') FOCUS.acc = (FOCUS.acc || 0) + dt;
+  if (FOCUS.acc >= 300 || (flushAll && FOCUS.acc >= 60)) { const m = Math.floor(FOCUS.acc / 60); FOCUS.acc -= m * 60; focusRecord(m); }
+}
 function focusTick() {
   if (!FOCUS.on) return;
+  focusCount(false);
   const now = Date.now(), brk = FOCUS.phase === 'break', el = (now - FOCUS.phaseStart) / 1000;
   if (FOCUS.min) {
     const len = (brk ? FOCUS.min / 5 : FOCUS.min) * 60;
@@ -4944,6 +5224,7 @@ function focusTick() {
 }
 function stopFocus() {
   const a = player.act; if (!a || a.type !== 'focus' || a.leaving) return;
+  focusCount(true);
   a.leaving = true; FOCUS.on = false; clearInterval(FOCUS.iv); focusSound(null);
   if (FOCUS.title) document.title = FOCUS.title;
   const mins = Math.floor((Date.now() - FOCUS.start) / 60000);
@@ -5379,14 +5660,14 @@ async function onAuth(session) {
     if (my !== authSeq) return;
     AUTH.profile = (data && data.profile) || null; AUTH.gifted = !!(data && data.gifted);
     if (AUTH.profile) applyProfile(AUTH.profile);
-    medMerge();
+    medMerge(); focusMerge();
     if (S.started) loadTrailNotes(true);   // 내 쪽지 표시를 다시 받는다
   } catch (e) { console.warn('길벗 정보를 불러오지 못함', e); if (my === authSeq) { AUTH.profile = null; AUTH.err = true; } }
   finally { if (my === authSeq) { AUTH.pending = false; renderGb(); } }
 }
 function lookToSave() {
   const r = v => v.map(x => Math.round(x * 1000) / 1000);
-  return { s: Math.max(0, SKINS.indexOf(player.skin)), f: player.face | 0, j: r(player.jacket), h: r(player.hat), dg: DOG.coat, ls: DOG.leash ? 1 : 0, g: player.g | 0 };
+  return { s: Math.max(0, SKINS.indexOf(player.skin)), f: player.face | 0, j: r(player.jacket), h: r(player.hat), dg: DOG.coat, ls: DOG.leash ? 1 : 0, g: player.g | 0, kr: player.keyring | 0 };
 }
 function applyProfile(pr) {
   if (pr.nick) setNick(cleanNick(pr.nick), false);
@@ -5407,6 +5688,7 @@ function setLook(patch, save) {
   if (col(patch.h)) L.h = col(patch.h);
   if (Number.isInteger(patch.dg) && patch.dg >= 0 && patch.dg <= DOG_N) { L.dg = patch.dg; DOG.coat = patch.dg; }
   if (patch.ls === 0 || patch.ls === 1) { L.ls = patch.ls; DOG.leash = !!patch.ls; }
+  if (Number.isInteger(patch.kr) && patch.kr >= 0 && patch.kr < KEYRINGS.length) { L.kr = patch.kr; player.keyring = patch.kr; }
   store.set('look', L);
   if (L.j) player.jacket = L.j; if (L.h) player.hat = L.h;
   player.skin = SKINS[Number.isInteger(L.s) ? L.s : 1]; player.face = L.f | 0; if (L.g === 0 || L.g === 1) player.g = L.g;
@@ -5493,6 +5775,7 @@ function buildGb() {
   MY_JACKETS.forEach((c, i) => { const b = document.createElement('button'); b.style.background = rgbCss(c); b.dataset.j = i; b.setAttribute('aria-label', i18n('재킷 색 {0}', i + 1)); b.onclick = () => setLook({ j: c }, true); $('#gbJacket').appendChild(b); });
   document.querySelectorAll('#gbFace button').forEach(b => b.onclick = () => setLook({ f: +b.dataset.f }, true));
   document.querySelectorAll('#gbGender button').forEach(b => b.onclick = () => setLook({ g: +b.dataset.g }, true));
+  document.querySelectorAll('#gbKey button').forEach(b => b.onclick = () => setLook({ kr: +b.dataset.k }, true));
   document.querySelectorAll('#gbDog button').forEach(b => b.onclick = () => { const c = +b.dataset.d; setLook({ dg: c }, true); if (c && !DOG.placed && S.started) placeDog(DOG, player); gbMsg(c && !AUTH.user ? i18n('강아지는 로그인한 길벗과 함께 걸어요. 아래에서 로그인하면 바로 곁에 나타나요') : ''); });
   $('#gbLeash').onchange = () => setLook({ ls: $('#gbLeash').checked ? 1 : 0 }, true);
 }
@@ -5523,12 +5806,21 @@ function renderGb() {
   if (P) { $('#gbKakao').hidden = !P.kakao; $('#gbGoogle').hidden = !P.google; $('#gbEmailBtn').hidden = !P.email; $('#gbNone').hidden = P.kakao || P.google || P.email; }
   document.querySelectorAll('#gbDog button').forEach(b => b.setAttribute('aria-pressed', +b.dataset.d === DOG.coat ? 'true' : 'false'));
   $('#gbLeashRow').style.display = DOG.coat && inn ? '' : 'none'; $('#gbLeash').checked = DOG.leash;
-  { const n = medN(), t = medTierOf(n), next = MED_TIERS[t];
-    $('#gbMed').innerHTML = '<b></b><small></small>';
-    $('#gbMed').querySelector('b').textContent = t ? i18n('명상 {0}번 · {1}', n, i18n(MED_TIERS[t - 1].name)) : i18n('명상 {0}번', n);
-    if (t) { const w = document.createElement('div'); w.className = 'chips gbWear'; for (let k = 1; k <= t; k++) { const b = document.createElement('button'); b.type = 'button'; const on = !(medHideMask() & (1 << k)); b.setAttribute('aria-pressed', String(on)); b.textContent = i18n(MED_TIERS[k - 1].gift); b.title = on ? i18n('누르면 빼요') : i18n('누르면 다시 차요'); b.onclick = () => { store.set('medHide', medHideMask() ^ (1 << k)); retrack(); renderGb(); }; w.appendChild(b); } $('#gbMed').appendChild(w); }
-    setLvBadge($('#meLv'), t);
-    $('#gbMed').querySelector('small').textContent = (next ? i18n('{0}번 더 하면 {1}', next.n - n, i18n(next.gift)) : i18n('산의 모든 모습을 얻었어요')) + (inn ? '' : ' · ' + i18n('로그인하면 어느 기기에서든 이어져요')); }
+  document.querySelectorAll('#gbKey button').forEach(b => b.setAttribute('aria-pressed', +b.dataset.k === (player.keyring | 0) ? 'true' : 'false'));
+  const wearChips = (box, list, t, mask, key) => { if (!t) return; const w = document.createElement('div'); w.className = 'chips gbWear';
+    for (let k = 1; k <= t; k++) { const b = document.createElement('button'); b.type = 'button'; const on = !(mask & (1 << k)); b.setAttribute('aria-pressed', String(on)); b.textContent = i18n(list[k - 1].gift); b.title = on ? i18n('누르면 빼요') : i18n('누르면 다시 차요'); b.onclick = () => { store.set(key, (store.get(key, 0) | 0) ^ (1 << k)); retrack(); renderGb(); }; w.appendChild(b); }
+    box.appendChild(w); };
+  { const n = medN(), t = medTierOf(n), next = MED_TIERS[t], box = $('#gbMed');
+    box.innerHTML = '<b></b><small></small>';
+    box.querySelector('b').textContent = t ? i18n('명상 {0}번 · {1}', n, i18n(MED_TIERS[t - 1].name)) : i18n('명상 {0}번', n);
+    box.querySelector('small').textContent = (next ? i18n('{0}번 더 하면 {1}', next.n - n, i18n(next.gift)) : i18n('산의 모든 모습을 얻었어요')) + (inn ? '' : ' · ' + i18n('로그인하면 어느 기기에서든 이어져요'));
+    wearChips(box, MED_TIERS, t, medHideMask(), 'medHide2');
+    setLvBadge($('#meLv'), t); }
+  { const m = focusMinN(), t = focusTierOf(m), next = FOCUS_TIERS[t], box = $('#gbFocus');
+    box.innerHTML = '<b></b><small></small>';
+    box.querySelector('b').textContent = t ? i18n('집중 {0} · {1}', fmtHM(m), i18n(FOCUS_TIERS[t - 1].name)) : i18n('집중 {0}', fmtHM(m));
+    box.querySelector('small').textContent = next ? i18n('{0} 더 집중하면 {1}', fmtHM(next.h * 60 - m), i18n(next.gift)) : i18n('집중의 모든 선물을 얻었어요');
+    wearChips(box, FOCUS_TIERS, t, focusHideMask(), 'focusHide'); }
   drawAvatar(); renderBag(); renderGbNotes();
 }
 function drawAvatar() {   // 길벗 카드의 작은 얼굴 그림 (3D 캐릭터와 같은 색, 같은 얼굴)
@@ -5722,7 +6014,8 @@ function ensurePeer(id, pres) {
     if (Number.isInteger(pres.s) && SKINS[pres.s]) p.skin = SKINS[pres.s];
     if (Number.isInteger(pres.f)) p.face = clamp(pres.f, 0, FACE_N - 1);
     p.g = pres.g === 1 ? 1 : 0;
-    p.dogCoat = Number.isInteger(pres.dg) ? clamp(pres.dg, 0, DOG_N) : 0; p.dogLeash = pres.ls !== 0; p.medTier = Number.isInteger(pres.md) ? clamp(pres.md, 0, 4) : 0; p.medHide = Number.isInteger(pres.mh) ? pres.mh & 30 : 0;
+    p.dogCoat = Number.isInteger(pres.dg) ? clamp(pres.dg, 0, DOG_N) : 0; p.dogLeash = pres.ls !== 0; p.medTier = Number.isInteger(pres.m2) ? clamp(pres.m2, 0, MED_TIERS.length) : Number.isInteger(pres.md) ? [0, 2, 4, 6, 8][clamp(pres.md, 0, 4)] : 0; p.medHide = Number.isInteger(pres.mh2) ? pres.mh2 & 0x3FE : 0;
+    p.focTier = Number.isInteger(pres.fc) ? clamp(pres.fc, 0, FOCUS_TIERS.length) : 0; p.focHide = Number.isInteger(pres.fh) ? pres.fh & 0x7E : 0; p.keyring = Number.isInteger(pres.kr) ? clamp(pres.kr, 0, KEYRINGS.length - 1) : 0;
   }
   p.label.el.querySelector('span').textContent = p.nick;
   if (!p.lvEl) { p.lvEl = document.createElement('i'); p.lvEl.className = 'mlv'; p.label.el.appendChild(p.lvEl); }
@@ -5896,7 +6189,8 @@ function frameStep(now) {
   updateCharAct(barista, dt); barista.y = groundY(barista.x, barista.z);
   updateCamp(dt);
   updateMedGuide();
-  if (S.started && !S.breath) movePlayer(dt);
+  if (S.started && !S.breath) movePlayer(dt); else S.movedNow = false;
+  updateEnergy(dt); updatePuffs(dt);
   moveNpcs(dt);
   updateDogs(dt);
   netTick(dt);
@@ -6160,7 +6454,7 @@ function bindUI() {
   $('#gbExt').onclick = () => { location.href = 'kakaotalk://web/openExternal?url=' + encodeURIComponent(location.href); };
   W.meLabel.el.addEventListener('click', e => { e.stopPropagation(); openGb(); });   // 내 이름표를 누르면 길벗 카드
   authInit(false); renderGb();
-  $('#nearSit').onclick = e => { e.stopPropagation(); if ($('#nearSit').dataset.k === 'cafe') goCafe(); else goCircle(); };
+  $('#nearSit').onclick = e => { e.stopPropagation(); const k = $('#nearSit').dataset.k; if (k === 'cafe') goCafe(); else if (k === 'spring') drinkSpring(); else goCircle(); };
   $('#actAlt').onclick = e => { e.stopPropagation(); if (player.act && player.act.type === 'focus' && FOCUS.phase !== 'break') { openFocusCard(); return; } $('#actAlt').hidden = true; startBreath(); };
   $('#focusGo').onclick = beginFocus; $('#focusCancel').onclick = () => { $('#focusCard').hidden = true; };
   $('#focusVol').oninput = () => { FOCUS.vol = +$('#focusVol').value; store.set('focusVol', FOCUS.vol); focusVolume(0.2); };
