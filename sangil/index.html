@@ -226,6 +226,11 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{ou
 .tag3d.place.tap{pointer-events:auto;cursor:pointer}
 #nearSit{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(98px + env(safe-area-inset-bottom,0px));z-index:19;border-radius:999px;padding:10px 20px;display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:var(--on-glass);white-space:nowrap}
 #nearSit .ico{width:18px;height:18px}
+#zoomBox{position:fixed;right:max(12px,env(safe-area-inset-right,0px));top:46%;transform:translateY(-50%);z-index:18;border-radius:16px;display:grid;padding:4px;gap:2px}
+#zoomBox button{width:42px;height:42px;border-radius:12px;font-size:24px;line-height:1;color:var(--on-glass);display:grid;place-items:center}
+#zoomBox button:active{background:rgba(255,255,255,.14)}
+body.calm #zoomBox{opacity:0;pointer-events:none}
+.tag3d.note{background:none;box-shadow:none;border:none;padding:0;font-size:20px;color:#ffe3a0;text-shadow:0 1px 4px rgba(0,0,0,.55);transition:none}
 .lab{font-size:13px;color:var(--ink-soft)}
 .drinks{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .drinks button{border:1.5px solid var(--paper-line);border-radius:14px;padding:12px;text-align:left;display:grid;gap:3px;color:var(--ink);background:#fbf8f1}
@@ -357,6 +362,7 @@ body.calm #trailCard,body.calm #hint{opacity:0;pointer-events:none}
     <button data-act="camp"><svg class="ico" viewBox="0 0 24 24"><path d="M3 20 12 5l9 15M12 5v15M9.5 20 12 15l2.5 5M2 20h20"/></svg><span>야영하기</span></button>
   </div>
   <div id="askBar" class="glass" hidden><span id="askTxt"></span><div><button id="askYes">하이파이브</button><button id="askNo">다음에</button></div></div>
+  <div id="zoomBox" class="glass"><button id="zoomIn" aria-label="가까이 보기">+</button><button id="zoomOut" aria-label="멀리 보기">−</button></div>
   <button id="nearSit" class="glass" hidden><svg class="ico" viewBox="0 0 24 24"><path d="M12 4c2 2.5 3 4 3 6a3 3 0 0 1-6 0c0-1 .5-2 1.2-2.8.3 1 .9 1.6 1.8 1.6C12 7.5 12 6 12 4zM5 19.5l14-4M19 19.5l-14-4"/></svg><span>모닥불에 앉기</span></button>
   <div id="actPill" class="glass" hidden><div><b id="actTitle"></b><small id="actSub"></small></div><button id="actStop">일어나기</button></div>
   <div id="toast" class="glass" hidden></div>
@@ -988,7 +994,11 @@ const EN = {"센트럴파크":"Central Park",
 "켜기":"On",
 "끄기":"Off",
 "모닥불 라디오를 들으려면 화면을 한 번 눌러 주세요":"Tap the screen once to hear the campfire radio",
-"모닥불 라디오 · {0} · {1}":"Campfire radio · {0} · {1}"};
+"모닥불 라디오 · {0} · {1}":"Campfire radio · {0} · {1}",
+"가까이 보기":"Zoom in",
+"멀리 보기":"Zoom out",
+"걸으려면 먼저 '일어나기'를 눌러 주세요":"Tap 'Stand up' first to walk again",
+"{0}까지 길을 따라 걸어가요 · 약 {1} km":"Walking along the trail to {0} · about {1} km"};
 function i18n(k, ...a) { if (LANG !== 'ko' && EN[k] === undefined && /[가-힣]/.test(k)) (window.__i18nMiss = window.__i18nMiss || new Set()).add(k); const s = LANG === 'ko' ? k : (EN[k] !== undefined ? EN[k] : k); return a.length ? s.replace(/\{(\d)\}/g, (m, i) => a[+i]) : s; }
 const ordinal = n => n + ((n % 100 >= 11 && n % 100 <= 13) ? 'th' : (['th', 'st', 'nd', 'rd'][n % 10] || 'th'));
 function translateDom() {   // HTML에 적힌 한국어 글자를 영어로 바꾼다
@@ -2707,7 +2717,7 @@ canvas.addEventListener('pointerdown', e => {
 canvas.addEventListener('pointermove', e => {
   const p = ptrs.get(e.pointerId); if (!p) return;
   const dx = e.clientX - p.x, dy = e.clientY - p.y; p.x = e.clientX; p.y = e.clientY;
-  if (ptrs.size === 2) { const [a, b] = [...ptrs.values()]; const d = Math.hypot(a.x - b.x, a.y - b.y); if (pinchD > 0) cam.dist = clamp(cam.dist * pinchD / d, 4, 32); pinchD = d; return; }
+  if (ptrs.size === 2) { const [a, b] = [...ptrs.values()]; const d = Math.hypot(a.x - b.x, a.y - b.y); if (pinchD > 0) { cam.dist = clamp(cam.dist * pinchD / d, 4, 42); S.userZoomT = T; } pinchD = d; return; }
   if (!dragMoved && downAt && Math.hypot(e.clientX - downAt.x, e.clientY - downAt.y) > 6) { dragMoved = true; canvas.classList.add('dragging'); }
   if (dragMoved && S.started) { cam.yaw -= dx * 0.006; cam.pitch = clamp(cam.pitch + dy * 0.004, 0.04, 1.25); S.lastDrag = T; }
 });
@@ -2717,7 +2727,12 @@ function endPtr(e) {
   if (ptrs.size < 2) pinchD = 0;
 }
 canvas.addEventListener('pointerup', endPtr); canvas.addEventListener('pointercancel', endPtr);
-canvas.addEventListener('wheel', e => { e.preventDefault(); cam.dist = clamp(cam.dist * Math.exp(e.deltaY * 0.0012), 4, 32); }, { passive: false });
+canvas.addEventListener('wheel', e => { e.preventDefault(); cam.dist = clamp(cam.dist * Math.exp(e.deltaY * 0.0012), 4, 42); S.userZoomT = T; }, { passive: false });
+function zoomBy(f) {   // + / − 버튼: 멀리 볼수록 카메라를 조금 더 위로 올려서 벽과 나무 너머 바닥이 보이게 한다
+  cam.dist = clamp(cam.dist * f, 4, 42); S.userZoomT = T;
+  if (f > 1) cam.pitch = clamp(Math.max(cam.pitch, 0.3 + (cam.dist - 9) * 0.02), 0.04, 1.1);
+  else if (cam.dist < 9) cam.pitch = Math.min(cam.pitch, 0.42);
+}
 const KEYMAP = { KeyW: 'w', ArrowUp: 'w', KeyS: 's', ArrowDown: 's', KeyA: 'a', ArrowLeft: 'a', KeyD: 'd', ArrowRight: 'd' };
 addEventListener('keydown', e => { if (e.target.closest && e.target.closest('input,select')) return; const k = KEYMAP[e.code]; if (k && S.started) { keys[k] = true; e.preventDefault(); } });
 addEventListener('keyup', e => { const k = KEYMAP[e.code]; if (k) keys[k] = false; });
@@ -2747,6 +2762,12 @@ function clickMove(cx, cy) {
   if (hit < 0) return;
   let lo = prev, hi = hit; for (let i = 0; i < 12; i++) { const m = (lo + hi) / 2, x = o[0] + d[0]*m, z = o[2] + d[2]*m; if (o[1] + d[1]*m < getH(x, z)) hi = m; else lo = m; }
   const x = o[0] + d[0]*hi, z = o[2] + d[2]*hi;
+  const pa = player.act;
+  if (Math.hypot(x - CIRCLE.x, z - CIRCLE.z) < CIRCLE.R + 1.4 && !(pa && pa.type === 'circle')) { S.circlePref = { x, z }; goCircle(); return; }   // 모닥불이나 둘레 자리를 누르면 그 자리에 가서 앉는다
+  if (pa && ['meditate', 'cafe', 'circle', 'camp'].includes(pa.type)) {   // 앉아 있을 때 화면을 눌러도 일어나지 않는다 (둘러보다 실수로 일어나지 않게)
+    if (T - (S.seatTipT || -99) > 8) { S.seatTipT = T; toast(i18n("걸으려면 먼저 '일어나기'를 눌러 주세요")); }
+    return;
+  }
   if (!walkable(x, z)) { toast(i18n('그쪽으로는 갈 수 없어요')); return; }
   player.target = { x, z }; S.auto = false; updateWalkBtn(); marker = { x, z, t: 0 };
 }
@@ -2769,7 +2790,9 @@ function movePlayer(dt) {
     let [d, i] = nearestTrail(player.x, player.z, Math.max(0, player.idx - 30), Math.min(TN - 1, player.idx + 30));
     if (d > 8) [d, i] = nearestTrail(player.x, player.z);
     player.idx = i;
-    if ((S.autoDir > 0 && i >= TN - 3) || (S.autoDir < 0 && i <= 2)) { S.auto = false; updateWalkBtn(); if (S.autoDir < 0) toast(IS_PARK ? i18n('5번가 입구로 돌아왔어요. 수고하셨습니다') : i18n('산길 입구에 내려왔어요. 수고하셨습니다')); }
+    if (S.walkGoal) S.autoDir = S.walkGoal.idx >= i ? 1 : -1;   // 목적지 쪽으로만 걷는다 (지나치면 돌아온다)
+    if (S.walkGoal && Math.abs(i - S.walkGoal.idx) <= 2) { const g = S.walkGoal; S.walkGoal = null; S.auto = false; updateWalkBtn(); g.then(); mx = mz = 0; }   // 목적지 근처 길에 닿았다
+    else if ((S.autoDir > 0 && i >= TN - 3) || (S.autoDir < 0 && i <= 2)) { S.auto = false; updateWalkBtn(); if (S.autoDir < 0) toast(IS_PARK ? i18n('5번가 입구로 돌아왔어요. 수고하셨습니다') : i18n('산길 입구에 내려왔어요. 수고하셨습니다')); }
     else { const j = clamp(i + 5 * S.autoDir, 0, TN - 1); mx = TX[j] - player.x; mz = TZ[j] - player.z; }
   } else if (player.target) {
     mx = player.target.x - player.x; mz = player.target.z - player.z; dist = Math.hypot(mx, mz);
@@ -3270,14 +3293,20 @@ const barista = { x: 0, z: 0, y: 0, heading: 0, phase: 0, moveAmt: 0, sit: 0, ac
 barista.skin = SKINS[IS_PARK ? 4 : 2];
 { const [x, z] = CAFE.L(0.9, -2.3); barista.x = x; barista.z = z; barista.heading = CAFE.yaw; }
 function nearCafe(d = 16) { return Math.hypot(player.x - CAFE.x, player.z - CAFE.z) < d; }
+/* 멀리 있는 곳(모닥불 쉼터, 카페)은 길을 따라 자동으로 걸어간다. 길에서 가장 가까운 곳에 닿으면 그다음 할 일(then)을 한다 */
+function walkTrailTo(idx, name, d, then) {
+  const [, i0] = nearestTrail(player.x, player.z); player.idx = i0;
+  S.walkGoal = { idx, then }; S.autoDir = idx >= i0 ? 1 : -1; S.auto = true; player.target = null; updateWalkBtn(); S.lastDrag = -10;
+  toast(i18n('{0}까지 길을 따라 걸어가요 · 약 {1} km', name, (d * UNIT_M / 1000).toFixed(1)));
+}
 function goCafe() {
   closeMenus();
   if (player.act) { if (player.act.type === 'meditate') standUp(); else { toast(i18n('하던 걸 마저 하고 할게요')); return; } }
   if (S.breath) stopBreath();
   const d = Math.hypot(player.x - CAFE.x, player.z - CAFE.z);
   if (d < 16) { openCafeCard(); return; }
-  if (d < 130) { const [fx, fz] = CAFE.front; player.target = { x: fx, z: fz }; S.auto = false; updateWalkBtn(); S.goCafe = true; marker = { x: fx, z: fz, t: 0 }; toast(i18n('{0}로 걸어가요', CAFE_NAME)); return; }
-  toast(i18n('{0}는 {1}에 있어요 · 약 {2} km', CAFE_NAME, i18n(IS_PARK ? i18n('베데스다 분수 동쪽 호숫가') : i18n('산길 입구에서 조금 올라간 길옆')), (d * UNIT_M / 1000).toFixed(1)));
+  if (d < 30) { const [fx, fz] = CAFE.front; player.target = { x: fx, z: fz }; S.auto = false; updateWalkBtn(); S.goCafe = true; marker = { x: fx, z: fz, t: 0 }; toast(i18n('{0}로 걸어가요', CAFE_NAME)); return; }
+  walkTrailTo(nearestTrail(CAFE.front[0], CAFE.front[1])[1], CAFE_NAME, d, () => { const [fx, fz] = CAFE.front; player.target = { x: fx, z: fz }; S.goCafe = true; marker = { x: fx, z: fz, t: 0 }; });
 }
 function openCafeCard() {
   S.goCafe = false;
@@ -3302,17 +3331,17 @@ function startCafe(dr) {
 function updateCafeAct(c, a, dt) {
   const isMe = c === player, cafe = a.type === 'cafe';
   if (isMe && a.seat) {
-    const k = smooth(0, 1.8, a.t);
-    if (a.t < 1.9 && !a.leaving) {   // 자리까지 걸어가기
+    const wd = a.wd || 1.8, k = smooth(0, wd, a.t);
+    if (a.t < wd + 0.1 && !a.leaving) {   // 자리까지 걸어가기
       const nx = lerp(a.from[0], a.seat.x, k), nz = lerp(a.from[1], a.seat.z, k);
-      if (a.t < 1.7) { c.heading = angLerp(c.heading, Math.atan2(a.seat.x - a.from[0], a.seat.z - a.from[1]), 1 - Math.exp(-dt * 10)); c.phase += Math.hypot(nx - c.x, nz - c.z) * 2.4; c.moveAmt = 1 - smooth(1.3, 1.8, a.t); }
+      if (a.t < wd - 0.1) { c.heading = angLerp(c.heading, Math.atan2(a.seat.x - a.from[0], a.seat.z - a.from[1]), 1 - Math.exp(-dt * 10)); c.phase += Math.hypot(nx - c.x, nz - c.z) * 2.4; c.moveAmt = 1 - smooth(wd - 0.5, wd, a.t); }
       c.x = nx; c.z = nz; c.y = groundY(c.x, c.z);
     } else if (!a.seated) { a.seated = true; c.x = a.seat.x; c.z = a.seat.z; c.moveAmt = 0; netState(true); if (cafe) startCafeAmb(); else openCircleChat(); }
-    if (a.t > 1.6) c.heading = angLerp(c.heading, a.seat.heading, 1 - Math.exp(-dt * 6));
-    if (cafe && !a.served && a.t > 3.0) { a.served = true; if (canSound()) cafeSfx.clink(); }
+    if (a.t > wd - 0.2) c.heading = angLerp(c.heading, a.seat.heading, 1 - Math.exp(-dt * 6));
+    if (cafe && !a.served && a.t > wd + 1.2) { a.served = true; if (canSound()) cafeSfx.clink(); }
     if (a.served && !a.leaving && a.t > a.nextSip) { a.sipAt = a.t; a.nextSip = a.t + 8 + Math.random() * 6; setTimeout(() => { if (canSound() && player.act === a) { cafeSfx.sip(); if (Math.random() < 0.35) setTimeout(() => canSound() && breathSound('ahh', 0.9), 900); } }, 900); }
   }
-  const sitting = a.leaving ? 0 : isMe ? (a.t > 1.8 ? 1 : 0) : 1;
+  const sitting = a.leaving ? 0 : isMe ? (a.t > (a.wd || 1.8) ? 1 : 0) : 1;
   c.sit = lerp(c.sit, sitting, 1 - Math.exp(-dt * (a.leaving ? 4 : 3)));
   if (a.leaving && c.sit < 0.04) {
     c.sit = 0; c.act = null;
@@ -3328,17 +3357,19 @@ function goCircle() {
   if (player.act) { if (player.act.type === 'meditate') standUp(); else { toast(i18n('하던 걸 마저 하고 할게요')); return; } }
   if (S.breath) stopBreath();
   const d = Math.hypot(player.x - CIRCLE.x, player.z - CIRCLE.z);
-  if (d < 15) { sitCircle(); return; }
-  if (d < 130) { const a = Math.atan2(player.x - CIRCLE.x, player.z - CIRCLE.z), fx = CIRCLE.x + Math.sin(a) * 7.5, fz = CIRCLE.z + Math.cos(a) * 7.5; player.target = { x: fx, z: fz }; S.auto = false; updateWalkBtn(); S.goCircle = true; marker = { x: fx, z: fz, t: 0 }; toast(i18n('{0}로 걸어가요', CIRCLE_NAME)); return; }
-  toast(i18n('{0}는 {1}에 있어요 · 약 {2} km', CIRCLE_NAME, i18n(IS_PARK ? '쉽 메도우 동쪽 잔디밭' : '산길 중턱 길옆'), (d * UNIT_M / 1000).toFixed(1)));
+  if (d < 22) { sitCircle(); return; }
+  if (d < 28) { const a = Math.atan2(player.x - CIRCLE.x, player.z - CIRCLE.z), fx = CIRCLE.x + Math.sin(a) * 7.5, fz = CIRCLE.z + Math.cos(a) * 7.5; player.target = { x: fx, z: fz }; S.auto = false; updateWalkBtn(); S.goCircle = true; marker = { x: fx, z: fz, t: 0 }; toast(i18n('{0}로 걸어가요', CIRCLE_NAME)); return; }
+  walkTrailTo(nearestTrail(CIRCLE.x, CIRCLE.z)[1], CIRCLE_NAME, d, () => { if (Math.hypot(player.x - CIRCLE.x, player.z - CIRCLE.z) < 22) { sitCircle(); return; } const a = Math.atan2(player.x - CIRCLE.x, player.z - CIRCLE.z), fx = CIRCLE.x + Math.sin(a) * 7.5, fz = CIRCLE.z + Math.cos(a) * 7.5; player.target = { x: fx, z: fz }; S.goCircle = true; marker = { x: fx, z: fz, t: 0 }; });
 }
 function sitCircle() {
   S.goCircle = false;
   const taken = st => [...NET.peers.values()].some(p => p.ready && !p.hidden && p.act && p.act.type === 'circle' && Math.hypot(p.x - st.x, p.z - st.z) < 0.7);
-  const free = CIRCLE.seats.filter(st => !taken(st)).sort((a, b) => Math.hypot(a.x - player.x, a.z - player.z) - Math.hypot(b.x - player.x, b.z - player.z));
+  const pref = S.circlePref || player; S.circlePref = null;   // 누른 자리와 가장 가까운 빈자리
+  const free = CIRCLE.seats.filter(st => !taken(st)).sort((a, b) => Math.hypot(a.x - pref.x, a.z - pref.z) - Math.hypot(b.x - pref.x, b.z - pref.z));
   if (!free.length) { toast(i18n('자리가 다 찼어요. 조금 있다가 다시 와 보세요')); return; }
   audioInit(); S.auto = false; player.target = null; updateWalkBtn(); S.lastDrag = -10;
-  player.act = { type: 'circle', t: 0, seat: free[0], from: [player.x, player.z], fired: 0, leaving: false };
+  const wd = clamp(Math.hypot(free[0].x - player.x, free[0].z - player.z) / 2.4, 1.8, 7);
+  player.act = { type: 'circle', t: 0, seat: free[0], from: [player.x, player.z], fired: 0, leaving: false, wd };
   $('#actPill').hidden = false; updatePill(); netState(true);
 }
 function openCircleChat() {
@@ -3355,6 +3386,32 @@ const RADIO_SONGS = [
   { f: 'chrome-raincoat.mp3', t: 'Chrome Raincoat', a: 'elsalee', d: 200.41 },
   { f: 'ya-ya-ya-catchy.mp3', t: 'Ya Ya Ya Catchy', a: 'oliviashim', d: 30.41 },
 ];
+const RADIO_PROP = (() => { const a = 0, r = 3.7, x = CIRCLE.x + Math.sin(a) * r, z = CIRCLE.z + Math.cos(a) * r; return { x, z, yaw: Math.atan2(x - CIRCLE.x, z - CIRCLE.z) }; })();   // 불과 둘레 자리 사이, 그루터기 위의 낡은 나무 라디오
+const NOTES = [];
+function drawRadioProp() {
+  const P = RADIO_PROP, y = groundY(P.x, P.z), on = RADIO.playing && RADIO.cur >= 0, beat = on ? 1 + 0.025 * Math.max(0, Math.sin(T * 7.5)) : 1;
+  const root = M.chain(M.T(P.x, y, P.z), M.Ry(P.yaw));
+  const D = (local, mesh, tint, em) => draw(mesh, { model: M.mul(root, local), tint, flat: 0, snowable: 0, emissive: em || 0 });
+  D(M.chain(M.T(0, 0.22, 0), M.S(0.5, 0.44, 0.5)), W.uCyl, [0.47, 0.32, 0.2]);   // 그루터기
+  D(M.chain(M.T(0, 0.445, 0), M.S(0.47, 0.01, 0.47)), W.uCyl, [0.78, 0.62, 0.42]);   // 나이테 단면
+  D(M.chain(M.T(0, 0.65, 0), M.S(0.62, 0.4 * beat, 0.28)), W.uBox, [0.38, 0.23, 0.13]);   // 라디오 몸통
+  for (const sx of [-0.15, 0.15]) D(M.chain(M.T(sx, 0.63, 0.142), M.Rx(Math.PI / 2), M.S(0.13, 0.02, 0.13)), W.uCyl, [0.15, 0.11, 0.09]);   // 스피커 망
+  D(M.chain(M.T(0, 0.8, 0.142), M.S(0.46, 0.05, 0.012)), W.uBox, [1.0, 0.86, 0.55], on ? 0.9 : 0.05);   // 주파수 창 (켜지면 은은하게)
+  D(M.chain(M.T(0, 0.9, 0), M.S(0.42, 0.03, 0.045)), W.uBox, [0.18, 0.14, 0.11]);   // 손잡이
+  for (const hx of [-0.19, 0.19]) D(M.chain(M.T(hx, 0.87, 0), M.S(0.03, 0.06, 0.045)), W.uBox, [0.18, 0.14, 0.11]);
+  D(M.chain(M.T(0.24, 1.08, -0.06), M.Rz(-0.35), M.S(0.016, 0.5, 0.016)), W.uCyl, [0.72, 0.72, 0.75]);   // 안테나
+}
+function updateNotes(dt) {   // 노래가 흐르면 라디오 위로 음표가 하나씩 떠오른다
+  const P = RADIO_PROP, dc = Math.hypot(player.x - P.x, player.z - P.z), on = S.started && RADIO.playing && RADIO.cur >= 0 && dc < 38;
+  NOTES.spawn = (NOTES.spawn || 0) - dt;
+  if (on && NOTES.spawn <= 0) {
+    NOTES.spawn = 0.75 + Math.random() * 0.5;
+    let n = NOTES.find(q => q.age >= q.life);
+    if (!n && NOTES.length < 7) { n = { age: 9, life: 1 }; n.L = addLabel('<span>♪</span>', 'note', () => { const k = n.age / n.life, y = groundY(P.x, P.z); return [P.x + n.ox * k + Math.sin(n.age * 3 + n.ph) * 0.12, y + 1.1 + k * 1.7, P.z + n.oz * k]; }, 40); n.L.hideIf = () => n.age >= n.life; NOTES.push(n); }
+    if (n) { n.age = 0; n.life = 2.2 + Math.random() * 0.8; n.ox = (Math.random() - 0.5) * 0.9; n.oz = (Math.random() - 0.5) * 0.9; n.ph = Math.random() * 6; n.L.el.querySelector('span').textContent = Math.random() < 0.5 ? '♪' : '♫'; }
+  }
+  for (const n of NOTES) { if (n.age < n.life) { n.age += dt; const k = n.age / n.life; n.L.el.style.opacity = (Math.min(1, k * 5) * (1 - k)).toFixed(2); } }
+}
 const RADIO_GAP = 5, RADIO_EPOCH = Date.UTC(2026, 10, 1) / 1000;   // 곡 사이 5초는 장작 타는 소리만
 const RADIO = { el: null, g: null, cur: -1, on: store.get('radio', true), playing: false, pending: false, blocked: false, unlocked: false, chk: 0, pt: 0, announced: -1 };
 const SILENT_WAV = 'data:audio/wav;base64,UklGRsQAAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
@@ -3555,7 +3612,7 @@ function updateCamera(dt) {
     else if (act && !GREETS.includes(act.type) && T - S.lastDrag > 2.5) {
       const k = 1 - Math.exp(-dt * 1.4), med = act.type === 'meditate' || act.type === 'cafe' || act.type === 'circle';
       cam.yaw = angLerp(cam.yaw, player.heading + Math.PI - (med ? 0.35 + 0.3 * Math.sin(act.t * 0.05) : 0.6), k);
-      cam.dist = lerp(cam.dist, med ? 6.5 : 4.6, k); cam.pitch = lerp(cam.pitch, med ? 0.22 : 0.1, k);
+      if (!(T - (S.userZoomT || -1e9) < 120)) { cam.dist = lerp(cam.dist, med ? 6.5 : 4.6, k); cam.pitch = lerp(cam.pitch, med ? 0.22 : 0.1, k); }
     }
     else if (S.breath) cam.yaw += dt * 0.09;
     else if (player.moveAmt > 0.3 && T - S.lastDrag > 2.5) cam.yaw = angLerp(cam.yaw, player.heading, 1 - Math.exp(-dt * 1.1));
@@ -3592,7 +3649,7 @@ function updateHud(dt) {
   hudTick -= dt; if (hudTick > 0 || !S.started) return; hudTick = 0.2;
   updatePill();
   if (S.goCafe && !player.act && nearCafe(9)) { player.target = null; openCafeCard(); }
-  if (S.goCircle && !player.act && Math.hypot(player.x - CIRCLE.x, player.z - CIRCLE.z) < 9) sitCircle();
+  if (S.goCircle && !player.act && Math.hypot(player.x - CIRCLE.x, player.z - CIRCLE.z) < 22) { player.target = null; sitCircle(); }
   if (W.circleLabel) {
     const n = circleMembers().length, base = n ? i18n('{0} · {1}/20명', CIRCLE_NAME, n) : CIRCLE_NAME;
     const song = RADIO.playing && RADIO.cur >= 0 && RADIO_SONGS[RADIO.cur] ? '  ♪ ' + RADIO_SONGS[RADIO.cur].t : '';
@@ -3845,6 +3902,7 @@ function render() {
   if (S.camp) drawCamp(S.camp.spot, S.camp.tentK, S.camp.fireOn, player.jacket);
   if (Math.hypot(barista.x - eye[0], barista.z - eye[2]) < 120) drawHiker(barista, false);
   drawCamp(CIRCLE.spot, 0, true, [1, 1, 1], CIRCLE.fire);   // 모닥불 쉼터의 큰 불은 늘 타오른다
+  if (Math.hypot(RADIO_PROP.x - eye[0], RADIO_PROP.z - eye[2]) < 120) drawRadioProp();
   if (S.started && !inTent(player)) drawHiker(player, true);
   // transparent
   gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); gl.depthMask(false);
@@ -4442,7 +4500,7 @@ function frameStep(now) {
   updateParticles(dt);
   updateMist(dt);
   updateAudio(Math.min(raw, 0.5));
-  radioTick(Math.min(raw, 0.5));
+  radioTick(Math.min(raw, 0.5)); updateNotes(dt);
   updateHud(dt);
   render();
   requestAnimationFrame(frame);
@@ -4509,6 +4567,7 @@ function buildParkMaps() {
   $('#miniProfile').innerHTML = ms;
 }
 function updateWalkBtn() {
+  if (!S.auto) S.walkGoal = null;
   const b = $('#walkBtn'); b.setAttribute('aria-pressed', S.auto ? 'true' : 'false');
   $('#walkLbl').textContent = S.auto ? i18n('멈추기') : (S.autoDir < 0 ? i18n('내려가기') : i18n('자동 걷기'));
 }
@@ -4692,6 +4751,7 @@ function bindUI() {
   W.meLabel.el.addEventListener('click', e => { e.stopPropagation(); openGb(); });   // 내 이름표를 누르면 길벗 카드
   authInit(false); renderGb();
   $('#nearSit').onclick = e => { e.stopPropagation(); goCircle(); };
+  $('#zoomIn').onclick = e => { e.stopPropagation(); zoomBy(1 / 1.35); }; $('#zoomOut').onclick = e => { e.stopPropagation(); zoomBy(1.35); };
   document.querySelectorAll('#radioSeg button').forEach(b => b.onclick = () => setRadio(b.dataset.r === '1')); setRadio(RADIO.on);
   addEventListener('pointerdown', radioKick, true);
   $('#medGo').onclick = beginMeditate; $('#medCancel').onclick = () => { $('#medCard').hidden = true; };
