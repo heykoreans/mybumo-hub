@@ -134,7 +134,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{ou
 #askBar div{display:flex;gap:6px;flex:none}
 #askBar button{padding:8px 14px;border-radius:999px;font-size:13px;background:rgba(255,255,255,.14);white-space:nowrap}
 #askBar #askYes{background:var(--ginkgo);color:#2b2010;font-weight:700}
-#toast{position:fixed;left:50%;top:calc(64px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:25;padding:10px 16px;border-radius:999px;font-size:14px;white-space:nowrap;max-width:calc(100vw - 32px);overflow:hidden;text-overflow:ellipsis;transition:opacity .4s}
+#toast{position:fixed;left:50%;top:calc(64px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:45;padding:10px 16px;border-radius:999px;font-size:14px;white-space:nowrap;max-width:calc(100vw - 32px);overflow:hidden;text-overflow:ellipsis;transition:opacity .4s}
 
 /* world labels */
 #labels{position:fixed;inset:0;pointer-events:none;z-index:5;overflow:hidden}
@@ -247,6 +247,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{ou
 .chips.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
 .enter2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:-4px}
 .enter2 .secondary{padding:12px 6px}
+.enter2 .fireStart{grid-column:1/-1}
 body.focusing #trailCard,body.focusing #hint{opacity:0;pointer-events:none}
 #focusVol{width:100%}
 .bagItem{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;background:#f3ead8;font-size:13px;color:var(--ink)}
@@ -580,7 +581,7 @@ body.calm #trailCard,body.calm #hint{opacity:0;pointer-events:none}
     <div class="eyebrow">모닥불 이야기 · 목소리로 나누는 시간</div>
     <h2 class="title" id="fireTitle"><b style="font-size:28px">불가에 둘러앉아</b></h2>
     <p style="font-size:14px">불지기가 이야기를 열면 누구나 들을 수 있어요. 말하고 싶으면 손을 들고, 불지기가 마이크를 건네요. 녹음하지 않아요.</p>
-    <div id="fireLive"></div>
+    <div id="fireLive" class="flist"></div>
     <div style="display:grid;gap:8px"><span class="lab">다가오는 모닥불</span><div class="flist" id="fireList"></div></div>
     <div class="fhost" id="fireHost" hidden>
       <span class="lab">불지기 · 모닥불 이야기 열기</span>
@@ -674,7 +675,7 @@ body.calm #trailCard,body.calm #hint{opacity:0;pointer-events:none}
     </div>
     <div class="name"><span>오늘의 이름 <b id="nickOut">느긋한 구름</b></span><button class="linkbtn" id="nickBtn">다른 이름</button></div>
     <button class="primary" id="enterBtn" disabled>입산하기</button>
-    <div class="enter2"><button class="secondary" id="enterMed" disabled>바로 명상하기</button><button class="secondary" id="enterFocus" disabled>일하며 켜 두기</button></div>
+    <div class="enter2"><button class="secondary" id="enterMed" disabled>바로 명상하기</button><button class="secondary" id="enterFocus" disabled>일하며 켜 두기</button><button class="secondary fireStart" id="enterFire" disabled>모닥불 이야기</button></div>
     <button class="linkbtn" id="gbStart">로그인하고 장작 10개 받기</button>
     <p class="fine">PC: 바닥 클릭 이동 · 드래그로 둘러보기 · 휠 확대, 방향키/WASD도 됩니다.<br>휴대폰: 탭으로 이동 · 드래그로 둘러보기 · 두 손가락으로 확대.</p>
   </div>
@@ -1405,9 +1406,17 @@ const EN = {"센트럴파크":"Central Park",
 "불지기만 모닥불 이야기를 열 수 있어요":"Only fire keepers can open campfire talks",
 "모닥불 이야기를 만들지 못했어요":"Couldn't create the campfire talk",
 "{0}에 모닥불 이야기를 잡았어요":"Campfire talk set for {0}",
-"이 코스에 이미 타고 있는 모닥불 이야기가 있어요":"A campfire talk is already live on this trail",
 "지금은 바꿀 수 없어요":"Can't change that right now",
 "모닥불 이야기를 취소했어요":"Campfire talk canceled",
+"다시 들어가기":"Rejoin",
+"모닥불 이야기 {0}곳 · 골라 듣기":"{0} campfire talks · pick one",
+"모닥불 이야기 · 지금 {0}곳":"Campfire talk · {0} live now",
+"{0}님의 모닥불":"{0}'s campfire",
+"바로 곁":"right here",
+"{0}m 거리":"{0}m away",
+"이미 피워 둔 모닥불이 있어요. 먼저 마쳐 주세요":"You already have a fire going. End it first",
+"이 코스에 모닥불이 가득 찼어요. 조금 있다가 피워 주세요":"This trail has all the fires it can hold. Try again a little later",
+"모닥불 이야기를 마쳤어요":"Campfire talk ended",
 "모닥불 이야기에 들어가는 중…":"Joining the campfire talk…",
 "모닥불 이야기가 이미 끝났어요":"That campfire talk has already ended",
 "모닥불 이야기에 들어가지 못했어요. 잠시 뒤에 다시 해 보세요":"Couldn't join the campfire talk. Please try again soon.",
@@ -2729,7 +2738,8 @@ function initLabels() {
   if (!IS_PARK) addLabel(i18n('<i></i><span>구름폭포</span>'), 'place', () => [W.fallLip[0], W.fallLip[1] + 3.2, W.fallLip[2]], 110);
   else for (const [nm, x, z] of [[i18n('더 레이크'), -14, -86], [i18n('저수지'), 0, 50], [i18n('그레이트 론'), 0, -2], [i18n('쉽 메도우'), -24, -168]]) addLabel(`<i></i><span>${nm}</span>`, 'place', () => [x, 6, z], 120);
   W.circleLabel = addLabel('<i></i><span></span>', 'place tap', () => [CIRCLE.x, CIRCLE.h + 5.2, CIRCLE.z], 120);
-  W.circleLabel.el.addEventListener('click', e => { e.stopPropagation(); if (TALK.live && !TALK.room) openFireCard(); else goCircle(); });   // 모닥불 이름표를 누르면 그리로 가서 앉는다
+  W.circleLabel.el.addEventListener('click', e => { e.stopPropagation(); if (TALK.lives.some(f => !firePos(f).own) && !TALK.room) openFireCard(); else goCircle(); });
+  W.fireLabels = Array.from({ length: 8 }, (_, i) => { const L = addLabel('<i></i><span></span>', 'place tap', () => { const f = TALK.ownLives[i]; if (!f) return [0, -9999, 0]; const sp = fireSpot(f); return [sp.fx, sp.fy + 3.6, sp.fz]; }, 140); L.hideIf = () => !TALK.ownLives[i]; L.el.addEventListener('click', e => { e.stopPropagation(); const f = TALK.ownLives[i]; if (f) fireTap(f); }); return L; });   // 모닥불 이름표를 누르면 그리로 가서 앉는다
   for (const cp of CPS) {
     cp.label = addLabel('<i></i><span></span>', 'place', () => [cp.x, cp.ly, cp.z], 95);
     cp.label.el.querySelector('span').textContent = cp.key === 'summit' && !IS_PARK ? `${cp.name} ${fmtAlt(SUMMIT_H)}m` : cp.key === 'cafe' ? i18n('{0} · 영업 중', cp.name) : cp.name;
@@ -4441,7 +4451,7 @@ function updateHud(dt) {
   if (W.circleLabel) {
     const n = circleMembers().length, base = n ? i18n('{0} · {1}/20명', CIRCLE_NAME, n) : CIRCLE_NAME;
     const song = RADIO.playing && RADIO.cur >= 0 && RADIO_SONGS[RADIO.cur] ? '  ♪ ' + RADIO_SONGS[RADIO.cur].t : '';
-    W.circleLabel.el.querySelector('span').textContent = base + (TALK.live ? '  ● ' + i18n('이야기 중') : song);
+    W.circleLabel.el.querySelector('span').textContent = base + (TALK.lives.some(f => !firePos(f).own) ? '  ● ' + i18n('이야기 중') : song);
   }
   {   // 모닥불 가까이 오면 '모닥불에 앉기' 버튼
     const dc = Math.hypot(player.x - CIRCLE.x, player.z - CIRCLE.z), dk = Math.hypot(player.x - CAFE.x, player.z - CAFE.z), free = S.started && !player.act && !S.camp && !S.breath;
@@ -4821,6 +4831,7 @@ function drawOpaque(shadowPass) {   // 땅, 나무, 바위, 사람, 강아지 (�
   if (S.camp) drawCamp(S.camp.spot, S.camp.tentK, S.camp.fireOn, player.jacket);
   if (Math.hypot(barista.x - eye[0], barista.z - eye[2]) < 120) drawHiker(barista, false);
   drawCamp(CIRCLE.spot, 0, true, [1, 1, 1], CIRCLE.fire);   // 모닥불 쉼터의 큰 불은 늘 타오른다
+  drawFires();   // 불지기들이 피운 모닥불
   if (Math.hypot(RADIO_PROP.x - eye[0], RADIO_PROP.z - eye[2]) < 120) drawRadioProp();
   if (!shadowPass) { drawFinds(); drawPapers(); }
   if (S.started && !inTent(player)) drawHiker(player, true);
@@ -5773,7 +5784,7 @@ const BAD = ['시발', '씨발', '씨팔', '시팔', 'ㅅㅂ', 'ㅆㅂ', '병신
    불지기(sangil_hosts에 넣은 사람)가 이야기를 열면 누구나 들을 수 있다. 말하기는 로그인한 길벗이 손을 들고 불지기가 허락해야 한다.
    음성은 LiveKit이 중계하고, 입장권은 Edge Function(sangil-voice)이 준다. 녹음하지 않는다. */
 const LK_SRC = ['https://cdn.jsdelivr.net/npm/livekit-client@2.15.9/dist/livekit-client.umd.min.js', 'https://unpkg.com/livekit-client@2.15.9/dist/livekit-client.umd.min.js'];
-const TALK = { fires: [], live: null, isHost: false, loadedAt: 0, room: null, joining: false, fire: null, hands: new Map(), speaking: new Set(), myHand: false, canPub: false, micOn: false, endArm: 0, leaving: false, ended: false, when: 'now', len: 60 };
+const TALK = { fires: [], lives: [], ownLives: [], live: null, endArmId: 0, spots: new Map(), isHost: false, loadedAt: 0, room: null, joining: false, fire: null, hands: new Map(), speaking: new Set(), myHand: false, canPub: false, micOn: false, endArm: 0, leaving: false, ended: false, when: 'now', len: 60 };
 async function fireLoad(force) {
   if (!SANGIL_SUPABASE_URL || !SANGIL_SUPABASE_ANON_KEY) return;
   if (!force && Date.now() - TALK.loadedAt < 60000) return;
@@ -5782,7 +5793,7 @@ async function fireLoad(force) {
     const sb = await getSB(), { data, error } = await sb.rpc('sangil_fire_list', { p_course: COURSE });
     if (error) throw error;
     TALK.fires = Array.isArray(data) ? data : [];
-    TALK.live = TALK.fires.find(f => f.status === 'live') || null;
+    TALK.lives = TALK.fires.filter(f => f.status === 'live'); TALK.live = TALK.lives[0] || null; TALK.ownLives = TALK.lives.filter(f => firePos(f).own).slice(0, 8);
     if (AUTH.user) { const r = await sb.rpc('sangil_is_host'); if (r && r.error) console.warn('불지기 확인 실패', r.error.code || '', r.error.message || ''); TALK.isHost = !!(r && r.data === true) || TALK.fires.some(f => f.i_host); } else TALK.isHost = false;
   } catch (e) { console.warn('모닥불 일정을 불러오지 못함', e); }
   fireUi();
@@ -5795,23 +5806,57 @@ function fmtWhen(iso) {
   return d.toLocaleDateString(LANG === 'ko' ? 'ko-KR' : 'en-US', { month: 'short', day: 'numeric', weekday: 'short' }) + ' ' + hm;
 }
 function fireUi() {
-  const chip = $('#fireChip'), L = TALK.live, show = !!(S.started && L && !TALK.room && !TALK.joining);
-  if (show) $('#fireChipTxt').textContent = i18n('모닥불 이야기 · {0} · 듣기', L.title);
+  const chip = $('#fireChip'), lives = TALK.lives, show = !!(S.started && lives.length && !TALK.room && !TALK.joining);
+  if (show) $('#fireChipTxt').textContent = lives.length === 1 ? i18n('모닥불 이야기 · {0} · 듣기', lives[0].title) : i18n('모닥불 이야기 {0}곳 · 골라 듣기', lives.length);
   chip.hidden = !show;
+  if (W.fireLabels) W.fireLabels.forEach((L, i) => { const f = TALK.ownLives[i], sp = L.el.querySelector('span'), t = f ? '● ' + f.title + ' · ' + cleanNick(f.host_nick) : ''; if (sp.textContent !== t) sp.textContent = t; });
+  const sb = $('#enterFire'); if (sb) sb.textContent = lives.length ? i18n('모닥불 이야기 · 지금 {0}곳', lives.length) : i18n('모닥불 이야기');
   if (!$('#fireCard').hidden) renderFireCard();
+}
+// 모닥불이 타는 자리: 불지기가 피운 자리, 없으면 코스의 모닥불 쉼터
+function firePos(f) { return f && f.px != null && f.pz != null && isFinite(+f.px) && isFinite(+f.pz) ? { x: +f.px, z: +f.pz, own: true } : { x: CIRCLE.x, z: CIRCLE.z, own: false }; }
+function fireSpot(f) {
+  let sp = TALK.spots.get(f.id);
+  if (!sp) { const p = firePos(f), y = groundY(p.x, p.z); sp = { tx: p.x, tz: p.z, ty: y, yaw: (f.id * 1.7) % TAU, fx: p.x, fz: p.z, fy: y }; TALK.spots.set(f.id, sp); }
+  return sp;
+}
+function drawFires() { for (const f of TALK.ownLives) drawCamp(fireSpot(f), 0, true, [1, 1, 1], 1.25); }
+function fireName(f) { return i18n('{0}님의 모닥불', cleanNick(f.host_nick)); }
+function goFire(f) {   // 그 모닥불 곁으로 걸어간다
+  const p = firePos(f); if (!p.own) { goCircle(); return; }
+  closeMenus();
+  if (player.act) { if (player.act.type === 'meditate') standUp(); else { toast(i18n('하던 걸 마저 하고 할게요')); return; } }
+  if (S.breath) stopBreath();
+  const d = Math.hypot(player.x - p.x, player.z - p.z), name = fireName(f);
+  const near = () => { const a = Math.atan2(player.x - p.x, player.z - p.z), fx = p.x + Math.sin(a) * 2.6, fz = p.z + Math.cos(a) * 2.6; player.target = { x: fx, z: fz }; S.auto = false; updateWalkBtn(); marker = { x: fx, z: fz, t: 0 }; };
+  if (d < 4) return;
+  if (d < 40) { near(); toast(i18n('{0}로 걸어가요', name)); return; }
+  walkTrailTo(nearestTrail(p.x, p.z)[1], name, d, near);
+}
+function fireTap(f) {   // 3D 모닥불 이름표를 누르면 그리로 걸어가며 듣는다
+  if (TALK.room && TALK.fire && TALK.fire.id === f.id) { goFire(f); return; }
+  if (Math.hypot(player.x - firePos(f).x, player.z - firePos(f).z) > 8) goFire(f);
+  voiceJoin(f);
+}
+function fireHere() {   // 불지기가 선 자리 바로 앞에 모닥불을 피운다 (모닥불 쉼터 가까이면 쉼터의 큰 불을 쓴다)
+  if (Math.hypot(player.x - CIRCLE.x, player.z - CIRCLE.z) < 14) return { x: null, z: null };
+  const h = player.heading || 0;
+  return { x: Math.round((player.x + Math.sin(h) * 3) * 100) / 100, z: Math.round((player.z + Math.cos(h) * 3) * 100) / 100 };
 }
 function openFireCard() { closeMenus(); fireLoad(true); renderFireCard(); $('#fireCard').hidden = false; }
 function fireBtn(text, fn, cls) { const b = document.createElement('button'); b.type = 'button'; b.textContent = text; if (cls) b.className = cls; b.onclick = fn; return b; }
 function renderFireCard() {
   const live = $('#fireLive'); live.innerHTML = '';
-  const L = TALK.live;
-  if (L) {
+  for (const L of TALK.lives) {
     const it = document.createElement('div'); it.className = 'fi'; it.innerHTML = '<b></b><small></small><div class="row"></div>';
-    it.querySelector('b').textContent = '● ' + L.title; it.querySelector('small').textContent = i18n('지금 이야기 중 · 불지기 {0}', cleanNick(L.host_nick));
+    const p = firePos(L), d = Math.hypot(player.x - p.x, player.z - p.z), here = TALK.room && TALK.fire && TALK.fire.id === L.id;
+    it.querySelector('b').textContent = '● ' + L.title;
+    it.querySelector('small').textContent = i18n('지금 이야기 중 · 불지기 {0}', cleanNick(L.host_nick)) + ' · ' + (p.own ? (d < 30 ? i18n('바로 곁') : i18n('{0}m 거리', Math.round(d * UNIT_M / 10) * 10)) : CIRCLE_NAME);
     const row = it.querySelector('.row');
-    if (TALK.room && TALK.fire && TALK.fire.id === L.id) row.appendChild(fireBtn(i18n('나가기'), () => voiceLeave()));
-    else row.appendChild(fireBtn(i18n('듣기'), () => { $('#fireCard').hidden = true; voiceJoin(L); }, 'go'));
-    if (Math.hypot(player.x - CIRCLE.x, player.z - CIRCLE.z) > 24) row.appendChild(fireBtn(i18n('모닥불로 가기'), () => { $('#fireCard').hidden = true; goCircle(); }));
+    if (here) row.appendChild(fireBtn(i18n('나가기'), () => voiceLeave()));
+    else row.appendChild(fireBtn(L.i_host ? i18n('다시 들어가기') : i18n('듣기'), () => { $('#fireCard').hidden = true; voiceJoin(L); }, 'go'));
+    if (L.i_host && !here) row.appendChild(fireBtn(TALK.endArmId === L.id && Date.now() - TALK.endArm < 6000 ? i18n('정말 마칠까요?') : i18n('모닥불 마치기'), () => fireEndFromCard(L)));
+    if (S.started && d > 24) row.appendChild(fireBtn(i18n('모닥불로 가기'), () => { $('#fireCard').hidden = true; goFire(L); }));
     live.appendChild(it);
   }
   const list = $('#fireList'); list.innerHTML = '';
@@ -5861,11 +5906,20 @@ async function fireCreate() {
   } catch (e) { console.warn('모닥불 만들기 실패', e); msg(i18n('모닥불 이야기를 만들지 못했어요')); }
   finally { $('#fhGo').disabled = false; }
 }
+async function fireEndFromCard(L) {   // 불지기가 방에 없을 때도 카드에서 모닥불을 마칠 수 있다 (두 번 누르기)
+  if (TALK.endArmId !== L.id || Date.now() - TALK.endArm > 6000) { TALK.endArm = Date.now(); TALK.endArmId = L.id; renderFireCard(); setTimeout(() => { if (!$('#fireCard').hidden) renderFireCard(); }, 6100); return; }
+  TALK.endArm = 0; TALK.endArmId = 0;
+  const r = await voiceCall({ action: 'end', fireId: L.id }).catch(() => ({ ok: false }));
+  if (!r.ok) { toast(i18n('지금은 하지 못했어요')); renderFireCard(); return; }
+  toast(i18n('모닥불 이야기를 마쳤어요')); await fireLoad(true);
+}
 async function fireSet(f, status) {
   try {
-    const sb = await getSB(), { data, error } = await sb.rpc('sangil_fire_set', { p_id: f.id, p_status: status });
+    const sb = await getSB(), pos = status === 'live' ? fireHere() : null;
+    let { data, error } = await sb.rpc('sangil_fire_set', pos ? { p_id: f.id, p_status: status, p_x: pos.x, p_z: pos.z } : { p_id: f.id, p_status: status });
+    if (error && pos && (error.code === 'PGRST202' || /function/i.test(error.message || ''))) ({ data, error } = await sb.rpc('sangil_fire_set', { p_id: f.id, p_status: status }));   // 새 SQL을 아직 안 돌렸을 때
     if (error) throw error;
-    if (!data || !data.ok) { toast(data && data.reason === 'busy' ? i18n('이 코스에 이미 타고 있는 모닥불 이야기가 있어요') : data && data.reason === 'too early' ? i18n('시작 30분 전부터 열 수 있어요') : i18n('지금은 바꿀 수 없어요')); return; }
+    if (!data || !data.ok) { toast(data && data.reason === 'mine live' ? i18n('이미 피워 둔 모닥불이 있어요. 먼저 마쳐 주세요') : data && data.reason === 'busy' ? i18n('이 코스에 모닥불이 가득 찼어요. 조금 있다가 피워 주세요') : data && data.reason === 'too early' ? i18n('시작 30분 전부터 열 수 있어요') : i18n('지금은 바꿀 수 없어요')); return; }
     await fireLoad(true);
     if (status === 'live') { $('#fireCard').hidden = true; const L = TALK.fires.find(x => x.id === f.id) || Object.assign({ status: 'live', host_nick: S.nick, i_host: true }, f); voiceJoin(L); }
     else toast(i18n('모닥불 이야기를 취소했어요'));
@@ -6788,7 +6842,7 @@ function bindUI() {
   $('#muteNo').onclick = () => { $('#muteMenu').hidden = true; };
   $('#muteNote').onclick = () => { const p = muteTarget; $('#muteMenu').hidden = true; if (p) openCompose(p); };
   $('#noteBtn').onclick = () => openCompose(null);
-  $('#fireChip').onclick = () => { if (TALK.live) voiceJoin(TALK.live); };
+  $('#fireChip').onclick = () => { if (TALK.lives.length === 1) fireTap(TALK.lives[0]); else if (TALK.lives.length) openFireCard(); };
   $('#fireClose').onclick = () => { $('#fireCard').hidden = true; }; $('#fireCard').addEventListener('click', e => { if (e.target.id === 'fireCard') $('#fireCard').hidden = true; });
   document.querySelectorAll('#fhWhen button').forEach(b => b.onclick = () => { TALK.when = b.dataset.w; renderFireCard(); });
   document.querySelectorAll('#fhLen button').forEach(b => b.onclick = () => { TALK.len = +b.dataset.m; renderFireCard(); });
@@ -6875,7 +6929,8 @@ function bindUI() {
     toast(i18n('{0}님, {1}에 오신 걸 환영해요', S.nick, COURSE_NAME));
     netStart();
   };
-  $('#enterMed').onclick = () => { $('#enterBtn').onclick(); setTimeout(openMedCard, 500); };   // 명상하러 온 사람은 들어오자마자 시간을 고른다
+  $('#enterMed').onclick = () => { $('#enterBtn').onclick(); setTimeout(openMedCard, 500); };
+  $('#enterFire').onclick = () => { $('#enterBtn').onclick(); setTimeout(openFireCard, 500); };   // 모닥불 이야기를 들으러 온 사람은 바로 목록을 본다   // 명상하러 온 사람은 들어오자마자 시간을 고른다
   // summit card
   $('#sumPhoto').onclick = () => {
     $('#summit').hidden = true;
@@ -6925,7 +6980,7 @@ function boot() {
   if (coarse) $('#photoHint').textContent = i18n('사진을 길게 눌러 저장하세요.');
   initState(); addCafeCp(); initLabels(); buildProfiles(); bindUI(); courseTexts();
   setSeason(S.season); setMute(S.mute); updateWalkBtn(); setRain(S.rain && !S.season, false);
-  $('#start').hidden = false; $('#enterBtn').disabled = false; $('#enterMed').disabled = false; $('#enterFocus').disabled = false;
+  $('#start').hidden = false; $('#enterBtn').disabled = false; $('#enterMed').disabled = false; $('#enterFocus').disabled = false; $('#enterFire').disabled = false; fireLoad(true);
   if (store.get('autoEnter', false)) { store.set('autoEnter', false); $('#enterBtn').focus(); }
   const ld = $('#loading'); ld.style.opacity = 0; setTimeout(() => { ld.hidden = true; }, 600);
   window.__sangil = { keys, setRain, hitObstacle, OBS, CIRCLE, sitCircle, goCircle, sendChat, inCircle, S, player, TN, getH, CPS, startAct, cam, NET, NPCS, greet, sendChat, W, netState, startCamp, wakeCamp, openCampCard, goCafe, startCafe, DRINKS, CAFE, H5, answerHi5, showHi5Ask, MED, TX, TZ, IS_PARK };
