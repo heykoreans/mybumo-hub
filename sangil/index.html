@@ -100,6 +100,8 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{ou
 #greetBtn.near::after,#chatBtn.near::after{content:"";position:absolute;top:7px;right:16px;width:8px;height:8px;border-radius:50%;background:var(--ginkgo);box-shadow:0 0 0 2px rgba(20,26,23,.6)}
 #peopleChip{font-size:12.5px;color:var(--on-glass);padding:0 12px 0 4px;white-space:nowrap;font-variant-numeric:tabular-nums;display:flex;align-items:center;gap:6px}
 #peopleChip i{width:7px;height:7px;border-radius:50%;background:var(--on-glass-soft);display:block}
+#peopleChip{cursor:pointer}
+#peopleChip .inv{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;opacity:.8;margin-left:-1px}
 #peopleChip.live i{background:#8fd1a8;box-shadow:0 0 0 3px rgba(143,209,168,.25)}
 #chatBar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(98px + env(safe-area-inset-bottom,0px));z-index:22;border-radius:18px;padding:8px;width:min(440px,calc(100vw - 32px));background:var(--glass-strong);display:grid;gap:6px}
 #chatLog{display:grid;gap:3px;max-height:132px;overflow-y:auto;font-size:13px;line-height:1.45;padding:2px 6px;-webkit-user-select:text;user-select:text}
@@ -355,7 +357,7 @@ body.calm #trailCard,body.calm #hint{opacity:0;pointer-events:none}
     </a>
     <button id="courseBtn" aria-haspopup="true" aria-expanded="false">솔바람산 <small id="courseName">단풍길</small>
       <svg class="ico" viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M6 9l6 6 6-6"/></svg></button>
-    <span id="peopleChip" title="같은 길을 걷는 사람"><i></i><span id="peopleTxt">혼자 걷는 중</span></span>
+    <span id="peopleChip" role="button" tabindex="0" title="친구 부르기"><i></i><span id="peopleTxt">혼자 걷는 중</span><svg class="inv" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.6-3.3 2.8-5 5.5-5s4.9 1.7 5.5 5M18 8v6M15 11h6"/></svg></span>
   </div>
   <div id="courseMenu" class="menu glass" hidden>
     <button data-course="autumn"><span id="cmA">솔바람산 단풍길</span><span class="tag">가을</span></button>
@@ -382,7 +384,7 @@ body.calm #trailCard,body.calm #hint{opacity:0;pointer-events:none}
     <div class="row"><span>언어</span><div class="seg" id="langSeg"><button data-l="ko">한국어</button><button data-l="en">English</button></div></div>
     <div class="row"><span>모닥불 라디오</span><div class="seg" id="radioSeg"><button data-r="1">켜기</button><button data-r="0">끄기</button></div></div>
     <div class="check"><label for="bubbleChk">다른 사람 말풍선 보기</label><input id="bubbleChk" type="checkbox" checked></div>
-    <div class="row"><span id="roomInfo">모두와 함께 걷는 방</span><div class="seg"><button id="friendBtn">친구 방 링크 만들기</button><button id="publicBtn" hidden>모두의 방으로</button></div></div>
+    <div class="row"><span id="roomInfo">모두와 함께 걷는 방</span><div class="seg"><button id="friendBtn">친구 부르기</button></div></div>
     <button class="linkbtn" id="unmuteBtn" hidden style="color:var(--on-glass);justify-self:start">숨긴 사람 다시 보기</button>
   </div>
   <div id="hint">바닥 클릭으로 이동 · 드래그로 둘러보기 · 휠로 확대/축소</div>
@@ -1272,6 +1274,16 @@ const EN = {"센트럴파크":"Central Park",
 "쪽지 · 오늘 남은 {0}/{1}":"Notes · {0}/{1} left today",
 "이 길에 남긴 내 쪽지 {0}장 · 고마워요 {1}":"Your notes on this trail: {0} · thanks: {1}",
 "{0}님이 건넨 쪽지":"from {0}",
+"친구 부르기":"Invite a friend",
+"산길에서 같이 걸어요. {0}에서 기다릴게요":"Let's walk together on Sangil. I'll be waiting at {0}.",
+"친구 부르기 링크를 복사했어요. 같이 걸을 사람에게 보내 주세요":"Invite link copied. Send it to someone you want to walk with.",
+"친구 부르기 링크: {0}":"Invite link: {0}",
+"친구가 있는 방으로 왔어요":"You joined your friend's room",
+"친구가 있는 방이 가득 차서 옆 방으로 왔어요":"Your friend's room was full, so you joined the next one",
+"{0}님 곁으로 왔어요":"You're now next to {0}",
+"산길":"Sangil",
+"로그인하면 어느 기기에서든 이어져요":"sign in to keep it on every device",
+"로그인 전에 한 명상 {0}번을 내 기록에 더했어요":"Added {0} meditations from before you signed in to your record",
 "2~12자 이름":"2 to 12 characters",
 "저장":"Save",
 "내 이름":"My name",
@@ -4170,7 +4182,7 @@ function drawHiker(c, isMe) {
   const root = M.chain(M.T(c.x + (c.ox || 0), c.y + p.lift, c.z + (c.oz || 0)), M.Ry(c.heading), M.Rx(p.lean));
   const P2 = (local, mesh, tint) => draw(mesh, { model: M.mul(root, local), tint, flat: 0, snowable: 0 });
   const skin = c.skin || SKINS[1], face = c.face | 0;
-  const tier = isMe ? medTierOf(store.get('medCount', 0) | 0) : (c.medTier || 0);
+  const tier = isMe ? medTierOf(medN()) : (c.medTier || 0);
   if (p.sit > 0.02 && !p.chair) {
     if (tier >= 4 && c.act && c.act.type === 'meditate') for (const [cx, cz, cs] of [[0, 0, 0.42], [0.3, -0.05, 0.28], [-0.3, -0.05, 0.28], [0.12, 0.22, 0.24], [-0.14, -0.25, 0.26]]) P2(M.chain(M.T(cx, 0.1 + 0.03 * Math.sin(T * 1.3 + cx * 5), cz - 0.04), M.S(cs * p.sit, cs * 0.45, cs * p.sit)), W.uSphere, [0.98, 0.98, 1]);   // 구름 방석
     else P2(M.chain(M.T(0, 0.05, -0.04), M.S(0.58 * p.sit, 0.1, 0.52 * p.sit)), W.uCyl, c.cushion || [0.55, 0.24, 0.18]);
@@ -4197,7 +4209,7 @@ function drawHiker(c, isMe) {
     if (face !== 3) P2(M.chain(head, M.T(0.24 * side, 0.17, 0.33), M.S(0.065, 0.04, 0.03)), W.uSphere, [0.98, 0.62, 0.58]);
   }
   if (face === 2) P2(M.chain(head, M.T(0, 0.27, 0.415), M.S(0.07, 0.016, 0.016)), W.uBox, [0.07, 0.08, 0.10]);
-  if (face === 3 && !((isMe ? medTierOf(store.get('medCount', 0) | 0) : (c.medTier || 0)) >= 2)) P2(M.chain(head, M.T(0, 0.07, 0.28), M.S(0.26, 0.15, 0.16)), W.uSphere, [0.30, 0.21, 0.14]);
+  if (face === 3 && !((isMe ? medTierOf(medN()) : (c.medTier || 0)) >= 2)) P2(M.chain(head, M.T(0, 0.07, 0.28), M.S(0.26, 0.15, 0.16)), W.uSphere, [0.30, 0.21, 0.14]);
   if (tier) drawSage(c, p, P2, head, tier);
   if (p.laptop > 0.4) {   // 집중 모드 노트북
     const ly = 0.5 - p.drop;
@@ -4348,8 +4360,46 @@ const NET = { mode: 'off', on: false, client: null, ch: null, bc: null, room: nu
 const MUTED = new Set(store.get('muted', []));
 function realCount() { let n = 0; for (const p of NET.peers.values()) if (p.ready && !p.hidden) n++; return n; }
 function showNpcs() { return realCount() < 4; }
-function friendRoom() { const m = location.hash.match(/^#(?:park-)?room-([a-z0-9]{4,12})$/i); return m ? 'room-' + m[1].toLowerCase() : null; }
-function myPresence() { return { id: ME.id, n: S.nick, j: player.jacket, h: player.hat, s: Math.max(0, SKINS.indexOf(player.skin)), f: player.face | 0, dg: myDog(), ls: DOG.leash ? 1 : 0, md: medTierOf(store.get('medCount', 0) | 0) }; }
+function friendRoom() { return null; }   // 비밀 친구 방은 없앴다. 예전 친구 방 링크로 오면 모두의 방으로 들어온다
+/* 친구 부르기: 내가 있는 모두의 방 번호와 내 id를 링크에 담는다. 친구는 그 방으로 들어오고(가득 차면 옆 방), 내 곁에서 걷기 시작한다 */
+const INVITE = (() => { const m = HASH0.match(/^#(park|mountain)-r(\d{2})(?:-([a-z0-9]{2,16}-[a-z0-9]{2,16}))?$/i); return m ? { room: m[2], host: m[3] ? m[3].toLowerCase() : null, at: Date.now(), told: false, met: false } : null; })();
+function inviteUrl() {
+  const r = NET.mode === 'supabase' && /^\d{2}$/.test(NET.room || '') ? NET.room : '01';
+  return location.origin + location.pathname + '#' + COURSE + '-r' + r + (ME.id ? '-' + ME.id.toLowerCase() : '');
+}
+async function inviteFriend() {
+  closeMenus();
+  const url = inviteUrl(), text = i18n('산길에서 같이 걸어요. {0}에서 기다릴게요', COURSE_NAME);
+  if (navigator.share && coarse) { try { await navigator.share({ title: i18n('산길'), text, url }); return; } catch (e) { if (e && e.name === 'AbortError') return; } }
+  try { await navigator.clipboard.writeText(text + ' ' + url); toast(i18n('친구 부르기 링크를 복사했어요. 같이 걸을 사람에게 보내 주세요')); }
+  catch (e) { addChatLog(null, i18n('친구 부르기 링크: {0}', url)); }
+}
+function inviteArrived() {   // 방에 들어온 뒤 한 번
+  if (!INVITE || INVITE.told || NET.mode !== 'supabase') return;
+  INVITE.told = true;
+  try { history.replaceState(null, '', location.pathname + location.search + '#' + COURSE); } catch (e) {}   // 주소를 원래대로 (다시 공유해도 내 방으로 오게)
+  setTimeout(() => toast(NET.room === INVITE.room ? i18n('친구가 있는 방으로 왔어요') : i18n('친구가 있는 방이 가득 차서 옆 방으로 왔어요')), 3200);
+}
+function inviteMeet() {   // 부른 사람이 보이면 그 곁으로
+  if (!INVITE || !INVITE.host || INVITE.met || !S.started || Date.now() - INVITE.at > 180000) return;
+  const p = NET.peers.get(INVITE.host) || [...NET.peers.values()].find(q => q.id.toLowerCase() === INVITE.host);
+  if (!p || !p.ready) return;
+  INVITE.met = true;
+  const [, ti] = nearestTrail(p.x, p.z), spots = [[-2.2, 1.8], [2.2, 1.8], [Math.PI, 2], [-1.2, 2.6], [1.2, 2.6]].map(([a, d]) => [p.x + Math.sin(p.heading + a) * d, p.z + Math.cos(p.heading + a) * d]);
+  spots.push([TX[clamp(ti - 2, 0, TN - 1)], TZ[clamp(ti - 2, 0, TN - 1)]], [TX[clamp(ti + 2, 0, TN - 1)], TZ[clamp(ti + 2, 0, TN - 1)]]);   // 곁에 설 자리가 없으면 가장 가까운 길 위로
+  for (const [x, z] of spots) {
+    if (walkable(x, z)) {
+      if (player.act) cancelAct();
+      player.x = x; player.z = z; player.y = groundY(x, z); player.target = null; S.auto = false; updateWalkBtn();
+      player.heading = Math.atan2(p.x - x, p.z - z); cam.yaw = player.heading;
+      const [, i] = nearestTrail(x, z); player.idx = i;
+      if (myDog()) placeDog(DOG, player);
+      netState(true); toast(i18n('{0}님 곁으로 왔어요', p.nick)); showBubble(p, i18n('반가워요~'), 3);
+      return;
+    }
+  }
+}
+function myPresence() { return { id: ME.id, n: S.nick, j: player.jacket, h: player.hat, s: Math.max(0, SKINS.indexOf(player.skin)), f: player.face | 0, dg: myDog(), ls: DOG.leash ? 1 : 0, md: medTierOf(medN()) }; }
 function loadScript(src) { return new Promise((res, rej) => { const s = document.createElement('script'); s.src = src; s.async = true; s.onload = res; s.onerror = rej; document.head.appendChild(s); }); }
 /* Supabase 연결 하나를 함께 걷기(실시간)와 로그인이 같이 쓴다. 로그인 정보는 이 기기에 'sangil-auth' 이름으로 남는다 */
 let SB_P = null;
@@ -4378,12 +4428,36 @@ const MED_TIERS = [
   { n: 40, name: '구름 위 신선', gift: '구름 방석과 은은한 빛' },
 ];
 const medTierOf = n => MED_TIERS.filter(t => n >= t.n).length;
+/* 명상 횟수: 로그인하면 계정(서버)에 쌓이고 어느 기기에서든 같은 숫자를 본다. 서버가 하나씩 더하므로 여러 기기에서 해도 빠지지 않는다.
+   로그인하지 않고 한 명상은 이 기기에 모아 두었다가(medAnon), 로그인하는 순간 계정 기록에 한 번 더한다. */
+if (store.get('medAnon', null) === null) { const was = hasStoredAuth(); store.set('medAnon', was ? 0 : (store.get('medCount', 0) | 0)); store.set('medAnonMin', was ? 0 : (store.get('medMinutes', 0) | 0)); }   // 예전 기록 옮기기 (로그인했던 기기는 서버 기록을 쓴다)
+const medServer = () => !!(AUTH.user && AUTH.profile && Number.isInteger(AUTH.profile.med_count));
+function medN() { return medServer() ? AUTH.profile.med_count : (store.get('medAnon', 0) | 0); }
+function medAnonAdd(k, mins) { store.set('medAnon', (store.get('medAnon', 0) | 0) + k); store.set('medAnonMin', (store.get('medAnonMin', 0) | 0) + mins); }
+async function medPush(k, mins) {   // 서버에 k번 더한다. 돌려받은 숫자가 진짜 숫자
+  const sb = await getSB(), { data, error } = await sb.rpc('sangil_add_meditation', { p_n: k, p_minutes: mins });
+  if (error) throw error;
+  if (data && Number.isInteger(data.count) && AUTH.profile) { AUTH.profile.med_count = data.count; AUTH.profile.med_minutes = data.minutes | 0; }
+  return data;
+}
+async function medMerge() {   // 로그인 전에 이 기기에서 한 명상을 계정 기록에 더한다
+  const k = Math.min(50, store.get('medAnon', 0) | 0), mins = store.get('medAnonMin', 0) | 0;
+  if (!medServer() || k <= 0) return;
+  store.set('medAnon', 0); store.set('medAnonMin', 0);   // 먼저 비워서 두 번 더하지 않게
+  try { await medPush(k, mins); toast(i18n('로그인 전에 한 명상 {0}번을 내 기록에 더했어요', k)); }
+  catch (e) { medAnonAdd(k, mins); console.warn('명상 기록 합치기 실패', e); }
+  retrack(); renderGb();
+}
 function medRecord(mt) {
-  const n = (store.get('medCount', 0) | 0) + 1; store.set('medCount', n); store.set('medMinutes', (store.get('medMinutes', 0) | 0) + Math.round(mt / 60));
-  const before = medTierOf(n - 1), after = medTierOf(n);
-  if (after > before) { const t = MED_TIERS[after - 1]; setTimeout(() => { toast(i18n('명상 {0}번! {1}을(를) 얻었어요 · {2}', n, i18n(t.gift), i18n(t.name))); showBubble(player, i18n(t.name), 3.5); if (canSound()) sfx.bowl(0.7); }, 2400); }
+  const mins = Math.round(mt / 60), before = medN(), n = before + 1;
+  if (medServer()) {
+    AUTH.profile.med_count = n;   // 화면은 바로 올리고, 서버 숫자로 맞춘다
+    medPush(1, mins).then(() => { retrack(); renderGb(); }).catch(e => { console.warn('명상 기록 실패', e); AUTH.profile.med_count = before; medAnonAdd(1, mins); retrack(); renderGb(); });   // 실패하면 이 기기에 모아 두었다가 다음에 합친다
+  } else medAnonAdd(1, mins);
+  const b4 = medTierOf(before), after = medTierOf(n);
+  if (after > b4) { const t = MED_TIERS[after - 1]; setTimeout(() => { toast(i18n('명상 {0}번! {1}을(를) 얻었어요 · {2}', n, i18n(t.gift), i18n(t.name))); showBubble(player, i18n(t.name), 3.5); if (canSound()) sfx.bowl(0.7); }, 2400); }
   else setTimeout(() => toast(i18n('{0}번째 명상이었어요', n)), 2600);
-  retrack(); saveProfile(); renderGb();
+  retrack(); renderGb();
 }
 function drawSage(c, p, P2, head, tier) {   // 염주, 흰 수염, 지팡이, 구름 방석과 빛
   if (tier >= 1) for (let k = 0; k < 12; k++) { const a = k / 12 * TAU; P2(M.chain(M.T(Math.sin(a) * 0.2, 1.19 + p.bob - p.drop - (Math.cos(a) > 0 ? 0.05 : 0), Math.cos(a) * 0.16 + 0.02), M.S(k === 0 ? 0.045 : 0.032)), W.uSphere, k === 0 ? [0.55, 0.12, 0.1] : [0.32, 0.19, 0.1]); }
@@ -4999,13 +5073,14 @@ async function onAuth(session) {
     if (my !== authSeq) return;
     AUTH.profile = (data && data.profile) || null; AUTH.gifted = !!(data && data.gifted);
     if (AUTH.profile) applyProfile(AUTH.profile);
+    medMerge();
     if (S.started) loadTrailNotes(true);   // 내 쪽지 표시를 다시 받는다
   } catch (e) { console.warn('길벗 정보를 불러오지 못함', e); if (my === authSeq) { AUTH.profile = null; AUTH.err = true; } }
   finally { if (my === authSeq) { AUTH.pending = false; renderGb(); } }
 }
 function lookToSave() {
   const r = v => v.map(x => Math.round(x * 1000) / 1000);
-  return { s: Math.max(0, SKINS.indexOf(player.skin)), f: player.face | 0, j: r(player.jacket), h: r(player.hat), dg: DOG.coat, ls: DOG.leash ? 1 : 0, m: store.get('medCount', 0) | 0 };
+  return { s: Math.max(0, SKINS.indexOf(player.skin)), f: player.face | 0, j: r(player.jacket), h: r(player.hat), dg: DOG.coat, ls: DOG.leash ? 1 : 0 };
 }
 function applyProfile(pr) {
   if (pr.nick) setNick(cleanNick(pr.nick), false);
@@ -5025,7 +5100,6 @@ function setLook(patch, save) {
   if (col(patch.h)) L.h = col(patch.h);
   if (Number.isInteger(patch.dg) && patch.dg >= 0 && patch.dg <= 3) { L.dg = patch.dg; DOG.coat = patch.dg; }
   if (patch.ls === 0 || patch.ls === 1) { L.ls = patch.ls; DOG.leash = !!patch.ls; }
-  if (Number.isInteger(patch.m) && patch.m > (store.get('medCount', 0) | 0)) store.set('medCount', Math.min(patch.m, 100000));   // 다른 기기에서 한 명상도 이어 받는다
   store.set('look', L);
   if (L.j) player.jacket = L.j; if (L.h) player.hat = L.h;
   player.skin = SKINS[Number.isInteger(L.s) ? L.s : 1]; player.face = L.f | 0;
@@ -5128,10 +5202,10 @@ function renderGb() {
   if (P) { $('#gbKakao').hidden = !P.kakao; $('#gbGoogle').hidden = !P.google; $('#gbEmailBtn').hidden = !P.email; $('#gbNone').hidden = P.kakao || P.google || P.email; }
   document.querySelectorAll('#gbDog button').forEach(b => b.setAttribute('aria-pressed', +b.dataset.d === DOG.coat ? 'true' : 'false'));
   $('#gbLeashRow').style.display = DOG.coat && inn ? '' : 'none'; $('#gbLeash').checked = DOG.leash;
-  { const n = store.get('medCount', 0) | 0, t = medTierOf(n), next = MED_TIERS[t];
+  { const n = medN(), t = medTierOf(n), next = MED_TIERS[t];
     $('#gbMed').innerHTML = '<b></b><small></small>';
     $('#gbMed').querySelector('b').textContent = t ? i18n('명상 {0}번 · {1}', n, i18n(MED_TIERS[t - 1].name)) : i18n('명상 {0}번', n);
-    $('#gbMed').querySelector('small').textContent = next ? i18n('{0}번 더 하면 {1}', next.n - n, i18n(next.gift)) : i18n('산의 모든 모습을 얻었어요'); }
+    $('#gbMed').querySelector('small').textContent = (next ? i18n('{0}번 더 하면 {1}', next.n - n, i18n(next.gift)) : i18n('산의 모든 모습을 얻었어요')) + (inn ? '' : ' · ' + i18n('로그인하면 어느 기기에서든 이어져요')); }
   drawAvatar(); renderBag(); renderGbNotes();
 }
 function drawAvatar() {   // 길벗 카드의 작은 얼굴 그림 (3D 캐릭터와 같은 색, 같은 얼굴)
@@ -5220,8 +5294,9 @@ async function netStart() {
 async function joinRooms() {
   const fr = friendRoom();
   let list = fr ? [fr] : Array.from({ length: MAX_ROOMS }, (_, i) => String(i + 1).padStart(2, '0'));
+  if (!NET.room && INVITE) NET.room = INVITE.room;   // 친구 부르기 링크로 왔다
   if (!fr && NET.room && list.includes(NET.room)) list = [NET.room, ...list.filter(r => r !== NET.room)];
-  for (const r of list) { const res = await tryRoom(r); if (res === 'ok') return true; if (res === 'error') return false; }
+  for (const r of list) { const res = await tryRoom(r); if (res === 'ok') { inviteArrived(); return true; } if (res === 'error') return false; }
   return false;
 }
 function tryRoom(r) {
@@ -5416,14 +5491,13 @@ function netTick(dt) {
     if (!p.ready) continue;
     updateCharAct(p, dt); simPeer(p, dt);
   }
-  netState(false);
+  netState(false); inviteMeet();
 }
 function updateCount() {
-  const n = realCount(), fr = NET.room && NET.room.startsWith('room-');
+  const n = realCount();
   $('#peopleChip').classList.toggle('live', NET.on);
-  $('#peopleTxt').textContent = !NET.on ? (NET.starting ? i18n('연결 중') : i18n('혼자 걷는 중')) : (fr ? i18n('친구 방') + ' · ' : '') + (n ? i18n('함께 {0}명', n + 1) : i18n('이 방엔 나뿐'));
-  $('#roomInfo').textContent = !NET.on ? i18n('혼자 걷는 중') : fr ? i18n('친구 방 ({0})', NET.room.slice(5)) : NET.mode === 'local' ? i18n('이 기기의 다른 탭과 연결됨') : i18n('모두의 방 {0}번', NET.room);
-  $('#publicBtn').hidden = !fr;
+  $('#peopleTxt').textContent = !NET.on ? (NET.starting ? i18n('연결 중') : i18n('혼자 걷는 중')) : (n ? i18n('함께 {0}명', n + 1) : i18n('이 방엔 나뿐'));
+  $('#roomInfo').textContent = !NET.on ? i18n('혼자 걷는 중') : NET.mode === 'local' ? i18n('이 기기의 다른 탭과 연결됨') : i18n('모두의 방 {0}번', NET.room);
 }
 
 /* ---------------- 말풍선 채팅 ---------------- */
@@ -5727,14 +5801,9 @@ function bindUI() {
   $('#unmuteBtn').onclick = () => { MUTED.clear(); store.set('muted', []); for (const p of NET.peers.values()) p.hidden = false; updateCount(); $('#unmuteBtn').hidden = true; toast(i18n('숨긴 사람을 다시 보여요')); };
   // 말풍선 보기, 친구 방
   $('#bubbleChk').checked = S.bubbles; $('#bubbleChk').onchange = e => { S.bubbles = e.target.checked; store.set('bubbles', S.bubbles); };
-  $('#friendBtn').onclick = () => {
-    const code = Math.random().toString(36).slice(2, 8), tag = (IS_PARK ? 'park-' : '') + 'room-' + code, url = location.href.split('#')[0] + '#' + tag;
-    const done = ok => { addChatLog(null, ok ? i18n('친구 방 링크를 복사했어요. 같이 걸을 사람에게 보내 주세요') : i18n('친구 방 링크: {0}', url)); };
-    try { navigator.clipboard.writeText(url).then(() => done(true), () => done(false)); } catch (e) { done(false); }
-    location.hash = tag;
-    toast(i18n('친구 방으로 옮겼어요. 링크를 받은 사람만 이 방에 들어와요'));
-  };
-  $('#publicBtn').onclick = () => { history.replaceState(null, '', location.pathname + location.search + (IS_PARK ? '#park' : '')); netStop(); netStart(); toast(i18n('모두의 방으로 돌아왔어요')); };
+  $('#friendBtn').onclick = e => { e.stopPropagation(); inviteFriend(); };
+  $('#peopleChip').onclick = e => { e.stopPropagation(); if (S.started) inviteFriend(); };
+  $('#peopleChip').onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); if (S.started) inviteFriend(); } };
   $('#soundBtn').onclick = () => { audioInit(); setMute(!S.mute); };
   $('#courseBtn').onclick = e => { e.stopPropagation(); const m = $('#courseMenu'); const open = m.hidden; closeMenus(); m.hidden = !open; $('#courseBtn').setAttribute('aria-expanded', open ? 'true' : 'false'); };
   $('#settingsBtn').onclick = e => { e.stopPropagation(); const m = $('#settings'); const open = m.hidden; closeMenus(); m.hidden = !open; $('#settingsBtn').setAttribute('aria-expanded', open ? 'true' : 'false'); };
