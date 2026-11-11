@@ -2748,11 +2748,12 @@ function initLabels() {
 }
 function updateLabels(cssW, cssH) {
   const pa = player.act, calm = inTent(player) || !!(pa && pa.type === 'meditate' && pa.medStart && !pa.leaving);   // 명상과 잠 사이에는 이름표를 걷어 낸다
+  const papers = [];   // 가까이 놓인 쪽지 이름표끼리 겹치면 하나만 보인다
   for (const L of labels) {
     const p = L.getPos(); const c = M.xf(VP, p[0], p[1], p[2]);
     const d = Math.hypot(p[0] - eye[0], p[1] - eye[1], p[2] - eye[2]);
     let vis = c[3] > 0.1 && d < L.maxD && S.started && !(L.hideIf && L.hideIf()) && !calm;
-    if (vis) { const x = (c[0]/c[3]*0.5 + 0.5) * cssW, y = (1 - (c[1]/c[3]*0.5 + 0.5)) * cssH; vis = x > -100 && x < cssW + 100 && y > -40 && y < cssH + 40; if (vis) L.el.style.transform = `translate(${x.toFixed(1)}px,${y.toFixed(1)}px) translate(-50%,-100%)`; }
+    if (vis) { const x = (c[0]/c[3]*0.5 + 0.5) * cssW, y = (1 - (c[1]/c[3]*0.5 + 0.5)) * cssH; vis = x > -100 && x < cssW + 100 && y > -40 && y < cssH + 40; if (vis && L.paper) { if (papers.some(([a, b]) => Math.abs(a - x) < 90 && Math.abs(b - y) < 26)) vis = false; else papers.push([x, y]); } if (vis) L.el.style.transform = `translate(${x.toFixed(1)}px,${y.toFixed(1)}px) translate(-50%,-100%)`; }
     if (vis !== L.shown) { L.el.style.display = vis ? '' : 'none'; L.shown = vis; }
   }
   updateBubbles(cssW, cssH);
@@ -5539,7 +5540,7 @@ function markRead(id) { const a = store.get('noteRead', []) || []; if (!a.includ
 const thxSet = () => new Set(store.get('noteThx', []) || []);
 function mkNote(o) {
   o.rot = seeded(String(o.id))() * TAU;
-  o.label = addLabel('<i></i><span></span>', 'place tap ppr', () => [o.x, groundY(o.x, o.z) + 0.95, o.z], 19);
+  o.label = addLabel('<i></i><span></span>', 'place tap ppr', () => [o.x, groundY(o.x, o.z) + 0.95, o.z], 19); o.label.paper = true;
   o.label.el.addEventListener('click', e => { e.stopPropagation(); goNote(o); });
   o.label.hideIf = () => !!(player.act && player.act.type === 'camp');
   noteLabel(o); return o;
@@ -5833,10 +5834,27 @@ function goFire(f) {   // 그 모닥불 곁으로 걸어간다
   if (d < 40) { near(); toast(i18n('{0}로 걸어가요', name)); return; }
   walkTrailTo(nearestTrail(p.x, p.z)[1], name, d, near);
 }
+function warpNearFire(f, tries = 0) {   // 멀리서 모닥불 이야기에 들어가면 그 불 곁으로 바로 옮겨 간다
+  const p = firePos(f), R0 = p.own ? 3 : 7.5;
+  if (Math.hypot(player.x - p.x, player.z - p.z) < 30) return;
+  if (player.act && (player.act.type === 'focus' || player.act.type === 'camp')) return;   // 집중 중이거나 텐트 안이면 그 자리에서 듣는다
+  if (player.act) { if (tries < 3) { cancelAct(); setTimeout(() => warpNearFire(f, tries + 1), 1600); } return; }
+  if (S.breath) stopBreath();
+  const base = Math.atan2(player.x - p.x, player.z - p.z), spots = [];
+  for (let k = 0; k < 10; k++) { const a = base + (k % 2 ? 1 : -1) * Math.ceil(k / 2) * 0.62; spots.push([p.x + Math.sin(a) * R0, p.z + Math.cos(a) * R0]); }
+  const [, ti] = nearestTrail(p.x, p.z); for (const d of [0, -2, 2, -4, 4]) { const i = clamp(ti + d, 0, TN - 1); spots.push([TX[i], TZ[i]]); }
+  for (const [x, z] of spots) {
+    if (!walkable(x, z)) continue;
+    player.x = x; player.z = z; player.y = groundY(x, z); player.target = null; S.auto = false; S.walkGoal = null; S.goCircle = false; updateWalkBtn(); marker = null;
+    player.heading = Math.atan2(p.x - x, p.z - z); cam.yaw = player.heading;
+    const [, i] = nearestTrail(x, z); player.idx = i;
+    if (myDog()) placeDog(DOG, player);
+    netState(true); return;
+  }
+}
 function fireTap(f) {   // 3D 모닥불 이름표를 누르면 그리로 걸어가며 듣는다
   if (TALK.room && TALK.fire && TALK.fire.id === f.id) { goFire(f); return; }
-  if (Math.hypot(player.x - firePos(f).x, player.z - firePos(f).z) > 8) goFire(f);
-  voiceJoin(f);
+  voiceJoin(f);   // 들어가면 멀리 있을 때 그 불 곁으로 옮겨 간다
 }
 function fireHere() {   // 불지기가 선 자리 바로 앞에 모닥불을 피운다 (모닥불 쉼터 가까이면 쉼터의 큰 불을 쓴다)
   if (Math.hypot(player.x - CIRCLE.x, player.z - CIRCLE.z) < 14) return { x: null, z: null };
@@ -5978,6 +5996,7 @@ async function voiceJoin(f) {
     TALK.room = room; TALK.fire = f; TALK.isHostHere = !!r.host; TALK.canPub = !!r.host; TALK.micOn = false; TALK.myHand = false; TALK.hands.clear(); TALK.leaving = false; TALK.ended = false;
     try { await room.startAudio(); } catch (e) {}
     $('#voicePanel').hidden = false; renderVoice();
+    warpNearFire(f);
     toast(r.host ? i18n('불지기로 들어왔어요. 마이크를 켜면 이야기가 시작돼요') : i18n('모닥불 이야기를 듣고 있어요. 말하고 싶으면 손을 들어요'));
   } catch (e) { console.warn('모닥불 이야기 연결 실패', e); toast(i18n('모닥불 이야기에 들어가지 못했어요. 잠시 뒤에 다시 해 보세요')); }
   finally { TALK.joining = false; fireUi(); }
