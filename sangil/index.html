@@ -233,6 +233,12 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{ou
 .gbMed{padding:12px 14px;border-radius:14px;background:#e9f0ea;color:var(--ink);font-size:14px;line-height:1.5}
 .gbMed b{font-family:var(--font-display);font-size:16px}
 .gbMed small{display:block;color:var(--ink-soft);font-size:12.5px}
+.gbWear{flex-wrap:wrap;margin-top:8px}
+.gbWear button{flex:none;padding:6px 11px;font-size:12.5px;background:#fbf8f1}
+.gbWear button[aria-pressed="false"]{opacity:.55;text-decoration:line-through}
+.tag3d .mlv{display:inline-flex;align-items:center;gap:2px;font-style:normal;font-size:10px;font-weight:700;color:#2f5a3e;background:#dcebdf;border-radius:999px;padding:1px 6px 1px 4px;margin-left:2px}
+.tag3d .mlv svg{width:10px;height:10px}
+.tag3d .mlv[hidden]{display:none}
 .chips.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
 .enter2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:-4px}
 .enter2 .secondary{padding:12px 6px}
@@ -1277,6 +1283,10 @@ const EN = {"센트럴파크":"Central Park",
 "쪽지 · 오늘 남은 {0}/{1}":"Notes · {0}/{1} left today",
 "이 길에 남긴 내 쪽지 {0}장 · 고마워요 {1}":"Your notes on this trail: {0} · thanks: {1}",
 "{0}님이 건넨 쪽지":"from {0}",
+"가방 풍경":"a little bell for your pack",
+"구름 방석":"a cloud cushion",
+"누르면 빼요":"Tap to take it off",
+"누르면 다시 차요":"Tap to wear it again",
 "모습":"Look",
 "남자":"Man",
 "여자":"Woman",
@@ -2392,6 +2402,7 @@ function initLabels() {
   W.meLabel = addLabel(i18n('<span class="me">나</span><span id="meName"></span>'), 'me', () => [player.x, player.y + 2.55 - 0.47 * player.sit, player.z], 60);
   W.meLabel.hideIf = () => inTent(player);
   $('#meName').textContent = S.nick;
+  W.meLabel.el.insertAdjacentHTML('beforeend', '<i class="mlv" id="meLv" hidden></i>');
   for (const n of NPCS) { const L = addLabel(`<em>${NPC_TAG}</em><span></span>`, 'npc', () => [n.x, n.y + 2.4 - 0.47 * n.sit, n.z], 38); L.el.querySelector('span').textContent = n.name; L.hideIf = () => !showNpcs(); n.label = L; }
   if (!IS_PARK) addLabel(i18n('<i></i><span>구름폭포</span>'), 'place', () => [W.fallLip[0], W.fallLip[1] + 3.2, W.fallLip[2]], 110);
   else for (const [nm, x, z] of [[i18n('더 레이크'), -14, -86], [i18n('저수지'), 0, 50], [i18n('그레이트 론'), 0, -2], [i18n('쉽 메도우'), -24, -168]]) addLabel(`<i></i><span>${nm}</span>`, 'place', () => [x, 6, z], 120);
@@ -3151,7 +3162,7 @@ function movePlayer(dt) {
   }
   player.moveAmt = lerp(player.moveAmt, moving ? 1 : 0, 1 - Math.exp(-dt * 8));
   player.y = groundY(player.x, player.z);
-  const st = Math.floor(player.phase / Math.PI); if (st !== player.lastStep) { player.lastStep = st; if (moving) footstep(); }
+  const st = Math.floor(player.phase / Math.PI); if (st !== player.lastStep) { player.lastStep = st; if (moving) { footstep(); if (st % 4 === 0 && Math.random() < 0.6 && medTierOf(medN()) >= 2 && !(medHideMask() & 4)) bagBell(); } }
   if (!S.auto) { const [d, i] = nearestTrail(player.x, player.z, Math.max(0, player.idx - 40), Math.min(TN - 1, player.idx + 40)); if (d < 12) player.idx = i; }
   S.climbMax = Math.max(S.climbMax, player.y);
 }
@@ -4198,9 +4209,9 @@ function drawHiker(c, isMe) {
   const root = M.chain(M.T(c.x + (c.ox || 0), c.y + p.lift, c.z + (c.oz || 0)), M.Ry(c.heading), M.Rx(p.lean));
   const P2 = (local, mesh, tint) => draw(mesh, { model: M.mul(root, local), tint, flat: 0, snowable: 0 });
   const skin = c.skin || SKINS[1], face = c.face | 0;
-  const tier = isMe ? medTierOf(medN()) : (c.medTier || 0);
+  const tier = isMe ? medTierOf(medN()) : (c.medTier || 0), hideM = isMe ? medHideMask() : (c.medHide || 0), has = t => tier >= t && !(hideM & (1 << t));
   if (p.sit > 0.02 && !p.chair) {
-    if (tier >= 4 && c.act && c.act.type === 'meditate') for (const [cx, cz, cs] of [[0, 0, 0.42], [0.3, -0.05, 0.28], [-0.3, -0.05, 0.28], [0.12, 0.22, 0.24], [-0.14, -0.25, 0.26]]) P2(M.chain(M.T(cx, 0.1 + 0.03 * Math.sin(T * 1.3 + cx * 5), cz - 0.04), M.S(cs * p.sit, cs * 0.45, cs * p.sit)), W.uSphere, [0.98, 0.98, 1]);   // 구름 방석
+    if (has(4) && c.act && c.act.type === 'meditate') for (const [cx, cz, cs] of [[0, 0, 0.42], [0.3, -0.05, 0.28], [-0.3, -0.05, 0.28], [0.12, 0.22, 0.24], [-0.14, -0.25, 0.26]]) P2(M.chain(M.T(cx, 0.1 + 0.03 * Math.sin(T * 1.3 + cx * 5), cz - 0.04), M.S(cs * p.sit, cs * 0.45, cs * p.sit)), W.uSphere, [0.98, 0.98, 1]);   // 구름 방석
     else P2(M.chain(M.T(0, 0.05, -0.04), M.S(0.58 * p.sit, 0.1, 0.52 * p.sit)), W.uCyl, c.cushion || [0.55, 0.24, 0.18]);
   }
   for (const side of [-1, 1]) {
@@ -4233,8 +4244,8 @@ function drawHiker(c, isMe) {
     if (fem && face !== 2) P2(M.chain(head, M.T(0.19 * side, face === 1 ? 0.255 : 0.272, 0.372), M.Rz(0.55 * side), M.S(0.03, 0.009, 0.02)), W.uSphere, [0.12, 0.10, 0.10]);   // 속눈썹
   }
   if (face === 2) P2(M.chain(head, M.T(0, 0.27, 0.415), M.S(0.07, 0.016, 0.016)), W.uBox, [0.07, 0.08, 0.10]);
-  if (face === 3 && !((isMe ? medTierOf(medN()) : (c.medTier || 0)) >= 2)) P2(M.chain(head, M.T(0, 0.07, 0.28), M.S(0.26, 0.15, 0.16)), W.uSphere, [0.30, 0.21, 0.14]);
-  if (tier) drawSage(c, p, P2, head, tier);
+  if (face === 3) P2(M.chain(head, M.T(0, 0.07, 0.28), M.S(0.26, 0.15, 0.16)), W.uSphere, [0.30, 0.21, 0.14]);
+  if (tier) drawSage(c, p, P2, head, has);
   if (p.laptop > 0.4) {   // 집중 모드 노트북
     const ly = 0.5 - p.drop;
     P2(M.chain(M.T(0, ly, 0.36), M.S(0.42, 0.025, 0.28)), W.uBox, [0.62, 0.64, 0.68]);
@@ -4423,7 +4434,7 @@ function inviteMeet() {   // 부른 사람이 보이면 그 곁으로
     }
   }
 }
-function myPresence() { return { id: ME.id, n: S.nick, j: player.jacket, h: player.hat, s: Math.max(0, SKINS.indexOf(player.skin)), f: player.face | 0, g: player.g | 0, dg: myDog(), ls: DOG.leash ? 1 : 0, md: medTierOf(medN()) }; }
+function myPresence() { return { id: ME.id, n: S.nick, j: player.jacket, h: player.hat, s: Math.max(0, SKINS.indexOf(player.skin)), f: player.face | 0, g: player.g | 0, dg: myDog(), ls: DOG.leash ? 1 : 0, md: medTierOf(medN()), mh: medHideMask() }; }
 function loadScript(src) { return new Promise((res, rej) => { const s = document.createElement('script'); s.src = src; s.async = true; s.onload = res; s.onerror = rej; document.head.appendChild(s); }); }
 /* Supabase 연결 하나를 함께 걷기(실시간)와 로그인이 같이 쓴다. 로그인 정보는 이 기기에 'sangil-auth' 이름으로 남는다 */
 let SB_P = null;
@@ -4447,11 +4458,27 @@ function getSB() {
    3분 넘게 앉았거나 끝까지 한 명상을 센다. 횟수에 따라 모습이 하나씩 더해진다(다른 사람에게도 보인다). */
 const MED_TIERS = [
   { n: 3, name: '마음 산책자', gift: '염주 목걸이' },
-  { n: 10, name: '고요한 길벗', gift: '흰 수염' },
+  { n: 10, name: '고요한 길벗', gift: '가방 풍경' },
   { n: 20, name: '산중 도인', gift: '나무 지팡이' },
-  { n: 40, name: '구름 위 신선', gift: '구름 방석과 은은한 빛' },
+  { n: 40, name: '구름 위 신선', gift: '구름 방석' },
 ];
 const medTierOf = n => MED_TIERS.filter(t => n >= t.n).length;
+/* 받은 선물은 생김새를 바꾸지 않는 물건이고, 길벗 카드에서 하나씩 빼거나 다시 찰 수 있다 (medHide: 숨긴 단계 번호의 비트) */
+const medHideMask = () => (store.get('medHide', 0) | 0) & 30;
+const MED_LEAF = '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M6 11c-3-1.2-4.4-3.6-4-7.4C5.4 3.4 8 5 8.4 8.2M6 11c2.4-.8 4-2.6 4-6.2-1 .1-1.9.4-2.7.9" fill="currentColor"/></svg>';
+function setLvBadge(el, tier) {   // 이름표 옆 작은 잎사귀와 단계 숫자
+  if (!el) return;
+  el.hidden = !tier; if (!tier) return;
+  el.innerHTML = MED_LEAF + '<span></span>'; el.querySelector('span').textContent = tier;
+  el.title = i18n(MED_TIERS[tier - 1].name);
+}
+function bagBell() {   // 가방 풍경: 걸을 때 가끔 작게 울린다
+  if (!canSound()) return;
+  const ctx = A.ctx, t = ctx.currentTime + 0.01;
+  [2793, 4186].forEach((f, i) => { const o = ctx.createOscillator(), g = ctx.createGain(); o.type = 'sine'; o.frequency.value = f * (1 + (Math.random() - 0.5) * 0.012);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.016 / (i + 1), t + 0.005); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.6);
+    o.connect(g).connect(A.sfx); o.start(t); o.stop(t + 0.65); });
+}
 /* 명상 횟수: 로그인하면 계정(서버)에 쌓이고 어느 기기에서든 같은 숫자를 본다. 서버가 하나씩 더하므로 여러 기기에서 해도 빠지지 않는다.
    로그인하지 않고 한 명상은 이 기기에 모아 두었다가(medAnon), 로그인하는 순간 계정 기록에 한 번 더한다. */
 if (store.get('medAnon', null) === null) { const was = hasStoredAuth(); store.set('medAnon', was ? 0 : (store.get('medCount', 0) | 0)); store.set('medAnonMin', was ? 0 : (store.get('medMinutes', 0) | 0)); }   // 예전 기록 옮기기 (로그인했던 기기는 서버 기록을 쓴다)
@@ -4483,8 +4510,8 @@ function medRecord(mt) {
   else setTimeout(() => toast(i18n('{0}번째 명상이었어요', n)), 2600);
   retrack(); renderGb();
 }
-function drawSage(c, p, P2, head, tier) {   // 염주, 흰 수염, 지팡이, 구름 방석과 빛
-  if (tier >= 1) {   // 염주: 큰 머리에 가리지 않게 가슴 앞으로 늘어뜨린다 (가슴 둥근 면을 따라)
+function drawSage(c, p, P2, head, has) {   // 염주, 가방 풍경, 나무 지팡이 (구름 방석은 앉을 때 방석 자리에)
+  if (has(1)) {   // 염주: 큰 머리에 가리지 않게 가슴 앞으로 늘어뜨린다 (가슴 둥근 면을 따라)
     const cy = 0.93 + p.bob - p.drop, rx = 0.35 * p.chest * (c.g === 1 ? 0.93 : 1), ry = 0.41 * p.chest, rz = 0.29, N = 13;
     for (let k = 0; k < N; k++) {
       const t = k / (N - 1) * 2 - 1, x = 0.21 * t, y = cy - 0.07 + 0.16 * t * t, q = 1 - (x / rx) ** 2 - ((y - cy) / ry) ** 2, z = rz * Math.sqrt(Math.max(0, q)) + 0.022;
@@ -4493,12 +4520,16 @@ function drawSage(c, p, P2, head, tier) {   // 염주, 흰 수염, 지팡이, �
     const ty = cy - 0.13, tz = rz * Math.sqrt(Math.max(0, 1 - ((ty - cy) / ry) ** 2)) + 0.02;
     P2(M.chain(M.T(0, ty, tz), M.S(0.026, 0.07, 0.02)), W.uSphere, [0.72, 0.18, 0.15]);   // 술
   }
-  if (tier >= 2) { P2(M.chain(head, M.T(0, 0.02, 0.27), M.S(0.27, 0.26, 0.17)), W.uSphere, [0.96, 0.95, 0.92]); P2(M.chain(head, M.T(0, -0.16, 0.25), M.S(0.12, 0.14, 0.1)), W.uSphere, [0.96, 0.95, 0.92]); }
-  if (tier >= 3) {
+  if (has(2)) {   // 가방 옆에 매단 작은 풍경 (걸을 때 흔들린다)
+    const sw = 0.5 * Math.sin((c.phase || 0) * 2) * (c.moveAmt || 0), top = M.chain(M.T(0.13, 0.84 + p.bob - p.drop, -0.4), M.Rz(sw), M.Rx(sw * 0.6));
+    P2(M.chain(top, M.T(0, -0.05, 0), M.S(0.008, 0.1, 0.008)), W.uCyl, [0.72, 0.18, 0.15]);
+    P2(M.chain(top, M.T(0, -0.14, 0), M.S(0.066, 0.072, 0.066)), W.uSphere, [0.86, 0.66, 0.26]);
+    P2(M.chain(top, M.T(0, -0.185, 0), M.S(0.082, 0.014, 0.082)), W.uCyl, [0.78, 0.58, 0.2]);
+  }
+  if (has(3)) {
     if (p.sit < 0.3) { const sw = 0.12 * Math.sin(c.phase || 0) * (c.moveAmt || 0); P2(M.chain(M.T(0.34, 0.02, 0.2), M.Rx(sw), M.T(0, 0.8, 0), M.S(0.035, 1.6, 0.035)), W.uCyl, [0.45, 0.31, 0.18]); P2(M.chain(M.T(0.34, 0.02, 0.2), M.Rx(sw), M.T(0, 1.62, 0), M.S(0.06)), W.uSphere, [0.36, 0.24, 0.14]); }
     else P2(M.chain(M.T(0.55, 0.06, 0.1), M.Rx(Math.PI / 2), M.S(0.035, 1.6, 0.035)), W.uCyl, [0.45, 0.31, 0.18]);
   }
-  if (tier >= 4) P2(M.chain(head, M.T(0, 0.95 + 0.03 * Math.sin(T * 1.6), -0.02), M.S(0.24, 1, 0.24)), W.uRing, [1, 0.88, 0.55]);
 }
 
 /* ================= 함께 걷는 강아지 (진돗개) =================
@@ -5271,6 +5302,8 @@ function renderGb() {
   { const n = medN(), t = medTierOf(n), next = MED_TIERS[t];
     $('#gbMed').innerHTML = '<b></b><small></small>';
     $('#gbMed').querySelector('b').textContent = t ? i18n('명상 {0}번 · {1}', n, i18n(MED_TIERS[t - 1].name)) : i18n('명상 {0}번', n);
+    if (t) { const w = document.createElement('div'); w.className = 'chips gbWear'; for (let k = 1; k <= t; k++) { const b = document.createElement('button'); b.type = 'button'; const on = !(medHideMask() & (1 << k)); b.setAttribute('aria-pressed', String(on)); b.textContent = i18n(MED_TIERS[k - 1].gift); b.title = on ? i18n('누르면 빼요') : i18n('누르면 다시 차요'); b.onclick = () => { store.set('medHide', medHideMask() ^ (1 << k)); retrack(); renderGb(); }; w.appendChild(b); } $('#gbMed').appendChild(w); }
+    setLvBadge($('#meLv'), t);
     $('#gbMed').querySelector('small').textContent = (next ? i18n('{0}번 더 하면 {1}', next.n - n, i18n(next.gift)) : i18n('산의 모든 모습을 얻었어요')) + (inn ? '' : ' · ' + i18n('로그인하면 어느 기기에서든 이어져요')); }
   drawAvatar(); renderBag(); renderGbNotes();
 }
@@ -5465,9 +5498,11 @@ function ensurePeer(id, pres) {
     if (Number.isInteger(pres.s) && SKINS[pres.s]) p.skin = SKINS[pres.s];
     if (Number.isInteger(pres.f)) p.face = clamp(pres.f, 0, FACE_N - 1);
     p.g = pres.g === 1 ? 1 : 0;
-    p.dogCoat = Number.isInteger(pres.dg) ? clamp(pres.dg, 0, DOG_N) : 0; p.dogLeash = pres.ls !== 0; p.medTier = Number.isInteger(pres.md) ? clamp(pres.md, 0, 4) : 0;
+    p.dogCoat = Number.isInteger(pres.dg) ? clamp(pres.dg, 0, DOG_N) : 0; p.dogLeash = pres.ls !== 0; p.medTier = Number.isInteger(pres.md) ? clamp(pres.md, 0, 4) : 0; p.medHide = Number.isInteger(pres.mh) ? pres.mh & 30 : 0;
   }
   p.label.el.querySelector('span').textContent = p.nick;
+  if (!p.lvEl) { p.lvEl = document.createElement('i'); p.lvEl.className = 'mlv'; p.label.el.appendChild(p.lvEl); }
+  setLvBadge(p.lvEl, p.medTier || 0);
   updateCount();
   return p;
 }
