@@ -5766,7 +5766,8 @@ function renderGbNotes() {
   }
   if (!mine.length && !PAPER.inbox.length) { const p = document.createElement('span'); p.className = 'gbWho'; p.textContent = i18n("'인사'의 쪽지로 마음을 건네 보세요. 받은 쪽지는 여기 모여요"); el.appendChild(p); }
 }
-(function loadInbox() { const a = store.get('inbox', []) || []; PAPER.inbox = (Array.isArray(a) ? a : []).slice(0, 20).filter(q => q && Number.isInteger(q.p) && q.p >= 0 && q.p < NOTE_PH.length).map((q, i) => ({ id: 'l' + (q.a || i), live: true, from: null, nick: cleanNick(q.n), ph: q.p, at: +q.a || 0, read: true })); })();
+const BAD = ['시발', '씨발', '씨팔', '시팔', 'ㅅㅂ', 'ㅆㅂ', '병신', 'ㅂㅅ', '개새', '새끼', '좆', '존나', 'ㅈㄴ', '미친놈', '미친년', '지랄', '염병', '닥쳐', 'fuck', 'shit', 'bitch', 'cunt', 'dick', 'asshole', 'nigg', 'slut'];
+(function loadInbox() { try { const a = store.get('inbox', []) || []; PAPER.inbox = (Array.isArray(a) ? a : []).slice(0, 20).filter(q => q && Number.isInteger(q.p) && q.p >= 0 && q.p < NOTE_PH.length).map((q, i) => ({ id: 'l' + (q.a || i), live: true, from: null, nick: cleanNick(q.n), ph: q.p, at: +q.a || 0, read: true })); } catch (e) { PAPER.inbox = []; console.warn('쪽지함을 불러오지 못함', e); } })();
 
 /* ================= 모닥불 이야기 (음성, LiveKit) =================
    불지기(sangil_hosts에 넣은 사람)가 이야기를 열면 누구나 들을 수 있다. 말하기는 로그인한 길벗이 손을 들고 불지기가 허락해야 한다.
@@ -5782,7 +5783,7 @@ async function fireLoad(force) {
     if (error) throw error;
     TALK.fires = Array.isArray(data) ? data : [];
     TALK.live = TALK.fires.find(f => f.status === 'live') || null;
-    if (AUTH.user) { const r = await sb.rpc('sangil_is_host'); TALK.isHost = !!(r && r.data === true); } else TALK.isHost = false;
+    if (AUTH.user) { const r = await sb.rpc('sangil_is_host'); if (r && r.error) console.warn('불지기 확인 실패', r.error.code || '', r.error.message || ''); TALK.isHost = !!(r && r.data === true) || TALK.fires.some(f => f.i_host); } else TALK.isHost = false;
   } catch (e) { console.warn('모닥불 일정을 불러오지 못함', e); }
   fireUi();
 }
@@ -6497,7 +6498,6 @@ function updateCount() {
 }
 
 /* ---------------- 말풍선 채팅 ---------------- */
-const BAD = ['시발', '씨발', '씨팔', '시팔', 'ㅅㅂ', 'ㅆㅂ', '병신', 'ㅂㅅ', '개새', '새끼', '좆', '존나', 'ㅈㄴ', '미친놈', '미친년', '지랄', '염병', '닥쳐', 'fuck', 'shit', 'bitch', 'cunt', 'dick', 'asshole', 'nigg', 'slut'];
 function maskBad(s) { let out = s; for (const w of BAD) out = out.replace(new RegExp(w, 'gi'), m => '○'.repeat(m.length)); return out; }
 function cleanText(s) { s = String(s == null ? '' : s).replace(/[\u0000-\u001f\u007f]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 40); return s ? maskBad(s) : null; }
 function cleanNick(n) { const s = cleanText(n); return s && !s.includes('○') ? s.slice(0, 24) : i18n('산행 중인 분'); }
