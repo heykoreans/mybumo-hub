@@ -468,6 +468,7 @@ body.calm #trailCard,body.calm #hint{opacity:0;pointer-events:none}
     <p class="fine" id="gbNickTip"></p>
     <div id="gbGift" hidden>로그인 선물로 장작 10개를 받았어요</div>
     <div style="display:grid;gap:8px"><span class="lab">피부색</span><div class="swatches" id="gbSkin"></div></div>
+    <div style="display:grid;gap:8px"><span class="lab">모습</span><div class="chips" id="gbGender"><button data-g="0">남자</button><button data-g="1">여자</button></div></div>
     <div style="display:grid;gap:8px"><span class="lab">얼굴</span><div class="chips" id="gbFace"><button data-f="0">기본</button><button data-f="1">웃는 눈</button><button data-f="2">선글라스</button><button data-f="3">수염</button></div></div>
     <div style="display:grid;gap:8px"><span class="lab">재킷</span><div class="swatches" id="gbJacket"></div></div>
     <div style="display:grid;gap:8px"><span class="lab" id="gbDogLab">함께 걷는 강아지</span><div class="chips" id="gbDog"><button data-d="0">없이</button><button data-d="1">황구</button><button data-d="2">백구</button><button data-d="3">흑구</button><button data-d="4">몰티즈</button><button data-d="5">푸들</button><button data-d="6">포메라니안</button></div>
@@ -1276,6 +1277,9 @@ const EN = {"센트럴파크":"Central Park",
 "쪽지 · 오늘 남은 {0}/{1}":"Notes · {0}/{1} left today",
 "이 길에 남긴 내 쪽지 {0}장 · 고마워요 {1}":"Your notes on this trail: {0} · thanks: {1}",
 "{0}님이 건넨 쪽지":"from {0}",
+"모습":"Look",
+"남자":"Man",
+"여자":"Woman",
 "이름을 확인하는 중…":"Checking the name…",
 "이미 다른 길벗이 쓰는 이름이에요. 다른 이름을 골라 주세요":"Another hiker already uses this name. Please pick a different one.",
 "지금은 이름을 정하지 못했어요. 잠시 뒤에 다시 해 보세요":"Couldn't set your name right now. Please try again soon.",
@@ -2345,17 +2349,19 @@ const MY_JACKETS = [[0.86,0.42,0.20],[0.25,0.45,0.70],[0.35,0.55,0.40],[0.60,0.4
 const SKINS = [[0.99,0.86,0.75],[0.97,0.80,0.66],[0.90,0.69,0.52],[0.77,0.55,0.38],[0.60,0.41,0.28],[0.42,0.28,0.19]];
 const FACE_N = 4;
 function initState() {
-  const look = Object.assign({}, store.get('look', null) || {});   // 재킷이나 모자 정보가 빠져 있으면 새로 고른다
+  const wasLook = !!store.get('look', null), look = Object.assign({}, store.get('look', null) || {});   // 재킷이나 모자 정보가 빠져 있으면 새로 고른다
   if (!(Array.isArray(look.j) && look.j.length >= 3)) look.j = MY_JACKETS[Math.floor(Math.random() * MY_JACKETS.length)];
   if (!(Array.isArray(look.h) && look.h.length >= 3)) look.h = HATS[Math.floor(Math.random() * HATS.length)];
   store.set('look', look); player.jacket = look.j; player.hat = look.h;
+  if (look.g !== 0 && look.g !== 1) { look.g = wasLook ? 0 : (Math.random() < 0.5 ? 1 : 0); store.set('look', look); }   // 예전 길벗은 지금 모습 그대로, 새로 온 길벗은 반반
+  player.g = look.g;
   player.skin = SKINS[Number.isInteger(look.s) ? look.s : 1] || SKINS[1]; player.face = Number.isInteger(look.f) ? clamp(look.f, 0, FACE_N - 1) : 0;
   player.heading = Math.atan2(TX[4] - TX[0], TZ[4] - TZ[0]);
   player.y = groundY(player.x, player.z);
   for (let i = 0; i < 6; i++) {
     NPCS.push({ s: rr(20, TN - 30), dir: R() < 0.5 ? 1 : -1, speed: IS_PARK && i % 3 === 0 ? rr(2.7, 3.2) : rr(1.2, 1.9), pause: 0, name: ADJ[i % ADJ.length].replace(i18n('천천히 걷는'), i18n('천천히')) + ' ' + NOUN[(i * 5 + 3) % NOUN.length],
       x: 0, z: 0, y: 0, heading: 0, phase: rr(0, 6), moveAmt: 1, jacket: JACKETS[i % JACKETS.length], pants: [0.24,0.26,0.30], hat: HATS[i % HATS.length], pack: [0.30,0.28,0.25], lastLand: -1,
-      sit: 0, act: null, cushion: [[0.30,0.42,0.36],[0.55,0.24,0.18],[0.42,0.34,0.52]][i % 3], skin: SKINS[(i * 4 + 1) % SKINS.length], face: [0, 1, 0, 3, 1, 2][i % 6] });
+      sit: 0, act: null, cushion: [[0.30,0.42,0.36],[0.55,0.24,0.18],[0.42,0.34,0.52]][i % 3], skin: SKINS[(i * 4 + 1) % SKINS.length], face: [0, 1, 0, 3, 1, 2][i % 6], g: [1, 0, 1, 0, 0, 1][i % 6] });
   }
   const cp = (key, name, x, z, r, ly) => { const idx = nearIdx(x, z); return { key, name, x, z, idx, r, ly: ly != null ? ly : TH[idx] + 4.2 }; };
   CPS = IS_PARK ? [
@@ -4205,10 +4211,17 @@ function drawHiker(c, isMe) {
     P2(M.chain(am, M.T(0, -A2.L / 2, 0), M.S(0.09, A2.L, 0.09)), W.uCyl, c.jacket);
     P2(M.chain(am, M.T(0, -A2.L, 0), M.S(0.085)), W.uSphere, skin);
   }
-  P2(M.chain(M.T(0, 0.93 + p.bob - p.drop, 0), M.S(0.35 * p.chest, 0.41 * p.chest, 0.29)), W.uSphere, c.jacket);
+  const fem = c.g === 1;
+  P2(M.chain(M.T(0, 0.93 + p.bob - p.drop, 0), M.S(0.35 * p.chest * (fem ? 0.93 : 1), 0.41 * p.chest, 0.29)), W.uSphere, c.jacket);
   P2(M.chain(M.T(0, 1.0 + p.bob - p.drop, -0.27), M.S(0.44, 0.5, 0.22)), W.uBox, c.pack);
   const head = M.chain(M.T(0, 1.2 + p.bob - p.drop, 0), M.Rx(p.headPitch));
   P2(M.chain(head, M.T(0, 0.26, 0), M.S(0.43, 0.41, 0.42)), W.uSphere, skin);
+  if (fem) {   // 여자: 얼굴을 감싸는 단발과 뒤로 묶은 머리
+    P2(M.chain(head, M.T(0, 0.25, -0.05), M.S(0.455, 0.34, 0.41)), W.uSphere, c.hair || [0.22, 0.14, 0.10]);
+    P2(M.chain(head, M.T(0, 0.12, -0.08), M.S(0.44, 0.2, 0.38)), W.uSphere, c.hair || [0.22, 0.14, 0.10]);
+    for (const sd of [-1, 1]) P2(M.chain(head, M.T(0.35 * sd, 0.14, 0.13), M.Rz(0.12 * sd), M.S(0.12, 0.22, 0.14)), W.uSphere, c.hair || [0.22, 0.14, 0.10]);   // 볼 옆으로 내려온 머리
+    P2(M.chain(head, M.T(0, 0.2, -0.43), M.Rx(0.25 + 0.15 * Math.sin((c.phase || 0) * 2) * (c.moveAmt || 0)), M.T(0, -0.08, 0), M.S(0.12, 0.2, 0.12)), W.uSphere, c.hair || [0.22, 0.14, 0.10]);
+  }
   P2(M.chain(head, M.T(0, 0.40, -0.035), M.S(0.445, 0.31, 0.43)), W.uSphere, c.hat);
   P2(M.chain(head, M.T(0, 0.73, 0), M.S(0.1)), W.uSphere, isMe ? [0.86, 0.42, 0.2] : c.hat);
   const ey = p.eyes;
@@ -4217,6 +4230,7 @@ function drawHiker(c, isMe) {
     else if (face === 1) for (const h of [-1, 1]) P2(M.chain(head, M.T(0.14 * side + 0.024 * h, 0.235, 0.388), M.Rz(-0.55 * h), M.S(0.032, 0.012, 0.03)), W.uSphere, [0.12, 0.10, 0.10]);   // 웃는 눈 (^ ^)
     else P2(M.chain(head, M.T(0.14 * side, 0.24 - (1 - ey) * 0.015, 0.385), M.S(0.045 + (1 - ey) * 0.012, 0.012 + 0.048 * ey, 0.03)), W.uSphere, [0.12, 0.10, 0.10]);
     if (face !== 3) P2(M.chain(head, M.T(0.24 * side, 0.17, 0.33), M.S(0.065, 0.04, 0.03)), W.uSphere, [0.98, 0.62, 0.58]);
+    if (fem && face !== 2) P2(M.chain(head, M.T(0.19 * side, face === 1 ? 0.255 : 0.272, 0.372), M.Rz(0.55 * side), M.S(0.03, 0.009, 0.02)), W.uSphere, [0.12, 0.10, 0.10]);   // 속눈썹
   }
   if (face === 2) P2(M.chain(head, M.T(0, 0.27, 0.415), M.S(0.07, 0.016, 0.016)), W.uBox, [0.07, 0.08, 0.10]);
   if (face === 3 && !((isMe ? medTierOf(medN()) : (c.medTier || 0)) >= 2)) P2(M.chain(head, M.T(0, 0.07, 0.28), M.S(0.26, 0.15, 0.16)), W.uSphere, [0.30, 0.21, 0.14]);
@@ -4409,7 +4423,7 @@ function inviteMeet() {   // 부른 사람이 보이면 그 곁으로
     }
   }
 }
-function myPresence() { return { id: ME.id, n: S.nick, j: player.jacket, h: player.hat, s: Math.max(0, SKINS.indexOf(player.skin)), f: player.face | 0, dg: myDog(), ls: DOG.leash ? 1 : 0, md: medTierOf(medN()) }; }
+function myPresence() { return { id: ME.id, n: S.nick, j: player.jacket, h: player.hat, s: Math.max(0, SKINS.indexOf(player.skin)), f: player.face | 0, g: player.g | 0, dg: myDog(), ls: DOG.leash ? 1 : 0, md: medTierOf(medN()) }; }
 function loadScript(src) { return new Promise((res, rej) => { const s = document.createElement('script'); s.src = src; s.async = true; s.onload = res; s.onerror = rej; document.head.appendChild(s); }); }
 /* Supabase 연결 하나를 함께 걷기(실시간)와 로그인이 같이 쓴다. 로그인 정보는 이 기기에 'sangil-auth' 이름으로 남는다 */
 let SB_P = null;
@@ -4470,7 +4484,15 @@ function medRecord(mt) {
   retrack(); renderGb();
 }
 function drawSage(c, p, P2, head, tier) {   // 염주, 흰 수염, 지팡이, 구름 방석과 빛
-  if (tier >= 1) for (let k = 0; k < 12; k++) { const a = k / 12 * TAU; P2(M.chain(M.T(Math.sin(a) * 0.2, 1.19 + p.bob - p.drop - (Math.cos(a) > 0 ? 0.05 : 0), Math.cos(a) * 0.16 + 0.02), M.S(k === 0 ? 0.045 : 0.032)), W.uSphere, k === 0 ? [0.55, 0.12, 0.1] : [0.32, 0.19, 0.1]); }
+  if (tier >= 1) {   // 염주: 큰 머리에 가리지 않게 가슴 앞으로 늘어뜨린다 (가슴 둥근 면을 따라)
+    const cy = 0.93 + p.bob - p.drop, rx = 0.35 * p.chest * (c.g === 1 ? 0.93 : 1), ry = 0.41 * p.chest, rz = 0.29, N = 13;
+    for (let k = 0; k < N; k++) {
+      const t = k / (N - 1) * 2 - 1, x = 0.21 * t, y = cy - 0.07 + 0.16 * t * t, q = 1 - (x / rx) ** 2 - ((y - cy) / ry) ** 2, z = rz * Math.sqrt(Math.max(0, q)) + 0.022;
+      P2(M.chain(M.T(x, y, z), M.S(k === (N - 1) / 2 ? 0.05 : 0.034)), W.uSphere, k === (N - 1) / 2 ? [0.62, 0.14, 0.12] : [0.36, 0.21, 0.11]);
+    }
+    const ty = cy - 0.13, tz = rz * Math.sqrt(Math.max(0, 1 - ((ty - cy) / ry) ** 2)) + 0.02;
+    P2(M.chain(M.T(0, ty, tz), M.S(0.026, 0.07, 0.02)), W.uSphere, [0.72, 0.18, 0.15]);   // 술
+  }
   if (tier >= 2) { P2(M.chain(head, M.T(0, 0.02, 0.27), M.S(0.27, 0.26, 0.17)), W.uSphere, [0.96, 0.95, 0.92]); P2(M.chain(head, M.T(0, -0.16, 0.25), M.S(0.12, 0.14, 0.1)), W.uSphere, [0.96, 0.95, 0.92]); }
   if (tier >= 3) {
     if (p.sit < 0.3) { const sw = 0.12 * Math.sin(c.phase || 0) * (c.moveAmt || 0); P2(M.chain(M.T(0.34, 0.02, 0.2), M.Rx(sw), M.T(0, 0.8, 0), M.S(0.035, 1.6, 0.035)), W.uCyl, [0.45, 0.31, 0.18]); P2(M.chain(M.T(0.34, 0.02, 0.2), M.Rx(sw), M.T(0, 1.62, 0), M.S(0.06)), W.uSphere, [0.36, 0.24, 0.14]); }
@@ -5109,7 +5131,7 @@ async function onAuth(session) {
 }
 function lookToSave() {
   const r = v => v.map(x => Math.round(x * 1000) / 1000);
-  return { s: Math.max(0, SKINS.indexOf(player.skin)), f: player.face | 0, j: r(player.jacket), h: r(player.hat), dg: DOG.coat, ls: DOG.leash ? 1 : 0 };
+  return { s: Math.max(0, SKINS.indexOf(player.skin)), f: player.face | 0, j: r(player.jacket), h: r(player.hat), dg: DOG.coat, ls: DOG.leash ? 1 : 0, g: player.g | 0 };
 }
 function applyProfile(pr) {
   if (pr.nick) setNick(cleanNick(pr.nick), false);
@@ -5125,13 +5147,14 @@ function setLook(patch, save) {
   const col = v => Array.isArray(v) && v.length >= 3 && v.slice(0, 3).every(x => isFinite(+x)) ? v.slice(0, 3).map(x => clamp(+x, 0, 1)) : null;
   if (Number.isInteger(patch.s) && SKINS[patch.s]) L.s = patch.s;
   if (Number.isInteger(patch.f) && patch.f >= 0 && patch.f < FACE_N) L.f = patch.f;
+  if (patch.g === 0 || patch.g === 1) L.g = patch.g;
   if (col(patch.j)) L.j = col(patch.j);
   if (col(patch.h)) L.h = col(patch.h);
   if (Number.isInteger(patch.dg) && patch.dg >= 0 && patch.dg <= DOG_N) { L.dg = patch.dg; DOG.coat = patch.dg; }
   if (patch.ls === 0 || patch.ls === 1) { L.ls = patch.ls; DOG.leash = !!patch.ls; }
   store.set('look', L);
   if (L.j) player.jacket = L.j; if (L.h) player.hat = L.h;
-  player.skin = SKINS[Number.isInteger(L.s) ? L.s : 1]; player.face = L.f | 0;
+  player.skin = SKINS[Number.isInteger(L.s) ? L.s : 1]; player.face = L.f | 0; if (L.g === 0 || L.g === 1) player.g = L.g;
   retrack(); renderGb(); if (save) saveProfile();
 }
 const NICK_RESERVED = /산지기|운영자|운영진|관리자|공식|^산길$|admin|ranger|official|staff|moderator|^sangil$/i;
@@ -5214,6 +5237,7 @@ function buildGb() {
   SKINS.forEach((c, i) => { const b = document.createElement('button'); b.style.background = rgbCss(c); b.dataset.s = i; b.setAttribute('aria-label', i18n('피부색 {0}', i + 1)); b.onclick = () => setLook({ s: i }, true); $('#gbSkin').appendChild(b); });
   MY_JACKETS.forEach((c, i) => { const b = document.createElement('button'); b.style.background = rgbCss(c); b.dataset.j = i; b.setAttribute('aria-label', i18n('재킷 색 {0}', i + 1)); b.onclick = () => setLook({ j: c }, true); $('#gbJacket').appendChild(b); });
   document.querySelectorAll('#gbFace button').forEach(b => b.onclick = () => setLook({ f: +b.dataset.f }, true));
+  document.querySelectorAll('#gbGender button').forEach(b => b.onclick = () => setLook({ g: +b.dataset.g }, true));
   document.querySelectorAll('#gbDog button').forEach(b => b.onclick = () => { const c = +b.dataset.d; setLook({ dg: c }, true); if (c && !DOG.placed && S.started) placeDog(DOG, player); gbMsg(c && !AUTH.user ? i18n('강아지는 로그인한 길벗과 함께 걸어요. 아래에서 로그인하면 바로 곁에 나타나요') : ''); });
   $('#gbLeash').onchange = () => setLook({ ls: $('#gbLeash').checked ? 1 : 0 }, true);
 }
@@ -5231,6 +5255,7 @@ function renderGb() {
   const sk = SKINS.indexOf(player.skin);
   document.querySelectorAll('#gbSkin button').forEach(b => b.setAttribute('aria-pressed', +b.dataset.s === sk ? 'true' : 'false'));
   document.querySelectorAll('#gbFace button').forEach(b => b.setAttribute('aria-pressed', +b.dataset.f === (player.face | 0) ? 'true' : 'false'));
+  document.querySelectorAll('#gbGender button').forEach(b => b.setAttribute('aria-pressed', +b.dataset.g === (player.g | 0) ? 'true' : 'false'));
   const jk = MY_JACKETS.findIndex(c => c.every((v, k) => Math.abs(v - player.jacket[k]) < 0.01));
   document.querySelectorAll('#gbJacket button').forEach(b => b.setAttribute('aria-pressed', +b.dataset.j === jk ? 'true' : 'false'));
   if (inn) {
@@ -5255,6 +5280,8 @@ function drawAvatar() {   // 길벗 카드의 작은 얼굴 그림 (3D 캐릭터
   x.clearRect(0, 0, 152, 152); x.save();
   x.beginPath(); x.arc(76, 76, 76, 0, TAU); x.fillStyle = '#e4ece1'; x.fill(); x.clip();
   x.fillStyle = rgbCss(player.jacket); x.beginPath(); x.ellipse(76, 156, 56, 46, 0, 0, TAU); x.fill();
+  const fem = player.g === 1;
+  if (fem) { x.fillStyle = '#38241a'; x.beginPath(); x.ellipse(76, 84, 42, 37, 0, 0, TAU); x.fill(); }   // 단발
   x.fillStyle = rgbCss(player.skin || SKINS[1]); x.beginPath(); x.arc(76, 78, 36, 0, TAU); x.fill();
   x.fillStyle = rgbCss(player.hat); x.beginPath(); x.ellipse(76, 66, 37, 28, 0, Math.PI, TAU); x.fill(); x.fillRect(39, 62, 74, 6);
   x.fillStyle = '#db6b33'; x.beginPath(); x.arc(76, 36, 7, 0, TAU); x.fill();
@@ -5263,6 +5290,7 @@ function drawAvatar() {   // 길벗 카드의 작은 얼굴 그림 (3D 캐릭터
   if (f === 2) { x.fillStyle = '#121418'; for (const cx of [62, 90]) { x.beginPath(); x.ellipse(cx, 81, 11, 7.5, 0, 0, TAU); x.fill(); } x.fillRect(70, 79, 12, 3); }
   else if (f === 1) { x.strokeStyle = ink; x.lineWidth = 3; x.lineCap = 'round'; for (const cx of [63, 89]) { x.beginPath(); x.arc(cx, 84, 5, Math.PI * 1.15, Math.PI * 1.85); x.stroke(); } }
   else { x.fillStyle = ink; for (const cx of [63, 89]) { x.beginPath(); x.ellipse(cx, 81, 3.4, 4.8, 0, 0, TAU); x.fill(); } }
+  if (fem && f !== 2) { x.strokeStyle = ink; x.lineWidth = 2; x.lineCap = 'round'; for (const [cx, d] of [[63, -1], [89, 1]]) { x.beginPath(); x.moveTo(cx + 3.5 * d, f === 1 ? 81 : 77.5); x.lineTo(cx + 7 * d, f === 1 ? 78.5 : 74.5); x.stroke(); } }   // 속눈썹
   if (f === 3) { x.fillStyle = '#45301f'; x.beginPath(); x.ellipse(76, 96, 25, 16, 0, 0, Math.PI); x.fill(); x.beginPath(); x.ellipse(76, 95, 25, 6, 0, 0, TAU); x.fill(); }
   else { x.strokeStyle = ink; x.lineWidth = 2.4; x.lineCap = 'round'; x.beginPath(); x.arc(76, 92, 6, Math.PI * 0.2, Math.PI * 0.8); x.stroke(); }
   x.restore();
@@ -5436,6 +5464,7 @@ function ensurePeer(id, pres) {
     p.jacket = col(pres.j) || p.jacket; p.hat = col(pres.h) || p.hat;
     if (Number.isInteger(pres.s) && SKINS[pres.s]) p.skin = SKINS[pres.s];
     if (Number.isInteger(pres.f)) p.face = clamp(pres.f, 0, FACE_N - 1);
+    p.g = pres.g === 1 ? 1 : 0;
     p.dogCoat = Number.isInteger(pres.dg) ? clamp(pres.dg, 0, DOG_N) : 0; p.dogLeash = pres.ls !== 0; p.medTier = Number.isInteger(pres.md) ? clamp(pres.md, 0, 4) : 0;
   }
   p.label.el.querySelector('span').textContent = p.nick;
