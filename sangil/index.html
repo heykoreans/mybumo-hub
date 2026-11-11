@@ -1276,6 +1276,9 @@ const EN = {"센트럴파크":"Central Park",
 "쪽지 · 오늘 남은 {0}/{1}":"Notes · {0}/{1} left today",
 "이 길에 남긴 내 쪽지 {0}장 · 고마워요 {1}":"Your notes on this trail: {0} · thanks: {1}",
 "{0}님이 건넨 쪽지":"from {0}",
+"이름을 확인하는 중…":"Checking the name…",
+"이미 다른 길벗이 쓰는 이름이에요. 다른 이름을 골라 주세요":"Another hiker already uses this name. Please pick a different one.",
+"지금은 이름을 정하지 못했어요. 잠시 뒤에 다시 해 보세요":"Couldn't set your name right now. Please try again soon.",
 "몰티즈":"Maltese",
 "푸들":"Poodle",
 "포메라니안":"Pomeranian",
@@ -4483,7 +4486,7 @@ const DOG_COATS = [null,
   { body: [0.80, 0.55, 0.30], cream: [0.97, 0.90, 0.77], tip: [0.60, 0.38, 0.20] },   // 황구
   { body: [0.95, 0.93, 0.88], cream: [0.99, 0.98, 0.95], tip: [0.86, 0.82, 0.74] },   // 백구
   { body: [0.17, 0.15, 0.14], cream: [0.78, 0.58, 0.36], tip: [0.10, 0.09, 0.09] },   // 흑구
-  { kind: 'maltese', s: 0.68, legK: 0.72, headK: 1.18, body: [0.97, 0.96, 0.93], cream: [0.99, 0.98, 0.96], tip: [0.93, 0.91, 0.87] },   // 몰티즈: 하얀 긴 털, 머리 위 리본
+  { kind: 'maltese', s: 0.7, legK: 0.85, headK: 1.24, body: [0.96, 0.93, 0.86], cream: [0.98, 0.96, 0.91], tip: [0.93, 0.88, 0.78] },   // 몰티즈: 짧게 다듬은 복슬복슬한 크림빛 털 (퍼피컷)
   { kind: 'poodle', s: 0.74, legK: 1.12, headK: 1.05, body: [0.70, 0.43, 0.24], cream: [0.78, 0.51, 0.30], tip: [0.62, 0.37, 0.20] },   // 푸들: 갈색 곱슬 방울
   { kind: 'pom', s: 0.64, legK: 0.55, headK: 1.22, body: [0.93, 0.60, 0.26], cream: [0.98, 0.83, 0.58], tip: [0.82, 0.49, 0.19] },   // 포메라니안: 주황 솜뭉치
 ];
@@ -4522,7 +4525,7 @@ function drawDog(dg, coat, leashFrom) {   // 진돗개 셋과 몰티즈, 푸들,
   const root = M.chain(M.T(dg.x, dg.y, dg.z), M.Ry(dg.heading), M.S(sc));
   const D = (loc, mesh, col) => draw(mesh, { model: M.mul(root, loc), tint: col, flat: 0, snowable: 0 });
   const body = M.chain(M.T(0, bodyY, 0), M.Rx(-0.42 * sit));   // 앉으면 엉덩이를 내리고 가슴을 든다
-  if (k === 'maltese') { D(M.chain(body, M.S(0.19, 0.18, 0.31)), W.uSphere, C.body); D(M.chain(body, M.T(0, -0.09, 0), M.S(0.21, 0.13, 0.32)), W.uSphere, C.cream); }   // 바닥까지 늘어진 털
+  if (k === 'maltese') { D(M.chain(body, M.S(0.17, 0.17, 0.29)), W.uSphere, C.body); D(M.chain(body, M.T(0, 0.0, 0.13), M.S(0.16, 0.18, 0.15)), W.uSphere, C.cream); D(M.chain(body, M.T(0, 0.07, -0.08), M.S(0.15, 0.13, 0.17)), W.uSphere, C.body); }   // 복슬복슬한 몸과 가슴 털
   else if (k === 'poodle') { D(M.chain(body, M.S(0.13, 0.14, 0.27)), W.uSphere, C.body); D(M.chain(body, M.T(0, 0.02, 0.12), M.S(0.16, 0.17, 0.15)), W.uSphere, C.cream); }   // 가슴의 곱슬 털
   else if (k === 'pom') { D(M.chain(body, M.S(0.22, 0.21, 0.26)), W.uSphere, C.body); D(M.chain(body, M.T(0, 0.07, 0.17), M.S(0.21, 0.21, 0.15)), W.uSphere, C.cream); }   // 솜뭉치 몸과 목 갈기
   else { D(M.chain(body, M.S(0.16, 0.16, 0.33)), W.uSphere, C.body); D(M.chain(body, M.T(0, -0.05, 0.08), M.S(0.12, 0.11, 0.22)), W.uSphere, C.cream); }   // 가슴과 배
@@ -4535,17 +4538,18 @@ function drawDog(dg, coat, leashFrom) {   // 진돗개 셋과 몰티즈, 푸들,
     D(M.chain(leg, M.T(0, -legL / 2, 0), M.S(0.045, legL, 0.045)), W.uCyl, front && k === 'jindo' ? C.cream : C.body);
     D(M.chain(leg, M.T(0, -legL, 0.02), M.S(0.04, 0.025, 0.055)), W.uSphere, C.cream);
     if (k === 'poodle') D(M.chain(leg, M.T(0, -legL + 0.05, 0.01), M.S(0.07, 0.07, 0.07)), W.uSphere, C.cream);   // 발목 방울
+    if (k === 'maltese') { D(M.chain(leg, M.T(0, -legL * 0.5, 0), M.S(0.068, legL * 0.62, 0.068)), W.uSphere, C.body); D(M.chain(leg, M.T(0, -legL + 0.02, 0.015), M.S(0.065, 0.045, 0.075)), W.uSphere, C.cream); }   // 털이 덮인 굵은 다리와 솜방망이 발
   }
   const headPitch = 0.55 * dg.sniff * (1 - lie) - 0.1 * lie;
   const head = M.chain(body, M.T(0, k === 'pom' ? 0.15 : 0.17, k === 'pom' ? 0.24 : 0.3), M.Rx(-0.42 * -sit * 0.8), M.Rx(headPitch), M.S(hk));
   D(M.chain(head, M.T(0, 0.06, 0.04), M.S(0.13, 0.12, 0.13)), W.uSphere, C.body);
   if (k === 'poodle') { D(M.chain(head, M.T(0, 0.03, 0.15), M.S(0.05, 0.05, 0.12)), W.uSphere, C.body); D(M.chain(head, M.T(0, 0.04, 0.27), M.S(0.026, 0.022, 0.02)), W.uSphere, [0.08, 0.05, 0.04]); }   // 길쭉한 주둥이
-  else if (k === 'maltese') { D(M.chain(head, M.T(0, 0.02, 0.13), M.S(0.07, 0.06, 0.07)), W.uSphere, C.cream); D(M.chain(head, M.T(0, 0.04, 0.2), M.S(0.03, 0.026, 0.022)), W.uSphere, [0.05, 0.05, 0.05]); }
+  else if (k === 'maltese') { D(M.chain(head, M.T(0, 0.06, 0.0), M.S(0.155, 0.14, 0.145)), W.uSphere, C.body); D(M.chain(head, M.T(0, 0.02, 0.12), M.S(0.085, 0.075, 0.08)), W.uSphere, C.cream); D(M.chain(head, M.T(0, -0.035, 0.11), M.S(0.07, 0.06, 0.06)), W.uSphere, C.cream); D(M.chain(head, M.T(0, 0.155, 0.085), M.S(0.12, 0.055, 0.075)), W.uSphere, C.body); D(M.chain(head, M.T(0, 0.05, 0.2), M.S(0.03, 0.026, 0.022)), W.uSphere, [0.05, 0.05, 0.05]); }   // 동그란 얼굴, 수염 같은 주둥이 털, 앞머리
   else if (k === 'pom') { D(M.chain(head, M.T(0, 0.03, 0.13), M.S(0.05, 0.045, 0.06)), W.uSphere, C.cream); D(M.chain(head, M.T(0, 0.045, 0.19), M.S(0.024, 0.02, 0.018)), W.uSphere, [0.05, 0.05, 0.05]); }
   else { D(M.chain(head, M.T(0, 0.02, 0.15), M.S(0.065, 0.06, 0.1)), W.uSphere, C.cream); D(M.chain(head, M.T(0, 0.04, 0.245), M.S(0.03, 0.026, 0.024)), W.uSphere, [0.05, 0.05, 0.05]); }   // 주둥이와 코
   for (const sd of [-1, 1]) {
-    D(M.chain(head, M.T(0.05 * sd, 0.1, 0.14), M.S(k === 'jindo' ? 0.018 : 0.023)), W.uSphere, [0.06, 0.05, 0.05]);   // 눈 (작은 개는 눈을 조금 크게)
-    if (k === 'maltese') D(M.chain(head, M.T(0.115 * sd, -0.01, 0.02), M.Rz(0.15 * sd), M.S(0.05, 0.14, 0.055)), W.uSphere, C.tip);   // 늘어진 긴 귀
+    D(M.chain(head, M.T(0.05 * sd, 0.1, k === 'maltese' ? 0.158 : 0.14), M.S(k === 'jindo' ? 0.018 : k === 'maltese' ? 0.025 : 0.023)), W.uSphere, [0.06, 0.05, 0.05]);   // 눈 (작은 개는 눈을 조금 크게)
+    if (k === 'maltese') D(M.chain(head, M.T(0.13 * sd, 0.03, 0.0), M.Rz(0.2 * sd), M.S(0.065, 0.115, 0.07)), W.uSphere, C.tip);   // 머리에 붙어 늘어진 복슬 귀
     else if (k === 'poodle') D(M.chain(head, M.T(0.12 * sd, 0.0, 0.02), M.S(0.065, 0.11, 0.065)), W.uSphere, C.tip);   // 동그란 곱슬 귀
     else if (k === 'pom') D(M.chain(head, M.T(0.065 * sd, 0.16, 0.02), M.Rz(-0.22 * sd), M.S(0.04, 0.08, 0.025)), W.flame, C.tip);   // 털 속의 작은 귀
     else {
@@ -4554,13 +4558,12 @@ function drawDog(dg, coat, leashFrom) {   // 진돗개 셋과 몰티즈, 푸들,
       D(M.chain(head, M.T(0.078 * sd, 0.19, 0.012), M.Rz(-0.28 * sd), M.Rx(-0.15), M.S(0.03, 0.07, 0.02)), W.flame, C.tip);
     }
   }
-  if (k === 'maltese') { D(M.chain(head, M.T(0, 0.19, 0.03), M.S(0.045)), W.uSphere, C.body); for (const sd of [-1, 1]) D(M.chain(head, M.T(0.035 * sd, 0.225, 0.03), M.Rz(0.5 * sd), M.S(0.045, 0.025, 0.03)), W.uBox, [0.93, 0.42, 0.55]); }   // 머리 묶고 분홍 리본
   if (k === 'poodle') D(M.chain(head, M.T(0, 0.16, 0.01), M.S(0.1, 0.09, 0.1)), W.uSphere, C.cream);   // 머리 위 곱슬 방울
-  D(M.chain(head, M.T(0, -0.05, -0.03), M.Rx(0.35), M.S(0.115, 0.03, 0.115)), W.uCyl, k === 'jindo' ? [0.12, 0.12, 0.13] : [0.75, 0.2, 0.22]);   // 목걸이
+  D(M.chain(head, M.T(0, -0.05, -0.03), M.Rx(0.35), M.S(0.115, 0.03, 0.115)), W.uCyl, [0.30, 0.20, 0.13]);   // 목걸이: 기본은 수수한 갈색 가죽 (색은 나중에 꾸미기로)
   const wag = Math.sin(T * (dg.move > 0.3 ? 11 : 7)) * (lie > 0.5 ? 0.15 : 0.45);
   if (k === 'pom') { const tail = M.chain(body, M.T(0, 0.17, -0.12), M.Rz(wag * 0.4)); D(M.chain(tail, M.S(0.15, 0.1, 0.17)), W.uSphere, C.cream); }   // 등 위에 얹은 풍성한 꼬리
   else if (k === 'poodle') { const tail = M.chain(body, M.T(0, 0.1, -0.25), M.Rz(wag), M.Rx(-0.35)); D(M.chain(tail, M.T(0, 0.05, 0), M.S(0.025, 0.1, 0.025)), W.uCyl, C.body); D(M.chain(tail, M.T(0, 0.12, 0), M.S(0.065)), W.uSphere, C.cream); }   // 꼬리 끝 방울
-  else if (k === 'maltese') { const tail = M.chain(body, M.T(0, 0.13, -0.25), M.Rz(wag), M.Rx(-1.1)); D(M.chain(tail, M.T(0, 0.08, 0.03), M.S(0.07, 0.12, 0.07)), W.uSphere, C.cream); }
+  else if (k === 'maltese') { const tail = M.chain(body, M.T(0, 0.11, -0.25), M.Rz(wag * 0.7), M.Rx(-1.75)); D(M.chain(tail, M.T(0, 0.08, 0.02), M.S(0.08, 0.11, 0.08)), W.uSphere, C.cream); }   // 등 쪽으로 말린 복슬 꼬리
   else { const tail = M.chain(body, M.T(0, 0.12, -0.3), M.Rz(wag), M.Rx(-0.9)); D(M.chain(tail, M.T(0, 0.08, 0), M.S(0.05, 0.11, 0.05)), W.uSphere, C.body); D(M.chain(tail, M.T(0, 0.15, 0.06), M.S(0.045, 0.06, 0.06)), W.uSphere, C.cream); }   // 말아 올린 꼬리
   if (leashFrom) {   // 목줄: 손에서 목걸이까지 살짝 처지는 줄
     const col = M.xf(M.mul(root, M.chain(head, M.T(0, -0.05, -0.03))), 0, 0, 0), b = [col[0], col[1], col[2]], a = leashFrom;
@@ -5149,13 +5152,25 @@ function openNickForm() {
   nickTip(i18n('한글, 영문, 숫자로 2~12자. 다른 사람을 불쾌하게 하는 이름은 운영 원칙에 따라 바뀔 수 있어요'));
   setTimeout(() => { try { $('#gbNickIn').focus(); $('#gbNickIn').select(); } catch (e) {} }, 30);
 }
-function submitNick(e) {
+async function submitNick(e) {   // 직접 정한 이름은 서버(sangil_set_nick)가 겹치는지 확인하고 정한다
   if (e) e.preventDefault();
   if (!AUTH.user) return;
   const [v, why] = validNick($('#gbNickIn').value);
   if (!v) { nickTip(why, true); return; }
-  $('#gbNickRow').hidden = true;
-  setNick(v, true); nickTip(i18n('이제 {0}님이에요', v));
+  if (v === S.nick && AUTH.profile && AUTH.profile.nick_set) { $('#gbNickRow').hidden = true; nickTip(''); return; }
+  const btn = $('#gbNickRow button'); btn.disabled = true; nickTip(i18n('이름을 확인하는 중…'));
+  try {
+    const sb = await getSB(), { data, error } = await sb.rpc('sangil_set_nick', { p_nick: v });
+    if (error) {
+      if (/PGRST202|Could not find the function/i.test((error.code || '') + ' ' + (error.message || ''))) { $('#gbNickRow').hidden = true; setNick(v, true); nickTip(i18n('이제 {0}님이에요', v)); return; }   // 서버 준비 전에는 예전 방식으로
+      throw error;
+    }
+    if (!data || !data.ok) { nickTip(data && data.reason === 'taken' ? i18n('이미 다른 길벗이 쓰는 이름이에요. 다른 이름을 골라 주세요') : i18n('그 이름은 쓸 수 없어요'), true); return; }
+    const nn = cleanNick(data.nick || v);
+    if (AUTH.profile) { AUTH.profile.nick = nn; AUTH.profile.nick_set = true; }
+    $('#gbNickRow').hidden = true; setNick(nn, false); nickTip(i18n('이제 {0}님이에요', nn));
+  } catch (err) { console.warn('이름 정하기 실패', err); nickTip(i18n('지금은 이름을 정하지 못했어요. 잠시 뒤에 다시 해 보세요'), true); }
+  finally { btn.disabled = false; }
 }
 function retrack() {   // 바뀐 이름과 모습을 함께 걷는 사람들에게 다시 알린다
   try {
