@@ -1660,13 +1660,41 @@ const FS = `#version 300 es
 precision highp float;
 in vec3 vNor; in vec3 vCol; in vec3 vWorld; in float vExtra;
 uniform vec3 uSunDir, uSunCol, uSkyCol, uGndCol, uFogCol, uCam, uSnowCol;
-uniform float uFogD, uSnow, uSnowLine, uAlpha, uEmissive, uFlat, uSnowable, uFlow, uFlowSpeed, uTime;
+uniform float uFogD, uSnow, uSnowLine, uAlpha, uEmissive, uFlat, uSnowable, uFlow, uFlowSpeed, uTime, uDetail, uShadowOn, uShadowTex, uMoss, uWater;
 uniform vec4 uFire;
+uniform mat4 uLVP;
+uniform highp sampler2DShadow uShadow;
 out vec4 o;
+float h31(vec3 p){ p = fract(p * 0.3183099 + 0.1); p *= 17.0; return fract(p.x * p.y * p.z * (p.x + p.y + p.z)); }
+float vn3(vec3 x){ vec3 i = floor(x), f = fract(x); f = f * f * (3.0 - 2.0 * f);
+  return mix(mix(mix(h31(i), h31(i + vec3(1,0,0)), f.x), mix(h31(i + vec3(0,1,0)), h31(i + vec3(1,1,0)), f.x), f.y),
+             mix(mix(h31(i + vec3(0,0,1)), h31(i + vec3(1,0,1)), f.x), mix(h31(i + vec3(0,1,1)), h31(i + vec3(1,1,1)), f.x), f.y), f.z); }
+float shadowF(vec3 wp, vec3 n){   // 해 쪽에서 본 깊이 지도로 그림자 (가장자리는 부드럽게)
+  if (uShadowOn < 0.5) return 1.0;
+  vec4 lp = uLVP * vec4(wp + n * 0.08, 1.0);
+  vec3 q = lp.xyz / lp.w * 0.5 + 0.5;
+  if (q.x <= 0.0 || q.x >= 1.0 || q.y <= 0.0 || q.y >= 1.0 || q.z >= 1.0) return 1.0;
+  float s = 0.0;
+  for (int i = -1; i <= 1; i++) for (int j = -1; j <= 1; j++) s += texture(uShadow, vec3(q.xy + vec2(float(i), float(j)) * uShadowTex * 1.3, q.z - 0.0009));
+  s /= 9.0;
+  float edge = smoothstep(0.0, 0.1, min(min(q.x, 1.0 - q.x), min(q.y, 1.0 - q.y)));
+  return mix(1.0, s, edge);
+}
 void main(){
   vec3 n = normalize(vNor);
   if (uFlat > 0.5) { vec3 fn = normalize(cross(dFdx(vWorld), dFdy(vWorld))); if (dot(fn, n) < 0.0) fn = -fn; n = fn; }
   vec3 base = vCol;
+  float d = length(vWorld - uCam);
+  if (uDetail > 0.0) {   // 표면 결: 가까이는 잔결, 멀리는 큰 얼룩 (흙, 풀, 바위가 덜 밋밋하게)
+    float near = 1.0 - smoothstep(18.0, 80.0, d);
+    float g = vn3(vWorld * 1.9) * 0.55 + vn3(vWorld * 7.0) * 0.45 - 0.5;
+    float big = vn3(vWorld * 0.09) - 0.5;
+    base *= 1.0 + uDetail * (g * 0.26 * near + big * 0.22);
+  }
+  if (uMoss > 0.0) {   // 바위 윗면의 이끼
+    float m = smoothstep(0.35, 0.85, n.y) * smoothstep(0.38, 0.62, vn3(vWorld * 0.8) * 0.7 + vn3(vWorld * 3.1) * 0.3);
+    base = mix(base, vec3(0.30, 0.40, 0.17) * (0.85 + 0.3 * vn3(vWorld * 5.0)), m * uMoss * (1.0 - uSnow));
+  }
   if (uFlow > 0.5) {
     float s = sin(vWorld.x * 4.3 + vWorld.z * 3.7) * 0.5 + 0.5;
     float f = fract(vWorld.y * 0.28 + uTime * uFlowSpeed + s * 0.7);
@@ -1678,16 +1706,35 @@ void main(){
   float sm = snowAmt * smoothstep(0.30, 0.72, n.y) * (1.0 - 0.6 * vExtra);
   base = mix(base, uSnowCol, sm);
   float diff = max(dot(n, uSunDir), 0.0);
+  float sh = diff > 0.0 ? shadowF(vWorld, n) : 1.0;
   vec3 hemi = mix(uGndCol, uSkyCol, n.y * 0.5 + 0.5);
-  vec3 col = base * (hemi * 0.62 + uSunCol * diff * 0.78) + base * uEmissive;
+  vec3 col = base * (hemi * mix(0.62, 0.6, uShadowOn) + uSunCol * diff * mix(0.78, 0.9, uShadowOn) * sh) + base * uEmissive;
   if (uFire.w > 0.0) {   // 모닥불 불빛
     vec3 L = uFire.xyz - vWorld; float dl = max(length(L), 0.001);
     col += base * vec3(1.0, 0.52, 0.2) * uFire.w / (1.0 + dl * dl * 0.11) * (0.3 + 0.7 * max(dot(n, L / dl), 0.0));
   }
-  float d = length(vWorld - uCam);
+  float aOut = uAlpha;
+  if (uWater > 0.0) {   // 물: 하늘이 비치고(비스듬히 볼수록 더), 잔물결에 햇빛이 반짝인다
+    vec3 V = normalize(uCam - vWorld);
+    vec2 q = vWorld.xz; float t = uTime, e = 0.18;
+    float h0 = vn3(vec3(q * 0.8, t * 0.32)) + 0.32 * vn3(vec3(q * 2.6, t * 0.75));
+    float hx = vn3(vec3((q + vec2(e, 0.0)) * 0.8, t * 0.32)) + 0.32 * vn3(vec3((q + vec2(e, 0.0)) * 2.6, t * 0.75));
+    float hz = vn3(vec3((q + vec2(0.0, e)) * 0.8, t * 0.32)) + 0.32 * vn3(vec3((q + vec2(0.0, e)) * 2.6, t * 0.75));
+    vec3 N = normalize(vec3((h0 - hx) / e * 0.22 * uWater, 1.0, (h0 - hz) / e * 0.22 * uWater));
+    float fres = 0.06 + 0.94 * pow(1.0 - max(dot(V, N), 0.0), 5.0);
+    vec3 Rv = reflect(-V, N);
+    vec3 sky = mix(uFogCol, uSkyCol * 1.08, smoothstep(0.0, 0.55, Rv.y));
+    col = mix(col, sky, clamp(fres * 0.95, 0.0, 0.85));
+    float sd = max(dot(Rv, uSunDir), 0.0);
+    col += uSunCol * (pow(sd, 260.0) * 3.2 + pow(sd, 28.0) * 0.12) * sh * uWater;
+    aOut = mix(uAlpha, 1.0, fres * 0.6);
+  }
+  float lum = dot(col, vec3(0.299, 0.587, 0.114));
+  col = mix(vec3(lum), col, 1.1);   // 채도 조금
+  col = clamp((col - 0.5) * 1.06 + 0.5, 0.0, 1.5);   // 대비 조금
   float f = 1.0 - exp(-pow(d * uFogD, 1.5));
   col = mix(col, uFogCol, clamp(f, 0.0, 1.0));
-  o = vec4(col, uAlpha);
+  o = vec4(col, aOut);
 }`;
 const SKY_VS = `#version 300 es
 layout(location=0) in vec2 aPos; out vec2 vNdc;
@@ -1726,8 +1773,10 @@ function program(vs, fs, names) {
   if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p));
   const u = {}; for (const n of names) u[n] = gl.getUniformLocation(p, n); return { p, u };
 }
-const P = program(VS, FS, ['uVP','uModel','uTime','uWind','uMode','uSunDir','uSunCol','uSkyCol','uGndCol','uFogCol','uCam','uSnowCol','uFogD','uSnow','uSnowLine','uAlpha','uEmissive','uFlat','uSnowable','uFlow','uFlowSpeed','uFire']);
+const P = program(VS, FS, ['uVP','uModel','uTime','uWind','uMode','uSunDir','uSunCol','uSkyCol','uGndCol','uFogCol','uCam','uSnowCol','uFogD','uSnow','uSnowLine','uAlpha','uEmissive','uFlat','uSnowable','uFlow','uFlowSpeed','uFire','uDetail','uShadowOn','uShadowTex','uLVP','uShadow','uMoss','uWater']);
 const PS = program(SKY_VS, SKY_FS, ['uInvVP','uCam','uZen','uHor','uSunDir','uGlow','uCloud','uTime','uNight','uRain']);
+const PD = program(VS, `#version 300 es
+precision mediump float; out vec4 o; void main(){ o = vec4(1.0); }`, ['uVP','uModel','uTime','uWind','uMode']);
 
 /* geometry */
 class Geo {
@@ -1761,6 +1810,16 @@ function sphere(g, cx, cy, cz, rx, ry, rz, su, sv, col, ex = 1, smoothN = false,
       add(a, b, c); add(a, c, d);
     } else g.quad(a, b, c, d, col, ex, ctr);
   }
+}
+function sphereL(g, cx, cy, cz, rx, ry, rz, su, sv, col, ex, jit, rnd) {   // sphere()와 같지만 울퉁불퉁함에 따로 받은 난수를 쓴다
+  const pts = [];
+  for (let j = 0; j <= sv; j++) {
+    const v = j / sv * Math.PI, row = [];
+    for (let i = 0; i < su; i++) { const uu = i / su * TAU, k = (jit && j > 0 && j < sv) ? 1 + (rnd() - 0.5) * jit : 1; row.push([cx + Math.sin(v) * Math.cos(uu) * rx * k, cy + Math.cos(v) * ry * k, cz + Math.sin(v) * Math.sin(uu) * rz * k]); }
+    row.push(row[0]); pts.push(row);
+  }
+  const ctr = [cx, cy, cz];
+  for (let j = 0; j < sv; j++) for (let i = 0; i < su; i++) g.quad(pts[j][i], pts[j][i + 1], pts[j + 1][i + 1], pts[j + 1][i], col, ex, ctr);
 }
 function cone(g, cx, cy, cz, r, h, seg, col, ex = 1, rot = 0) {
   const apex = [cx, cy + h, cz], ctr = [cx, cy + h * 0.3, cz];
@@ -1886,11 +1945,16 @@ function lampPost(g, lg, x, z) {
   cyl(g, x, y, z, 0.17, 0.15, 0.4, 8, PCOL.lamp); cyl(g, x, y + 0.35, z, 0.07, 0.06, 3.05, 6, PCOL.lamp); cyl(g, x, y + 3.35, z, 0.2, 0.1, 0.14, 8, PCOL.lamp);
   cyl(lg, x, y + 3.48, z, 0.17, 0.25, 0.55, 8, [1, 1, 1], 1); cone(lg, x, y + 4.02, z, 0.28, 0.3, 8, [0.12, 0.13, 0.12], 0);
 }
-function bench(g, x, z, yaw) {
-  const y = groundY(x, z), L = localPlacer(x, z, yaw);
-  const [sx, sz] = L(0, 0); box(g, sx, y + 0.46, sz, 1.9, 0.1, 0.5, PCOL.bench, 0, yaw);
-  const [bx, bz] = L(0, -0.25); box(g, bx, y + 0.82, bz, 1.9, 0.5, 0.08, PCOL.bench, 0, yaw);
-  for (const sd of [-0.8, 0.8]) { const [lx, lz] = L(sd, -0.02); box(g, lx, y + 0.23, lz, 0.08, 0.46, 0.5, PCOL.iron, 0, yaw); }
+function bench(g, x, z, yaw) {   // 센트럴파크 벤치: 앉는 널 세 장, 등받이 널 둘, 무쇠 다리와 팔걸이
+  const y = groundY(x, z), L = localPlacer(x, z, yaw), wd = [0.36, 0.25, 0.16], wd2 = [0.42, 0.30, 0.19];
+  for (const [k, lz] of [[0, 0.17], [1, 0], [2, -0.17]]) { const [sx, sz] = L(0, lz); box(g, sx, y + 0.46, sz, 1.9, 0.05, 0.13, k % 2 ? wd2 : wd, 0, yaw); }
+  for (const [k, hy] of [[0, 0.68], [1, 0.9]]) { const [bx, bz] = L(0, -0.27 - (hy - 0.68) * 0.25); box(g, bx, y + hy, bz, 1.9, 0.13, 0.04, k ? wd : wd2, 0, yaw, -0.25); }
+  for (const sd of [-0.82, 0.82]) {
+    const [fx, fz] = L(sd, 0.18); box(g, fx, y + 0.22, fz, 0.06, 0.44, 0.06, PCOL.iron, 0, yaw);
+    const [rx, rz] = L(sd, -0.22); box(g, rx, y + 0.45, rz, 0.06, 0.9, 0.06, PCOL.iron, 0, yaw, -0.18);
+    const [mx, mz] = L(sd, 0); box(g, mx, y + 0.42, mz, 0.06, 0.05, 0.5, PCOL.iron, 0, yaw);
+    const [ax, az] = L(sd * 1.02, 0.02); box(g, ax, y + 0.66, az, 0.07, 0.05, 0.48, PCOL.iron, 0, yaw); box(g, ax, y + 0.55, az + 0, 0.05, 0.22, 0.05, PCOL.iron, 0, yaw);
+  }
 }
 function waterTower(g, x, y, z) {
   for (const [a, b] of [[-0.8, -0.8], [0.8, -0.8], [0.8, 0.8], [-0.8, 0.8]]) box(g, x + a, y + 0.8, z + b, 0.14, 1.6, 0.14, PCOL.iron, 0);
@@ -1970,8 +2034,14 @@ function buildParkProps(g) {
       if (prev) { const mx = (x + prev[0]) / 2, mz = (z + prev[1]) / 2, len = Math.hypot(x - prev[0], z - prev[1]), yaw = Math.atan2(x - prev[0], z - prev[1]); box(g, mx, y + 1.0, mz, 0.06, 0.06, len, PCOL.iron, 0, yaw); }
       prev = [x, z]; } }
   // 공원 돌담 (5번가 입구는 비워 둔다)
-  for (let z = -PARK.hl; z < PARK.hl; z += 10) for (const sd of [-1, 1]) box(g, sd * (PARK.hw + 0.5), 0.9, z + 5, 0.6, 1.0, 10.02, [0.52, 0.50, 0.46], 0);
-  for (let x = -PARK.hw; x < PARK.hw; x += 10) for (const sd of [-1, 1]) { if (sd < 0 && x + 5 > 30) continue; box(g, x + 5, 0.9, sd * (PARK.hl + 0.5), 10.02, 1.0, 0.6, [0.52, 0.50, 0.46], 0); }
+  { const wr = rng(4410), wall = (x0, z0, x1, z1) => {   // 돌담 한 줄: 두 켜로 돌을 엇갈려 쌓고 위에 갓돌
+      const len = Math.hypot(x1 - x0, z1 - z0), dx = (x1 - x0) / len, dz = (z1 - z0) / len, yaw = Math.atan2(dx, dz);
+      for (let row = 0; row < 2; row++) { let t = row ? -0.45 : 0; while (t < len) { const l = 0.7 + wr() * 0.8, a = Math.max(0, t), b = Math.min(len, t + l); if (b - a > 0.15) { const m = (a + b) / 2, v = 0.42 + wr() * 0.16, w = v + (wr() - 0.5) * 0.03; const qx = x0 + dx * m, qz = z0 + dz * m; box(g, qx, Math.min(getH(qx, qz), 1.2) + 0.12 + row * 0.42, qz, 0.58, 0.4 + (row ? 0 : 0.3), b - a - 0.04, [w, v * 0.98, v * 0.93], 0, yaw); } t += l; } }
+      for (let t = 0; t < len; t += 2) { const b = Math.min(len, t + 2), m = (t + b) / 2, v = 0.6 + wr() * 0.06; const qx = x0 + dx * m, qz = z0 + dz * m; box(g, qx, Math.min(getH(qx, qz), 1.2) + 0.84, qz, 0.7, 0.1, b - t - 0.03, [v, v * 0.98, v * 0.95], 0, yaw); }
+    };
+    for (const sd of [-1, 1]) wall(sd * (PARK.hw + 0.5), -PARK.hl, sd * (PARK.hw + 0.5), PARK.hl);
+    wall(-PARK.hw, PARK.hl + 0.5, PARK.hw, PARK.hl + 0.5); wall(-PARK.hw, -PARK.hl - 0.5, 30, -PARK.hl - 0.5);   // 5번가 입구는 비워 둔다
+  }
   W.lampHeads = upload(lg);
   buildCity();
 }
@@ -2112,12 +2182,31 @@ function buildWorld() {
     if (Math.abs(slope) > 0.26 && i % 2 === 0) box(g, TX[i], TH[i] + 0.06, TZ[i], 2.3, 0.16, 0.34, COL.wood, 0, yaw);
     if (Math.abs(slope) > 0.2 && i % 8 === 0) { const px = TX[i] + c*2.3, pz = TZ[i] - s*2.3; cyl(g, px, getH(px, pz) - 0.1, pz, 0.12, 0.1, 1.1, 6, COL.woodDark); }
   }
-  // 이정표
-  for (const i of [nearIdx(PV.x, PV.z) - 4, nearIdx(DK.x, DK.z) + 5, Math.floor(TN * 0.82)]) {
-    const yaw = tan(i), c = Math.cos(yaw), s = Math.sin(yaw), px = TX[i] - c*2.6, pz = TZ[i] + s*2.6, y = getH(px, pz);
-    box(g, px, y + 1.0, pz, 0.16, 2.0, 0.16, COL.woodDark, 0, yaw);
-    box(g, px, y + 1.75, pz, 1.2, 0.3, 0.08, COL.board, 0, yaw + Math.PI/2);
-    box(g, px, y + 1.35, pz, 1.0, 0.28, 0.08, COL.board, 0, yaw + Math.PI/2 + 0.5);
+  // 이정표: 나무 기둥에 화살표 모양 널판, 작은 지붕
+  { const sign = (i, side) => {
+      const yaw = tan(i), c = Math.cos(yaw), s = Math.sin(yaw), px = TX[i] - c * 2.6 * side, pz = TZ[i] + s * 2.6 * side, y = getH(px, pz);
+      box(g, px, y + 1.05, pz, 0.15, 2.1, 0.15, COL.woodDark, 0, yaw);
+      box(g, px, y + 2.18, pz, 0.5, 0.06, 0.34, COL.woodDark, 0, yaw, 0); box(g, px, y + 2.24, pz, 0.34, 0.06, 0.24, COL.woodDark, 0, yaw);
+      for (const [hy, dirA, w] of [[1.78, 0, 1.1], [1.42, Math.PI, 0.95]]) {
+        const a = yaw + Math.PI / 2 + dirA, ox = Math.sin(a) * (w / 2 - 0.05), oz = Math.cos(a) * (w / 2 - 0.05);
+        box(g, px + ox, y + hy, pz + oz, 0.07, 0.26, w - 0.16, COL.board, 0, a);
+        const tx = px + Math.sin(a) * (w - 0.1), tz = pz + Math.cos(a) * (w - 0.1);   // 화살촉
+        g.tri([tx - Math.sin(a) * 0.08 + 0, y + hy + 0.13, tz - Math.cos(a) * 0.08], [tx - Math.sin(a) * 0.08, y + hy - 0.13, tz - Math.cos(a) * 0.08], [tx + Math.sin(a) * 0.14, y + hy, tz + Math.cos(a) * 0.14], COL.board, 0, [px, y + hy, pz]);
+        box(g, px + ox, y + hy, pz + oz, 0.075, 0.04, w * 0.55, [0.30, 0.22, 0.15], 0, a);   // 새긴 글씨 자리
+      }
+    };
+    for (const i of [nearIdx(PV.x, PV.z) - 4, nearIdx(DK.x, DK.z) + 5, Math.floor(TN * 0.82), 9, Math.floor(TN * 0.3), Math.floor(TN * 0.6)]) sign(clamp(i, 4, TN - 5), 1);
+  }
+  // 돌탑: 지나가는 사람들이 하나씩 얹은 작은 돌탑
+  { const cr = rng(5150);
+    for (const f of [0.16, 0.34, 0.48, 0.7, 0.9]) {
+      const i = clamp(Math.floor(TN * f), 4, TN - 5), yaw = tan(i), c = Math.cos(yaw), s = Math.sin(yaw), px = TX[i] + c * 2.7, pz = TZ[i] - s * 2.7;
+      if (pads.some(p => Math.hypot(px - p.x, pz - p.z) < p.r + 1.5)) continue;
+      let y = getH(px, pz) - 0.05; const n = 5 + Math.floor(cr() * 3);
+      for (let k = 0; k < n; k++) { const r = 0.55 * (1 - k / (n + 1.5)) + 0.08, h = r * (0.42 + cr() * 0.12), v = 0.5 + cr() * 0.25; sphereL(g, px + (cr() - 0.5) * 0.08, y + h * 0.8, pz + (cr() - 0.5) * 0.08, r, h, r * (0.85 + cr() * 0.2), 7, 4, [v, v * 0.98, v * 0.94], 0, 0.22, cr); y += h * 1.55; }
+      for (let k = 0; k < 6; k++) { const a = k / 6 * TAU + cr(), d = 0.75 + cr() * 0.4, r = 0.12 + cr() * 0.1, v = 0.45 + cr() * 0.25, qx = px + Math.cos(a) * d, qz = pz + Math.sin(a) * d; sphereL(g, qx, getH(qx, qz) + r * 0.2, qz, r, r * 0.6, r, 5, 3, [v, v, v * 0.95], 0, 0.3, cr); }
+      addObstacle(px, pz, 0.55);
+    }
   }
   { // 구름폭포 둘레 바위: 폭포 양옆 절벽과 물속 바위
     const [dx, dz] = FALL_DIR, px = -dz, pz = dx;
@@ -2168,9 +2257,21 @@ function buildWorld() {
   sphere(dec, 0, 3.7, 0, 1.9, 1.55, 1.9, 7, 5, [1,1,1], 1, false, 0.2);
   sphere(dec, 0.95, 3.1, 0.5, 1.3, 1.1, 1.3, 6, 4, [1,1,1], 1, false, 0.2);
   sphere(dec, -0.85, 3.25, -0.4, 1.4, 1.15, 1.4, 6, 4, [1,1,1], 1, false, 0.2);
-  sphere(dec, 0.2, 4.7, -0.2, 1.15, 0.95, 1.15, 6, 4, [1,1,1], 1, false, 0.2);
+  sphere(dec, 0.2, 4.7, -0.2, 1.15, 0.95, 1.15, 6, 4, [1,1,1], 1, false, 0.2);   // (예전 모양: 세상 배치 난수 순서를 지키려고 그대로 만들고 쓰지는 않는다)
+  const decR = (() => {
+    const lr = rng(77011), g2 = new Geo();
+    cyl(g2, 0, 0, 0, 0.36, 0.22, 2.7, 6, COL.trunk, 0);
+    for (const [yaw, p] of [[0.6, 0.75], [2.9, 0.7], [4.6, 0.8]]) { const L = 1.5, ax = [Math.sin(yaw) * Math.sin(p), Math.cos(p), Math.cos(yaw) * Math.sin(p)]; box(g2, ax[0] * L / 2, 2.25 + ax[1] * L / 2, ax[2] * L / 2, 0.13, L, 0.13, COL.trunk, 0, yaw, p); }   // 가지
+    const TOP = [1.08, 1.06, 1.0], MID = [1, 1, 1], LOW = [0.84, 0.85, 0.9], WARM = [1.06, 0.9, 0.82], COOL = [0.9, 1.03, 0.92];
+    const CL = coarse ? [[0, 3.75, 0, 1.55, MID], [0.1, 4.75, -0.1, 1.05, TOP], [1.1, 4.0, 0.5, 1.0, WARM], [-1.05, 4.05, 0.4, 1.0, TOP], [0.4, 3.9, -1.1, 1.0, COOL], [-0.5, 3.2, -0.9, 0.9, LOW], [0.5, 3.15, 1.0, 0.9, LOW]]
+      : [[0, 3.75, 0, 1.45, MID], [0.15, 4.75, -0.1, 1.05, TOP], [1.05, 4.2, 0.55, 0.95, WARM], [-0.95, 4.25, 0.45, 0.95, TOP], [0.55, 4.15, -1.0, 0.95, COOL], [-0.7, 4.05, -0.85, 0.92, MID],
+         [1.5, 3.35, -0.15, 0.9, LOW], [-1.5, 3.4, 0.15, 0.9, WARM], [0.25, 3.25, 1.45, 0.9, LOW], [-0.15, 3.3, -1.45, 0.88, COOL], [0.9, 2.95, 0.9, 0.75, LOW], [-0.95, 3.0, -0.6, 0.75, LOW]];
+    for (const [x, y, z, r, c] of CL) sphereL(g2, x, y, z, r, r * 0.85, r, coarse ? 5 : 6, 4, c, 1, 0.3, lr);
+    return g2;
+  })();
   const maxT = coarse ? 1500 : 2300;
-  W.con = makeInst(con, maxT); W.dec = makeInst(dec, maxT);
+  W.con = makeInst(con, maxT); W.dec = makeInst(decR, maxT);
+  W.conS = makeInst(con, 520); W.decS = makeInst(decR, 520);   // 그림자용: 내 주변 나무만
   W.decA = []; W.decW = []; W.conA = []; W.conW = [];
   const putTree = (x, z, isCon, sc, y = getH(x, z)) => {
     const m = isCon ? W.con : W.dec; if (m.n >= m.max) return false;
@@ -2225,6 +2326,24 @@ function buildWorld() {
     if (isCon) { const v = rr(0.8, 1.15); W.conA.push([0.17*v, 0.33*v, 0.21*v]); W.conW.push([0.14*v, 0.26*v, 0.21*v]); }
     else { const c = AUTUMN_LEAF[Math.floor(R() * AUTUMN_LEAF.length)], v = rr(0.88, 1.08); W.decA.push([c[0]*v, c[1]*v, c[2]*v]); const w = rr(0.72, 0.84); W.decW.push([w, w + 0.02, w + 0.06]); }
     placed++;
+  }
+  /* 풀포기 (가는 잎 7장), 들꽃 (줄기와 꽃잎 다섯), 억새 (키 큰 잎과 이삭) */
+  { const gg = new Geo(), gr = rng(3301);
+    const blade = (geo, a, lean, h, w, c0, c1) => { const bx = Math.cos(a), bz = Math.sin(a), px = -bz * w, pz = bx * w, tip = [bx * lean, h, bz * lean], up = [0, 1, 0];
+      geo.v([px, 0, pz], up, c0, 1); geo.v([-px, 0, -pz], up, c0, 1); geo.v(tip, up, c1, 1); };
+    for (let k = 0; k < 7; k++) blade(gg, k / 7 * TAU + gr() * 0.6, 0.12 + gr() * 0.2, 0.32 + gr() * 0.3, 0.04, [0.5, 0.52, 0.48], [1.12, 1.12, 1.02]);
+    W.grass = makeInst(gg, coarse ? 1800 : 3400);
+    const fg = new Geo(), up = [0, 1, 0];
+    for (const [ox, oz, hh] of [[0, 0, 0.42], [0.09, 0.05, 0.34], [-0.07, 0.08, 0.3]]) {
+      fg.v([ox - 0.01, 0, oz], up, [0.32, 0.45, 0.2], 0); fg.v([ox + 0.01, 0, oz], up, [0.32, 0.45, 0.2], 0); fg.v([ox, hh, oz], up, [0.38, 0.52, 0.24], 0);
+      for (let p = 0; p < 5; p++) { const a0 = p / 5 * TAU, a1 = a0 + 0.9, r = 0.075; fg.v([ox, hh, oz], up, [1, 1, 1], 1); fg.v([ox + Math.cos(a0) * r, hh + 0.01, oz + Math.sin(a0) * r], up, [1, 1, 1], 1); fg.v([ox + Math.cos(a1) * r, hh + 0.01, oz + Math.sin(a1) * r], up, [1, 1, 1], 1); }
+      sphereL(fg, ox, hh + 0.012, oz, 0.025, 0.015, 0.025, 5, 3, [0.95, 0.75, 0.2], 0, 0, gr);
+    }
+    W.flower = makeInst(fg, coarse ? 260 : 480);
+    const rg = new Geo();
+    for (let k = 0; k < 6; k++) { const a = k / 6 * TAU + gr() * 0.5, lean = 0.12 + gr() * 0.2, h = 0.85 + gr() * 0.4; blade(rg, a, lean, h, 0.03, [0.5, 0.48, 0.4], [1.0, 0.96, 0.84]);
+      sphereL(rg, Math.cos(a) * (lean + 0.03), h + 0.12, Math.sin(a) * (lean + 0.03), 0.045, 0.16, 0.045, 5, 3, [1.25, 1.2, 1.1], 1, 0.2, gr); }
+    W.reed = makeInst(rg, coarse ? 160 : 300);
   }
   /* 카메라가 나뭇잎 속으로 들어가지 않게: 나무 위치를 칸에 나눠 둔다 */
   W.treeGrid = new Map();
@@ -2326,6 +2445,7 @@ function envMix(sb, tb) {
     for (const key in RAIN) o[key] = mix3(o[key], RAIN[key], k);
     o.fog = lerp(o.fog, 0.0095, k);
   }
+  o.fog *= 0.8;   // 멀리까지 조금 더 맑게
   if (IS_PARK) o.fog *= 0.7;
   const l = Math.hypot(...o.dir); o.dir = o.dir.map(v => v / l);
   return o;
@@ -4057,7 +4177,103 @@ function resize() {
   const w = Math.round(canvas.clientWidth * dpr), h = Math.round(canvas.clientHeight * dpr);
   if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
 }
-const u = P.u;
+let u = P.u;
+/* 햇빛 그림자: 해 쪽에서 내 주변(반경 약 40m)을 한 번 더 그려 깊이 지도를 만든다. '가볍게' 화질이나 밤에는 끈다 */
+const SHADOW = { on: false, size: coarse ? 1024 : 2048, R: 40, tex: null, fb: null, lvp: M.ident(), ok: true };
+function shadowInit() {
+  try {
+    const t = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, t);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT24, SHADOW.size, SHADOW.size, 0, gl.DEPTH_COMPONENT, gl.UNSIGNED_INT, null);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_COMPARE_MODE, gl.COMPARE_REF_TO_TEXTURE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_COMPARE_FUNC, gl.LEQUAL);
+    const fb = gl.createFramebuffer(); gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, t, 0);
+    gl.drawBuffers([gl.NONE]); gl.readBuffer(gl.NONE);
+    const okFb = gl.checkFramebufferStatus(gl.FRAMEBUFFER) === gl.FRAMEBUFFER_COMPLETE;
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null); gl.bindTexture(gl.TEXTURE_2D, null);
+    if (!okFb) { SHADOW.ok = false; return; }
+    SHADOW.tex = t; SHADOW.fb = fb;
+  } catch (e) { SHADOW.ok = false; console.warn('그림자 준비 실패', e); }
+}
+let shTreeAt = null;
+/* 풀포기: 6m 칸마다 정해진 자리(칸 번호로 만든 난수)를 한 번 계산해 두고, 내 주변 칸만 모아 그린다 */
+const GRASS = { cell: 6, rad: 4, cache: new Map(), at: '', sb: -1 };
+function grassCell(cx, cz) {
+  const key = cx + ',' + cz; let c = GRASS.cache.get(key); if (c) return c;
+  c = { g: [], f: [], r: [] }; const rnd = rng((cx * 73856093) ^ (cz * 19349663) ^ (IS_PARK ? 11 : 29));
+  const tries = IS_PARK ? 24 : 20;
+  for (let t = 0; t < tries; t++) {
+    const x = (cx + rnd()) * GRASS.cell, z = (cz + rnd()) * GRASS.cell, roll = rnd(), sc = 0.95 + rnd() * 0.7, rot = rnd() * TAU, tone = rnd();
+    if (IS_PARK) {
+      if (Math.abs(x) > PARK.hw - 1.2 || Math.abs(z) > PARK.hl - 1.2 || parkPathNear(x, z) || trailDist(x, z)[0] < 2.8 || inWater(x, z, 1.1) || bridgeFloor(x, z) !== null) continue;
+      if (Math.hypot(x - FOUNTAIN.x, z - FOUNTAIN.z) < 13 || pads.some(p => Math.hypot(x - p.x, z - p.z) < p.r + 1)) continue;
+    } else {
+      if (trailDist(x, z)[0] < 2.0 || inWater(x, z, 1.1) || pads.some(p => Math.hypot(x - p.x, z - p.z) < p.r + 0.8) || Math.hypot(x - CIRCLE.x, z - CIRCLE.z) < CIRCLE.R + 2) continue;
+      const nn = getN(x, z); if (nn[1] < 0.72) continue;
+      if (getH(x, z) > 104 && roll < 0.6) continue;
+    }
+    if (inCafeBuilding(x, z)) continue;
+    const y = groundY(x, z) - 0.02;
+    if (!IS_PARK && roll > 0.93 && getN(x, z)[1] > 0.85) { c.r.push([x, y, z, rot, 0.86 + tone * 0.1, 0.8 + tone * 0.08, 0.66, sc * 1.1]); continue; }   // 억새
+    if (roll > 0.88) { const P = IS_PARK ? [[1, 1, 0.98], [0.98, 0.85, 0.35], [0.78, 0.66, 0.95]] : [[1, 1, 0.97], [0.76, 0.66, 0.95], [0.98, 0.84, 0.32]], pc = P[Math.floor(tone * 3) % 3]; c.f.push([x, y, z, rot, pc[0], pc[1], pc[2], sc]); continue; }   // 들꽃: 구절초, 쑥부쟁이, 산국
+    const gc = IS_PARK ? [0.34 + tone * 0.12, 0.5 + tone * 0.1, 0.2 + tone * 0.05] : [0.46 + tone * 0.2, 0.5 + tone * 0.1, 0.22 + tone * 0.04];
+    c.g.push([x, y, z, rot, gc[0], gc[1], gc[2], sc]);
+    for (let e = 0; e < 2; e++) if (rnd() < 0.7) { const x2 = x + (rnd() - 0.5) * 0.8, z2 = z + (rnd() - 0.5) * 0.8; c.g.push([x2, groundY(x2, z2) - 0.02, z2, rnd() * TAU, gc[0] * 0.92, gc[1] * 0.95, gc[2], sc * (0.7 + rnd() * 0.3)]); }
+  }
+  GRASS.cache.set(key, c); return c;
+}
+function updateGrass() {
+  if (!S.started || !W.grass) return;
+  const cx = Math.floor(player.x / GRASS.cell), cz = Math.floor(player.z / GRASS.cell), key = cx + ',' + cz;
+  if (key === GRASS.at) return;
+  GRASS.at = key;
+  const fill = (m, list) => { let k = 0; for (const it of list) { if (k >= m.max) break; m.off.set([it[0], it[1], it[2], it[3]], k * 4); m.col.set([it[4], it[5], it[6], it[7]], k * 4); k++; } m.n = k; syncInst(m, true); };
+  const G = [], Fl = [], Rd = [], R2 = GRASS.rad;
+  for (let dz = -R2; dz <= R2; dz++) for (let dx = -R2; dx <= R2; dx++) { if (dx * dx + dz * dz > R2 * R2 + 1) continue; const c = grassCell(cx + dx, cz + dz); G.push(...c.g); Fl.push(...c.f); Rd.push(...c.r); }
+  const d2 = it => (it[0] - player.x) ** 2 + (it[2] - player.z) ** 2;
+  if (G.length > W.grass.max) G.sort((a, b) => d2(a) - d2(b));
+  fill(W.grass, G); fill(W.flower, Fl); fill(W.reed, Rd);
+  if (GRASS.cache.size > 900) GRASS.cache.clear();
+}
+function drawGrass() {
+  if (!S.started || !W.grass || S.sb > 0.6) return;   // 눈이 덮이면 풀은 감춘다
+  updateGrass();
+  draw(W.grass, { mode: 1, wind: 7, flat: 0, snowable: 0 });
+  if (S.sb < 0.3) draw(W.flower, { mode: 1, wind: 5, flat: 0, snowable: 0 });
+  draw(W.reed, { mode: 1, wind: 3.2, flat: 0, snowable: 0 });
+}
+function shadowTrees() {   // 그림자 범위 안의 나무만 골라 담는다 (4m 넘게 움직였을 때만)
+  if (shTreeAt && Math.hypot(player.x - shTreeAt[0], player.z - shTreeAt[1]) < 4) return;
+  shTreeAt = [player.x, player.z];
+  const rr2 = (SHADOW.R + 14) ** 2;
+  for (const [src, dst] of [[W.dec, W.decS], [W.con, W.conS]]) {
+    let k = 0;
+    for (let i = 0; i < src.n && k < dst.max; i++) { const dx = src.off[i * 4] - player.x, dz = src.off[i * 4 + 2] - player.z; if (dx * dx + dz * dz > rr2) continue; for (let j = 0; j < 4; j++) { dst.off[k * 4 + j] = src.off[i * 4 + j]; dst.col[k * 4 + j] = src.col[i * 4 + j]; } k++; }
+    dst.n = k; syncInst(dst, true);
+  }
+}
+function ortho(l, r, b, t, n, f) { return new Float32Array([2 / (r - l), 0, 0, 0, 0, 2 / (t - b), 0, 0, 0, 0, -2 / (f - n), 0, -(r + l) / (r - l), -(t + b) / (t - b), -(f + n) / (f - n), 1]); }
+function renderShadow(env) {
+  SHADOW.on = false;
+  if (!S.started || !S.quality || S.night > 0.5 || !SHADOW.ok || env.dir[1] < 0.06) return;
+  if (!SHADOW.tex) { shadowInit(); if (!SHADOW.ok) return; }
+  const R = SHADOW.R, d = env.dir, up = Math.abs(d[1]) > 0.97 ? [0, 0, 1] : [0, 1, 0];
+  const L = M.lookAt([d[0] * 300, d[1] * 300, d[2] * 300], [0, 0, 0], up);
+  const c = M.xf(L, player.x, player.y, player.z), tx = (2 * R) / SHADOW.size;
+  const cx = Math.round(c[0] / tx) * tx, cy = Math.round(c[1] / tx) * tx;   // 텍셀 단위로 맞춰 걸을 때 그림자 가장자리가 떨리지 않게
+  SHADOW.lvp = M.mul(ortho(cx - R, cx + R, cy - R, cy + R, -c[2] - 260, -c[2] + 260), L);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, SHADOW.fb); gl.viewport(0, 0, SHADOW.size, SHADOW.size);
+  gl.clear(gl.DEPTH_BUFFER_BIT); gl.enable(gl.DEPTH_TEST); gl.depthMask(true); gl.disable(gl.BLEND);
+  gl.useProgram(PD.p); gl.uniformMatrix4fv(PD.u.uVP, false, SHADOW.lvp); gl.uniform1f(PD.u.uTime, T);
+  gl.enable(gl.POLYGON_OFFSET_FILL); gl.polygonOffset(1.6, 3.0);
+  u = PD.u;
+  shadowTrees();
+  try { gl.vertexAttrib4f(3, 0, 0, 0, 0); drawOpaque(true); } finally { u = P.u; }
+  gl.disable(gl.POLYGON_OFFSET_FILL);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+  SHADOW.on = true;
+}
 function setCommon(env) {
   gl.useProgram(P.p);
   gl.uniformMatrix4fv(u.uVP, false, VP); gl.uniform1f(u.uTime, T);
@@ -4065,6 +4281,8 @@ function setCommon(env) {
   gl.uniform3fv(u.uFogCol, env.hor); gl.uniform3fv(u.uCam, eye); gl.uniform3fv(u.uSnowCol, [0.95, 0.97, 1.0]);
   gl.uniform1f(u.uFogD, env.fog); gl.uniform1f(u.uSnow, S.sb); gl.uniform1f(u.uSnowLine, lerp(122, 60, S.sb));
   const f = fireLight(); gl.uniform4f(u.uFire, f[0], f[1], f[2], f[3]);
+  gl.uniform1f(u.uShadowOn, SHADOW.on ? 1 : 0); gl.uniform1f(u.uShadowTex, 1 / SHADOW.size); gl.uniformMatrix4fv(u.uLVP, false, SHADOW.lvp);
+  gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, SHADOW.tex); gl.uniform1i(u.uShadow, 1); gl.activeTexture(gl.TEXTURE0);
 }
 function fireLight() {
   const flick = 0.82 + 0.1 * Math.sin(T * 13.1) + 0.08 * Math.sin(T * 7.3 + 1.7);
@@ -4080,7 +4298,7 @@ function draw(m, o = {}) {
   gl.uniform1f(u.uMode, o.mode === undefined ? 1 : o.mode); gl.uniform1f(u.uFlat, o.flat === undefined ? 1 : o.flat);
   gl.uniform1f(u.uWind, o.wind || 0); gl.uniform1f(u.uAlpha, o.alpha === undefined ? 1 : o.alpha);
   gl.uniform1f(u.uEmissive, o.emissive || 0); gl.uniform1f(u.uSnowable, o.snowable === undefined ? 1 : o.snowable);
-  gl.uniform1f(u.uFlow, o.flow || 0); gl.uniform1f(u.uFlowSpeed, o.flowSpeed || 0);
+  gl.uniform1f(u.uFlow, o.flow || 0); gl.uniform1f(u.uFlowSpeed, o.flowSpeed || 0); gl.uniform1f(u.uDetail, o.detail || 0); gl.uniform1f(u.uMoss, o.moss || 0); gl.uniform1f(u.uWater, o.water || 0);
   if (o.tint) gl.vertexAttrib4f(4, o.tint[0], o.tint[1], o.tint[2], 1); else gl.vertexAttrib4f(4, 1, 1, 1, 1);
   gl.bindVertexArray(m.vao);
   if (m.indexed) gl.drawElements(gl.TRIANGLES, m.count, gl.UNSIGNED_INT, 0);
@@ -4260,37 +4478,21 @@ function drawShadow(x, z, s) {
   let ax = [1, 0, 0]; ax = [ax[0] - n[0] * n[0], -n[0] * n[1], -n[0] * n[2]]; const al = Math.hypot(...ax); ax = ax.map(v => v / al);
   const bz = [ax[1]*n[2] - ax[2]*n[1], ax[2]*n[0] - ax[0]*n[2], ax[0]*n[1] - ax[1]*n[0]];
   const m = new Float32Array([ax[0]*s,ax[1]*s,ax[2]*s,0, n[0],n[1],n[2],0, bz[0]*s,bz[1]*s,bz[2]*s,0, x,y+0.06,z,1]);
-  draw(W.uDisc, { model: m, tint: [0, 0, 0], alpha: 0.26, flat: 0, snowable: 0 });
+  draw(W.uDisc, { model: m, tint: [0, 0, 0], alpha: SHADOW.on ? 0.12 : 0.26, flat: 0, snowable: 0 });
 }
-function render() {
-  resize();
-  const cw = canvas.width, ch = canvas.height;
-  gl.viewport(0, 0, cw, ch);
-  const env = envMix(S.sb, S.tb);
-  eye = cam.e.slice();
-  const proj = M.persp(55 * Math.PI / 180, cw / ch, 0.3, 1100);
-  VP = M.mul(proj, M.lookAt(eye, cam.t, [0, 1, 0])); invVP = M.inv(VP);
-  gl.clearColor(env.hor[0], env.hor[1], env.hor[2], 1); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-  // sky
-  gl.disable(gl.DEPTH_TEST); gl.depthMask(false);
-  gl.useProgram(PS.p);
-  gl.uniformMatrix4fv(PS.u.uInvVP, false, invVP); gl.uniform3fv(PS.u.uCam, eye); gl.uniform3fv(PS.u.uZen, env.zen); gl.uniform3fv(PS.u.uHor, env.hor);
-  gl.uniform3fv(PS.u.uSunDir, env.dir); gl.uniform3fv(PS.u.uGlow, env.glow); gl.uniform3fv(PS.u.uCloud, env.cloud); gl.uniform1f(PS.u.uTime, T); gl.uniform1f(PS.u.uNight, S.night); gl.uniform1f(PS.u.uRain, S.rainK);
-  gl.bindVertexArray(W.sky); gl.drawArrays(gl.TRIANGLES, 0, 3);
-  gl.enable(gl.DEPTH_TEST); gl.depthMask(true); gl.disable(gl.BLEND);
-  setCommon(env);
-  gl.vertexAttrib4f(3, 0, 0, 0, 0);
-  draw(W.terrain, { mode: 0 });
-  draw(W.props, { mode: 1 });
+function drawOpaque(shadowPass) {   // 땅, 나무, 바위, 사람, 강아지 (투명한 것은 빼고)
+  draw(W.terrain, { mode: 0, detail: 1, flat: 0 });
+  draw(W.props, { mode: 1, detail: 0.45 });
   if (IS_PARK) {
     draw(W.city, { mode: 1, emissive: 0.04 * S.night });
     const lit = Math.max(S.tb * 0.75, S.night);
     draw(W.lampHeads, { mode: 1, tint: mix3([0.9, 0.88, 0.8], [1.0, 0.82, 0.5], lit), emissive: 0.15 + 1.5 * lit, flat: 0 });
   }
   draw(W.cafeGlow, { mode: 1, tint: [1, 0.85, 0.6], emissive: 0.25 + 1.4 * Math.max(S.tb * 0.75, S.night), flat: 0 });
-  draw(W.rock, { mode: 1 });
-  draw(W.con, { mode: 1, wind: 1 });
-  draw(W.dec, { mode: 1, wind: 1 });
+  draw(W.rock, { mode: 1, detail: 0.9, moss: IS_PARK ? 0.45 : 0.85 });
+  draw(shadowPass ? W.conS : W.con, { mode: 1, wind: 1, detail: 0.45 });
+  draw(shadowPass ? W.decS : W.dec, { mode: 1, wind: 1, detail: 0.45 });
+  if (!shadowPass) drawGrass();
   const npcOn = showNpcs();
   if (npcOn) for (const n of NPCS) if (Math.hypot(n.x - eye[0], n.z - eye[2]) < 140) drawHiker(n, false);
   for (const p of NET.peers.values()) if (p.ready && !p.hidden && Math.hypot(p.x - eye[0], p.z - eye[2]) < 160) {
@@ -4301,9 +4503,31 @@ function render() {
   if (Math.hypot(barista.x - eye[0], barista.z - eye[2]) < 120) drawHiker(barista, false);
   drawCamp(CIRCLE.spot, 0, true, [1, 1, 1], CIRCLE.fire);   // 모닥불 쉼터의 큰 불은 늘 타오른다
   if (Math.hypot(RADIO_PROP.x - eye[0], RADIO_PROP.z - eye[2]) < 120) drawRadioProp();
-  drawFinds(); drawPapers();
+  if (!shadowPass) { drawFinds(); drawPapers(); }
   if (S.started && !inTent(player)) drawHiker(player, true);
   drawDogs();
+}
+function render() {
+  resize();
+  const cw = canvas.width, ch = canvas.height;
+  gl.viewport(0, 0, cw, ch);
+  const env = envMix(S.sb, S.tb);
+  eye = cam.e.slice();
+  const proj = M.persp(55 * Math.PI / 180, cw / ch, 0.3, 1100);
+  VP = M.mul(proj, M.lookAt(eye, cam.t, [0, 1, 0])); invVP = M.inv(VP);
+  renderShadow(env); gl.viewport(0, 0, cw, ch);
+  gl.clearColor(env.hor[0], env.hor[1], env.hor[2], 1); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+  // sky
+  gl.disable(gl.DEPTH_TEST); gl.depthMask(false);
+  gl.useProgram(PS.p);
+  gl.uniformMatrix4fv(PS.u.uInvVP, false, invVP); gl.uniform3fv(PS.u.uCam, eye); gl.uniform3fv(PS.u.uZen, env.zen); gl.uniform3fv(PS.u.uHor, env.hor);
+  gl.uniform3fv(PS.u.uSunDir, env.dir); gl.uniform3fv(PS.u.uGlow, env.glow); gl.uniform3fv(PS.u.uCloud, env.cloud); gl.uniform1f(PS.u.uTime, T); gl.uniform1f(PS.u.uNight, S.night); gl.uniform1f(PS.u.uRain, S.rainK);
+  gl.bindVertexArray(W.sky); gl.drawArrays(gl.TRIANGLES, 0, 3);
+  gl.enable(gl.DEPTH_TEST); gl.depthMask(true); gl.disable(gl.BLEND);
+  setCommon(env);
+  gl.vertexAttrib4f(3, 0, 0, 0, 0);
+  drawOpaque(false);
+  const npcOn = showNpcs();
   // transparent
   gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); gl.depthMask(false);
   gl.enable(gl.POLYGON_OFFSET_FILL); gl.polygonOffset(-2, -2);
@@ -4320,8 +4544,8 @@ function render() {
   }
   const ice = S.sb;
   const wTint = mix3([1, 1, 1], [3.9, 2.4, 2.35], ice), wAlpha = lerp(0.8, 0.96, ice);
-  for (const w of WATERS) draw(W.water, { model: M.chain(M.T(w.x, w.level, w.z), M.S(w.rx * 1.12, 1, w.rz * 1.12)), tint: wTint, alpha: wAlpha, emissive: 0.18, flat: 0, snowable: 0 });
-  if (W.basin) draw(W.water, { model: M.chain(M.T(W.basin.x, W.basin.y, W.basin.z), M.S(W.basin.r, 1, W.basin.r)), tint: wTint, alpha: wAlpha, emissive: 0.2, flat: 0, snowable: 0 });
+  for (const w of WATERS) draw(W.water, { model: M.chain(M.T(w.x, w.level, w.z), M.S(w.rx * 1.12, 1, w.rz * 1.12)), tint: wTint, alpha: wAlpha, emissive: 0.18, flat: 0, snowable: 0, water: 1 - 0.85 * ice });
+  if (W.basin) draw(W.water, { model: M.chain(M.T(W.basin.x, W.basin.y, W.basin.z), M.S(W.basin.r, 1, W.basin.r)), tint: wTint, alpha: wAlpha, emissive: 0.2, flat: 0, snowable: 0, water: 1.3 - 1.1 * ice });
   const fountainOff = IS_PARK && ice > 0.5;   // 겨울에는 분수를 잠근다
   if (!fountainOff && Math.hypot(W.fallBase[0] - eye[0], W.fallBase[2] - eye[2]) < 260) {
     draw(W.fall, { tint: mix3([0.55, 0.78, 0.86], [0.84, 0.93, 1.0], ice), alpha: lerp(0.84, 0.96, ice), emissive: 0.4, flat: 0, snowable: 0, flow: 1, flowSpeed: ice > 0.5 ? 0 : 1.6 });
