@@ -220,6 +220,8 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{ou
 .gbLogs small{display:block;font-size:12.5px;color:var(--ink-soft);line-height:1.45}
 .gbWho{font-size:13px;color:var(--ink-soft);line-height:1.5;overflow-wrap:anywhere}
 #gbMsg:empty{display:none}
+#gbNickTip:empty{display:none}
+#gbNickTip.err{color:var(--maple)}
 #gbGift{padding:10px 14px;border-radius:12px;background:#fdf1d6;border:1px solid #e9c77a;color:#6b4a0c;font-size:14px;font-weight:600}
 .tag3d.me{pointer-events:auto;cursor:pointer}
 .tag3d.place.tap{pointer-events:auto;cursor:pointer}
@@ -458,17 +460,19 @@ body.calm #trailCard,body.calm #hint{opacity:0;pointer-events:none}
   <div class="card" role="dialog" aria-labelledby="gbNick">
     <div class="eyebrow">길벗 카드</div>
     <div class="gbHead"><canvas id="gbAvatar" width="152" height="152" aria-hidden="true"></canvas><div class="t"><b id="gbNick"></b><button class="linkbtn" id="gbNickBtn" style="justify-self:start;padding-left:0">다른 이름</button></div></div>
+    <form class="gbRow" id="gbNickRow" hidden autocomplete="off"><input id="gbNickIn" maxlength="12" enterkeyhint="done" placeholder="2~12자 이름" aria-label="내 이름"><button class="authbtn email" type="submit" style="width:auto;padding:0 18px">저장</button></form>
+    <p class="fine" id="gbNickTip"></p>
     <div id="gbGift" hidden>로그인 선물로 장작 10개를 받았어요</div>
     <div style="display:grid;gap:8px"><span class="lab">피부색</span><div class="swatches" id="gbSkin"></div></div>
     <div style="display:grid;gap:8px"><span class="lab">얼굴</span><div class="chips" id="gbFace"><button data-f="0">기본</button><button data-f="1">웃는 눈</button><button data-f="2">선글라스</button><button data-f="3">수염</button></div></div>
     <div style="display:grid;gap:8px"><span class="lab">재킷</span><div class="swatches" id="gbJacket"></div></div>
-    <div style="display:grid;gap:8px"><span class="lab">함께 걷는 강아지</span><div class="chips" id="gbDog"><button data-d="0">없이</button><button data-d="1">황구</button><button data-d="2">백구</button><button data-d="3">흑구</button></div>
+    <div style="display:grid;gap:8px"><span class="lab" id="gbDogLab">함께 걷는 강아지</span><div class="chips" id="gbDog"><button data-d="0">없이</button><button data-d="1">황구</button><button data-d="2">백구</button><button data-d="3">흑구</button></div>
       <label class="pcheck" id="gbLeashRow"><input type="checkbox" id="gbLeash" checked><span>목줄 채우기<small>함께 걸을 때는 목줄을 해 주세요</small></span></label></div>
     <div class="gbMed" id="gbMed"></div>
     <div style="display:grid;gap:8px"><span class="lab" id="gbNoteLab">쪽지</span><div class="gbNotes" id="gbNotes"></div></div>
     <div style="display:grid;gap:8px"><span class="lab" id="gbBagLab">주머니</span><div class="bag" id="gbBag"></div></div>
     <div id="gbOut" style="display:grid;gap:10px">
-      <p>로그인하면 장작 10개를 선물로 드려요. 다른 기기에서도 내 이름과 모습이 그대로 이어지고, 나중에 불지기가 될 수 있어요.</p>
+      <p>로그인하면 장작 10개를 선물로 드려요. 이름을 직접 정하고, 진돗개와 함께 걸을 수 있어요. 다른 기기에서도 내 이름과 모습이 그대로 이어져요.</p>
       <button class="authbtn kakao" id="gbKakao"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#000" d="M12 3.6c-5 0-9 3.1-9 7 0 2.5 1.7 4.7 4.2 6l-1 3.7c-.1.3.3.6.6.4l4.4-2.9h.8c5 0 9-3.1 9-7s-4-7.2-9-7.2z"/></svg><span>카카오로 계속하기</span></button>
       <button class="authbtn google" id="gbGoogle"><svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.6 5.4 2.7 13.3l7.9 6.1C12.5 13.6 17.8 9.5 24 9.5z"/><path fill="#4285F4" d="M46.1 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.4c-.5 2.9-2.2 5.3-4.6 6.9l7.4 5.7c4.3-4 6.9-9.9 6.9-17.1z"/><path fill="#FBBC05" d="M10.5 28.6c-.5-1.4-.8-3-.8-4.6s.3-3.2.8-4.6l-7.9-6.1C1 16.6 0 20.2 0 24s1 7.4 2.7 10.7l7.8-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.8-5.8l-7.4-5.7c-2.1 1.4-4.8 2.3-8.4 2.3-6.2 0-11.5-4.2-13.4-9.9l-7.9 6.1C6.6 42.6 14.6 48 24 48z"/></svg><span>구글로 계속하기</span></button>
       <button class="authbtn email" id="gbEmailBtn"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2"/><path d="M3.5 7l8.5 6 8.5-6"/></svg><span>이메일로 로그인 코드 받기</span></button>
@@ -1268,6 +1272,21 @@ const EN = {"센트럴파크":"Central Park",
 "쪽지 · 오늘 남은 {0}/{1}":"Notes · {0}/{1} left today",
 "이 길에 남긴 내 쪽지 {0}장 · 고마워요 {1}":"Your notes on this trail: {0} · thanks: {1}",
 "{0}님이 건넨 쪽지":"from {0}",
+"2~12자 이름":"2 to 12 characters",
+"저장":"Save",
+"내 이름":"My name",
+"로그인하면 장작 10개를 선물로 드려요. 이름을 직접 정하고, 진돗개와 함께 걸을 수 있어요. 다른 기기에서도 내 이름과 모습이 그대로 이어져요.":"Sign in and get 10 firewood logs as a gift. Choose your own name and walk with a Jindo dog. Your name and look follow you to every device.",
+"강아지는 로그인한 길벗과 함께 걸어요. 아래에서 로그인하면 바로 곁에 나타나요":"Dogs walk with signed-in hikers. Sign in below and yours appears right beside you.",
+"이름은 2~12자로 정해 주세요":"Names need 2 to 12 characters",
+"한글, 영문, 숫자와 . _ - ~ 만 쓸 수 있어요":"Use letters, numbers, Korean, and . _ - ~ only",
+"숫자만으로는 정할 수 없어요":"A name can't be only numbers",
+"그 이름은 쓸 수 없어요":"That name can't be used",
+"운영자나 산지기로 오해할 수 있는 이름은 쓸 수 없어요":"Names that look like staff or the ranger can't be used",
+"한글, 영문, 숫자로 2~12자. 다른 사람을 불쾌하게 하는 이름은 운영 원칙에 따라 바뀔 수 있어요":"2 to 12 letters or numbers. Names that are hurtful to others may be changed under our rules.",
+"이제 {0}님이에요":"You're now {0}",
+"이름 정하기":"Set my name",
+"로그인하면 이름을 직접 정할 수 있어요":"Sign in to choose your own name",
+"함께 걷는 강아지 · 로그인하면 함께 걸어요":"Walking buddy · walks with signed-in hikers",
 "'인사'의 쪽지로 마음을 건네 보세요. 받은 쪽지는 여기 모여요":"Send a kind word with Note under 'Greet'. Notes you receive gather here."};
 function i18n(k, ...a) { if (LANG !== 'ko' && EN[k] === undefined && /[가-힣]/.test(k)) (window.__i18nMiss = window.__i18nMiss || new Set()).add(k); const s = LANG === 'ko' ? k : (EN[k] !== undefined ? EN[k] : k); return a.length ? s.replace(/\{(\d)\}/g, (m, i) => a[+i]) : s; }
 const ordinal = n => n + ((n % 100 >= 11 && n % 100 <= 13) ? 'th' : (['th', 'st', 'nd', 'rd'][n % 10] || 'th'));
@@ -4242,7 +4261,7 @@ function render() {
   gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); gl.depthMask(false);
   gl.enable(gl.POLYGON_OFFSET_FILL); gl.polygonOffset(-2, -2);
   if (S.started && !inTent(player)) drawShadow(player.x, player.z, 0.62);
-  if (S.started && DOG.coat && DOG.placed && !inTent(player)) drawShadow(DOG.x, DOG.z, 0.42);
+  if (S.started && myDog() && DOG.placed && !inTent(player)) drawShadow(DOG.x, DOG.z, 0.42);
   if (npcOn) for (const n of NPCS) if (Math.hypot(n.x - eye[0], n.z - eye[2]) < 80) drawShadow(n.x, n.z, 0.6);
   for (const p of NET.peers.values()) if (p.ready && !p.hidden && Math.hypot(p.x - eye[0], p.z - eye[2]) < 80) drawShadow(p.x + (p.ox || 0), p.z + (p.oz || 0), 0.6);
   drawSeatMarks(); drawFindSparkles();
@@ -4330,7 +4349,7 @@ const MUTED = new Set(store.get('muted', []));
 function realCount() { let n = 0; for (const p of NET.peers.values()) if (p.ready && !p.hidden) n++; return n; }
 function showNpcs() { return realCount() < 4; }
 function friendRoom() { const m = location.hash.match(/^#(?:park-)?room-([a-z0-9]{4,12})$/i); return m ? 'room-' + m[1].toLowerCase() : null; }
-function myPresence() { return { id: ME.id, n: S.nick, j: player.jacket, h: player.hat, s: Math.max(0, SKINS.indexOf(player.skin)), f: player.face | 0, dg: DOG.coat, ls: DOG.leash ? 1 : 0, md: medTierOf(store.get('medCount', 0) | 0) }; }
+function myPresence() { return { id: ME.id, n: S.nick, j: player.jacket, h: player.hat, s: Math.max(0, SKINS.indexOf(player.skin)), f: player.face | 0, dg: myDog(), ls: DOG.leash ? 1 : 0, md: medTierOf(store.get('medCount', 0) | 0) }; }
 function loadScript(src) { return new Promise((res, rej) => { const s = document.createElement('script'); s.src = src; s.async = true; s.onload = res; s.onerror = rej; document.head.appendChild(s); }); }
 /* Supabase 연결 하나를 함께 걷기(실시간)와 로그인이 같이 쓴다. 로그인 정보는 이 기기에 'sangil-auth' 이름으로 남는다 */
 let SB_P = null;
@@ -4384,6 +4403,7 @@ const DOG_COATS = [null,
   { body: [0.95, 0.93, 0.88], cream: [0.99, 0.98, 0.95], tip: [0.86, 0.82, 0.74] },   // 백구
   { body: [0.17, 0.15, 0.14], cream: [0.78, 0.58, 0.36], tip: [0.10, 0.09, 0.09] },   // 흑구
 ];
+const myDog = () => (AUTH.user ? DOG.coat : 0);   // 강아지는 로그인한 길벗과 함께 걷는다 (고른 강아지는 기억해 두고, 로그인하면 바로 나타난다)
 const DOG = { coat: 0, leash: true, x: 0, z: 0, y: 0, heading: 0, phase: 0, move: 0, idle: 0, sit: 0, lie: 0, sniff: 0, sniffT: 0, placed: false };
 { const L = store.get('look', null) || {}; DOG.coat = Number.isInteger(L.dg) ? clamp(L.dg, 0, 3) : 0; DOG.leash = L.ls !== 0; }
 function placeDog(dg, o) { dg.x = o.x + Math.sin(o.heading - 2.3) * 0.9; dg.z = o.z + Math.cos(o.heading - 2.3) * 0.9; dg.heading = o.heading; dg.y = groundY(dg.x, dg.z); dg.placed = true; }
@@ -4458,11 +4478,11 @@ function leashHand(c) {   // 왼손 근처 (앉아 있으면 낮게)
   return [c.x + Math.sin(a) * 0.32, (c.y || groundY(c.x, c.z)) + 0.82 - 0.45 * s2, c.z + Math.cos(a) * 0.32];
 }
 function updateDogs(dt) {
-  if (S.started && DOG.coat) updateDog(DOG, player, DOG.leash, dt);
+  if (S.started && myDog()) updateDog(DOG, player, DOG.leash, dt);
   for (const p of NET.peers.values()) if (p.ready && p.dogCoat) { p.dogS = p.dogS || { phase: 0, move: 0, idle: 0, sit: 0, lie: 0, sniff: 0, sniffT: 0, placed: false }; updateDog(p.dogS, p, p.dogLeash, dt); }
 }
 function drawDogs() {
-  if (S.started && DOG.coat && !inTent(player)) drawDog(DOG, DOG.coat, DOG.leash ? leashHand(player) : null);
+  if (S.started && myDog() && !inTent(player)) drawDog(DOG, DOG.coat, DOG.leash ? leashHand(player) : null);
   for (const p of NET.peers.values()) if (p.ready && !p.hidden && p.dogCoat && p.dogS && Math.hypot(p.x - eye[0], p.z - eye[2]) < 120) drawDog(p.dogS, p.dogCoat, p.dogLeash ? leashHand(p) : null);
 }
 
@@ -4968,6 +4988,7 @@ let authSeq = 0;
 async function onAuth(session) {
   const u = (session && session.user) || null, prev = AUTH.user ? AUTH.user.id : null;
   AUTH.user = u;
+  if ((u ? u.id : null) !== prev) { if (u && DOG.coat && S.started) placeDog(DOG, player); if (!u) $('#gbNickRow').hidden = true; setTimeout(retrack, 0); }   // 로그인하면 강아지가 나타나고, 로그아웃하면 사라진다
   if (!u) { AUTH.profile = null; AUTH.pending = false; AUTH.gifted = false; renderGb(); return; }
   if (prev === u.id && (AUTH.profile || AUTH.pending)) { renderGb(); return; }
   const my = ++authSeq; AUTH.pending = true; AUTH.err = false; renderGb();
@@ -5009,6 +5030,32 @@ function setLook(patch, save) {
   if (L.j) player.jacket = L.j; if (L.h) player.hat = L.h;
   player.skin = SKINS[Number.isInteger(L.s) ? L.s : 1]; player.face = L.f | 0;
   retrack(); renderGb(); if (save) saveProfile();
+}
+const NICK_RESERVED = /산지기|운영자|운영진|관리자|공식|^산길$|admin|ranger|official|staff|moderator|^sangil$/i;
+function validNick(raw) {   // [이름, 안 되는 이유]
+  const s = String(raw == null ? '' : raw).replace(/\s+/g, ' ').trim(), n = [...s].length, bare = s.replace(/[ ._\-~]/g, '');
+  if (n < 2 || n > 12) return [null, i18n('이름은 2~12자로 정해 주세요')];
+  if (!/^[가-힣ㄱ-ㅎㅏ-ㅣA-Za-z0-9 ._\-~]+$/.test(s)) return [null, i18n('한글, 영문, 숫자와 . _ - ~ 만 쓸 수 있어요')];
+  if (!bare || /^\d+$/.test(bare)) return [null, i18n('숫자만으로는 정할 수 없어요')];
+  if (maskBad(s) !== s || maskBad(bare) !== bare) return [null, i18n('그 이름은 쓸 수 없어요')];
+  if (NICK_RESERVED.test(bare)) return [null, i18n('운영자나 산지기로 오해할 수 있는 이름은 쓸 수 없어요')];
+  const why = blockedReason(s); if (why) return [null, why];
+  return [s, null];
+}
+function nickTip(t, err) { const el = $('#gbNickTip'); el.textContent = t || ''; el.classList.toggle('err', !!err); }
+function openNickForm() {
+  if (!AUTH.user) return;
+  $('#gbNickRow').hidden = false; $('#gbNickIn').value = S.nick;
+  nickTip(i18n('한글, 영문, 숫자로 2~12자. 다른 사람을 불쾌하게 하는 이름은 운영 원칙에 따라 바뀔 수 있어요'));
+  setTimeout(() => { try { $('#gbNickIn').focus(); $('#gbNickIn').select(); } catch (e) {} }, 30);
+}
+function submitNick(e) {
+  if (e) e.preventDefault();
+  if (!AUTH.user) return;
+  const [v, why] = validNick($('#gbNickIn').value);
+  if (!v) { nickTip(why, true); return; }
+  $('#gbNickRow').hidden = true;
+  setNick(v, true); nickTip(i18n('이제 {0}님이에요', v));
 }
 function retrack() {   // 바뀐 이름과 모습을 함께 걷는 사람들에게 다시 알린다
   try {
@@ -5052,7 +5099,7 @@ function buildGb() {
   SKINS.forEach((c, i) => { const b = document.createElement('button'); b.style.background = rgbCss(c); b.dataset.s = i; b.setAttribute('aria-label', i18n('피부색 {0}', i + 1)); b.onclick = () => setLook({ s: i }, true); $('#gbSkin').appendChild(b); });
   MY_JACKETS.forEach((c, i) => { const b = document.createElement('button'); b.style.background = rgbCss(c); b.dataset.j = i; b.setAttribute('aria-label', i18n('재킷 색 {0}', i + 1)); b.onclick = () => setLook({ j: c }, true); $('#gbJacket').appendChild(b); });
   document.querySelectorAll('#gbFace button').forEach(b => b.onclick = () => setLook({ f: +b.dataset.f }, true));
-  document.querySelectorAll('#gbDog button').forEach(b => b.onclick = () => { const c = +b.dataset.d; setLook({ dg: c }, true); if (c && !DOG.placed) placeDog(DOG, player); });
+  document.querySelectorAll('#gbDog button').forEach(b => b.onclick = () => { const c = +b.dataset.d; setLook({ dg: c }, true); if (c && !DOG.placed && S.started) placeDog(DOG, player); gbMsg(c && !AUTH.user ? i18n('강아지는 로그인한 길벗과 함께 걸어요. 아래에서 로그인하면 바로 곁에 나타나요') : ''); });
   $('#gbLeash').onchange = () => setLook({ ls: $('#gbLeash').checked ? 1 : 0 }, true);
 }
 const rgbCss = c => `rgb(${c.map(v => Math.round(clamp(v, 0, 1) * 255)).join(',')})`;
@@ -5061,6 +5108,9 @@ function renderGb() {
   $('#gbSet').textContent = inn ? i18n('길벗 카드 보기') : i18n('로그인하고 장작 받기');
   $('#gbStart').textContent = inn ? i18n('길벗 카드') : i18n('로그인하고 장작 10개 받기');
   $('#gbNick').textContent = S.nick;
+  $('#gbNickBtn').textContent = inn ? i18n('이름 정하기') : i18n('다른 이름'); $('#nickBtn').textContent = inn ? i18n('이름 정하기') : i18n('다른 이름');
+  if (!inn) nickTip(i18n('로그인하면 이름을 직접 정할 수 있어요')); else if (!$('#gbNickTip').classList.contains('err') && $('#gbNickRow').hidden && $('#gbNickTip').textContent === i18n('로그인하면 이름을 직접 정할 수 있어요')) nickTip('');
+  $('#gbDogLab').textContent = inn ? i18n('함께 걷는 강아지') : i18n('함께 걷는 강아지 · 로그인하면 함께 걸어요');
   $('#gbOut').hidden = inn; $('#gbIn').hidden = !inn;
   $('#gbGift').hidden = !(inn && AUTH.gifted);
   const sk = SKINS.indexOf(player.skin);
@@ -5077,7 +5127,7 @@ function renderGb() {
   const P = AUTH.providers;
   if (P) { $('#gbKakao').hidden = !P.kakao; $('#gbGoogle').hidden = !P.google; $('#gbEmailBtn').hidden = !P.email; $('#gbNone').hidden = P.kakao || P.google || P.email; }
   document.querySelectorAll('#gbDog button').forEach(b => b.setAttribute('aria-pressed', +b.dataset.d === DOG.coat ? 'true' : 'false'));
-  $('#gbLeashRow').style.display = DOG.coat ? '' : 'none'; $('#gbLeash').checked = DOG.leash;
+  $('#gbLeashRow').style.display = DOG.coat && inn ? '' : 'none'; $('#gbLeash').checked = DOG.leash;
   { const n = store.get('medCount', 0) | 0, t = medTierOf(n), next = MED_TIERS[t];
     $('#gbMed').innerHTML = '<b></b><small></small>';
     $('#gbMed').querySelector('b').textContent = t ? i18n('명상 {0}번 · {1}', n, i18n(MED_TIERS[t - 1].name)) : i18n('명상 {0}번', n);
@@ -5704,7 +5754,8 @@ function bindUI() {
   $('#campGo').onclick = startCamp;
   $('#gbStart').onclick = () => openGb(); $('#gbSet').onclick = e => { e.stopPropagation(); openGb(); };
   $('#gbClose').onclick = closeGb; $('#gbCard').addEventListener('click', e => { if (e.target.id === 'gbCard') closeGb(); });
-  $('#gbNickBtn').onclick = () => setNick(nickRand(), true);
+  $('#gbNickBtn').onclick = () => { if (AUTH.user) { if ($('#gbNickRow').hidden) openNickForm(); else { $('#gbNickRow').hidden = true; nickTip(''); } } else setNick(nickRand(), true); };
+  $('#gbNickRow').onsubmit = submitNick;
   $('#gbKakao').onclick = () => gbOAuth('kakao'); $('#gbGoogle').onclick = () => gbOAuth('google');
   $('#gbEmailBtn').onclick = () => { $('#gbEmailRow').hidden = false; $('#gbCodeRow').hidden = true; gbMsg(''); $('#gbEmail').focus(); };
   $('#gbEmailRow').onsubmit = gbSendCode; $('#gbCodeRow').onsubmit = gbVerify; $('#gbLogout').onclick = gbLogout;
@@ -5738,13 +5789,13 @@ function bindUI() {
   // start card
   $('#pickAutumn').onclick = () => setSeason(0); $('#pickWinter').onclick = () => setSeason(1);
   $('#nickOut').textContent = S.nick;
-  $('#nickBtn').onclick = () => setNick(nickRand(), true);
+  $('#nickBtn').onclick = () => { if (AUTH.user) { openGb(); openNickForm(); } else setNick(nickRand(), true); };
   $('#enterBtn').onclick = () => {
     store.set('nick', S.nick); $('#meName').textContent = S.nick;
     $('#start').hidden = true; $('#hud').hidden = false; S.started = true; S.startT = T;
     warpToStart(true); cam.pitch = 0.3; cam.dist = 9;
     audioInit(); setMute(S.mute); radioUnlock();
-    setupFinds(); if (DOG.coat) placeDog(DOG, player);
+    setupFinds(); if (myDog()) placeDog(DOG, player);
     setupHouseNotes(); loadTrailNotes(true);
     if (store.get('findHint', '') !== todayKey() + COURSE) { store.set('findHint', todayKey() + COURSE); setTimeout(() => toast(i18n('오늘 {0} 어딘가에 6가지가 숨어 있어요. 바위 아래, 나무 밑을 살펴보세요', COURSE_NAME)), 6500); }
     setTimeout(() => { $('#hint').style.opacity = 0; }, 9000);
