@@ -5909,7 +5909,11 @@ async function fireCreate() {
 async function fireEndFromCard(L) {   // 불지기가 방에 없을 때도 카드에서 모닥불을 마칠 수 있다 (두 번 누르기)
   if (TALK.endArmId !== L.id || Date.now() - TALK.endArm > 6000) { TALK.endArm = Date.now(); TALK.endArmId = L.id; renderFireCard(); setTimeout(() => { if (!$('#fireCard').hidden) renderFireCard(); }, 6100); return; }
   TALK.endArm = 0; TALK.endArmId = 0;
-  const r = await voiceCall({ action: 'end', fireId: L.id }).catch(() => ({ ok: false }));
+  let r = await voiceCall({ action: 'end', fireId: L.id }).catch(() => ({ ok: false, reason: 'call' }));
+  if (!r.ok) {   // 음성 서버가 말을 듣지 않아도 일정에서는 꼭 내린다
+    console.warn('모닥불 마치기(음성 서버) 실패:', r.reason || 'unknown', r.detail || '');
+    try { const sb = await getSB(), q = await sb.rpc('sangil_fire_set', { p_id: L.id, p_status: 'ended' }); r = q.data || { ok: false }; if (q.error) console.warn('모닥불 마치기(일정) 실패:', q.error.code || '', q.error.message || ''); } catch (e) { r = { ok: false }; }
+  }
   if (!r.ok) { toast(i18n('지금은 하지 못했어요')); renderFireCard(); return; }
   toast(i18n('모닥불 이야기를 마쳤어요')); await fireLoad(true);
 }
@@ -5942,7 +5946,7 @@ async function voiceJoin(f) {
   try {
     const LK = await lkLoad();
     const r = await voiceCall({ action: 'token', fireId: f.id, identity: ME.id, name: S.nick });
-    if (!r || !r.ok) { toast(r && r.reason === 'not live' ? i18n('모닥불 이야기가 이미 끝났어요') : i18n('모닥불 이야기에 들어가지 못했어요. 잠시 뒤에 다시 해 보세요')); fireLoad(true); return; }
+    if (!r || !r.ok) { console.warn('모닥불 입장 실패:', (r && r.reason) || 'unknown', (r && r.detail) || ''); toast(r && r.reason === 'not live' ? i18n('모닥불 이야기가 이미 끝났어요') : i18n('모닥불 이야기에 들어가지 못했어요. 잠시 뒤에 다시 해 보세요')); fireLoad(true); return; }
     const room = new LK.Room({ adaptiveStream: false, dynacast: false, audioCaptureDefaults: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } });
     const E = LK.RoomEvent;
     room.on(E.TrackSubscribed, (track, pub, part) => { if (track.kind !== 'audio') return; const el = track.attach(); el.dataset.pid = part.identity; $('#voiceAudio').appendChild(el); });
