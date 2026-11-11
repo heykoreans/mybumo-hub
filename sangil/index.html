@@ -17,7 +17,7 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Gowun+Dodum&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Gowun+Dodum&family=Nanum+Pen+Script&display=swap">
 <style>
 /* Layout: full-bleed 3D canvas; frosted glass controls pinned to the four edges; paper cards for start and summit. */
 :root{
@@ -282,6 +282,59 @@ body.calm #trailCard,body.calm #hint{opacity:0;pointer-events:none}
 }
 @media (max-width:360px){#actions button span{font-size:10px}#peopleChip span{display:none}}
 @media (prefers-reduced-motion:reduce){#hint,#toast,#loading{transition:none}}
+
+/* 쪽지 */
+#muteMenu div{flex-wrap:wrap}
+#muteNote{flex-basis:100%;background:rgba(255,231,179,.2)!important;color:#ffe7b3}
+.tag3d.place.ppr i{width:11px;height:8px;border-radius:1.5px;background:#f6ecd2;box-shadow:inset 0 -2px 0 rgba(0,0,0,.12)}
+.tag3d.place.ppr.mine i{background:#d4e4f3}
+.tag3d.place.ppr.read{opacity:.72}
+.nto{display:flex;flex-wrap:wrap;gap:6px}
+.nto button{flex:1 1 40%;padding:9px 10px;line-height:1.3;border:1.5px solid var(--paper-line);border-radius:12px;background:#fbf8f1;color:var(--ink);font-size:14px;text-align:left}
+.nto button small{display:block;font-size:11.5px;color:var(--ink-soft);margin-top:1px}
+.nto button[aria-pressed="true"]{border-color:var(--pine);background:#e9f0ea;font-weight:700}
+.ntabs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+.ntabs button{flex:none;padding:6px 13px;border-radius:999px;border:1.5px solid var(--paper-line);background:#fbf8f1;font-size:13px;color:var(--ink)}
+.ntabs button[aria-pressed="true"]{border-color:var(--pine);background:#e9f0ea;font-weight:700}
+.nphr{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.nphr button{padding:9px 10px;border-radius:12px;border:1.5px solid var(--paper-line);background:#fffdf8;color:var(--ink);font-size:13.5px;line-height:1.35;text-align:left;min-height:50px}
+.nphr button[aria-pressed="true"]{border-color:var(--maple);background:#fff3e9;font-weight:700}
+.nleft{font-size:12.5px;color:var(--ink-soft);margin:-4px 0 -2px}
+#noteToTip:empty{display:none}
+#noteView{z-index:46;background:linear-gradient(180deg,rgba(14,18,16,.35),rgba(14,18,16,.7))}
+.nwrap{display:grid;justify-items:center;gap:14px;width:min(340px,100%)}
+.npaper{position:relative;width:min(300px,78vw);aspect-ratio:4/5;perspective:1100px;cursor:pointer;transition:transform .6s cubic-bezier(.3,.7,.3,1);transform:rotate(-4deg) scale(.92)}
+.npaper.o2{transform:none;cursor:default}
+.nsheet{position:absolute;inset:0;border-radius:3px;color:#2f3b34;font-family:"Nanum Pen Script",var(--font-display);text-align:center;
+  background:linear-gradient(180deg,transparent 33.1%,rgba(110,90,60,.2) 33.33%,transparent 33.7%,transparent 66.4%,rgba(110,90,60,.2) 66.66%,transparent 67%),
+  repeating-linear-gradient(180deg,transparent 0 29px,rgba(80,115,150,.1) 29px 30px),#fbf5e6;
+  box-shadow:0 22px 50px rgba(0,0,0,.38);clip-path:inset(33.33% 0 33.33% 0);transition:clip-path .55s cubic-bezier(.3,.7,.3,1)}
+.npaper.o1 .nsheet{clip-path:inset(0 0 33.33% 0)}
+.npaper.o2 .nsheet{clip-path:inset(0)}
+.nto2{position:absolute;left:0;right:0;top:15%;font-size:25px;opacity:.8}
+.nmsg{position:absolute;left:8%;right:8%;top:33.33%;height:33.33%;display:grid;place-items:center;font-size:clamp(28px,8.6vw,36px);line-height:1.2;text-wrap:balance}
+.nfrom{position:absolute;right:10%;bottom:16%;font-size:25px;opacity:.85}
+.nflap{position:absolute;left:0;right:0;top:33.33%;height:33.34%;border-radius:2px;background:linear-gradient(180deg,#f1e8d2,#e7dcc2);box-shadow:0 1px 5px rgba(0,0,0,.18);transition:transform .55s cubic-bezier(.3,.7,.3,1),opacity .18s .42s}
+.nflap.t{transform-origin:50% 0;z-index:3;display:grid;place-items:center}
+.nflap.b{transform-origin:50% 100%;z-index:2}
+.npaper.o1 .nflap.t{transform:rotateX(180deg);opacity:0}
+.npaper.o2 .nflap.b{transform:rotateX(-180deg);opacity:0}
+.nseal{width:38px;height:38px;border-radius:50%;background:radial-gradient(circle at 38% 35%,#d0573c,#9a2f1d 70%);box-shadow:0 2px 4px rgba(0,0,0,.25),inset 0 0 0 3px rgba(255,255,255,.12);display:grid;place-items:center;color:#f7d9c8;font-family:var(--font-display);font-size:15px;font-weight:700}
+.nseal.house{background:radial-gradient(circle at 38% 35%,#4f7a5e,#2b4a37 70%)}
+.nhint{font-size:14px;color:#fffaf0;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+.nbtns{display:grid;gap:8px;width:min(300px,78vw)}
+.nbtns .primary{padding:12px;font-size:16px}
+.nbtns .primary:disabled{opacity:.55}
+.nfoot{margin:0;font-size:13px;color:#fffaf0;text-shadow:0 1px 3px rgba(0,0,0,.6);text-align:center}
+.nfoot:empty{display:none}
+#noteChip{position:fixed;left:50%;top:calc(110px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:24;display:flex;align-items:center;gap:8px;padding:8px 15px 8px 10px;border-radius:999px;background:var(--glass-strong);font-size:13.5px;max-width:calc(100vw - 32px);animation:nchip .5s ease}
+#noteChip svg{width:24px;height:24px;flex:none}
+#noteChip b{font-weight:600;color:#ffe7b3}
+@keyframes nchip{from{opacity:0;transform:translate(-50%,-8px)}}
+.gbNotes{display:grid;gap:6px}
+.gbNotes button.nrow{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:8px 12px;border-radius:12px;border:1px solid var(--paper-line);background:#fffdf8;color:var(--ink);text-align:left}
+.gbNotes button.nrow span{font-family:"Nanum Pen Script",var(--font-display);font-size:21px;line-height:1.15}
+.gbNotes button.nrow small{font-size:11.5px;color:var(--ink-soft);white-space:nowrap}
 </style>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}*{box-sizing:border-box}[hidden]{display:none!important}body{margin:0;font-size:14px}</style>
 </head>
@@ -355,13 +408,14 @@ body.calm #trailCard,body.calm #hint{opacity:0;pointer-events:none}
   <div id="greetMenu" class="popmenu glass" hidden>
     <button data-greet="bow"><svg class="ico" viewBox="0 0 24 24"><circle cx="13.5" cy="6.5" r="2.2"/><path d="M12 9l-3.5 4.5L10 20M8.5 13.5 14 15M10 20h3"/></svg><span>목례</span></button>
     <button data-greet="wave"><svg class="ico" viewBox="0 0 24 24"><path d="M9 20v-8.5M9 11.5V5.5a1.5 1.5 0 0 1 3 0v5M12 10V4.5a1.5 1.5 0 0 1 3 0V11M15 11V7a1.5 1.5 0 0 1 3 0v7a6 6 0 0 1-6 6M19 3c1 .8 1.6 1.8 1.8 3M4 5.5C4.6 4.3 5.5 3.5 6.6 3"/></svg><span>손 흔들기</span></button>
+    <button id="noteBtn"><svg class="ico" viewBox="0 0 24 24"><path d="M5 6.5h14v11H5z"/><path d="M5 6.5l7 5.5 7-5.5"/></svg><span>쪽지</span></button>
   </div>
   <div id="chatBar" class="glass" hidden>
     <div id="circleHead"><span id="circleTxt"></span><button id="circleLeave" type="button">일어나기</button></div>
     <div id="chatLog" aria-live="polite"></div>
     <form id="chatForm" autocomplete="off"><input id="chatInput" maxlength="40" enterkeyhint="send" placeholder="가까이 있는 사람에게 한마디 (말풍선)" aria-label="말하기"><button id="chatSend" type="submit">보내기</button></form>
   </div>
-  <div id="muteMenu" class="glass" hidden><span id="muteTxt"></span><div><button id="muteYes">내 화면에서 숨기기</button><button id="muteNo">취소</button></div></div>
+  <div id="muteMenu" class="glass" hidden><span id="muteTxt"></span><div><button id="muteNote">쪽지 건네기</button><button id="muteYes">내 화면에서 숨기기</button><button id="muteNo">취소</button></div></div>
   <div id="restMenu" class="popmenu glass" hidden>
     <button data-act="focus"><svg class="ico" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="9.5" rx="1.2"/><path d="M3 18.5h18M9.5 9.8c.8-1.2 1.6-1.8 2.5-1.8s1.7.6 2.5 1.8"/></svg><span>집중 모드</span></button>
     <button data-act="breath"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.5"/></svg><span>숨 고르기</span></button>
@@ -411,6 +465,7 @@ body.calm #trailCard,body.calm #hint{opacity:0;pointer-events:none}
     <div style="display:grid;gap:8px"><span class="lab">함께 걷는 강아지</span><div class="chips" id="gbDog"><button data-d="0">없이</button><button data-d="1">황구</button><button data-d="2">백구</button><button data-d="3">흑구</button></div>
       <label class="pcheck" id="gbLeashRow"><input type="checkbox" id="gbLeash" checked><span>목줄 채우기<small>함께 걸을 때는 목줄을 해 주세요</small></span></label></div>
     <div class="gbMed" id="gbMed"></div>
+    <div style="display:grid;gap:8px"><span class="lab" id="gbNoteLab">쪽지</span><div class="gbNotes" id="gbNotes"></div></div>
     <div style="display:grid;gap:8px"><span class="lab" id="gbBagLab">주머니</span><div class="bag" id="gbBag"></div></div>
     <div id="gbOut" style="display:grid;gap:10px">
       <p>로그인하면 장작 10개를 선물로 드려요. 다른 기기에서도 내 이름과 모습이 그대로 이어지고, 나중에 불지기가 될 수 있어요.</p>
@@ -444,6 +499,33 @@ body.calm #trailCard,body.calm #hint{opacity:0;pointer-events:none}
     <div style="display:grid;gap:8px"><span class="lab">소리 크기</span><input id="focusVol" type="range" min="10" max="100" value="60" aria-label="소리 크기"></div>
     <button class="primary" id="focusGo">집중 시작</button>
     <button class="secondary" id="focusCancel">다음에 할게요</button>
+  </div>
+</section>
+
+<button id="noteChip" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#f6ecd2" d="M4 7h16v11H4z"/><path fill="none" stroke="#9a7b4f" stroke-width="1.3" d="M4 7l8 6 8-6"/><circle cx="12" cy="13" r="2.2" fill="#b8402a"/></svg><span id="noteChipTxt"></span></button>
+
+<section id="noteCard" class="scrim" hidden>
+  <div class="card" role="dialog" aria-labelledby="noteTitle">
+    <div class="eyebrow">쪽지 · 하루 5장</div>
+    <h2 class="title" id="noteTitle"><b style="font-size:30px">마음을 접어 건네요</b></h2>
+    <p style="font-size:14px">정해진 문장 중에서 골라요. 받는 사람의 언어로 바뀌어 전해져요.</p>
+    <div style="display:grid;gap:8px"><span class="lab">누구에게</span><div class="nto" id="noteTo"></div><p class="fine" id="noteToTip"></p></div>
+    <div style="display:grid;gap:8px"><span class="lab">문장 고르기</span><div class="ntabs" id="noteTabs"></div><div class="nphr" id="notePh"></div></div>
+    <div class="nleft" id="noteLeft"></div>
+    <button class="primary" id="noteGo">접어서 건네기</button>
+    <button class="secondary" id="noteCancel">닫기</button>
+  </div>
+</section>
+
+<section id="noteView" class="scrim" hidden>
+  <div class="nwrap">
+    <div class="npaper" id="nvPaper" role="button" aria-label="쪽지 펼치기">
+      <div class="nsheet"><div class="nto2" id="nvTo"></div><div class="nmsg" id="nvMsg"></div><div class="nfrom" id="nvFrom"></div></div>
+      <div class="nflap b"></div><div class="nflap t"><i class="nseal" id="nvSeal">길</i></div>
+    </div>
+    <div class="nhint" id="nvHint">눌러서 펼치기</div>
+    <div class="nbtns" id="nvBtns" hidden><button class="primary" id="nvThanks">고마워요</button><button class="secondary" id="nvReply">답장 쪽지</button><button class="secondary" id="nvClose">닫기</button></div>
+    <p class="nfoot" id="nvFoot"></p>
   </div>
 </section>
 
@@ -1105,7 +1187,88 @@ const EN = {"센트럴파크":"Central Park",
 "{0}번 더 하면 {1}":"{0} more for {1}",
 "산의 모든 모습을 얻었어요":"You've earned every look the mountain has",
 "명상 {0}번! {1}을(를) 얻었어요 · {2}":"{0} meditations! You earned {1} · {2}",
-"{0}번째 명상이었어요":"That was meditation #{0}"};
+"{0}번째 명상이었어요":"That was meditation #{0}",
+"쪽지":"Note",
+"쪽지 건네기":"Give a note",
+"쪽지 · 하루 5장":"Notes · 5 a day",
+"마음을 접어 건네요":"Fold a kind word",
+"정해진 문장 중에서 골라요. 받는 사람의 언어로 바뀌어 전해져요.":"Pick from set phrases. Each one arrives in the reader's own language.",
+"누구에게":"To",
+"문장 고르기":"Choose a phrase",
+"접어서 건네기":"Fold and give",
+"쪽지 펼치기":"Open the note",
+"눌러서 펼치기":"Tap to unfold",
+"고마워요":"Thank you",
+"답장 쪽지":"Reply with a note",
+"응원":"Cheer",
+"길 이야기":"Trail",
+"마음":"Heart",
+"오늘도 수고 많았어요":"You did well today",
+"천천히 가도 괜찮아요":"It's okay to go slow",
+"당신의 하루를 응원해요":"I'm cheering for your day",
+"집중하는 모습이 멋져요":"Your focus is inspiring",
+"잠깐 쉬어 가도 돼요":"It's fine to take a break",
+"숨 한 번 크게 쉬어요":"Take one deep breath",
+"여기 바람이 참 좋아요":"The breeze here is lovely",
+"이 자리에서 보는 하늘이 예뻐요":"The sky looks lovely from here",
+"조금만 더 가면 경치가 좋아요":"The view gets better just ahead",
+"새소리에 귀 기울여 보세요":"Listen for the birds",
+"여기 앉아서 쉬어 가세요":"Sit and rest here a while",
+"물소리가 마음을 씻어 줘요":"The sound of water clears the mind",
+"함께 걸어서 좋았어요":"Glad we walked together",
+"반가웠어요":"Nice to meet you",
+"좋은 꿈 꾸세요":"Sweet dreams",
+"내일도 이 길에서 만나요":"See you on this trail tomorrow",
+"오늘 하루도 무사히":"May today go gently",
+"저도 오늘 조금 힘들었어요":"Today was a little hard for me too",
+"다 잘될 거예요":"It's all going to be okay",
+"당신은 혼자가 아니에요":"You are not alone",
+"작은 걸음도 걸음이에요":"Small steps are still steps",
+"오늘 여기 다녀가요":"I was here today",
+"이 길을 걷는 누군가에게 행운을":"Good luck to whoever walks this way",
+"내 쪽지 · 고마워요 {0}":"My note · {0} thanks",
+"내 쪽지":"My note",
+"읽은 쪽지":"Read note",
+"{0}님에게":"To {0}",
+"집중 중 · 조용히 도착해요":"Focusing · arrives quietly",
+"바로 건네요":"Hand it over now",
+"이 길에 남기기":"Leave it on the trail",
+"지나가는 누군가가 펼쳐 봐요":"Someone passing by will open it",
+"길에 남기려면 로그인이 필요해요. 처음 로그인하면 장작 10개도 드려요":"Sign in to leave notes on the trail. Your first sign-in also brings 10 firewood logs.",
+"로그인하기":"Sign in",
+"가까이 누가 오면 그분께 바로 건넬 수도 있어요":"When someone is nearby, you can hand it to them directly.",
+"오늘 남은 쪽지 {0}/{1}":"Notes left today {0}/{1}",
+"오늘 쪽지를 다 썼어요. {0}부터 다시 쓸 수 있어요":"You've used today's notes. More from {0}.",
+"문장을 골라 주세요":"Choose a phrase",
+"이 자리에 놓기":"Leave it here",
+"그분이 길을 떠났어요":"They have left the trail",
+"{0}님에게 쪽지를 건넸어요":"You gave {0} a note",
+"오늘 쪽지를 다 썼어요":"You've used today's notes",
+"쪽지를 놓지 못했어요. 잠시 뒤에 다시 해 보세요":"Couldn't leave the note. Please try again soon.",
+"이 자리에 쪽지를 놓았어요. 고마워요를 받으면 길벗 카드에서 볼 수 있어요":"Note left here. Thanks you receive will show on your hiker card.",
+"{0}님께":"Dear {0}",
+"이 길을 걷는 분께":"To whoever walks this way",
+"{0} 드림":"From {0}",
+"산길 산지기":"the Sangil ranger",
+"길":"S",
+"고마움을 전했어요":"Thanks sent",
+"쪽지 하나 더 남기기":"Leave another note",
+"나도 쪽지 남기기":"Leave a note too",
+"당신도 이 길에 쪽지를 남길 수 있어요":"You can leave a note on this trail too",
+"내가 남긴 쪽지 · 고마워요 {0}":"Your note · {0} thanks",
+"{0}일 전 이 자리에 놓인 쪽지":"Left here {0} days ago",
+"오늘 이 자리에 놓인 쪽지":"Left here today",
+"고마워요 {0}":"{0} thanks",
+"{0}님에게 고마움을 전했어요":"You thanked {0}",
+"산지기에게 고마움이 전해졌어요":"The ranger got your thanks",
+"로그인하면 고마움을 전할 수 있어요":"Sign in to send thanks",
+"지금은 전하지 못했어요. 잠시 뒤에 다시 해 보세요":"Couldn't send it right now. Please try again soon.",
+"님이 쪽지를 건넸어요 · 펼쳐 보기":" gave you a note · open",
+"{0}님이 쪽지를 펼쳐 보고 고마워해요":"{0} opened your note and says thanks",
+"쪽지 · 오늘 남은 {0}/{1}":"Notes · {0}/{1} left today",
+"이 길에 남긴 내 쪽지 {0}장 · 고마워요 {1}":"Your notes on this trail: {0} · thanks: {1}",
+"{0}님이 건넨 쪽지":"from {0}",
+"'인사'의 쪽지로 마음을 건네 보세요. 받은 쪽지는 여기 모여요":"Send a kind word with Note under 'Greet'. Notes you receive gather here."};
 function i18n(k, ...a) { if (LANG !== 'ko' && EN[k] === undefined && /[가-힣]/.test(k)) (window.__i18nMiss = window.__i18nMiss || new Set()).add(k); const s = LANG === 'ko' ? k : (EN[k] !== undefined ? EN[k] : k); return a.length ? s.replace(/\{(\d)\}/g, (m, i) => a[+i]) : s; }
 const ordinal = n => n + ((n % 100 >= 11 && n % 100 <= 13) ? 'th' : (['th', 'st', 'nd', 'rd'][n % 10] || 'th'));
 function translateDom() {   // HTML에 적힌 한국어 글자를 영어로 바꾼다
@@ -2882,6 +3045,7 @@ function clickMove(cx, cy) {
   const x = o[0] + d[0]*hi, z = o[2] + d[2]*hi;
   const pa = player.act;
   if (!pa || GREETS.includes(pa.type)) { const f = findNear(x, z, 1.7); if (f) { player.target = { x: f.x, z: f.z }; S.auto = false; updateWalkBtn(); S.pickT = f; marker = { x: f.x, z: f.z, t: 0 }; return; } }   // 반짝이는 곳을 누르면 그리로 가서 줍는다
+  { const n = paperNear(x, z, 1.1); if (n) { goNote(n); return; } }   // 길에 놓인 쪽지를 누르면 다가가서 펼친다
   if (!(pa && pa.type === 'cafe') && Math.hypot(player.x - CAFE.x, player.z - CAFE.z) < 30) { const st = CAFE.seats.find(q => Math.hypot(q.x - x, q.z - z) < 0.75); if (st) { S.cafePref = st; goCafe(); return; } }   // 카페 의자를 누르면 메뉴부터
   if (Math.hypot(x - CIRCLE.x, z - CIRCLE.z) < CIRCLE.R + 1.4 && !(pa && pa.type === 'circle')) { S.circlePref = { x, z }; goCircle(); return; }   // 모닥불이나 둘레 자리를 누르면 그 자리에 가서 앉는다
   if (pa && ['meditate', 'cafe', 'circle', 'camp', 'focus'].includes(pa.type)) {   // 앉아 있을 때 화면을 눌러도 일어나지 않는다 (둘러보다 실수로 일어나지 않게)
@@ -4071,7 +4235,7 @@ function render() {
   if (Math.hypot(barista.x - eye[0], barista.z - eye[2]) < 120) drawHiker(barista, false);
   drawCamp(CIRCLE.spot, 0, true, [1, 1, 1], CIRCLE.fire);   // 모닥불 쉼터의 큰 불은 늘 타오른다
   if (Math.hypot(RADIO_PROP.x - eye[0], RADIO_PROP.z - eye[2]) < 120) drawRadioProp();
-  drawFinds();
+  drawFinds(); drawPapers();
   if (S.started && !inTent(player)) drawHiker(player, true);
   drawDogs();
   // transparent
@@ -4513,6 +4677,269 @@ function renderBag() {
   for (const k of keys) { const b = document.createElement('span'); b.className = 'bagItem'; b.innerHTML = '<i></i><span></span>'; b.querySelector('i').style.background = rgbCss(FIND_KINDS[k].c); b.querySelector('span').textContent = i18n(FIND_KINDS[k].n) + ' × ' + bag[k]; el.appendChild(b); }
 }
 
+/* ================= 쪽지 =================
+   정해진 문장만 쓴다. 문장 번호로 주고받기 때문에 받는 사람의 언어로 보인다. 24시간에 5장.
+   - 가까이 있는 사람에게 건네기: 실시간으로만 전한다 (서버에 남지 않음). 집중 중인 사람에게는 조용히 도착한다.
+   - 이 길에 남기기: 로그인한 길벗만. 서버 함수 sangil_leave_note 가 하루 5장을 지키고, 이름은 서버가 길벗 정보에서 붙인다.
+   - 산지기 쪽지: 산길이 직접 놓아 둔 쪽지 몇 장 (아무도 없는 날에도 쪽지를 만나 볼 수 있게) */
+const NOTE_PH = ['오늘도 수고 많았어요', '천천히 가도 괜찮아요', '당신의 하루를 응원해요', '집중하는 모습이 멋져요', '잠깐 쉬어 가도 돼요', '숨 한 번 크게 쉬어요',
+  '여기 바람이 참 좋아요', '이 자리에서 보는 하늘이 예뻐요', '조금만 더 가면 경치가 좋아요', '새소리에 귀 기울여 보세요', '여기 앉아서 쉬어 가세요', '물소리가 마음을 씻어 줘요',
+  '함께 걸어서 좋았어요', '고마워요', '반가웠어요', '좋은 꿈 꾸세요', '내일도 이 길에서 만나요', '오늘 하루도 무사히',
+  '저도 오늘 조금 힘들었어요', '다 잘될 거예요', '당신은 혼자가 아니에요', '작은 걸음도 걸음이에요', '오늘 여기 다녀가요', '이 길을 걷는 누군가에게 행운을'];
+const NOTE_CATS = [{ n: '응원', ph: [0, 1, 2, 3, 4, 5] }, { n: '길 이야기', ph: [6, 7, 8, 9, 10, 11] }, { n: '인사', ph: [12, 13, 14, 15, 16, 17] }, { n: '마음', ph: [18, 19, 20, 21, 22, 23] }];
+const NOTE_MAX = 5, NOTE_DAY = 864e5;
+const PAPER = { trail: [], house: [], inbox: [], flights: [], to: null, cat: 0, ph: -1, view: null, recv: {}, pending: null, goal: null, loadedAt: 0, chipT: 0 };
+function notesSent() { const now = Date.now(); return (store.get('noteSent', []) || []).filter(t => +t > now - NOTE_DAY && +t <= now + 6e4); }
+function notesLeft() { return Math.max(0, NOTE_MAX - notesSent().length); }
+function noteSpend(fill) { const a = notesSent(); a.push(Date.now()); while (fill && a.length < NOTE_MAX) a.push(Date.now()); store.set('noteSent', a.slice(-NOTE_MAX)); }
+function noteNextAt() { const a = notesSent(); return a.length ? new Date(Math.min(...a) + NOTE_DAY) : null; }
+const fmtClock = d => d.toLocaleTimeString(LANG === 'ko' ? 'ko-KR' : 'en-US', { hour: 'numeric', minute: '2-digit' });
+const phText = ph => i18n(NOTE_PH[ph] || NOTE_PH[13]);
+const readSet = () => new Set(store.get('noteRead', []) || []);
+function markRead(id) { const a = store.get('noteRead', []) || []; if (!a.includes(id)) { a.push(id); store.set('noteRead', a.slice(-400)); } }
+const thxSet = () => new Set(store.get('noteThx', []) || []);
+function mkNote(o) {
+  o.rot = seeded(String(o.id))() * TAU;
+  o.label = addLabel('<i></i><span></span>', 'place tap ppr', () => [o.x, groundY(o.x, o.z) + 0.95, o.z], 19);
+  o.label.el.addEventListener('click', e => { e.stopPropagation(); goNote(o); });
+  o.label.hideIf = () => !!(player.act && player.act.type === 'camp');
+  noteLabel(o); return o;
+}
+function noteLabel(o) {
+  if (!o.label) return;
+  const read = readSet().has(o.id);
+  o.label.el.classList.toggle('mine', !!o.mine); o.label.el.classList.toggle('read', read && !o.mine);
+  o.label.el.querySelector('span').textContent = o.mine ? (o.thanks ? i18n('내 쪽지 · 고마워요 {0}', o.thanks) : i18n('내 쪽지')) : read ? i18n('읽은 쪽지') : i18n('쪽지');
+}
+function setupHouseNotes() {
+  for (const n of PAPER.house) removeLabel(n.label);
+  PAPER.house = [];
+  const picks = IS_PARK ? [[0.16, 10], [0.5, 6], [0.84, 16]] : [[0.2, 1], [0.55, 8], [0.88, 21]];
+  picks.forEach(([f, ph], k) => {
+    const i = clamp(Math.round(f * (TN - 1)), 1, TN - 2), dx = TX[i + 1] - TX[i - 1], dz = TZ[i + 1] - TZ[i - 1], l = Math.hypot(dx, dz) || 1;
+    for (const side of [1.8, -1.8, 2.6, -2.6, 1.2, -1.2]) {
+      const x = TX[i] + dz / l * side, z = TZ[i] - dx / l * side;
+      if (walkable(x, z) && Math.hypot(x - CIRCLE.x, z - CIRCLE.z) > CIRCLE.R + 3 && Math.hypot(x - CAFE.x, z - CAFE.z) > 9) { PAPER.house.push(mkNote({ id: 'h' + COURSE + k, x, z, ph, house: true })); break; }
+    }
+  });
+}
+async function loadTrailNotes(force) {
+  if (!SANGIL_SUPABASE_URL || !SANGIL_SUPABASE_ANON_KEY) return;
+  if (!force && Date.now() - PAPER.loadedAt < 300000) return;
+  PAPER.loadedAt = Date.now();
+  try {
+    const sb = await getSB(); const { data, error } = await sb.rpc('sangil_notes', { p_course: COURSE });
+    if (error) throw error;
+    setTrailNotes(Array.isArray(data) ? data : []);
+  } catch (e) { console.warn('쪽지를 불러오지 못함', e); }
+}
+function setTrailNotes(rows) {
+  const old = new Map(PAPER.trail.map(n => [n.id, n])), next = [];
+  for (const r of rows.slice(0, 60)) {
+    const ph = r.phrase | 0, x = +r.x, z = +r.z; if (!(ph >= 0 && ph < NOTE_PH.length) || !isFinite(x) || !isFinite(z) || !r.id) continue;
+    const id = 't' + r.id, have = old.get(id);
+    if (have) { have.thanks = r.thanks | 0; have.mine = !!r.mine; have.nick = cleanNick(r.nick); old.delete(id); noteLabel(have); next.push(have); }
+    else next.push(mkNote({ id, sid: +r.id, x, z, ph, nick: cleanNick(r.nick), mine: !!r.mine, thanks: r.thanks | 0, at: Date.parse(r.created_at) || Date.now() }));
+  }
+  for (const n of old.values()) if (!n.fresh || Date.now() - n.at > 60000) removeLabel(n.label); else next.unshift(n);   // 방금 놓은 쪽지는 목록이 늦게 와도 지우지 않는다
+  PAPER.trail = next; renderGbNotes();
+}
+function allPapers() { return PAPER.house.concat(PAPER.trail); }
+function paperNear(x, z, r) { let best = null, bd = r; for (const n of allPapers()) { const d = Math.hypot(n.x - x, n.z - z); if (d < bd) { bd = d; best = n; } } return best; }
+function goNote(n) {
+  closeMenus();
+  const d = Math.hypot(n.x - player.x, n.z - player.z), pa = player.act;
+  if (d < 3.2) { openNote(n); return; }
+  if (pa && RESTING.includes(pa.type)) { if (d < 16) openNote(n); else toast(i18n("걸으려면 먼저 '일어나기'를 눌러 주세요")); return; }
+  if (S.breath) stopBreath();
+  player.target = { x: n.x, z: n.z }; S.auto = false; updateWalkBtn(); marker = { x: n.x, z: n.z, t: 0 }; PAPER.goal = n;
+}
+function nearPeers() { return [...NET.peers.values()].filter(p => p.ready && !p.hidden && Math.hypot(p.x - player.x, p.z - player.z) < 25).sort((a, b) => Math.hypot(a.x - player.x, a.z - player.z) - Math.hypot(b.x - player.x, b.z - player.z)).slice(0, 3); }
+function openCompose(to) {
+  if (!S.started) return;
+  closeMenus(); $('#noteView').hidden = true;
+  PAPER.to = to && NET.peers.has(to.id) ? to : null; PAPER.ph = -1;
+  renderCompose(); $('#noteCard').hidden = false;
+}
+function renderCompose() {
+  const peers = nearPeers();
+  if (PAPER.to && !NET.peers.has(PAPER.to.id)) PAPER.to = null;
+  if (PAPER.to && !peers.includes(PAPER.to)) peers.unshift(PAPER.to);
+  const box = $('#noteTo'); box.innerHTML = '';
+  const opts = peers.map(p => ({ p, a: i18n('{0}님에게', p.nick), b: p.act && p.act.type === 'focus' ? i18n('집중 중 · 조용히 도착해요') : i18n('바로 건네요') }));
+  opts.push({ p: null, a: i18n('이 길에 남기기'), b: i18n('지나가는 누군가가 펼쳐 봐요') });
+  for (const o of opts) {
+    const b = document.createElement('button'); b.type = 'button'; b.innerHTML = '<span></span><small></small>';
+    b.querySelector('span').textContent = o.a; b.querySelector('small').textContent = o.b;
+    b.setAttribute('aria-pressed', String(o.p === PAPER.to)); b.onclick = () => { PAPER.to = o.p; renderCompose(); };
+    box.appendChild(b);
+  }
+  const tip = $('#noteToTip'); tip.innerHTML = '';
+  if (!PAPER.to && !AUTH.user) {
+    tip.appendChild(document.createTextNode(i18n('길에 남기려면 로그인이 필요해요. 처음 로그인하면 장작 10개도 드려요') + ' '));
+    const a = document.createElement('button'); a.className = 'linkbtn'; a.type = 'button'; a.textContent = i18n('로그인하기'); a.style.padding = '0'; a.onclick = () => { $('#noteCard').hidden = true; openGb(); }; tip.appendChild(a);
+  } else if (!PAPER.to && !peers.length) tip.textContent = i18n('가까이 누가 오면 그분께 바로 건넬 수도 있어요');
+  const tabs = $('#noteTabs'); tabs.innerHTML = '';
+  NOTE_CATS.forEach((c, i) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = i18n(c.n); b.setAttribute('aria-pressed', String(i === PAPER.cat)); b.onclick = () => { PAPER.cat = i; renderCompose(); }; tabs.appendChild(b); });
+  const grid = $('#notePh'); grid.innerHTML = '';
+  for (const ph of NOTE_CATS[PAPER.cat].ph) { const b = document.createElement('button'); b.type = 'button'; b.textContent = phText(ph); b.setAttribute('aria-pressed', String(ph === PAPER.ph)); b.onclick = () => { PAPER.ph = ph; renderCompose(); }; grid.appendChild(b); }
+  const left = notesLeft(), nx = noteNextAt();
+  $('#noteLeft').textContent = left ? i18n('오늘 남은 쪽지 {0}/{1}', left, NOTE_MAX) : i18n('오늘 쪽지를 다 썼어요. {0}부터 다시 쓸 수 있어요', nx ? fmtClock(nx) : '');
+  const go = $('#noteGo');
+  go.textContent = PAPER.ph < 0 ? i18n('문장을 골라 주세요') : PAPER.to ? i18n('접어서 건네기') : i18n('이 자리에 놓기');
+  go.disabled = PAPER.ph < 0 || !left || (!PAPER.to && !AUTH.user);
+}
+function placeSpot() {
+  const h = player.heading;
+  for (const [f, sd] of [[1, 0], [0.8, 0.6], [0.8, -0.6], [0.3, 0.9], [0.3, -0.9]]) { const x = player.x + Math.sin(h) * f + Math.cos(h) * sd, z = player.z + Math.cos(h) * f - Math.sin(h) * sd; if (walkable(x, z)) return { x: +x.toFixed(2), z: +z.toFixed(2) }; }
+  return { x: +(player.x + 0.4).toFixed(2), z: +player.z.toFixed(2) };
+}
+function stoop(x, z) { player.heading = Math.atan2(x - player.x, z - player.z); if (!player.act) player.act = { type: 'bow', t: 0, fired: 0 }; }
+async function sendNote() {
+  const ph = PAPER.ph; if (ph < 0 || !notesLeft()) return;
+  const to = PAPER.to;
+  if (to) {
+    if (!NET.peers.has(to.id) || to.hidden) { toast(i18n('그분이 길을 떠났어요')); PAPER.to = null; renderCompose(); return; }
+    netSend({ k: 'note', to: to.id, ph });
+    noteSpend(); flyPaper(player, to); stoop(to.x, to.z); paperSound(false);
+    $('#noteCard').hidden = true; toast(i18n('{0}님에게 쪽지를 건넸어요', to.nick)); renderGbNotes(); return;
+  }
+  if (!AUTH.user) { $('#noteCard').hidden = true; openGb(); return; }
+  const go = $('#noteGo'); go.disabled = true;
+  try {
+    const sp = placeSpot(), sb = await getSB();
+    const { data, error } = await sb.rpc('sangil_leave_note', { p_course: COURSE, p_x: sp.x, p_z: sp.z, p_phrase: ph });
+    if (error) throw error;
+    if (!data || !data.ok) { if (data && data.reason === 'limit') { noteSpend(true); toast(i18n('오늘 쪽지를 다 썼어요')); } else toast(i18n('쪽지를 놓지 못했어요. 잠시 뒤에 다시 해 보세요')); renderCompose(); return; }
+    noteSpend();
+    const n = mkNote({ id: 't' + data.id, sid: +data.id, x: sp.x, z: sp.z, ph, nick: S.nick, mine: true, thanks: 0, at: Date.now(), fresh: true });
+    PAPER.trail.unshift(n); markRead(n.id); noteLabel(n);
+    netSend({ k: 'tnote', id: +data.id, x: sp.x, z: sp.z, ph });
+    stoop(sp.x, sp.z); paperSound(false);
+    $('#noteCard').hidden = true; toast(i18n('이 자리에 쪽지를 놓았어요. 고마워요를 받으면 길벗 카드에서 볼 수 있어요')); renderGbNotes();
+  } catch (e) { console.warn('쪽지 놓기 실패', e); toast(i18n('쪽지를 놓지 못했어요. 잠시 뒤에 다시 해 보세요')); }
+  finally { go.disabled = false; if (!$('#noteCard').hidden) renderCompose(); }
+}
+function openNote(n) {
+  closeMenus(); $('#noteCard').hidden = true; $('#noteChip').hidden = true;
+  PAPER.view = n; PAPER.goal = null;
+  const P = $('#nvPaper'); P.classList.remove('o1', 'o2');
+  $('#nvTo').textContent = n.live ? i18n('{0}님께', S.nick) : i18n('이 길을 걷는 분께');
+  $('#nvMsg').textContent = phText(n.ph);
+  $('#nvFrom').textContent = i18n('{0} 드림', n.house ? i18n('산길 산지기') : n.nick);
+  const seal = $('#nvSeal'); seal.classList.toggle('house', !!n.house); seal.textContent = n.house ? i18n('길') : (n.nick || '').slice(0, 1) || i18n('길');
+  $('#nvHint').hidden = false; $('#nvBtns').hidden = true; $('#nvFoot').textContent = '';
+  $('#noteView').hidden = false; paperSound(false);
+  if (reducedMotion) unfoldNote();
+}
+function unfoldNote() {
+  const P = $('#nvPaper'), n = PAPER.view; if (!n || P.classList.contains('o1')) return;
+  P.classList.add('o1'); paperSound(true);
+  setTimeout(() => P.classList.add('o2'), reducedMotion ? 0 : 430);
+  setTimeout(() => {
+    if (PAPER.view !== n) return;
+    $('#nvHint').hidden = true; $('#nvBtns').hidden = false;
+    if (n.live) n.read = true; else { markRead(n.id); noteLabel(n); }
+    const th = $('#nvThanks'), rp = $('#nvReply'), thx = thxSet().has(n.id) || n.thanked;
+    th.hidden = !!n.mine; th.disabled = !!thx; th.textContent = thx ? i18n('고마움을 전했어요') : i18n('고마워요');
+    if (n.live) { rp.hidden = !NET.peers.has(n.from); rp.textContent = i18n('답장 쪽지'); }
+    else { rp.hidden = false; rp.textContent = n.mine ? i18n('쪽지 하나 더 남기기') : i18n('나도 쪽지 남기기'); }
+    const days = n.at ? Math.floor((Date.now() - n.at) / NOTE_DAY) : 0;
+    $('#nvFoot').textContent = n.house ? i18n('당신도 이 길에 쪽지를 남길 수 있어요') : n.mine ? i18n('내가 남긴 쪽지 · 고마워요 {0}', n.thanks | 0)
+      : n.live ? '' : (days > 0 ? i18n('{0}일 전 이 자리에 놓인 쪽지', days) : i18n('오늘 이 자리에 놓인 쪽지')) + (n.thanks ? ' · ' + i18n('고마워요 {0}', n.thanks) : '');
+    renderGbNotes();
+  }, reducedMotion ? 30 : 900);
+}
+async function thankNote() {
+  const n = PAPER.view; if (!n || n.mine) return;
+  const done = () => { const a = store.get('noteThx', []) || []; a.push(n.id); store.set('noteThx', a.slice(-400)); n.thanked = true; const th = $('#nvThanks'); th.disabled = true; th.textContent = i18n('고마움을 전했어요'); };
+  if (n.live) { netSend({ k: 'nthx', to: n.from }); done(); toast(i18n('{0}님에게 고마움을 전했어요', n.nick)); return; }
+  if (n.house) { done(); toast(i18n('산지기에게 고마움이 전해졌어요')); return; }
+  if (!AUTH.user) { toast(i18n('로그인하면 고마움을 전할 수 있어요')); return; }
+  $('#nvThanks').disabled = true;
+  try {
+    const sb = await getSB(); const { data, error } = await sb.rpc('sangil_thank_note', { p_id: n.sid });
+    if (error) throw error;
+    if (Number.isInteger(data)) n.thanks = data;
+    done(); noteLabel(n); toast(i18n('{0}님에게 고마움을 전했어요', n.nick));
+    $('#nvFoot').textContent = i18n('고마워요 {0}', n.thanks | 0);
+  } catch (e) { $('#nvThanks').disabled = false; toast(i18n('지금은 전하지 못했어요. 잠시 뒤에 다시 해 보세요')); }
+}
+function closeNote() { $('#noteView').hidden = true; PAPER.view = null; }
+function recvNote(p, m) {
+  if (m.to !== ME.id || p.hidden) return;
+  const ph = m.ph | 0; if (!(ph >= 0 && ph < NOTE_PH.length)) return;
+  const now = Date.now(), r = (PAPER.recv[p.id] || []).filter(t => now - t < 600000); if (r.length >= 3) return;   // 한 사람에게서 10분에 3장까지만
+  r.push(now); PAPER.recv[p.id] = r;
+  const n = { id: 'l' + now, live: true, from: p.id, nick: p.nick, ph, at: now };
+  PAPER.inbox.unshift(n); PAPER.inbox.length = Math.min(PAPER.inbox.length, 20);
+  store.set('inbox', PAPER.inbox.map(q => ({ n: q.nick, p: q.ph, a: q.at })));
+  flyPaper(p, player); renderGbNotes();
+  if (player.act && player.act.type === 'meditate' && !player.act.leaving) PAPER.pending = n;   // 명상 중에는 끝난 뒤에 알린다
+  else showNoteChip(n);
+}
+function showNoteChip(n) {
+  PAPER.pending = null; PAPER.chipN = n; PAPER.chipT = performance.now();
+  $('#noteChipTxt').innerHTML = ''; const b = document.createElement('b'); b.textContent = n.nick;
+  $('#noteChipTxt').append(b, document.createTextNode(i18n('님이 쪽지를 건넸어요 · 펼쳐 보기')));
+  $('#noteChip').hidden = false;
+  if (!(player.act && player.act.type === 'focus')) paperSound(false);   // 집중 중이면 소리 없이
+}
+function flyPaper(a, b) { PAPER.flights.push({ a, b, t: 0 }); }
+function noteTick(dt) {
+  if (!S.started) return;
+  if (PAPER.pending && !(player.act && player.act.type === 'meditate' && !player.act.leaving)) showNoteChip(PAPER.pending);
+  if (!$('#noteChip').hidden && performance.now() - PAPER.chipT > 40000) $('#noteChip').hidden = true;
+  const g = PAPER.goal;
+  if (g) { const d = Math.hypot(g.x - player.x, g.z - player.z); if (d < 1.6 || (!player.target && d < 3.6)) { player.target = null; openNote(g); } else if (!player.target) PAPER.goal = null; }
+  for (const f of PAPER.flights) f.t += dt / 1.15;
+  PAPER.flights = PAPER.flights.filter(f => f.t < 1);
+  if (document.visibilityState === 'visible') loadTrailNotes(false);
+}
+function drawPapers() {
+  if (!S.started) return;
+  const rs = readSet();
+  for (const n of allPapers()) {
+    if (Math.hypot(n.x - eye[0], n.z - eye[2]) > 48) continue;
+    const y = groundY(n.x, n.z), root = M.chain(M.T(n.x, y, n.z), M.Ry(n.rot), M.S(1.3)), unread = !n.mine && !rs.has(n.id);
+    const D = (loc, mesh, col, em) => draw(mesh, { model: M.mul(root, loc), tint: col, flat: 0, snowable: 0, emissive: em || 0 });
+    const col = n.mine ? [0.84, 0.9, 0.96] : n.house ? [0.97, 0.94, 0.85] : [0.98, 0.95, 0.86];
+    D(M.chain(M.T(0, 0.025, 0), M.S(0.44, 0.03, 0.31)), W.uBox, col, unread ? 0.35 + 0.15 * Math.sin(T * 2.2 + n.rot) : 0.05);
+    D(M.chain(M.T(0, 0.042, 0), M.S(0.44, 0.006, 0.012)), W.uBox, [0.8, 0.74, 0.62]);   // 접힌 자국
+    D(M.chain(M.T(0, 0.05, 0.07), M.S(0.035, 0.012, 0.035)), W.uCyl, n.house ? [0.2, 0.36, 0.26] : [0.62, 0.2, 0.13]);   // 봉인
+    D(M.chain(M.T(0.13, 0.075, -0.07), M.S(0.08, 0.05, 0.065)), W.uSphere, [0.5, 0.49, 0.46]);   // 날아가지 않게 올려 둔 돌
+  }
+  for (const f of PAPER.flights) {
+    const k = f.t, e = k * k * (3 - 2 * k), ax = f.a.x, az = f.a.z, ay = (f.a.y || groundY(ax, az)) + 1.35, bx = f.b.x, bz = f.b.z, by = (f.b.y || groundY(bx, bz)) + 1.25;
+    const x = lerp(ax, bx, e), z = lerp(az, bz, e), y = lerp(ay, by, e) + Math.sin(Math.PI * k) * 1.3;
+    draw(W.uBox, { model: M.chain(M.T(x, y, z), M.Ry(k * 9), M.Rx(Math.sin(k * 12) * 0.5), M.S(0.2, 0.02, 0.14)), tint: [0.98, 0.95, 0.86], flat: 0, snowable: 0, emissive: 0.4 });
+  }
+}
+function paperSound(open) {
+  if (!canSound() || !A.noise) return;
+  const ctx = A.ctx, t = ctx.currentTime + 0.01, n = open ? 6 : 3;
+  for (let i = 0; i < n; i++) {
+    const st = t + i * (open ? 0.085 : 0.06) + Math.random() * 0.03, s = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain(), len = 0.04 + Math.random() * 0.08;
+    s.buffer = A.noise; f.type = 'bandpass'; f.frequency.value = 1800 + Math.random() * 3200; f.Q.value = 0.9;
+    g.gain.setValueAtTime(0.0001, st); g.gain.exponentialRampToValueAtTime(0.1 + Math.random() * 0.08, st + 0.008); g.gain.exponentialRampToValueAtTime(0.0001, st + len);
+    s.connect(f).connect(g).connect(A.sfx); s.start(st, Math.random() * 1.6, len + 0.02);
+  }
+}
+function renderGbNotes() {
+  const el = $('#gbNotes'); if (!el) return;
+  $('#gbNoteLab').textContent = i18n('쪽지 · 오늘 남은 {0}/{1}', notesLeft(), NOTE_MAX);
+  el.innerHTML = '';
+  const mine = PAPER.trail.filter(n => n.mine), thanks = mine.reduce((a, n) => a + (n.thanks | 0), 0);
+  if (mine.length) { const p = document.createElement('span'); p.className = 'gbWho'; p.textContent = i18n('이 길에 남긴 내 쪽지 {0}장 · 고마워요 {1}', mine.length, thanks); el.appendChild(p); }
+  for (const n of PAPER.inbox.slice(0, 3)) {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'nrow'; b.innerHTML = '<span></span><small></small>';
+    b.querySelector('span').textContent = phText(n.ph); b.querySelector('small').textContent = i18n('{0}님이 건넨 쪽지', n.nick);
+    b.onclick = () => { $('#gbCard').hidden = true; openNote(n); }; el.appendChild(b);
+  }
+  if (!mine.length && !PAPER.inbox.length) { const p = document.createElement('span'); p.className = 'gbWho'; p.textContent = i18n("'인사'의 쪽지로 마음을 건네 보세요. 받은 쪽지는 여기 모여요"); el.appendChild(p); }
+}
+(function loadInbox() { const a = store.get('inbox', []) || []; PAPER.inbox = (Array.isArray(a) ? a : []).slice(0, 20).filter(q => q && Number.isInteger(q.p) && q.p >= 0 && q.p < NOTE_PH.length).map((q, i) => ({ id: 'l' + (q.a || i), live: true, from: null, nick: cleanNick(q.n), ph: q.p, at: +q.a || 0, read: true })); })();
+
 /* ================= 길벗: 로그인과 내 모습 =================
    로그인은 카카오, 구글, 이메일 숫자 코드. 처음 로그인하면 서버 함수(sangil_claim_gift)가 길벗 정보를 만들고 장작 10개를 준다.
    장작 수는 서버 함수만 바꿀 수 있고, 페이지는 이름과 모습만 고칠 수 있다. 모습 고르기는 로그인하지 않아도 된다. */
@@ -4551,6 +4978,7 @@ async function onAuth(session) {
     if (my !== authSeq) return;
     AUTH.profile = (data && data.profile) || null; AUTH.gifted = !!(data && data.gifted);
     if (AUTH.profile) applyProfile(AUTH.profile);
+    if (S.started) loadTrailNotes(true);   // 내 쪽지 표시를 다시 받는다
   } catch (e) { console.warn('길벗 정보를 불러오지 못함', e); if (my === authSeq) { AUTH.profile = null; AUTH.err = true; } }
   finally { if (my === authSeq) { AUTH.pending = false; renderGb(); } }
 }
@@ -4654,7 +5082,7 @@ function renderGb() {
     $('#gbMed').innerHTML = '<b></b><small></small>';
     $('#gbMed').querySelector('b').textContent = t ? i18n('명상 {0}번 · {1}', n, i18n(MED_TIERS[t - 1].name)) : i18n('명상 {0}번', n);
     $('#gbMed').querySelector('small').textContent = next ? i18n('{0}번 더 하면 {1}', next.n - n, i18n(next.gift)) : i18n('산의 모든 모습을 얻었어요'); }
-  drawAvatar(); renderBag();
+  drawAvatar(); renderBag(); renderGbNotes();
 }
 function drawAvatar() {   // 길벗 카드의 작은 얼굴 그림 (3D 캐릭터와 같은 색, 같은 얼굴)
   const cv = $('#gbAvatar'); if (!cv) return;
@@ -4892,6 +5320,14 @@ function onNet(m) {
     H5.out = null; dropBubble(player);
     if (m.ok) { if (Math.hypot(p.x - player.x, p.z - player.z) < 7) { H5.with = p; greet('hi5', null, true); H5.with = null; } else toast(i18n('{0}님이 좋대요. 조금 더 가까이 가서 다시 해 보세요', p.nick)); }
     else toast(i18n('{0}님은 다음에 하자고 하네요', p.nick));
+  } else if (m.k === 'note') { recvNote(p, m); return;
+  } else if (m.k === 'nthx') {   // 내가 건넨 쪽지에 고마워요
+    if (m.to !== ME.id || p.hidden) return;
+    toast(i18n('{0}님이 쪽지를 펼쳐 보고 고마워해요', p.nick)); showBubble(p, i18n('고마워요'), 3, true); return;
+  } else if (m.k === 'tnote') {   // 같은 방 사람이 방금 길에 놓은 쪽지
+    const ph = m.ph | 0, x = +m.x, z = +m.z, id = 't' + (m.id | 0);
+    if (p.hidden || !(m.id > 0) || !(ph >= 0 && ph < NOTE_PH.length) || !isFinite(x) || !isFinite(z) || PAPER.trail.some(n => n.id === id)) return;
+    PAPER.trail.unshift(mkNote({ id, sid: m.id | 0, x, z, ph, nick: p.nick, mine: false, thanks: 0, at: Date.now(), fresh: true })); return;
   } else if (m.k === 'say') {
     if (p.hidden) return;
     const s = cleanText(m.text); if (!s || blockedReason(s)) return;
@@ -5015,7 +5451,7 @@ function frameStep(now) {
   updateParticles(dt);
   updateMist(dt);
   updateAudio(Math.min(raw, 0.5));
-  radioTick(Math.min(raw, 0.5)); updateNotes(dt); updateFinds();
+  radioTick(Math.min(raw, 0.5)); updateNotes(dt); updateFinds(); noteTick(dt);
   updateHud(dt);
   render();
   requestAnimationFrame(frame);
@@ -5229,6 +5665,14 @@ function bindUI() {
   // 숨기기
   $('#muteYes').onclick = () => { const p = muteTarget; if (p) { MUTED.add(p.id); store.set('muted', [...MUTED].slice(-200)); p.hidden = true; dropBubble(p); updateCount(); toast(i18n('{0}님을 내 화면에서 숨겼어요', p.nick)); $('#unmuteBtn').hidden = false; } $('#muteMenu').hidden = true; };
   $('#muteNo').onclick = () => { $('#muteMenu').hidden = true; };
+  $('#muteNote').onclick = () => { const p = muteTarget; $('#muteMenu').hidden = true; if (p) openCompose(p); };
+  $('#noteBtn').onclick = () => openCompose(null);
+  $('#noteGo').onclick = sendNote; $('#noteCancel').onclick = () => { $('#noteCard').hidden = true; };
+  $('#noteCard').addEventListener('click', e => { if (e.target.id === 'noteCard') $('#noteCard').hidden = true; });
+  $('#nvPaper').onclick = unfoldNote; $('#nvThanks').onclick = thankNote; $('#nvClose').onclick = closeNote;
+  $('#nvReply').onclick = () => { const n = PAPER.view; closeNote(); if (n && n.live) openCompose(NET.peers.get(n.from) || null); else openCompose(null); };
+  $('#noteView').addEventListener('click', e => { if (e.target.id === 'noteView' || e.target.classList.contains('nwrap')) closeNote(); });
+  $('#noteChip').onclick = () => { $('#noteChip').hidden = true; if (PAPER.chipN) openNote(PAPER.chipN); };
   $('#unmuteBtn').hidden = MUTED.size === 0;
   $('#unmuteBtn').onclick = () => { MUTED.clear(); store.set('muted', []); for (const p of NET.peers.values()) p.hidden = false; updateCount(); $('#unmuteBtn').hidden = true; toast(i18n('숨긴 사람을 다시 보여요')); };
   // 말풍선 보기, 친구 방
@@ -5301,6 +5745,7 @@ function bindUI() {
     warpToStart(true); cam.pitch = 0.3; cam.dist = 9;
     audioInit(); setMute(S.mute); radioUnlock();
     setupFinds(); if (DOG.coat) placeDog(DOG, player);
+    setupHouseNotes(); loadTrailNotes(true);
     if (store.get('findHint', '') !== todayKey() + COURSE) { store.set('findHint', todayKey() + COURSE); setTimeout(() => toast(i18n('오늘 {0} 어딘가에 6가지가 숨어 있어요. 바위 아래, 나무 밑을 살펴보세요', COURSE_NAME)), 6500); }
     setTimeout(() => { $('#hint').style.opacity = 0; }, 9000);
     toast(i18n('{0}님, {1}에 오신 걸 환영해요', S.nick, COURSE_NAME));
