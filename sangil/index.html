@@ -170,6 +170,16 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{ou
 .seasons button.w[aria-pressed="true"]{border-color:var(--rime);background:#f3f7fa}
 .name{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:14px;color:var(--ink-soft)}
 .name b{color:var(--ink);font-family:var(--font-display);font-size:16px}
+#handSheet .card{gap:12px}
+.hsApp{display:grid;gap:8px;padding:12px;border-radius:14px;background:#ece5d5;font-size:13px;line-height:1.5;color:var(--ink)}
+.hsAppBtn{justify-self:start;padding:9px 14px;border-radius:10px;border:1px solid #b9b19f;background:#f8f4ea;font-size:13px;color:var(--ink)}
+.hsMsg{margin:0;font-size:13px;color:#8a4b2b;min-height:0}
+.hsMsg:empty{display:none}
+.hsFoot{display:flex;align-items:center;justify-content:space-between;gap:8px;padding-top:8px;border-top:1px solid var(--paper-line);font-size:12px;color:var(--ink-soft);line-height:1.5}
+.hsFoot .linkbtn{white-space:nowrap;flex:none}
+.vnudge{display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:12px;background:rgba(255,255,255,.08);font-size:13px}
+.vnudge[hidden]{display:none}
+.vnudge svg{width:18px;height:18px;flex:none;color:#fee58a}
 .linkbtn{font-size:13px;color:var(--pine);text-decoration:underline;text-underline-offset:3px;padding:4px}
 .primary{width:100%;padding:15px;border-radius:14px;background:var(--pine);color:#f4eee2;font-family:var(--font-display);font-size:18px;font-weight:700;letter-spacing:.04em}
 .primary:hover{background:#25402f}
@@ -572,9 +582,25 @@ body.calm #trailCard,body.calm #hint{opacity:0;pointer-events:none}
   <div class="vhead"><i class="vdot"></i><b id="vTitle"></b><span id="vCount"></span></div>
   <div class="vspk" id="vSpk"></div>
   <div class="vhands" id="vHands" hidden></div>
+  <div class="vnudge" id="vNudge" hidden><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 13V5.5a1.5 1.5 0 0 1 3 0V12M11 11.5v-7a1.5 1.5 0 0 1 3 0V12M14 11.5V6a1.5 1.5 0 0 1 3 0v8c0 4-2.5 7-6.5 7S5 18.5 4 15.5l-1-3a1.5 1.5 0 0 1 2.7-1.2L8 14"/></svg><span>이야기에 끼고 싶으면 손을 들어 보세요</span></div>
   <div class="vbtns"><button id="vMic" hidden>마이크 켜기</button><button id="vHand" hidden>손 들기</button><button id="vAudio" hidden>소리 켜기</button><button id="vEnd" hidden>모닥불 마치기</button><button id="vLeave">나가기</button></div>
 </div>
 <div id="voiceAudio" hidden></div>
+<section id="handSheet" class="scrim" hidden>
+  <div class="card" role="dialog" aria-labelledby="hsTitle">
+    <div class="eyebrow" id="hsEye">손 들기</div>
+    <h2 class="title" id="hsTitle"><b style="font-size:23px;line-height:1.35">불지기에게 손을 들려면 이름이 필요해요</b></h2>
+    <p style="font-size:14px">한 번만 로그인하면 이 모닥불로 바로 돌아와, 손이 들린 채로 기다려요. 듣는 건 그동안에도 이어져요.</p>
+    <div style="display:grid;gap:10px">
+      <button class="authbtn kakao" id="hsKakao"></button>
+      <button class="authbtn google" id="hsGoogle"></button>
+      <button class="authbtn email" id="hsEmail"></button>
+    </div>
+    <div class="hsApp" id="hsApp" hidden><span id="hsAppTxt"></span><button class="hsAppBtn" id="hsOpen"></button></div>
+    <p class="hsMsg" id="hsMsg"></p>
+    <div class="hsFoot"><span>로그인하면 이름을 지키고, 강아지와 함께 걸어요</span><button class="linkbtn" id="hsLater">다음에 할게요</button></div>
+  </div>
+</section>
 
 <section id="fireCard" class="scrim" hidden>
   <div class="card" role="dialog" aria-labelledby="fireTitle">
@@ -1409,6 +1435,22 @@ const EN = {"센트럴파크":"Central Park",
 "지금은 바꿀 수 없어요":"Can't change that right now",
 "모닥불 이야기를 취소했어요":"Campfire talk canceled",
 "다시 들어가기":"Rejoin",
+"불지기에게 손을 들려면 이름이 필요해요":"To raise your hand, the fire keeper needs your name",
+"한 번만 로그인하면 이 모닥불로 바로 돌아와, 손이 들린 채로 기다려요. 듣는 건 그동안에도 이어져요.":"Sign in once and you come right back to this fire with your hand already up. You keep listening the whole time.",
+"로그인하면 이름을 지키고, 강아지와 함께 걸어요":"Signed in, your name stays yours and your dog walks with you",
+"카카오로 계속하기":"Continue with Kakao",
+"Google로 계속하기":"Continue with Google",
+"이메일로 인증번호 받기":"Get a code by email",
+"구글 계정으로 하려면 Safari나 Chrome에서 열어 주세요. 이 앱 안에서는 구글 로그인이 막혀 있어요":"To use Google, open this in Safari or Chrome. Google sign-in is blocked inside this app",
+"주소 복사하기":"Copy link",
+"지금은 이 브라우저에서 로그인할 수 없어요. Safari나 Chrome에서 열어 주세요":"You can't sign in from this browser right now. Open it in Safari or Chrome",
+"이메일로 받은 인증번호를 넣으면 손이 들려요":"Enter the code from your email and your hand goes up",
+"그 모닥불 이야기는 이미 끝났어요":"That campfire talk has already ended",
+"다시 모닥불로 돌아왔어요. 손을 들었어요. 불지기가 마이크를 건넬 때까지 기다려 주세요":"You're back at the fire with your hand up. Wait for the fire keeper to pass you the mic",
+"모닥불로 돌아가기":"Back to the fire",
+"로그인했어요. 모닥불로 돌아가면 손이 들려 있어요":"You're signed in. Head back to the fire and your hand will be up",
+"이야기에 끼고 싶으면 손을 들어 보세요":"Want to join in? Raise your hand",
+"주소를 복사했어요. Safari나 Chrome에 붙여 넣어 주세요":"Link copied. Paste it into Safari or Chrome",
 "모닥불 이야기 {0}곳 · 골라 듣기":"{0} campfire talks · pick one",
 "모닥불 이야기 · 지금 {0}곳":"Campfire talk · {0} live now",
 "{0}님의 모닥불":"{0}'s campfire",
@@ -5799,7 +5841,7 @@ async function fireLoad(force) {
   } catch (e) { console.warn('모닥불 일정을 불러오지 못함', e); }
   fireUi();
 }
-function fireTick() { if (S.started && document.visibilityState === 'visible') fireLoad(false); }
+function fireTick() { if (S.started && document.visibilityState === 'visible') fireLoad(false); renderVoiceNudge(); }
 function fmtWhen(iso) {
   const d = new Date(iso), now = new Date(), day = 864e5, d0 = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime(), k = Math.floor((d.getTime() - d0) / day);
   const hm = d.toLocaleTimeString(LANG === 'ko' ? 'ko-KR' : 'en-US', { hour: 'numeric', minute: '2-digit' });
@@ -5996,7 +6038,7 @@ async function voiceJoin(f) {
     TALK.room = room; TALK.fire = f; TALK.isHostHere = !!r.host; TALK.canPub = !!r.host; TALK.micOn = false; TALK.myHand = false; TALK.hands.clear(); TALK.leaving = false; TALK.ended = false;
     try { await room.startAudio(); } catch (e) {}
     $('#voicePanel').hidden = false; renderVoice();
-    warpNearFire(f);
+    warpNearFire(f); TALK.joinedAt = Date.now();
     toast(r.host ? i18n('불지기로 들어왔어요. 마이크를 켜면 이야기가 시작돼요') : i18n('모닥불 이야기를 듣고 있어요. 말하고 싶으면 손을 들어요'));
   } catch (e) { console.warn('모닥불 이야기 연결 실패', e); toast(i18n('모닥불 이야기에 들어가지 못했어요. 잠시 뒤에 다시 해 보세요')); }
   finally { TALK.joining = false; fireUi(); }
@@ -6015,6 +6057,12 @@ function sendHand(on) {
 }
 function voiceParts() { const room = TALK.room; if (!room) return []; return [room.localParticipant, ...room.remoteParticipants.values()]; }
 const partMeta = p => { try { return JSON.parse(p.metadata || '{}'); } catch (e) { return {}; } };
+function renderVoiceNudge() {
+  const el = $('#vNudge'); if (!el) return;
+  const on = !!(TALK.room && !AUTH.user && !TALK.canPub && !TALK.myHand && TALK.joinedAt && Date.now() - TALK.joinedAt > 150000 && !store.get('nudged', false));
+  if (on && el.hidden) { el.hidden = false; store.set('nudged', true); TALK.nudgeUntil = Date.now() + 60000; }
+  if (!el.hidden && (Date.now() > (TALK.nudgeUntil || 0) || AUTH.user || TALK.myHand || !TALK.room)) el.hidden = true;
+}
 function renderVoice() {
   const room = TALK.room; if (!room || !TALK.fire) return;
   const parts = voiceParts(), host = TALK.isHostHere;
@@ -6045,9 +6093,49 @@ async function voiceMic() {
   catch (e) { toast(i18n('마이크를 쓸 수 없어요. 브라우저에서 마이크를 허용해 주세요')); }
   renderVoice();
 }
+// 손 들기 = 로그인 입구: 로그인하고 돌아오면 같은 모닥불에 다시 들어가 손이 들린 채로 기다린다
+const PEND_KEY = 'sangil.pendHand';
+function pendHand() { try { const v = JSON.parse(localStorage.getItem(PEND_KEY) || 'null'); return v && Date.now() - v.at < 15 * 60000 && v.course === COURSE ? v : null; } catch (e) { return null; } }
+function setPendHand(f) { try { if (f) localStorage.setItem(PEND_KEY, JSON.stringify({ fid: f.id, course: COURSE, at: Date.now() })); else localStorage.removeItem(PEND_KEY); } catch (e) {} }
+async function openHandSheet() {
+  const f = TALK.fire; if (!f) return;
+  $('#hsEye').textContent = i18n('손 들기') + ' · ' + f.title;
+  if (!$('#hsKakao').children.length) {
+    $('#hsKakao').innerHTML = $('#gbKakao').innerHTML; $('#hsGoogle').innerHTML = $('#gbGoogle').innerHTML; $('#hsEmail').innerHTML = $('#gbEmailBtn').innerHTML;
+    const lab = (el, t) => { const sp = el.querySelector('span'); if (sp) sp.textContent = t; else el.append(t); };
+    lab($('#hsKakao'), i18n('카카오로 계속하기')); lab($('#hsGoogle'), i18n('Google로 계속하기')); lab($('#hsEmail'), i18n('이메일로 인증번호 받기'));
+  }
+  $('#hsMsg').textContent = '';
+  $('#hsApp').hidden = !IN_APP;
+  if (IN_APP) { $('#hsAppTxt').textContent = i18n('구글 계정으로 하려면 Safari나 Chrome에서 열어 주세요. 이 앱 안에서는 구글 로그인이 막혀 있어요'); $('#hsOpen').textContent = IN_KAKAO ? i18n('다른 브라우저로 열기') : i18n('주소 복사하기'); }
+  const P = await loadProviders();
+  $('#hsKakao').hidden = !P.kakao; $('#hsGoogle').hidden = !P.google || IN_APP; $('#hsEmail').hidden = !P.email;
+  if (!P.kakao && !P.email && (IN_APP || !P.google)) $('#hsMsg').textContent = i18n('지금은 이 브라우저에서 로그인할 수 없어요. Safari나 Chrome에서 열어 주세요');
+  $('#handSheet').hidden = false;
+}
+function handLogin(provider) {
+  setPendHand(TALK.fire);
+  if (provider === 'email') { $('#handSheet').hidden = true; openGb(i18n('이메일로 받은 인증번호를 넣으면 손이 들려요')); $('#gbEmailBtn').onclick(); return; }
+  $('#hsMsg').textContent = i18n('로그인 화면으로 이동해요…');
+  gbOAuth(provider);
+}
+async function resumeHand() {   // 로그인하고 돌아왔다: 같은 모닥불로, 손을 든 채로
+  const P = pendHand(); if (!P) return; setPendHand(null);
+  for (let i = 0; i < 40 && !AUTH.user; i++) await new Promise(r => setTimeout(r, 200));
+  if (!AUTH.user) return;
+  await fireLoad(true);
+  const f = TALK.lives.find(x => x.id === P.fid);
+  if (!f) { toast(i18n('그 모닥불 이야기는 이미 끝났어요')); return; }
+  if (TALK.room) await voiceLeave();   // 손님 입장권으로 들어와 있었다면 길벗 입장권으로 다시 들어간다
+  await voiceJoin(f);
+  if (!TALK.room || !TALK.fire || TALK.fire.id !== f.id) return;
+  TALK.myHand = true; sendHand(true); renderVoice();
+  toast(i18n('다시 모닥불로 돌아왔어요. 손을 들었어요. 불지기가 마이크를 건넬 때까지 기다려 주세요'));
+  if (canSound()) bell(0.25);
+}
 function voiceHand() {
   if (!TALK.room) return;
-  if (!AUTH.user) { toast(i18n('말하려면 로그인이 필요해요. 길벗 카드에서 로그인할 수 있어요')); return; }
+  if (!AUTH.user) { openHandSheet(); return; }
   TALK.myHand = !TALK.myHand; sendHand(TALK.myHand);
   toast(TALK.myHand ? i18n('손을 들었어요. 불지기가 마이크를 건네면 말할 수 있어요') : i18n('손을 내렸어요'));
   renderVoice();
@@ -6094,7 +6182,8 @@ async function authInit(force) {
     const q = new URLSearchParams(location.search), err = q.get('error_description') || q.get('error');
     let h = ''; try { h = sessionStorage.getItem('sangil.authHash') || ''; sessionStorage.removeItem('sangil.authHash'); } catch (e) {}
     try { history.replaceState(null, '', location.pathname + (h || location.hash)); } catch (e) {}
-    openGb(err || !AUTH.user ? i18n('로그인을 마치지 못했어요. 다시 시도해 주세요') : '');
+    if (!err && AUTH.user && pendHand()) { $('#enterBtn').textContent = i18n('모닥불로 돌아가기'); toast(i18n('로그인했어요. 모닥불로 돌아가면 손이 들려 있어요')); }
+    else { if (err) setPendHand(null); openGb(err || !AUTH.user ? i18n('로그인을 마치지 못했어요. 다시 시도해 주세요') : ''); }
   }
 }
 let authSeq = 0;
@@ -6113,6 +6202,7 @@ async function onAuth(session) {
     AUTH.profile = (data && data.profile) || null; AUTH.gifted = !!(data && data.gifted);
     if (AUTH.profile) applyProfile(AUTH.profile);
     medMerge(); focusMerge(); if (S.started) fireLoad(true);
+    if (S.started && pendHand()) { $('#gbCard').hidden = true; resumeHand(); }
     if (S.started) loadTrailNotes(true);   // 내 쪽지 표시를 다시 받는다
   } catch (e) { console.warn('길벗 정보를 불러오지 못함', e); if (my === authSeq) { AUTH.profile = null; AUTH.err = true; } }
   finally { if (my === authSeq) { AUTH.pending = false; renderGb(); } }
@@ -6870,6 +6960,13 @@ function bindUI() {
   document.querySelectorAll('#fhWhen button').forEach(b => b.onclick = () => { TALK.when = b.dataset.w; renderFireCard(); });
   document.querySelectorAll('#fhLen button').forEach(b => b.onclick = () => { TALK.len = +b.dataset.m; renderFireCard(); });
   $('#fhGo').onclick = fireCreate;
+  $('#hsKakao').onclick = () => handLogin('kakao'); $('#hsGoogle').onclick = () => handLogin('google'); $('#hsEmail').onclick = () => handLogin('email');
+  $('#hsLater').onclick = () => { $('#handSheet').hidden = true; };
+  $('#handSheet').addEventListener('click', e => { if (e.target.id === 'handSheet') $('#handSheet').hidden = true; });
+  $('#hsOpen').onclick = async () => {
+    if (IN_KAKAO) { setPendHand(TALK.fire); location.href = 'kakaotalk://web/openExternal?url=' + encodeURIComponent(location.href); return; }
+    try { await navigator.clipboard.writeText(location.href); $('#hsMsg').textContent = i18n('주소를 복사했어요. Safari나 Chrome에 붙여 넣어 주세요'); } catch (e) { $('#hsMsg').textContent = location.href; }
+  };
   $('#vMic').onclick = voiceMic; $('#vHand').onclick = voiceHand; $('#vLeave').onclick = voiceLeave; $('#vEnd').onclick = voiceEnd;
   $('#vAudio').onclick = async () => { try { await TALK.room.startAudio(); } catch (e) {} renderVoice(); };
   $('#noteGo').onclick = sendNote; $('#noteCancel').onclick = () => { $('#noteCard').hidden = true; };
@@ -6951,6 +7048,7 @@ function bindUI() {
     setTimeout(() => { $('#hint').style.opacity = 0; }, 9000);
     toast(i18n('{0}님, {1}에 오신 걸 환영해요', S.nick, COURSE_NAME));
     netStart();
+    if (AUTH_RET && pendHand()) setTimeout(resumeHand, 600);
   };
   $('#enterMed').onclick = () => { $('#enterBtn').onclick(); setTimeout(openMedCard, 500); };
   $('#enterFire').onclick = () => { $('#enterBtn').onclick(); setTimeout(openFireCard, 500); };   // 모닥불 이야기를 들으러 온 사람은 바로 목록을 본다   // 명상하러 온 사람은 들어오자마자 시간을 고른다
