@@ -6383,6 +6383,7 @@ async function onAuth(session) {
     sb.rpc('sangil_my_roles').then(async r => {
       if (my !== authSeq || !r || r.error || !r.data) return;
       AUTH.master = !!r.data.master; AUTH.masterVariant = r.data.variant || 'white';
+      if (r.data.host && !TALK.isHost) { TALK.isHost = true; fireUi(); }   // 처음 로그인에서 불지기가 된 사람도 바로 칸이 보이게
       if (AUTH.master) { if (!S.form) S.form = store.get('form', 'deer'); await sb.rpc('sangil_master_tag', { p_tag: ME.id }); }
       renderGb(); retrack();
     }).catch(() => {});
