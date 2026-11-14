@@ -177,6 +177,13 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{ou
 .hsMsg:empty{display:none}
 .hsFoot{display:flex;align-items:center;justify-content:space-between;gap:8px;padding-top:8px;border-top:1px solid var(--paper-line);font-size:12px;color:var(--ink-soft);line-height:1.5}
 .hsFoot .linkbtn{white-space:nowrap;flex:none}
+#voicePanel{grid-template-columns:minmax(0,1fr)}
+.vsay{display:flex;gap:6px;align-items:center;min-width:0}
+.vsay input{flex:1;min-width:0;padding:10px 12px;border-radius:12px;border:0;background:rgba(255,255,255,.12);color:inherit;font-size:16px}
+.vsay input::placeholder{color:rgba(244,238,226,.6)}
+.vsay button{flex:none;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.18);font-size:13px;white-space:nowrap}
+.vsay .vvoice{background:rgba(255,255,255,.08);font-size:12px}
+.vsay[hidden]{display:none}
 .vnudge{display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:12px;background:rgba(255,255,255,.08);font-size:13px}
 .vnudge[hidden]{display:none}
 .vnudge svg{width:18px;height:18px;flex:none;color:#fee58a}
@@ -254,6 +261,8 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{ou
 .tag3d .mlv{display:inline-flex;align-items:center;gap:2px;font-style:normal;font-size:10px;font-weight:700;color:#2f5a3e;background:#dcebdf;border-radius:999px;padding:1px 6px 1px 4px;margin-left:2px}
 .tag3d .mlv svg{width:10px;height:10px}
 .tag3d .mlv[hidden]{display:none}
+.tag3d .mst{font-style:normal;font-size:10px;font-weight:700;color:#6b5420;background:#f7efd4;border-radius:999px;padding:1px 7px;margin-left:3px}
+.tag3d .mst[hidden]{display:none}
 .chips.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
 .enter2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:-4px}
 .enter2 .secondary{padding:12px 6px}
@@ -528,6 +537,7 @@ body.calm #trailCard,body.calm #hint{opacity:0;pointer-events:none}
     <div class="gbHead"><canvas id="gbAvatar" width="152" height="152" aria-hidden="true"></canvas><div class="t"><b id="gbNick"></b><button class="linkbtn" id="gbNickBtn" style="justify-self:start;padding-left:0">다른 이름</button></div></div>
     <form class="gbRow" id="gbNickRow" hidden autocomplete="off"><input id="gbNickIn" maxlength="12" enterkeyhint="done" placeholder="2~12자 이름" aria-label="내 이름"><button class="authbtn email" type="submit" style="width:auto;padding:0 18px">저장</button></form>
     <p class="fine" id="gbNickTip"></p>
+    <button class="authbtn email" id="gbForm" hidden></button>
     <div id="gbGift" hidden>로그인 선물로 장작 10개를 받았어요</div>
     <div style="display:grid;gap:8px"><span class="lab">피부색</span><div class="swatches" id="gbSkin"></div></div>
     <div style="display:grid;gap:8px"><span class="lab">모습</span><div class="chips" id="gbGender"><button data-g="0">남자</button><button data-g="1">여자</button></div></div>
@@ -582,8 +592,9 @@ body.calm #trailCard,body.calm #hint{opacity:0;pointer-events:none}
   <div class="vhead"><i class="vdot"></i><b id="vTitle"></b><span id="vCount"></span></div>
   <div class="vspk" id="vSpk"></div>
   <div class="vhands" id="vHands" hidden></div>
+  <form class="vsay" id="vSay" autocomplete="off"><button type="button" class="vvoice" id="vVoice" aria-label="목소리 고르기"></button><input id="vSayIn" maxlength="60" enterkeyhint="send" placeholder="글로 말하기" aria-label="글로 말하기"><button type="submit" id="vSayGo">보내기</button></form>
   <div class="vnudge" id="vNudge" hidden><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 13V5.5a1.5 1.5 0 0 1 3 0V12M11 11.5v-7a1.5 1.5 0 0 1 3 0V12M14 11.5V6a1.5 1.5 0 0 1 3 0v8c0 4-2.5 7-6.5 7S5 18.5 4 15.5l-1-3a1.5 1.5 0 0 1 2.7-1.2L8 14"/></svg><span>이야기에 끼고 싶으면 손을 들어 보세요</span></div>
-  <div class="vbtns"><button id="vMic" hidden>마이크 켜기</button><button id="vHand" hidden>손 들기</button><button id="vAudio" hidden>소리 켜기</button><button id="vEnd" hidden>모닥불 마치기</button><button id="vLeave">나가기</button></div>
+  <div class="vbtns"><button id="vMic" hidden>마이크 켜기</button><button id="vHand" hidden>손 들기</button><button id="vAudio" hidden>소리 켜기</button><button id="vTts" hidden></button><button id="vSkip" hidden>넘기기</button><button id="vEnd" hidden>모닥불 마치기</button><button id="vLeave">나가기</button></div>
 </div>
 <div id="voiceAudio" hidden></div>
 <section id="handSheet" class="scrim" hidden>
@@ -1435,6 +1446,28 @@ const EN = {"센트럴파크":"Central Park",
 "지금은 바꿀 수 없어요":"Can't change that right now",
 "모닥불 이야기를 취소했어요":"Campfire talk canceled",
 "다시 들어가기":"Rejoin",
+"글로 말하기":"Type to speak",
+"보내기":"Send",
+"목소리 고르기":"Choose a voice",
+"차분하게":"Calm",
+"밝게":"Bright",
+"낮게":"Deep",
+"넘기기":"Skip",
+"글 읽어 주기 끄기":"Turn off read-aloud",
+"글 읽어 주기 켜기":"Turn on read-aloud",
+"글 읽어 주기를 켰어요":"Read-aloud is on",
+"글 읽어 주기를 껐어요":"Read-aloud is off",
+"불지기가 글 읽어 주기를 꺼 두었어요":"The fire keeper turned off read-aloud",
+"이 브라우저는 글 읽어 주기를 지원하지 않아요":"This browser can't read text aloud",
+"그 말은 읽어 줄 수 없어요":"That can't be read aloud",
+"오늘은 글로 말하기를 다 썼어요. 내일 다시 할 수 있어요":"You've used today's written messages. You can send more tomorrow",
+"{0}초 뒤에 다시 보낼 수 있어요":"You can send again in {0}s",
+"읽어 줄 글이 밀려 있어요. 조금 뒤에 보내 주세요":"Messages are queued up. Try again in a moment",
+"산지기":"Keeper",
+"흰 꽃사슴으로 변하기":"Become the white deer",
+"내 모습으로 돌아가기":"Back to my own look",
+"흰 꽃사슴이 되었어요":"You're the white deer now",
+"내 모습으로 돌아왔어요":"Back to your own look",
 "불지기에게 손을 들려면 이름이 필요해요":"To raise your hand, the fire keeper needs your name",
 "한 번만 로그인하면 이 모닥불로 바로 돌아와, 손이 들린 채로 기다려요. 듣는 건 그동안에도 이어져요.":"Sign in once and you come right back to this fire with your hand already up. You keep listening the whole time.",
 "로그인하면 이름을 지키고, 강아지와 함께 걸어요":"Signed in, your name stays yours and your dog walks with you",
@@ -2772,10 +2805,10 @@ const labelsEl = $('#labels');
 const labels = [];
 function addLabel(html, cls, getPos, maxD) { const el = document.createElement('div'); el.className = 'tag3d ' + cls; el.innerHTML = html; labelsEl.appendChild(el); const L = { el, getPos, maxD, shown: true }; labels.push(L); return L; }
 function initLabels() {
-  W.meLabel = addLabel(i18n('<span class="me">나</span><span id="meName"></span>'), 'me', () => [player.x, player.y + 2.55 - 0.47 * player.sit, player.z], 60);
+  W.meLabel = addLabel(i18n('<span class="me">나</span><span id="meName"></span>'), 'me', () => [player.x, player.y + (isDeer(player) ? 2.3 : 2.55) - 0.47 * player.sit, player.z], 60);
   W.meLabel.hideIf = () => inTent(player);
   $('#meName').textContent = S.nick;
-  W.meLabel.el.insertAdjacentHTML('beforeend', '<i class="mlv" id="meLv" hidden></i>');
+  W.meLabel.el.insertAdjacentHTML('beforeend', '<i class="mlv" id="meLv" hidden></i><i class="mst" id="meMst" hidden>산지기</i>');
   for (const n of NPCS) { const L = addLabel(`<em>${NPC_TAG}</em><span></span>`, 'npc', () => [n.x, n.y + 2.4 - 0.47 * n.sit, n.z], 38); L.el.querySelector('span').textContent = n.name; L.hideIf = () => !showNpcs(); n.label = L; }
   if (!IS_PARK) addLabel(i18n('<i></i><span>구름폭포</span>'), 'place', () => [W.fallLip[0], W.fallLip[1] + 3.2, W.fallLip[2]], 110);
   else for (const [nm, x, z] of [[i18n('더 레이크'), -14, -86], [i18n('저수지'), 0, 50], [i18n('그레이트 론'), 0, -2], [i18n('쉽 메도우'), -24, -168]]) addLabel(`<i></i><span>${nm}</span>`, 'place', () => [x, 6, z], 120);
@@ -3592,6 +3625,79 @@ function updatePuffs(dt) {
   }
   for (const q of PUFFS) { q.t += dt; q.x += q.vx * dt; q.z += q.vz * dt; q.y += 0.18 * dt; }
   while (PUFFS.length && PUFFS[0].t > 1.6) PUFFS.shift();
+  updatePoof(dt);
+}
+/* 산지기의 흰 꽃사슴: 산신령을 모시는 신령한 사슴. 은은하게 빛나고, 걸으면 발밑에 꽃잎이 핀다 */
+const POOF = [], PETALS = [];
+let SHADOW_DRAW = false;
+function isDeer(c) { return c === player ? !!(AUTH.master && S.form === 'deer') : !!(c.fmWant && c.mstOk); }
+function poofAt(c) {   // 펑! 구름 속에서 모습이 바뀐다
+  for (let i = 0; i < 18; i++) { const a = i / 18 * TAU + Math.random() * 0.3, up = 0.4 + Math.random() * 1.2; POOF.push({ x: c.x, y: c.y + up, z: c.z, vx: Math.sin(a) * (0.9 + Math.random() * 0.8), vy: 0.25 + Math.random() * 0.5, vz: Math.cos(a) * (0.9 + Math.random() * 0.8), s: 0.22 + Math.random() * 0.22, t: 0 }); }
+  if (canSound()) bell(0.3);
+}
+function updatePoof(dt) {
+  for (const q of POOF) { q.t += dt; const d = Math.exp(-dt * 3.2); q.vx *= d; q.vz *= d; q.x += q.vx * dt; q.y += q.vy * dt; q.z += q.vz * dt; }
+  while (POOF.length && POOF[0].t > 1.1) POOF.shift();
+  for (const q of PETALS) q.t += dt;
+  while (PETALS.length && PETALS[0].t > 1.6) PETALS.shift();
+}
+function drawPoof() {
+  for (const q of POOF) { const k = q.t / 1.1; draw(W.uSphere, { model: M.chain(M.T(q.x, q.y, q.z), M.S(q.s * (0.6 + 1.3 * k))), tint: [1, 1, 1], alpha: 0.85 * (1 - k) * (1 - k), emissive: 0.9, flat: 0, snowable: 0 }); }
+  for (const q of PETALS) { const k = q.t / 1.6, a = Math.min(1, q.t * 5) * (1 - k); draw(W.uSphere, { model: M.chain(M.T(q.x, q.y + 0.03 + 0.02 * k, q.z), M.Ry(q.r), M.S(0.07 * (0.6 + 0.6 * Math.min(1, q.t * 4)), 0.012, 0.045)), tint: q.c, alpha: a, emissive: 0.5, flat: 0, snowable: 0 }); }
+}
+const DEER = { white: [0.97, 0.96, 0.93], belly: [1, 1, 0.98], spot: [0.97, 0.88, 0.7], muzzle: [0.86, 0.8, 0.74], dark: [0.09, 0.08, 0.08], antler: [0.98, 0.93, 0.78], hoof: [0.56, 0.5, 0.45], inner: [0.96, 0.8, 0.8] };
+function drawDeer(c) {
+  const p = computePose(c), sit = Math.min(1, p.sit), mv = c.moveAmt * (1 - sit), ph = c.phase || 0;
+  const root = M.chain(M.T(c.x + (c.ox || 0), c.y, c.z + (c.oz || 0)), M.Ry(c.heading));
+  const D = (loc, mesh, col, em) => draw(mesh, { model: M.mul(root, loc), tint: col, emissive: em === undefined ? 0.24 : em, flat: 0, snowable: 0 });
+  const by = lerp(0.9, 0.36, sit) + Math.abs(Math.sin(ph)) * 0.05 * mv, C = DEER;
+  D(M.chain(M.T(0, by, 0), M.S(0.27, 0.3, 0.56)), W.uSphere, C.white);
+  D(M.chain(M.T(0, by + 0.05, 0.33), M.S(0.25, 0.3, 0.26)), W.uSphere, C.white);
+  D(M.chain(M.T(0, by + 0.04, -0.36), M.S(0.26, 0.28, 0.25)), W.uSphere, C.white);
+  D(M.chain(M.T(0, by - 0.13, 0.02), M.S(0.2, 0.14, 0.42)), W.uSphere, C.belly);
+  for (const sd of [-1, 1]) for (const [sx, sz] of [[0.14, -0.3], [0.17, -0.12], [0.16, 0.08], [0.12, 0.26], [0.07, -0.2], [0.08, 0.02]]) {   // 등의 연한 점박이 무늬
+    const x = sx * sd, q = 1 - (x / 0.27) ** 2 - (sz / 0.56) ** 2; if (q <= 0) continue;
+    D(M.chain(M.T(x, by + 0.3 * Math.sqrt(q) - 0.005, sz), M.S(0.042, 0.018, 0.05)), W.uSphere, C.spot, 0.3);
+  }
+  D(M.chain(M.T(0, by + 0.12, -0.6), M.Rx(0.5), M.S(0.07, 0.11, 0.06)), W.uSphere, C.belly);   // 꼬리
+  const hipY = by - 0.1, legL = Math.max(0.2, hipY);
+  for (const [lx, lz, fr] of [[-0.12, 0.32, 1], [0.12, 0.32, -1], [-0.12, -0.34, -1], [0.12, -0.34, 1]]) {
+    const front = lz > 0, swing = Math.sin(ph + (fr > 0 ? 0 : Math.PI)) * 0.5 * mv;
+    let leg = M.chain(M.T(lx, hipY, lz), M.Rx(swing));
+    if (sit > 0.02) leg = M.chain(M.T(lx, hipY, lz), M.Rx(lerp(swing, front ? -1.45 : 1.45, sit)));
+    const L = lerp(legL, 0.36, sit);
+    D(M.chain(leg, M.T(0, -L / 2, 0), M.S(0.065, L, 0.065)), W.uCyl, C.white);
+    D(M.chain(leg, M.T(0, -L, 0.01), M.S(0.045, 0.04, 0.055)), W.uSphere, C.hoof, 0.02);
+  }
+  const look = Math.sin(T * 0.7 + (c.x || 0)) * 0.12 * (1 - mv);
+  const neck = M.chain(M.T(0, by + 0.16, 0.42), M.Ry(look), M.Rx(-0.42 + 0.15 * sit));
+  D(M.chain(neck, M.T(0, 0.2, 0), M.S(0.12, 0.3, 0.13)), W.uSphere, C.white);
+  const head = M.chain(neck, M.T(0, 0.44, 0.02), M.Rx(0.42 - 0.15 * sit + Math.sin(T * 1.1 + (c.z || 0)) * 0.04 + 0.08 * mv * Math.sin(ph * 2)));
+  D(M.chain(head, M.T(0, 0, 0.05), M.S(0.14, 0.135, 0.19)), W.uSphere, C.white);
+  D(M.chain(head, M.T(0, -0.035, 0.2), M.S(0.08, 0.07, 0.1)), W.uSphere, C.muzzle, 0.08);
+  D(M.chain(head, M.T(0, -0.015, 0.29), M.S(0.032, 0.026, 0.02)), W.uSphere, C.dark, 0);
+  for (const sd of [-1, 1]) {
+    D(M.chain(head, M.T(0.095 * sd, 0.035, 0.1), M.S(0.024)), W.uSphere, C.dark, 0);
+    D(M.chain(head, M.T(0.13 * sd, 0.09, -0.03), M.Rz(-0.95 * sd), M.Rx(-0.2), M.S(0.05, 0.12, 0.028)), W.uSphere, C.white);
+    D(M.chain(head, M.T(0.135 * sd, 0.092, -0.025), M.Rz(-0.95 * sd), M.Rx(-0.2), M.S(0.03, 0.085, 0.012)), W.uSphere, C.inner, 0.05);
+    const beam = M.chain(head, M.T(0.055 * sd, 0.12, -0.02), M.Rz(-0.38 * sd), M.Rx(-0.28));   // 작고 둥근 뿔: 은은한 빛
+    D(M.chain(beam, M.T(0, 0.15, 0), M.S(0.026, 0.3, 0.026)), W.uCyl, C.antler, 0.45);
+    const tine = M.chain(beam, M.T(0, 0.15, 0), M.Rx(0.75), M.Rz(0.2 * sd));
+    D(M.chain(tine, M.T(0, 0.07, 0), M.S(0.02, 0.14, 0.02)), W.uCyl, C.antler, 0.45);
+    D(M.chain(beam, M.T(0, 0.3, 0), M.S(0.03)), W.uSphere, C.antler, 0.9);
+    D(M.chain(tine, M.T(0, 0.14, 0), M.S(0.024)), W.uSphere, C.antler, 0.9);
+  }
+  if (SHADOW_DRAW) return;
+  for (let i = 0; i < 4; i++) {   // 뿔 둘레를 도는 작은 빛
+    const a = T * 0.8 + i * 1.57;
+    D(M.chain(head, M.T(Math.cos(a) * 0.32, 0.32 + 0.08 * Math.sin(T * 1.3 + i), Math.sin(a) * 0.32 - 0.02), M.S(0.02)), W.uSphere, [1, 0.96, 0.82], 2.2);
+  }
+  if (mv > 0.3 && T - (c._petT || 0) > 0.32) {   // 걸으면 발밑에 꽃잎이 잠깐 피었다 진다
+    c._petT = T; const sd = (c._petS = -(c._petS || 1)), h = c.heading;
+    const x = c.x + Math.cos(h) * 0.14 * sd, z = c.z - Math.sin(h) * 0.14 * sd;
+    PETALS.push({ x, z, y: groundY(x, z), r: Math.random() * TAU, t: 0, c: Math.random() < 0.5 ? [0.98, 0.78, 0.84] : [1, 0.92, 0.95] });
+    if (PETALS.length > 60) PETALS.shift();
+  }
 }
 function drawPuffs() { for (const q of PUFFS) { const k = q.t / 1.6; draw(W.uSphere, { model: M.chain(M.T(q.x, q.y, q.z), M.S(0.05 + 0.14 * k)), tint: [1, 1, 1], alpha: 0.42 * (1 - k), emissive: 0.6, flat: 0, snowable: 0 }); } }
 /* 약수터: 산 중턱 바위 아래 돌확과 대나무 대롱, 바가지. 공원은 무쇠 음수대. 마시면 기운이 가득 찬다 */
@@ -4488,6 +4594,8 @@ function updateHud(dt) {
   {   // 집중하는 사람 이름표에는 '집중 중' (말 걸기보다 쪽지가 어울리는 때)
     const mine = S.nick + (player.act && player.act.type === 'focus' && !player.act.leaving ? ' · ' + i18n('집중 중') : '');
     const me = $('#meName'); if (me && me.textContent !== mine) me.textContent = mine;
+    { const mb = $('#meMst'), on = isDeer(player); if (mb && mb.hidden === on) mb.hidden = !on; }
+    for (const q of NET.peers.values()) { if (!q.label) continue; const on = isDeer(q); if (on && !q.mstEl) { q.mstEl = document.createElement('i'); q.mstEl.className = 'mst'; q.mstEl.textContent = i18n('산지기'); q.label.el.appendChild(q.mstEl); } if (q.mstEl && q.mstEl.hidden === on) q.mstEl.hidden = !on; }
     for (const p of NET.peers.values()) { if (!p.label) continue; const t2 = p.nick + (p.act && p.act.type === 'focus' ? ' · ' + i18n('집중 중') : ''), sp = p.label.el.querySelector('span'); if (sp.textContent !== t2) sp.textContent = t2; }
     document.body.classList.toggle('focusing', !!(player.act && player.act.type === 'focus' && !player.act.leaving));
   }
@@ -4851,6 +4959,12 @@ function drawShadow(x, z, s) {
   const m = new Float32Array([ax[0]*s,ax[1]*s,ax[2]*s,0, n[0],n[1],n[2],0, bz[0]*s,bz[1]*s,bz[2]*s,0, x,y+0.06,z,1]);
   draw(W.uDisc, { model: m, tint: [0, 0, 0], alpha: SHADOW.on ? 0.12 : 0.26, flat: 0, snowable: 0 });
 }
+function drawChar(c, isMe, shadowPass) {
+  const d = isDeer(c);
+  if (!shadowPass) { if (c._deer !== undefined && c._deer !== d) poofAt(c); c._deer = d; }
+  SHADOW_DRAW = !!shadowPass;
+  if (d) drawDeer(c); else drawHiker(c, isMe);
+}
 function drawOpaque(shadowPass) {   // 땅, 나무, 바위, 사람, 강아지 (투명한 것은 빼고)
   draw(W.terrain, { mode: 0, detail: 1, flat: 0 });
   draw(W.props, { mode: 1, detail: 0.45 });
@@ -4869,7 +4983,7 @@ function drawOpaque(shadowPass) {   // 땅, 나무, 바위, 사람, 강아지 (�
   if (npcOn) for (const n of NPCS) if (Math.hypot(n.x - eye[0], n.z - eye[2]) < 140) drawHiker(n, false);
   for (const p of NET.peers.values()) if (p.ready && !p.hidden && Math.hypot(p.x - eye[0], p.z - eye[2]) < 160) {
     if (p.act && p.act.type === 'camp' && p.act.spot) drawCamp(p.act.spot, smooth(0, 1.8, p.act.t), p.act.t > 2.4, p.jacket);
-    if (!inTent(p)) drawHiker(p, false);
+    if (!inTent(p)) drawChar(p, false, shadowPass);
   }
   if (S.camp) drawCamp(S.camp.spot, S.camp.tentK, S.camp.fireOn, player.jacket);
   if (Math.hypot(barista.x - eye[0], barista.z - eye[2]) < 120) drawHiker(barista, false);
@@ -4877,7 +4991,7 @@ function drawOpaque(shadowPass) {   // 땅, 나무, 바위, 사람, 강아지 (�
   drawFires();   // 불지기들이 피운 모닥불
   if (Math.hypot(RADIO_PROP.x - eye[0], RADIO_PROP.z - eye[2]) < 120) drawRadioProp();
   if (!shadowPass) { drawFinds(); drawPapers(); }
-  if (S.started && !inTent(player)) drawHiker(player, true);
+  if (S.started && !inTent(player)) drawChar(player, true, shadowPass);
   drawDogs();
 }
 function render() {
@@ -4921,7 +5035,7 @@ function render() {
     const sw = SPRING.water; draw(W.water, { model: M.chain(M.T(sw.x, sw.y, sw.z), M.S(sw.r, 1, sw.r)), tint: wTintS(), alpha: 0.85, emissive: 0.2, flat: 0, snowable: 0, water: S.sb > 0.5 ? 0.2 : 1.4 });
     if (SPRING.spout && S.sb < 0.7) { const sp = SPRING.spout, h = sp[1] - sw.y; draw(W.uCyl, { model: M.chain(M.T(sp[0], sw.y + h / 2, sp[2]), M.S(0.03, h, 0.03)), tint: [0.8, 0.9, 1], alpha: 0.6, emissive: 0.5, flat: 0, snowable: 0, flow: 1, flowSpeed: 2.2 }); }
   }
-  drawPuffs();
+  drawPuffs(); drawPoof();
   for (const w of WATERS) draw(W.water, { model: M.chain(M.T(w.x, w.level, w.z), M.S(w.rx * 1.12, 1, w.rz * 1.12)), tint: wTint, alpha: wAlpha, emissive: 0.18, flat: 0, snowable: 0, water: 1 - 0.85 * ice });
   if (W.basin) draw(W.water, { model: M.chain(M.T(W.basin.x, W.basin.y, W.basin.z), M.S(W.basin.r, 1, W.basin.r)), tint: wTint, alpha: wAlpha, emissive: 0.2, flat: 0, snowable: 0, water: 1.3 - 1.1 * ice });
   const fountainOff = IS_PARK && ice > 0.5;   // 겨울에는 분수를 잠근다
@@ -5036,7 +5150,7 @@ function inviteMeet() {   // 부른 사람이 보이면 그 곁으로
     }
   }
 }
-function myPresence() { return { id: ME.id, n: S.nick, j: player.jacket, h: player.hat, s: Math.max(0, SKINS.indexOf(player.skin)), f: player.face | 0, g: player.g | 0, dg: myDog(), ls: DOG.leash ? 1 : 0, md: Math.min(4, [0, 0, 1, 1, 2, 2, 3, 3, 4, 4][medTierOf(medN())]), m2: medTierOf(medN()), mh2: medHideMask(), fc: focusTierOf(focusMinN()), fh: focusHideMask(), kr: player.keyring | 0 }; }
+function myPresence() { return { id: ME.id, n: S.nick, j: player.jacket, h: player.hat, s: Math.max(0, SKINS.indexOf(player.skin)), f: player.face | 0, g: player.g | 0, dg: myDog(), ls: DOG.leash ? 1 : 0, md: Math.min(4, [0, 0, 1, 1, 2, 2, 3, 3, 4, 4][medTierOf(medN())]), m2: medTierOf(medN()), mh2: medHideMask(), fc: focusTierOf(focusMinN()), fh: focusHideMask(), kr: player.keyring | 0, fm: isDeer(player) ? 1 : 0 }; }
 function loadScript(src) { return new Promise((res, rej) => { const s = document.createElement('script'); s.src = src; s.async = true; s.onload = res; s.onerror = rej; document.head.appendChild(s); }); }
 /* Supabase 연결 하나를 함께 걷기(실시간)와 로그인이 같이 쓴다. 로그인 정보는 이 기기에 'sangil-auth' 이름으로 남는다 */
 let SB_P = null;
@@ -6012,13 +6126,17 @@ async function voiceJoin(f) {
     room.on(E.TrackSubscribed, (track, pub, part) => { if (track.kind !== 'audio') return; const el = track.attach(); el.dataset.pid = part.identity; $('#voiceAudio').appendChild(el); });
     room.on(E.TrackUnsubscribed, track => { try { track.detach().forEach(el => el.remove()); } catch (e) {} });
     room.on(E.ActiveSpeakersChanged, sp => { TALK.speaking = new Set(sp.map(p => p.identity)); renderVoice(); });
-    room.on(E.ParticipantConnected, () => renderVoice());
+    room.on(E.ParticipantConnected, () => { renderVoice(); if (TALK.isHostHere && !SAY.on) setTimeout(() => sendData({ t: 'tts', on: false }), 800); });
     room.on(E.ParticipantDisconnected, p => { TALK.hands.delete(p.identity); renderVoice(); });
     room.on(E.TrackMuted, () => renderVoice()); room.on(E.TrackUnmuted, () => renderVoice());
     room.on(E.LocalTrackPublished, () => renderVoice()); room.on(E.LocalTrackUnpublished, () => renderVoice());
     room.on(E.DataReceived, (payload, part) => {
       let m = null; try { m = JSON.parse(new TextDecoder().decode(payload)); } catch (e) { return; }
-      if (!m || !part || m.t !== 'hand') return;
+      if (!m || !part) return;
+      if (m.t === 'say') { sayEnqueue(m, part.identity); return; }
+      if (m.t === 'tts' && partMeta(part).host) { SAY.on = !!m.on; if (!SAY.on) sayClear(); renderVoice(); return; }
+      if (m.t === 'skip' && partMeta(part).host) { saySkip(false); return; }
+      if (m.t !== 'hand') return;
       if (m.on) { TALK.hands.set(part.identity, cleanNick(part.name || m.n)); if (TALK.isHostHere) { toast(i18n('{0}님이 손을 들었어요', cleanNick(part.name || m.n))); if (canSound()) bell(0.25); } }
       else TALK.hands.delete(part.identity);
       renderVoice();
@@ -6045,6 +6163,7 @@ async function voiceJoin(f) {
 }
 function voiceCleanup() {
   const was = !!TALK.room, leaving = TALK.leaving, ended = TALK.ended;
+  sayClear(); SAY.on = true; SAY.last.clear();
   TALK.room = null; TALK.fire = null; TALK.canPub = TALK.micOn = TALK.myHand = false; TALK.hands.clear(); TALK.speaking.clear(); TALK.isHostHere = false;
   $('#voiceAudio').innerHTML = ''; $('#voicePanel').hidden = true;
   if (was && !leaving) toast(ended ? i18n('모닥불 이야기를 마쳤어요. 함께해 줘서 고마워요') : i18n('모닥불 이야기가 끝났어요. 함께해 줘서 고마워요'));
@@ -6057,6 +6176,55 @@ function sendHand(on) {
 }
 function voiceParts() { const room = TALK.room; if (!room) return []; return [room.localParticipant, ...room.remoteParticipants.values()]; }
 const partMeta = p => { try { return JSON.parse(p.metadata || '{}'); } catch (e) { return {}; } };
+/* 글로 말하기: 쓴 글을 기계 목소리로 모두에게 읽어 준다. 들어온 순서대로 한 번에 하나씩 */
+const SAY = { q: [], cur: null, on: true, last: new Map(), unlocked: false, voiceIx: store.get('sayVoice', 0) | 0 };
+const SAY_VOICES = [{ k: '차분하게', pitch: 0.95, rate: 0.98 }, { k: '밝게', pitch: 1.3, rate: 1.05 }, { k: '낮게', pitch: 0.7, rate: 0.92 }];
+const SAY_DAY = 30, SAY_GAP = 20000, SAY_MAX = 60;
+const canSpeak = () => 'speechSynthesis' in window && typeof SpeechSynthesisUtterance === 'function';
+function sayUnlock() { if (SAY.unlocked || !canSpeak()) return; SAY.unlocked = true; try { const u = new SpeechSynthesisUtterance(' '); u.volume = 0; speechSynthesis.speak(u); } catch (e) {} }
+function sayToday() { const d = store.get('sayDay', null); return d && d.k === todayKey() ? d.n | 0 : 0; }
+function sayPick(lang) { try { const vs = speechSynthesis.getVoices().filter(v => (v.lang || '').toLowerCase().startsWith(lang)); return vs.find(v => /google|yuna|sora|heami|female|natural/i.test(v.name)) || vs[0] || null; } catch (e) { return null; } }
+function sayEnqueue(m, ident) {   // 받는 쪽에서도 줄 서기 규칙을 지킨다 (보내는 쪽 규칙을 건너뛰어도 소용없게)
+  if (!SAY.on || !TALK.room || !canSpeak()) return false;
+  const raw = String(m.x || '').replace(/[\u0000-\u001f\u007f]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, SAY_MAX), text = raw && maskBad(raw); if (!text || text.includes('○')) return false;
+  const now = Date.now(), last = SAY.last.get(ident) || 0; if (now - last < SAY_GAP - 2000) return false;
+  if (SAY.q.length >= 5) return false;
+  SAY.last.set(ident, now);
+  SAY.q.push({ ident, nick: cleanNick(m.n), text, v: clamp(m.v | 0, 0, SAY_VOICES.length - 1) });
+  sayNext(); return true;
+}
+function sayDuck(on) { document.querySelectorAll('#voiceAudio audio').forEach(a => { a.volume = on ? 0.45 : 1; }); }
+function sayNext() {
+  if (SAY.cur || !SAY.q.length || !SAY.on) return;
+  const it = SAY.cur = SAY.q.shift(), V0 = SAY_VOICES[it.v], ko = /[가-힣]/.test(it.text);
+  const who = it.ident === ME.id ? player : NET.peers.get(it.ident);
+  if (who) showBubble(who, it.text, Math.min(9, 2.5 + it.text.length * 0.12));
+  try {
+    const u = new SpeechSynthesisUtterance(it.text), vo = sayPick(ko ? 'ko' : 'en');
+    u.lang = ko ? 'ko-KR' : 'en-US'; if (vo) u.voice = vo; u.pitch = V0.pitch; u.rate = V0.rate; u.volume = 1;
+    const done = () => { if (SAY.cur !== it) return; SAY.cur = null; sayDuck(false); setTimeout(sayNext, 500); };
+    u.onend = done; u.onerror = done; setTimeout(done, 15000);
+    sayDuck(true); speechSynthesis.speak(u);
+  } catch (e) { SAY.cur = null; }
+  renderVoice();
+}
+function saySkip(local) { try { speechSynthesis.cancel(); } catch (e) {} SAY.cur = null; sayDuck(false); if (!local) setTimeout(sayNext, 300); }
+function sayClear() { SAY.q.length = 0; saySkip(true); }
+function sendData(obj) { const room = TALK.room; if (!room) return; try { room.localParticipant.publishData(new TextEncoder().encode(JSON.stringify(obj)), { reliable: true }); } catch (e) {} }
+function saySend() {
+  const inp = $('#vSayIn'), text = String(inp.value || '').replace(/\s+/g, ' ').trim();
+  if (!TALK.room || !text) return;
+  if (!SAY.on) { toast(i18n('불지기가 글 읽어 주기를 꺼 두었어요')); return; }
+  if (!canSpeak()) { toast(i18n('이 브라우저는 글 읽어 주기를 지원하지 않아요')); return; }
+  if (maskBad(text) !== text || blockedReason(text)) { toast(i18n('그 말은 읽어 줄 수 없어요')); return; }
+  if (sayToday() >= SAY_DAY) { toast(i18n('오늘은 글로 말하기를 다 썼어요. 내일 다시 할 수 있어요')); return; }
+  const wait = SAY_GAP - (Date.now() - (SAY.last.get(ME.id) || 0)); if (wait > 0) { toast(i18n('{0}초 뒤에 다시 보낼 수 있어요', Math.ceil(wait / 1000))); return; }
+  if (SAY.q.length >= 5) { toast(i18n('읽어 줄 글이 밀려 있어요. 조금 뒤에 보내 주세요')); return; }
+  sayUnlock();
+  const m = { t: 'say', x: text.slice(0, SAY_MAX), n: S.nick, v: SAY.voiceIx };
+  if (!sayEnqueue(m, ME.id)) return;
+  sendData(m); inp.value = ''; store.set('sayDay', { k: todayKey(), n: sayToday() + 1 });
+}
 function renderVoiceNudge() {
   const el = $('#vNudge'); if (!el) return;
   const on = !!(TALK.room && !AUTH.user && !TALK.canPub && !TALK.myHand && TALK.joinedAt && Date.now() - TALK.joinedAt > 150000 && !store.get('nudged', false));
@@ -6084,6 +6252,11 @@ function renderVoice() {
   const mic = $('#vMic'); mic.hidden = !TALK.canPub; mic.textContent = TALK.micOn ? i18n('마이크 끄기') : i18n('마이크 켜기'); mic.classList.toggle('live', TALK.micOn);
   const hand = $('#vHand'); hand.hidden = TALK.canPub; hand.textContent = TALK.myHand ? i18n('손 내리기') : i18n('손 들기'); hand.classList.toggle('up', TALK.myHand);
   $('#vAudio').hidden = room.canPlaybackAudio !== false;
+  $('#vSay').hidden = !canSpeak() || (!SAY.on && !host);
+  $('#vSayIn').placeholder = SAY.on ? i18n('글로 말하기') : i18n('불지기가 글 읽어 주기를 꺼 두었어요');
+  $('#vVoice').textContent = i18n(SAY_VOICES[SAY.voiceIx].k);
+  const tts = $('#vTts'); tts.hidden = !host; tts.textContent = SAY.on ? i18n('글 읽어 주기 끄기') : i18n('글 읽어 주기 켜기');
+  $('#vSkip').hidden = !host || !SAY.cur;
   const end = $('#vEnd'); end.hidden = !host; end.textContent = Date.now() - TALK.endArm < 6000 ? i18n('정말 마칠까요?') : i18n('모닥불 마치기');
 }
 async function voiceMic() {
@@ -6164,7 +6337,7 @@ function drawVoiceRings() {   // 말하는 사람 머리 위에 퍼지는 고리
 /* ================= 길벗: 로그인과 내 모습 =================
    로그인은 카카오, 구글, 이메일 숫자 코드. 처음 로그인하면 서버 함수(sangil_claim_gift)가 길벗 정보를 만들고 장작 10개를 준다.
    장작 수는 서버 함수만 바꿀 수 있고, 페이지는 이름과 모습만 고칠 수 있다. 모습 고르기는 로그인하지 않아도 된다. */
-const AUTH = { user: null, profile: null, pending: false, err: false, gifted: false, providers: null, listening: false, email: '', returned: false };
+const AUTH = { master: false, user: null, profile: null, pending: false, err: false, gifted: false, providers: null, listening: false, email: '', returned: false };
 const IN_APP = /KAKAOTALK|Instagram|FBAN|FBAV|FB_IAB|Line\/|NAVER\(inapp|DaumApps|everytimeApp/i.test(navigator.userAgent);
 const IN_KAKAO = /KAKAOTALK/i.test(navigator.userAgent);
 const authRedirect = () => location.origin + location.pathname;
@@ -6191,7 +6364,7 @@ async function onAuth(session) {
   const u = (session && session.user) || null, prev = AUTH.user ? AUTH.user.id : null;
   AUTH.user = u;
   if ((u ? u.id : null) !== prev) { if (u && DOG.coat && S.started) placeDog(DOG, player); if (!u) $('#gbNickRow').hidden = true; setTimeout(retrack, 0); }   // 로그인하면 강아지가 나타나고, 로그아웃하면 사라진다
-  if (!u) { AUTH.profile = null; AUTH.pending = false; AUTH.gifted = false; renderGb(); return; }
+  if (!u) { AUTH.profile = null; AUTH.pending = false; AUTH.gifted = false; AUTH.master = false; renderGb(); return; }
   if (prev === u.id && (AUTH.profile || AUTH.pending)) { renderGb(); return; }
   const my = ++authSeq; AUTH.pending = true; AUTH.err = false; renderGb();
   try {
@@ -6202,6 +6375,12 @@ async function onAuth(session) {
     AUTH.profile = (data && data.profile) || null; AUTH.gifted = !!(data && data.gifted);
     if (AUTH.profile) applyProfile(AUTH.profile);
     medMerge(); focusMerge(); if (S.started) fireLoad(true);
+    sb.rpc('sangil_my_roles').then(async r => {
+      if (my !== authSeq || !r || r.error || !r.data) return;
+      AUTH.master = !!r.data.master;
+      if (AUTH.master) { if (!S.form) S.form = store.get('form', 'deer'); await sb.rpc('sangil_master_tag', { p_tag: ME.id }); }
+      renderGb(); retrack();
+    }).catch(() => {});
     if (S.started && pendHand()) { $('#gbCard').hidden = true; resumeHand(); }
     if (S.started) loadTrailNotes(true);   // 내 쪽지 표시를 다시 받는다
   } catch (e) { console.warn('길벗 정보를 불러오지 못함', e); if (my === authSeq) { AUTH.profile = null; AUTH.err = true; } }
@@ -6322,7 +6501,13 @@ function buildGb() {
   $('#gbLeash').onchange = () => setLook({ ls: $('#gbLeash').checked ? 1 : 0 }, true);
 }
 const rgbCss = c => `rgb(${c.map(v => Math.round(clamp(v, 0, 1) * 255)).join(',')})`;
+function renderForm() {
+  const b = $('#gbForm'); if (!b) return;
+  b.hidden = !AUTH.master || !AUTH.user;
+  b.textContent = isDeer(player) ? i18n('내 모습으로 돌아가기') : i18n('흰 꽃사슴으로 변하기');
+}
 function renderGb() {
+  renderForm();
   const inn = !!AUTH.user, logs = AUTH.profile ? (AUTH.profile.logs | 0) : null;
   $('#gbSet').textContent = inn ? i18n('길벗 카드 보기') : i18n('로그인하고 장작 받기');
   $('#gbStart').textContent = inn ? i18n('길벗 카드') : i18n('로그인하고 장작 10개 받기');
@@ -6543,7 +6728,7 @@ function ensurePeer(id, pres) {
     p = { id, real: true, ready: false, nick: i18n('산행 중인 분'), x: 0, z: 0, y: 0, heading: 0, phase: Math.random() * 6, moveAmt: 0, sit: 0, act: null,
       jacket: [0.5, 0.5, 0.55], hat: [0.9, 0.88, 0.82], pants: [0.24, 0.26, 0.30], pack: [0.30, 0.28, 0.25], cushion: [0.42, 0.34, 0.52],
       mode: 'stop', tx: 0, tz: 0, sp: 1.8, dir: 1, idx: 0, heard: performance.now(), seen: performance.now(), ox: 0, oz: 0, hidden: MUTED.has(id) };
-    p.label = addLabel('<span></span>', 'real', () => [p.x + p.ox, p.y + 2.45 - 0.47 * p.sit, p.z + p.oz], 60);
+    p.label = addLabel('<span></span>', 'real', () => [p.x + p.ox, p.y + (isDeer(p) ? 2.2 : 2.45) - 0.47 * p.sit, p.z + p.oz], 60);
     p.label.hideIf = () => !p.ready || p.hidden;
     p.label.el.addEventListener('click', e => { e.stopPropagation(); openMute(p, e.clientX, e.clientY); });
     NET.peers.set(id, p);
@@ -6558,6 +6743,8 @@ function ensurePeer(id, pres) {
     p.g = pres.g === 1 ? 1 : 0;
     p.dogCoat = Number.isInteger(pres.dg) ? clamp(pres.dg, 0, DOG_N) : 0; p.dogLeash = pres.ls !== 0; p.medTier = Number.isInteger(pres.m2) ? clamp(pres.m2, 0, MED_TIERS.length) : Number.isInteger(pres.md) ? [0, 2, 4, 6, 8][clamp(pres.md, 0, 4)] : 0; p.medHide = Number.isInteger(pres.mh2) ? pres.mh2 & 0x3FE : 0;
     p.focTier = Number.isInteger(pres.fc) ? clamp(pres.fc, 0, FOCUS_TIERS.length) : 0; p.focHide = Number.isInteger(pres.fh) ? pres.fh & 0x7E : 0; p.keyring = Number.isInteger(pres.kr) ? clamp(pres.kr, 0, KEYRINGS.length - 1) : 0;
+    p.fmWant = pres.fm === 1;
+    if (p.fmWant && p.mstOk === undefined && SANGIL_SUPABASE_URL) { p.mstOk = null; getSB().then(sb => sb.rpc('sangil_is_master_tag', { p_tag: p.id })).then(r => { p.mstOk = !!(r && r.data === true); }).catch(() => { p.mstOk = undefined; }); }
   }
   p.label.el.querySelector('span').textContent = p.nick;
   if (!p.lvEl) { p.lvEl = document.createElement('i'); p.lvEl.className = 'mlv'; p.label.el.appendChild(p.lvEl); }
@@ -6962,6 +7149,13 @@ function bindUI() {
   $('#fhGo').onclick = fireCreate;
   $('#hsKakao').onclick = () => handLogin('kakao'); $('#hsGoogle').onclick = () => handLogin('google'); $('#hsEmail').onclick = () => handLogin('email');
   $('#hsLater').onclick = () => { $('#handSheet').hidden = true; };
+  $('#vSay').addEventListener('submit', e => { e.preventDefault(); saySend(); });
+  $('#vSayIn').addEventListener('keydown', e => e.stopPropagation());   // 글을 쓰는 동안 화살표나 글자 키로 걷지 않게
+  $('#vVoice').onclick = () => { SAY.voiceIx = (SAY.voiceIx + 1) % SAY_VOICES.length; store.set('sayVoice', SAY.voiceIx); renderVoice(); };
+  $('#vTts').onclick = () => { SAY.on = !SAY.on; if (!SAY.on) sayClear(); sendData({ t: 'tts', on: SAY.on }); renderVoice(); toast(SAY.on ? i18n('글 읽어 주기를 켰어요') : i18n('글 읽어 주기를 껐어요')); };
+  $('#vSkip').onclick = () => { saySkip(false); sendData({ t: 'skip' }); renderVoice(); };
+  document.addEventListener('pointerdown', sayUnlock, { once: true, capture: true });
+  $('#gbForm').onclick = () => { if (!AUTH.master) return; S.form = isDeer(player) ? 'me' : 'deer'; store.set('form', S.form); renderForm(); retrack(); $('#gbCard').hidden = true; toast(isDeer(player) ? i18n('흰 꽃사슴이 되었어요') : i18n('내 모습으로 돌아왔어요')); };
   $('#handSheet').addEventListener('click', e => { if (e.target.id === 'handSheet') $('#handSheet').hidden = true; });
   $('#hsOpen').onclick = async () => {
     if (IN_KAKAO) { setPendHand(TALK.fire); location.href = 'kakaotalk://web/openExternal?url=' + encodeURIComponent(location.href); return; }
