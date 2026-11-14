@@ -263,6 +263,8 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{ou
 .tag3d .mlv[hidden]{display:none}
 .tag3d .mst{font-style:normal;font-size:10px;font-weight:700;color:#6b5420;background:#f7efd4;border-radius:999px;padding:1px 7px;margin-left:3px}
 .tag3d .mst[hidden]{display:none}
+.tag3d .tph{width:18px;height:18px;border-radius:50%;object-fit:cover;flex:none;margin-right:2px;background:#e4ece1}
+.tag3d .tph[hidden]{display:none}
 .chips.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
 .enter2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:-4px}
 .enter2 .secondary{padding:12px 6px}
@@ -537,6 +539,7 @@ body.calm #trailCard,body.calm #hint{opacity:0;pointer-events:none}
     <div class="gbHead"><canvas id="gbAvatar" width="152" height="152" aria-hidden="true"></canvas><div class="t"><b id="gbNick"></b><button class="linkbtn" id="gbNickBtn" style="justify-self:start;padding-left:0">다른 이름</button></div></div>
     <form class="gbRow" id="gbNickRow" hidden autocomplete="off"><input id="gbNickIn" maxlength="12" enterkeyhint="done" placeholder="2~12자 이름" aria-label="내 이름"><button class="authbtn email" type="submit" style="width:auto;padding:0 18px">저장</button></form>
     <p class="fine" id="gbNickTip"></p>
+    <label class="pcheck" id="gbPhotoRow" hidden><input type="checkbox" id="gbPhoto"><span>다른 길벗에게 내 사진 보이기<small>이름표 옆에 작은 동그라미로 보여요</small></span></label>
     <button class="authbtn email" id="gbForm" hidden></button>
     <div id="gbGift" hidden>로그인 선물로 장작 10개를 받았어요</div>
     <div style="display:grid;gap:8px"><span class="lab">피부색</span><div class="swatches" id="gbSkin"></div></div>
@@ -1446,6 +1449,8 @@ const EN = {"센트럴파크":"Central Park",
 "지금은 바꿀 수 없어요":"Can't change that right now",
 "모닥불 이야기를 취소했어요":"Campfire talk canceled",
 "다시 들어가기":"Rejoin",
+"다른 길벗에게 내 사진 보이기":"Show my photo to other hikers",
+"이름표 옆에 작은 동그라미로 보여요":"A small circle next to your name tag",
 "글로 말하기":"Type to speak",
 "보내기":"Send",
 "목소리 고르기":"Choose a voice",
@@ -4600,6 +4605,8 @@ function updateHud(dt) {
     const mine = S.nick + (player.act && player.act.type === 'focus' && !player.act.leaving ? ' · ' + i18n('집중 중') : '');
     const me = $('#meName'); if (me && me.textContent !== mine) me.textContent = mine;
     { const mb = $('#meMst'), on = isDeer(player); if (mb && mb.hidden === on) mb.hidden = !on; }
+    tagPhoto(W.meLabel, sharePhoto() ? myPhoto() : '', 'phEl');
+    for (const q of NET.peers.values()) if (q.label) tagPhoto(q.label, q.photo || '', 'phEl');
     for (const q of NET.peers.values()) { if (!q.label) continue; const on = isDeer(q); if (on && !q.mstEl) { q.mstEl = document.createElement('i'); q.mstEl.className = 'mst'; q.mstEl.textContent = i18n('산지기'); q.label.el.appendChild(q.mstEl); } if (q.mstEl && q.mstEl.hidden === on) q.mstEl.hidden = !on; }
     for (const p of NET.peers.values()) { if (!p.label) continue; const t2 = p.nick + (p.act && p.act.type === 'focus' ? ' · ' + i18n('집중 중') : ''), sp = p.label.el.querySelector('span'); if (sp.textContent !== t2) sp.textContent = t2; }
     document.body.classList.toggle('focusing', !!(player.act && player.act.type === 'focus' && !player.act.leaving));
@@ -5155,7 +5162,7 @@ function inviteMeet() {   // 부른 사람이 보이면 그 곁으로
     }
   }
 }
-function myPresence() { return { id: ME.id, n: S.nick, j: player.jacket, h: player.hat, s: Math.max(0, SKINS.indexOf(player.skin)), f: player.face | 0, g: player.g | 0, dg: myDog(), ls: DOG.leash ? 1 : 0, md: Math.min(4, [0, 0, 1, 1, 2, 2, 3, 3, 4, 4][medTierOf(medN())]), m2: medTierOf(medN()), mh2: medHideMask(), fc: focusTierOf(focusMinN()), fh: focusHideMask(), kr: player.keyring | 0, fm: isDeer(player) ? 1 : 0 }; }
+function myPresence() { return { id: ME.id, n: S.nick, j: player.jacket, h: player.hat, s: Math.max(0, SKINS.indexOf(player.skin)), f: player.face | 0, g: player.g | 0, dg: myDog(), ls: DOG.leash ? 1 : 0, md: Math.min(4, [0, 0, 1, 1, 2, 2, 3, 3, 4, 4][medTierOf(medN())]), m2: medTierOf(medN()), mh2: medHideMask(), fc: focusTierOf(focusMinN()), fh: focusHideMask(), kr: player.keyring | 0, fm: isDeer(player) ? 1 : 0, ph: sharePhoto() ? myPhoto() : '' }; }
 function loadScript(src) { return new Promise((res, rej) => { const s = document.createElement('script'); s.src = src; s.async = true; s.onload = res; s.onerror = rej; document.head.appendChild(s); }); }
 /* Supabase 연결 하나를 함께 걷기(실시간)와 로그인이 같이 쓴다. 로그인 정보는 이 기기에 'sangil-auth' 이름으로 남는다 */
 let SB_P = null;
@@ -6514,6 +6521,7 @@ function renderForm() {
 }
 function renderGb() {
   renderForm();
+  { const row = $('#gbPhotoRow'); if (row) { row.hidden = !(AUTH.user && myPhoto()); $('#gbPhoto').checked = !!store.get('photoShare', false); } }
   const inn = !!AUTH.user, logs = AUTH.profile ? (AUTH.profile.logs | 0) : null;
   $('#gbSet').textContent = inn ? i18n('길벗 카드 보기') : i18n('로그인하고 장작 받기');
   $('#gbStart').textContent = inn ? i18n('길벗 카드') : i18n('로그인하고 장작 10개 받기');
@@ -6556,7 +6564,34 @@ function renderGb() {
     wearChips(box, FOCUS_TIERS, t, focusHideMask(), 'focusHide'); }
   drawAvatar(); renderBag(); renderGbNotes();
 }
-function drawAvatar() {   // 길벗 카드의 작은 얼굴 그림 (3D 캐릭터와 같은 색, 같은 얼굴)
+// 카카오·구글 프로필 사진: 길벗 카드에 보이고, 원하면 이름표 옆에도 작게 보인다
+function safePhoto(u) {
+  if (typeof u !== 'string' || u.length > 400) return '';
+  let url; try { url = new URL(u.replace(/^http:\/\//i, 'https://')); } catch (e) { return ''; }
+  if (url.protocol !== 'https:' || !/(^|\.)(kakaocdn\.net|googleusercontent\.com)$/i.test(url.hostname)) return '';
+  return url.href;
+}
+function myPhoto() { const m = (AUTH.user && AUTH.user.user_metadata) || {}; return safePhoto(m.avatar_url || m.picture || m.profile_image || ''); }
+const sharePhoto = () => !!(AUTH.user && store.get('photoShare', false) && myPhoto());
+const PHOTO_IMG = new Map();
+function photoImg(url) {
+  let im = PHOTO_IMG.get(url);
+  if (!im) { im = new Image(); im.referrerPolicy = 'no-referrer'; im.onload = () => drawAvatar(); im.src = url; PHOTO_IMG.set(url, im); }
+  return im;
+}
+function tagPhoto(label, url, key) {   // 이름표 앞의 작은 동그란 사진
+  let el = label[key];
+  if (!url) { if (el) el.hidden = true; return; }
+  if (!el) { el = label[key] = document.createElement('img'); el.className = 'tph'; el.alt = ''; el.referrerPolicy = 'no-referrer'; el.loading = 'lazy'; label.el.insertBefore(el, label.el.firstChild); }
+  if (el.dataset.src !== url) { el.dataset.src = url; el.src = url; }
+  el.hidden = false;
+}
+function drawAvatar() {
+  const pu = myPhoto();
+  if (pu) { const im = photoImg(pu), cv0 = $('#gbAvatar'), x0 = cv0 && cv0.getContext('2d'); if (x0 && im.complete && im.naturalWidth) { x0.clearRect(0, 0, 152, 152); x0.save(); x0.beginPath(); x0.arc(76, 76, 76, 0, TAU); x0.clip(); const s0 = Math.min(im.naturalWidth, im.naturalHeight); x0.drawImage(im, (im.naturalWidth - s0) / 2, (im.naturalHeight - s0) / 2, s0, s0, 0, 0, 152, 152); x0.restore(); return; } }
+  drawCharAvatar();
+}
+function drawCharAvatar() {   // 길벗 카드의 작은 얼굴 그림 (3D 캐릭터와 같은 색, 같은 얼굴)
   const cv = $('#gbAvatar'); if (!cv) return;
   const x = cv.getContext('2d'), f = player.face | 0; if (!x) return;
   x.clearRect(0, 0, 152, 152); x.save();
@@ -6623,7 +6658,7 @@ async function gbVerify(ev) {
 }
 async function gbLogout() {
   try { const sb = await getSB(); await sb.auth.signOut(); } catch (e) {}
-  AUTH.user = null; AUTH.profile = null; AUTH.gifted = false; renderGb(); gbMsg(i18n('로그아웃했어요'));
+  AUTH.user = null; AUTH.profile = null; AUTH.gifted = false; AUTH.master = false; setNick(nickRand()); $('#meName').textContent = S.nick; retrack(); renderGb(); gbMsg(i18n('로그아웃했어요'));
 }
 
 async function netStart() {
@@ -6749,7 +6784,7 @@ function ensurePeer(id, pres) {
     p.g = pres.g === 1 ? 1 : 0;
     p.dogCoat = Number.isInteger(pres.dg) ? clamp(pres.dg, 0, DOG_N) : 0; p.dogLeash = pres.ls !== 0; p.medTier = Number.isInteger(pres.m2) ? clamp(pres.m2, 0, MED_TIERS.length) : Number.isInteger(pres.md) ? [0, 2, 4, 6, 8][clamp(pres.md, 0, 4)] : 0; p.medHide = Number.isInteger(pres.mh2) ? pres.mh2 & 0x3FE : 0;
     p.focTier = Number.isInteger(pres.fc) ? clamp(pres.fc, 0, FOCUS_TIERS.length) : 0; p.focHide = Number.isInteger(pres.fh) ? pres.fh & 0x7E : 0; p.keyring = Number.isInteger(pres.kr) ? clamp(pres.kr, 0, KEYRINGS.length - 1) : 0;
-    p.fmWant = pres.fm === 1;
+    p.fmWant = pres.fm === 1; p.photo = safePhoto(pres.ph);
     if (p.fmWant && p.mstOk === undefined && SANGIL_SUPABASE_URL) { p.mstOk = null; getSB().then(async sb => { let r = await sb.rpc('sangil_master_variant', { p_tag: p.id }); if (r && r.error) { r = await sb.rpc('sangil_is_master_tag', { p_tag: p.id }); p.mstOk = r && r.data === true ? 'white' : false; return; } p.mstOk = r && typeof r.data === 'string' ? r.data : false; }).catch(() => { p.mstOk = undefined; }); }
   }
   p.label.el.querySelector('span').textContent = p.nick;
@@ -7155,6 +7190,7 @@ function bindUI() {
   $('#fhGo').onclick = fireCreate;
   $('#hsKakao').onclick = () => handLogin('kakao'); $('#hsGoogle').onclick = () => handLogin('google'); $('#hsEmail').onclick = () => handLogin('email');
   $('#hsLater').onclick = () => { $('#handSheet').hidden = true; };
+  $('#gbPhoto').onchange = () => { store.set('photoShare', $('#gbPhoto').checked); retrack(); };
   $('#vSay').addEventListener('submit', e => { e.preventDefault(); saySend(); });
   $('#vSayIn').addEventListener('keydown', e => e.stopPropagation());   // 글을 쓰는 동안 화살표나 글자 키로 걷지 않게
   $('#vVoice').onclick = () => { SAY.voiceIx = (SAY.voiceIx + 1) % SAY_VOICES.length; store.set('sayVoice', SAY.voiceIx); renderVoice(); };
