@@ -278,11 +278,16 @@ body.focusing #trailCard,body.focusing #hint{opacity:0;pointer-events:none}
 #snowBar b{font-variant-numeric:tabular-nums;font-weight:600}
 #snowThrow{padding:10px 20px;border-radius:999px;background:#f4f8ff;color:#22302a;font-weight:700;font-size:15px}
 #snowThrow:disabled{opacity:.45}
+#snowThrow{touch-action:none;-webkit-user-select:none;user-select:none}
+#snowGauge,#tagGauge{display:block;width:52px;height:8px;border-radius:99px;background:rgba(255,255,255,.18);overflow:hidden;opacity:.35;transition:opacity .2s}
+#snowGauge.on,#tagGauge.on{opacity:1}
+#snowGauge i,#tagGauge i{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,#f4f8ff,#ffd27a 60%,#ff8a4a)}
 #snowQuit{padding:8px 12px;border-radius:999px;color:var(--on-glass-soft);font-size:13px}
 #tagBar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(98px + env(safe-area-inset-bottom,0px));z-index:19;border-radius:999px;padding:7px 8px 7px 16px;display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--on-glass);white-space:nowrap}
 #tagBar b{font-variant-numeric:tabular-nums;font-weight:600}
 #tagAct{padding:10px 18px;border-radius:999px;background:#f4f8ff;color:#22302a;font-weight:700;font-size:15px}
 #tagAct:disabled{opacity:.45}
+#tagThrow{padding:10px 14px;border-radius:999px;background:rgba(255,255,255,.2);color:var(--on-glass);font-weight:700;font-size:14px;touch-action:none;-webkit-user-select:none;user-select:none}
 #tagQuit{padding:8px 12px;border-radius:999px;color:var(--on-glass-soft);font-size:13px}
 #tagStart{padding:8px 13px;border-radius:999px;background:rgba(255,255,255,.16);color:var(--on-glass);font-size:13px;font-weight:600}
 #tagStart:disabled{opacity:.4}
@@ -553,9 +558,9 @@ body.calm #trailCard,body.calm #hint{opacity:0;pointer-events:none}
   </div>
   <div id="askBar" class="glass" hidden><span id="askTxt"></span><div><button id="askYes">하이파이브</button><button id="askNo">다음에</button></div></div>
   <div id="zoomBox" class="glass"><button id="zoomIn" aria-label="가까이 보기">+</button><button id="zoomOut" aria-label="멀리 보기">−</button></div>
-  <div id="snowBar" class="glass" hidden><b id="snowScore"></b><button id="snowThrow">던지기</button><button id="snowStart" hidden>경기 시작</button><button id="snowQuit">그만</button></div>
+  <div id="snowBar" class="glass" hidden><b id="snowScore"></b><i id="snowGauge"><i></i></i><button id="snowThrow">던지기</button><button id="snowStart" hidden>경기 시작</button><button id="snowQuit">그만</button></div>
   <div id="snowPick" class="glass" hidden><span id="snowPickTxt">어느 팀으로 놀까요?</span><div><button class="tb" data-t="1">청팀<small id="snowNb"></small></button><button class="tw" data-t="2">백팀<small id="snowNw"></small></button><button class="tf" data-t="0">그냥 놀기</button></div><span>경도 (경찰과 도둑)</span><div><button class="tc" data-g="1">경찰<small id="tagNc"></small></button><button class="tr" data-g="2">도둑<small id="tagNr"></small></button></div></div>
-  <div id="tagBar" class="glass" hidden><b id="tagTxt"></b><button id="tagAct"></button><button id="tagStart" hidden>경기 시작</button><button id="tagQuit">그만</button></div>
+  <div id="tagBar" class="glass" hidden><b id="tagTxt"></b><button id="tagAct"></button><i id="tagGauge" hidden><i></i></i><button id="tagThrow" hidden>눈 던지기</button><button id="tagStart" hidden>경기 시작</button><button id="tagQuit">그만</button></div>
   <button id="nearSit" class="glass" hidden><svg class="ico" viewBox="0 0 24 24"><path d="M12 4c2 2.5 3 4 3 6a3 3 0 0 1-6 0c0-1 .5-2 1.2-2.8.3 1 .9 1.6 1.8 1.6C12 7.5 12 6 12 4zM5 19.5l14-4M19 19.5l-14-4"/></svg><span id="nearSitTxt">모닥불에 앉기</span></button>
   <div id="actPill" class="glass" hidden><div><b id="actTitle"></b><small id="actSub"></small></div><button id="actAlt" hidden>숨 고르기</button><button id="actStop">일어나기</button></div>
   <div id="toast" class="glass" hidden></div>
@@ -1273,6 +1278,33 @@ const EN = {"센트럴파크":"Central Park",
 "{0}분 명상을 마쳤어요. 이 고요함을 안고 다시 걸어요":"{0}-minute meditation done. Carry this calm with you",
 "스트레스를 후~ 날려 보냈어요. 숨이 한결 고르네요":"Stress, blown away. Your breath feels steadier",
 "내 정보":"My profile",
+"곧 경도 시작! 도둑이 숨는 30초 동안은 움직일 수 없어요. 그 뒤 99초 안에 모두 찾아야 해요":"Starting soon! You can't move for 30 seconds while the robbers hide. Then you have 99 seconds to find them all.",
+"곧 경도 시작! 30초 안에 달아나 숨으세요. 99초만 버티면 이겨요":"Starting soon! Run and hide within 30 seconds. Last 99 seconds and you win.",
+"얼어붙었어요 · {0}초":"Frozen · {0}s",
+"{0} · 잡힌 도둑 {1}/{2} · {3}초":"{0} · caught {1}/{2} · {3}s",
+"감옥 · 구해 주길 기다려요 · {0}초":"In jail · waiting for rescue · {0}s",
+"경도 끝! 99초 안에 다 찾지 못했어요 · 도둑 승리":"Game over! Not everyone was found in 99 seconds · Robbers win",
+"경기장 밖이에요. 주황색 선 안에서만 움직일 수 있어요":"That's out of bounds. Stay inside the orange line.",
+"눈 던지기":"Throw snow",
+"눈에 맞아 3초 동안 얼어붙었어요!":"Hit by a snowball. Frozen for 3 seconds!",
+"앗, 차가워!":"Brr, cold!",
+"{0}님이 3초 동안 얼어붙었어요. 어서 가서 잡아요":"{0} is frozen for 3 seconds. Go catch them!",
+"경찰이 되었어요. 달아나는 도둑은 눈을 던져 맞히면 3초 얼어붙어요. 가까이 가서 잡기를 눌러요":"You're a cop. Hit a fleeing robber with a snowball to freeze them for 3 seconds, then get close and press Catch.",
+"겨눌 곳을 꾹 눌렀다 떼면 던져요. 오래 누를수록 멀리 가요":"Press and hold where you want to aim, then let go. Hold longer to throw farther.",
+"마우스로 겨누고, 누르고 있다가 떼면 던져요. 오래 누를수록 멀리 가요":"Aim with the mouse, hold, then release to throw. Hold longer to throw farther.",
+"살금살금 너구리":"Sneaky Raccoon",
+"재빠른 다람쥐":"Speedy Chipmunk",
+"몰래몰래 고양이":"Stealthy Cat",
+"날랜 족제비":"Swift Weasel",
+"부지런한 순경":"Diligent Officer",
+"눈 밝은 경위":"Sharp-eyed Sergeant",
+"혼자여도 괜찮아요. 산책객 넷이 도둑이 되어 줘요. '경기 시작'을 눌러 보세요":"Playing alone is fine. Four strollers will be the robbers. Press Start match.",
+"혼자여도 괜찮아요. 산책객 둘이 경찰, 둘이 같은 편 도둑이 되어 줘요. '경기 시작'을 눌러 보세요":"Playing alone is fine. Two strollers are cops and two are robbers on your side. Press Start match.",
+"어서 나와요!":"Come on out!",
+"수상한데…?":"Suspicious…",
+"고요한 소나무":"Quiet Pine",
+"맑은 샘물":"Clear Spring",
+"포근한 이끼":"Soft Moss",
 "눈덩이 대장":"Snowball Chief",
 "날쌘 청설모":"Quick Squirrel",
 "장난꾸러기 참새":"Cheeky Sparrow",
@@ -2166,6 +2198,7 @@ const HALL = (() => {
   return c;
 })();
 const HALL_NAME = i18n('명상원');
+const HALL_NPCS = [];   // 진짜 사람이 4명 미만일 때만 보이는, 명상원에 앉아 있는 산객 넷 (명상하는 사람 수에는 넣지 않는다)
 const pads = IS_PARK ? [
   { x: TX[1], z: TZ[1], r: 5, h: TH[1] },
   { x: 6, z: -118, r: 8.5, h: TH[nearIdx(6, -118)] },
@@ -3312,6 +3345,10 @@ function initLabels() {
   if (!IS_PARK) addLabel(i18n('<i></i><span>구름폭포</span>'), 'place', () => [W.fallLip[0], W.fallLip[1] + 3.2, W.fallLip[2]], 110);
   else for (const [nm, x, z] of [[i18n('더 레이크'), -14, -86], [i18n('저수지'), 0, 50], [i18n('그레이트 론'), 0, -2], [i18n('쉽 메도우'), -24, -168]]) addLabel(`<i></i><span>${nm}</span>`, 'place', () => [x, 6, z], 120);
   for (let i = 0; i < 3; i++) { const L = addLabel(`<em>${NPC_TAG}</em><span></span>`, 'npc', () => { const b = SNOW.bots[i]; return b ? [b.x, b.y + 2.4, b.z] : [0, -9999, 0]; }, 45); L.hideIf = () => !SNOW.bots[i]; L.botI = i; SNOW.botLabels = SNOW.botLabels || []; SNOW.botLabels.push(L); }
+  for (let i = 0; i < 4; i++) { const L = addLabel(`<em></em><span></span>`, 'npc', () => { const b = TAG.bots[i]; return b && !b.camo ? [b.x, b.y + 2.4, b.z] : [0, -9999, 0]; }, 45); L.hideIf = () => !TAG.bots[i] || !!TAG.bots[i].camo; TAG.botLabels = TAG.botLabels || []; TAG.botLabels.push(L); }
+  if (HALL && !HALL_NPCS.length && NPCS.length) [[4, i18n('고요한 소나무')], [16, i18n('느긋한 구름')], [30, i18n('맑은 샘물')], [43, i18n('포근한 이끼')]].forEach(([k, name], i) => { const st = HALL.seats[k], n = NPCS[i % NPCS.length];
+    HALL_NPCS.push({ npc: true, name, seat: st, x: st.x, z: st.z, y: getH(st.x, st.z) + HALL.floor, heading: st.heading, phase: 0, moveAmt: 0, sit: 1, act: { type: 'meditate', t: 99, medStart: 1 }, jacket: JACKETS[(i * 2 + 3) % JACKETS.length], pants: [0.24, 0.26, 0.30], hat: HATS[(i + 3) % HATS.length], pack: [0.30, 0.28, 0.25], cushion: [0.42, 0.34, 0.52], skin: n.skin, face: n.face, g: n.g }); });
+  for (const n of HALL_NPCS) { const L = addLabel(`<em>${NPC_TAG}</em><span></span>`, 'npc', () => [n.x, n.y + 1.95, n.z], 30); L.el.querySelector('span').textContent = n.name; L.hideIf = () => !showNpcs(); }
   if (TAG.zone) { const L = addLabel(i18n('<i></i><span>경도 감옥</span>'), 'place', () => [TAG.jx, groundY(TAG.jx, TAG.jz) + 3, TAG.jz], 90); L.hideIf = () => !TAG.on && !tagN(1) && !tagN(2); }
   if (RINK) addLabel(i18n('<i></i><span>울먼 링크</span>'), 'place', () => [RINK.x, RINK.y + 5.5, RINK.z], 110);
   if (IS_PARK) for (const [nm, x, y, z] of CITY_MARKS) { const L = addLabel('<i></i><span></span>', 'place', () => [x, y, z], 210); L.el.querySelector('span').textContent = nm; }   // 이름난 건물
@@ -3966,15 +4003,17 @@ const keys = {};
 const ptrs = new Map(); let dragMoved = false, pinchD = 0, downAt = null;
 canvas.addEventListener('pointerdown', e => {
   canvas.setPointerCapture(e.pointerId); ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
-  if (ptrs.size === 1) { dragMoved = false; downAt = { x: e.clientX, y: e.clientY }; }
+  if (ptrs.size === 1) { dragMoved = false; downAt = { x: e.clientX, y: e.clientY }; if (snowCan()) { SNOW.press = { t: performance.now() }; SNOW.aimS = { x: e.clientX, y: e.clientY, at: performance.now() }; } } else SNOW.press = null;
   if (ptrs.size === 2) { const [a, b] = [...ptrs.values()]; pinchD = Math.hypot(a.x - b.x, a.y - b.y); dragMoved = true; }
   closeMenus();
   if (A.ctx && A.ctx.state !== 'running' && S.started && !document.hidden) A.ctx.resume();   // 아이폰: 소리가 멈췄으면 다시 깨운다
   if (document.activeElement && document.activeElement.id === 'chatInput') document.activeElement.blur();
 });
 canvas.addEventListener('pointermove', e => {
+  if (snowCan() && (e.pointerType === 'mouse' || ptrs.has(e.pointerId))) SNOW.aimS = { x: e.clientX, y: e.clientY, at: performance.now() };   // 눈 놀이: 마우스가 가리키는 곳을 겨눈다
   const p = ptrs.get(e.pointerId); if (!p) return;
   const dx = e.clientX - p.x, dy = e.clientY - p.y; p.x = e.clientX; p.y = e.clientY;
+  if (SNOW.on && SNOW.chg && SNOW.chg.src === 'ptr') return;   // 힘을 모으는 동안은 화면이 돌지 않고 겨누는 곳만 따라간다
   if (ptrs.size === 2) { const [a, b] = [...ptrs.values()]; const d = Math.hypot(a.x - b.x, a.y - b.y); if (pinchD > 0) { cam.dist = clamp(cam.dist * pinchD / d, 4, 42); S.userZoomT = T; } pinchD = d; return; }
   if (!dragMoved && downAt && Math.hypot(e.clientX - downAt.x, e.clientY - downAt.y) > 6) { dragMoved = true; canvas.classList.add('dragging'); }
   if (dragMoved && S.started) {
@@ -3987,6 +4026,7 @@ canvas.addEventListener('pointermove', e => {
 });
 function endPtr(e) {
   const had = ptrs.has(e.pointerId); ptrs.delete(e.pointerId);
+  if (SNOW.chg || SNOW.press) { const c = SNOW.chg; SNOW.press = null; if (c && c.src === 'ptr') { if (e.type === 'pointerup') snowRelease(); else SNOW.chg = null; canvas.classList.remove('dragging'); return; } }
   if (had && ptrs.size === 0) { canvas.classList.remove('dragging'); if (!dragMoved && S.started && !S.breath && e.type === 'pointerup') clickMove(e.clientX, e.clientY); }
   if (ptrs.size < 2) pinchD = 0;
 }
@@ -4031,7 +4071,7 @@ function clickMove(cx, cy) {
     const tt = (HALL.h + HALL.floor + 0.1 - o[1]) / d[1], fx2 = o[0] + d[0] * tt, fz2 = o[2] + d[2] * tt;
     let st = null, bd = 1.15; for (const q of HALL.seats) { const dd = Math.hypot(q.x - fx2, q.z - fz2); if (dd < bd) { bd = dd; st = q; } }
     if (st) {
-      if ([...NET.peers.values()].some(q => q.ready && !q.hidden && q.act && q.act.type === 'meditate' && Math.hypot(q.x - st.x, q.z - st.z) < 0.8)) { toast(i18n('그 자리에는 다른 분이 앉아 있어요')); return; }
+      if ((showNpcs() && HALL_NPCS.some(n => n.seat === st)) || [...NET.peers.values()].some(q => q.ready && !q.hidden && q.act && q.act.type === 'meditate' && Math.hypot(q.x - st.x, q.z - st.z) < 0.8)) { toast(i18n('그 자리에는 다른 분이 앉아 있어요')); return; }
       S.hallPref = st; S.medPlace = 'hall'; marker = { x: st.x, z: st.z, t: 0 }; openMedCard(); toast(i18n('이 방석에 앉을게요. 얼마나 앉을지 골라 주세요')); return;
     }
   }
@@ -4076,7 +4116,7 @@ function movePlayer(dt) {
     mx = player.target.x - player.x; mz = player.target.z - player.z; dist = Math.hypot(mx, mz);
     if (dist < 0.3) { player.target = null; mx = mz = 0; }
   }
-  let l = Math.hypot(mx, mz), moving = false, speedK = TAG.on && TAG.role === 1 && tagPhase() === 'chase' ? 1.12 : 1;   // 쫓는 경찰은 조금 빠르다
+  let l = Math.hypot(mx, mz), moving = false, speedK = 1;
   const ice = onRink(player.x, player.z);
   if (ice) {   // 얼음 위: 미는 쪽으로 서서히 방향이 꺾이고, 손을 떼도 한참 미끄러진다
     const G = S.glide || (S.glide = { x: 0, z: 0, v: 0 });
@@ -4152,14 +4192,14 @@ function updatePrints(dt) {
     if (ice) { PRINTS.push({ x: c.x - Math.cos(yaw) * 0.12 * c._side, z: c.z + Math.sin(yaw) * 0.12 * c._side, y: RINK.y + 0.075, yaw: yaw + 0.22 * c._side, t: 0, life: 50, ice: 1 }); return; }
     if (!snow || melted(c.x, c.z) || (IS_PARK ? bridgeFloor(c.x, c.z) !== null : propFloor(c.x, c.z) > 0)) return;
     const px = c.x - Math.cos(yaw) * 0.13 * c._side, pz = c.z + Math.sin(yaw) * 0.13 * c._side;
-    PRINTS.push({ x: px, z: pz, y: getH(px, pz) + 0.045, yaw, t: 0, life: 110, ice: 0 });
+    PRINTS.push({ x: px, z: pz, y: getH(px, pz) + 0.045, yaw, t: 0, life: 24, ice: 0 });   // 20초 남짓이면 눈에 덮여 사라진다
   };
   if (S.started) { walker(player); for (const p of NET.peers.values()) if (p.ready && !p.hidden && Math.hypot(p.x - player.x, p.z - player.z) < 70) walker(p); }
 }
 function drawPrints() {
   for (const q of PRINTS) {
     if (Math.hypot(q.x - eye[0], q.z - eye[2]) > 55) continue;
-    const a = Math.min(1, q.t * 4) * (1 - smooth(q.life * 0.6, q.life, q.t));
+    const a = Math.min(1, q.t * 4) * (1 - smooth(q.life * 0.25, q.life, q.t));
     if (q.ice) draw(W.uDisc, { model: M.chain(M.T(q.x, q.y, q.z), M.Ry(q.yaw), M.S(0.028, 1, 0.42)), tint: [1, 1, 1], alpha: 0.55 * a, emissive: 0.35, flat: 0, snowable: 0 });
     else draw(W.uDisc, { model: M.chain(M.T(q.x, q.y, q.z), M.Ry(q.yaw), M.S(0.1, 1, 0.19)), tint: [0.50, 0.57, 0.70], alpha: 0.5 * a, emissive: 0.1, flat: 0, snowable: 0 });
   }
@@ -4691,7 +4731,7 @@ function beginMeditate() {
 /* 명상원 자리: 다른 사람이 앉지 않은 방석에 앉는다. 가까이 있으면 걸어가고, 멀리 있으면 바로 옮겨 간다 */
 function hallSeat() {
   if (!HALL) return null;
-  const taken = st => [...NET.peers.values()].some(p => p.ready && !p.hidden && p.act && p.act.type === 'meditate' && Math.hypot(p.x - st.x, p.z - st.z) < 0.8);
+  const taken = st => (showNpcs() && HALL_NPCS.some(n => n.seat === st)) || [...NET.peers.values()].some(p => p.ready && !p.hidden && p.act && p.act.type === 'meditate' && Math.hypot(p.x - st.x, p.z - st.z) < 0.8);
   const free = HALL.seats.filter(st => !taken(st));
   if (S.hallPref) { const want = S.hallPref; S.hallPref = null; if (free.includes(want)) return want; toast(i18n('그 자리는 방금 다른 분이 앉았어요. 가까운 자리로 갈게요')); free.sort((a, b) => Math.hypot(a.x - want.x, a.z - want.z) - Math.hypot(b.x - want.x, b.z - want.z)); return free[0] || null; }
   if (Math.hypot(player.x - HALL.x, player.z - HALL.z) < HALL.r + 6) free.sort((a, b) => Math.hypot(a.x - player.x, a.z - player.z) - Math.hypot(b.x - player.x, b.z - player.z));
@@ -5516,6 +5556,7 @@ function computePose(c) {
   }
   if (sit > 0.001) { p.headPitch = 0.12 * sit; p.eyes = 1 - smooth(0.55, 1, sit); p.chest = lerp(p.chest, 1 + 0.03 * Math.sin(T * 1.2), sit); }
   if (c === player && S.breath) { const k = S.breathK; p.chest = 1 + 0.07 * k; p.headPitch += -0.12 * k; p.arms[-1].sh[1] += 0.04 * k; p.arms[1].sh[1] += 0.04 * k; }
+  if (c.windK > 0) { p.arms[-1].dir = V.blend(p.arms[-1].dir, V.norm([-0.18, 0.95, -0.4]), c.windK); p.lean -= 0.06 * c.windK; }   // 힘 모으기: 팔을 뒤로 젖힌다
   if (c.throwT && T - c.throwT < 0.42) { const k = (T - c.throwT) / 0.42, e = k * k * (3 - 2 * k); p.arms[-1].dir = V.norm([-0.18, lerp(0.95, -0.15, e), lerp(-0.4, 1, e)]); p.lean += 0.12 * Math.sin(k * Math.PI); }   // 눈 던지기: 팔을 뒤로 젖혔다가 앞으로 뿌린다
   const a = c.act;
   if (a && a.type === 'meditate' && c === player && a.medStart && !a.leaving) { const k = a.breathK || 0; p.chest = 1 + 0.06 * k * c.sit; p.headPitch += -0.06 * k; }
@@ -5623,7 +5664,8 @@ function drawHiker(c, isMe) {
   const root = M.chain(M.T(c.x + (c.ox || 0), c.y + p.lift, c.z + (c.oz || 0)), M.Ry(c.heading), M.Rx(p.lean));
   const P2 = (local, mesh, tint) => draw(mesh, { model: M.mul(root, local), tint, flat: 0, snowable: 0 });
   const red = isMe ? SNOW.on && T < SNOW.restUntil : T < (c.snowRedUntil || 0);   // 눈을 세 번 맞으면 얼굴이 빨개진다
-  const skin = red ? mix3(c.skin || SKINS[1], [0.93, 0.28, 0.24], 0.62) : (c.skin || SKINS[1]), face = c.face | 0;
+  const icy = isMe ? TAG.on && T < TAG.frozenUntil : T < (c.tagFrozenUntil || 0) || T < (c.frozen || 0);   // 경도에서 눈에 맞으면 파랗게 얼어붙는다
+  const skin = red ? mix3(c.skin || SKINS[1], [0.93, 0.28, 0.24], 0.62) : icy ? mix3(c.skin || SKINS[1], [0.62, 0.82, 1.0], 0.7) : (c.skin || SKINS[1]), face = c.face | 0;
   const tier = isMe ? medTierOf(medN()) : (c.medTier || 0), has = tierHas(MED_TIERS, tier, isMe ? medHideMask() : (c.medHide || 0));
   const ftier = isMe ? focusTierOf(focusMinN()) : (c.focTier || 0), fhas = tierHas(FOCUS_TIERS, ftier, isMe ? focusHideMask() : (c.focHide || 0));
   const medSit = !!(c.act && c.act.type === 'meditate' && p.sit > 0.4);
@@ -5715,6 +5757,8 @@ function drawOpaque(shadowPass) {   // 땅, 나무, 바위, 사람, 강아지 (�
   const npcOn = showNpcs();
   if (npcOn) for (const n of NPCS) if (Math.hypot(n.x - eye[0], n.z - eye[2]) < 140) drawHiker(n, false);
   for (const n of SNOW.bots) drawHiker(n, false);   // 눈싸움 상대가 되어 주는 산책객
+  for (const n of TAG.bots) { if (n.camo) drawCamo(n, n.camo, !shadowPass); else drawHiker(n, false); }   // 경도를 함께 해 주는 산책객
+  if (HALL_NPCS.length && showNpcs()) for (const n of HALL_NPCS) if (Math.hypot(n.x - eye[0], n.z - eye[2]) < 120) drawHiker(n, false);   // 명상원에 앉아 있는 산객
   for (const p of NET.peers.values()) if (p.ready && !p.hidden && Math.hypot(p.x - eye[0], p.z - eye[2]) < 160) {
     if (p.act && p.act.type === 'camp' && p.act.spot) drawCamp(p.act.spot, smooth(0, 1.8, p.act.t), p.act.t > 2.4, p.jacket);
     if (!inTent(p)) drawChar(p, false, shadowPass);
@@ -5756,6 +5800,7 @@ function render() {
   if (S.started && myDog() && DOG.placed && !inTent(player)) drawShadow(DOG.x, DOG.z, 0.42 * ((DOG_COATS[DOG.coat] || {}).s || 1));
   if (npcOn) for (const n of NPCS) if (Math.hypot(n.x - eye[0], n.z - eye[2]) < 80) drawShadow(n.x, n.z, 0.6);
   for (const n of SNOW.bots) drawShadow(n.x, n.z, 0.6);
+  for (const n of TAG.bots) if (!n.camo) drawShadow(n.x, n.z, 0.6);
   for (const p of NET.peers.values()) if (p.ready && !p.hidden && Math.hypot(p.x - eye[0], p.z - eye[2]) < 80) drawShadow(p.x + (p.ox || 0), p.z + (p.oz || 0), 0.6);
   drawSeatMarks(); drawFindSparkles(); drawVoiceRings();
   if (marker) { const a = 1 - marker.t / 1.6, s = 0.5 + marker.t * 0.6; draw(W.uRing, { model: M.chain(M.T(marker.x, getH(marker.x, marker.z) + 0.1, marker.z), M.S(s)), tint: [1, 1, 1], alpha: a * 0.85, emissive: 0.8, flat: 0, snowable: 0 }); }
@@ -6089,7 +6134,7 @@ function updateSnowBots(dt) {
     b.moveAmt = lerp(b.moveAmt, go ? 1 : 0, 1 - Math.exp(-dt * 8)); b.y = groundY(b.x, b.z);
     if (!rest && T >= b.nextThrow && dP < 24 && T >= SNOW.restUntil) {   // 내가 있는 곳 언저리로 던진다 (조금씩 빗나간다)
       b.nextThrow = T + 2.2 + Math.random() * 2.4;
-      const tx = player.x + (Math.random() - 0.5) * 2.4, tz = player.z + (Math.random() - 0.5) * 2.4, hd = Math.atan2(tx - b.x, tz - b.z);
+      const lead = clamp(dP / 13, 0.4, 1.5) * 0.8, tx = player.x + (SNOW.pvx || 0) * lead + (Math.random() - 0.5) * 2.0, tz = player.z + (SNOW.pvz || 0) * lead + (Math.random() - 0.5) * 2.0, hd = Math.atan2(tx - b.x, tz - b.z);   // 내가 가는 쪽 앞을 겨눈다
       const sx = b.x + Math.sin(hd) * 0.45, sy = b.y + 1.45, sz = b.z + Math.cos(hd) * 0.45, dist = Math.hypot(tx - sx, tz - sz), tf = clamp(dist / 13, 0.4, 1.5);
       SNOW.balls.push({ id: b.id + ':' + (++SNOW.seq), from: b.id, own: false, bot: true, tm: snowBotTeam(), x: sx, y: sy, z: sz, vx: Math.sin(hd) * dist / tf, vy: (player.y + 1.0 - sy) / tf + 0.5 * SNOW.G * tf, vz: Math.cos(hd) * dist / tf, t: 0 });
       b.heading = hd; b.throwT = T; if (dP < 30) snowSound('throw');
@@ -6141,27 +6186,70 @@ function snowJoin(team = 0) {
   if (!S.season) setSeason(1, false);   // 눈이 있어야 던질 수 있다
   SNOW.on = true; SNOW.hits = 0; SNOW.got = 0; SNOW.strikes = 0; SNOW.restUntil = -1; SNOW.pingAt = -99; SNOW.shown = '';
   audioInit(); $('#snowBar').hidden = false;
-  toast(SNOW.team ? i18n('{0}으로 들어왔어요. 던지기 버튼이나 스페이스 키로 눈을 던져요', i18n(SNOW_TEAM[SNOW.team].name)) : i18n('눈 놀이를 시작해요. 던지기 버튼이나 스페이스 키로 눈을 던져요'));
+  toast(coarse ? i18n('겨눌 곳을 꾹 눌렀다 떼면 던져요. 오래 누를수록 멀리 가요') : i18n('마우스로 겨누고, 누르고 있다가 떼면 던져요. 오래 누를수록 멀리 가요'));
 }
 function snowLeave(quiet) {
   if (!SNOW.on) return;
   SNOW.on = false; SNOW.restUntil = -1; SNOW.bots.length = 0; $('#snowBar').hidden = true; netSend({ k: 'snj', on: 0 }); if (!snowLive()) SNOW.match = null;
   if (!quiet) toast(i18n('눈 놀이를 마쳤어요 · 맞힘 {0}번, 맞음 {1}번', SNOW.hits, SNOW.got));
 }
-function snowThrow() {
-  if (!SNOW.on || T - SNOW.lastThrow < 0.7 || T < SNOW.restUntil || player.act) return;
-  SNOW.lastThrow = T;
-  let tgt = null, bd = 26;   // 가까이 있는 놀이 상대를 향해 던지고, 없으면 보는 쪽으로 던진다
-  for (const q of NET.peers.values()) { if (!q.ready || q.hidden || !snowPlaying(q) || T < (q.snowRedUntil || 0)) continue; if (SNOW.team && ((q.snowTeam | 0) === SNOW.team || (snowLive() && !(q.snowTeam | 0)))) continue; const d = Math.hypot(q.x - player.x, q.z - player.z); if (d < bd && d > 0.8) { bd = d; tgt = q; } }
-  for (const q of SNOW.bots) { if (T < q.snowRedUntil) continue; const d = Math.hypot(q.x - player.x, q.z - player.z); if (d < bd && d > 0.8) { bd = d; tgt = q; } }
-  const tx = tgt ? tgt.x : player.x + Math.sin(cam.yaw) * 13, tz = tgt ? tgt.z : player.z + Math.cos(cam.yaw) * 13, ty = (tgt ? tgt.y : groundY(tx, tz)) + (tgt ? 1.0 : 0.2);
-  const hd = Math.atan2(tx - player.x, tz - player.z) + (Math.random() - 0.5) * 0.09; player.heading = hd; player.target = null;
-  const sx = player.x + Math.sin(hd) * 0.45, sy = player.y + 1.45, sz = player.z + Math.cos(hd) * 0.45, dist = Math.hypot(tx - sx, tz - sz) * (0.96 + Math.random() * 0.08);
-  const tf = clamp(dist / 15, 0.35, 1.35), v = [Math.sin(hd) * dist / tf, (ty - sy) / tf + 0.5 * SNOW.G * tf, Math.cos(hd) * dist / tf];
+/* 겨누고 던지기: 마우스(또는 누르고 있는 손가락)가 가리키는 쪽으로 던지고, 누르고 있는 동안 힘이 모여 더 멀리 간다.
+   눈덩이는 바닥의 동그라미(떨어질 자리)를 향해 포물선으로 날아가므로, 움직이는 상대는 가는 쪽 앞을 겨눠야 맞는다.
+   PC: WASD 로 움직이며 마우스로 겨누고, 마우스를 누르고 있거나 스페이스를 누르고 있다가 뗀다. 휴대폰: 겨눌 곳을 꾹 눌렀다 떼거나, 던지기 단추를 꾹 눌렀다 뗀다 (단추는 화면이 보는 쪽으로). */
+function groundAt(cx, cy) {   // 화면의 한 점이 가리키는 땅
+  const r = canvas.getBoundingClientRect(), nx = (cx - r.left) / r.width * 2 - 1, ny = 1 - (cy - r.top) / r.height * 2;
+  const a = M.xf(invVP, nx, ny, -1), b = M.xf(invVP, nx, ny, 1), o = [a[0] / a[3], a[1] / a[3], a[2] / a[3]], f = [b[0] / b[3], b[1] / b[3], b[2] / b[3]];
+  let d = [f[0] - o[0], f[1] - o[1], f[2] - o[2]]; const l = Math.hypot(...d); d = d.map(v => v / l);
+  if (d[1] > -0.01) return [o[0] + d[0] * 60, o[2] + d[2] * 60];   // 하늘을 가리키면 그쪽 먼 곳
+  let prev = 0, hit = -1; for (let t = 0.5; t < 200; t += 1) { if (o[1] + d[1] * t < getH(o[0] + d[0] * t, o[2] + d[2] * t)) { hit = t; break; } prev = t; }
+  if (hit < 0) return [o[0] + d[0] * 60, o[2] + d[2] * 60];
+  let lo = prev, hi = hit; for (let i = 0; i < 8; i++) { const m = (lo + hi) / 2; if (o[1] + d[1] * m < getH(o[0] + d[0] * m, o[2] + d[2] * m)) hi = m; else lo = m; }
+  return [o[0] + d[0] * hi, o[2] + d[2] * hi];
+}
+const snowCan = () => SNOW.on || (TAG.on && TAG.role === 1 && !TAG.jail && tagPhase() === 'chase');   // 눈 놀이 중이거나, 경도에서 쫓는 경찰
+const snowPower = () => SNOW.chg ? clamp((performance.now() - SNOW.chg.t0) / 1100, 0, 1) : 0;
+const snowRange = k => 4 + 24 * Math.pow(k, 0.85);
+function snowAimDir() {   // 지금 겨누는 방향
+  const c = SNOW.chg, fresh = SNOW.aimS && performance.now() - SNOW.aimS.at < 4000;
+  if ((c && c.src === 'btn' && coarse) || !fresh) return SNOW.chg || !fresh ? (c && c.src === 'btn' ? cam.yaw : (SNOW.aimDir === undefined ? cam.yaw : SNOW.aimDir)) : cam.yaw;
+  const g = groundAt(SNOW.aimS.x, SNOW.aimS.y), dx = g[0] - player.x, dz = g[1] - player.z;
+  return Math.hypot(dx, dz) > 0.6 ? Math.atan2(dx, dz) : player.heading;
+}
+function snowCharge(src) {
+  if (!snowCan() || SNOW.chg || T < SNOW.restUntil || T - SNOW.lastThrow < 0.45 || player.act) return;
+  SNOW.chg = { src, t0: performance.now() }; player.target = null; if (S.auto) { S.auto = false; updateWalkBtn(); }
+}
+function snowRelease() { const c = SNOW.chg; if (!c) return; const k = snowPower(), dir = snowAimDir(); SNOW.chg = null; player.windK = 0; snowThrow(Math.max(0.06, k), dir); }
+function snowThrow(k = 0.45, dir = snowAimDir()) {
+  if (!snowCan() || T < SNOW.restUntil || player.act) return;
+  const tg = TAG.on ? 1 : 0;
+  SNOW.lastThrow = T; player.heading = dir; player.target = null;
+  const range = snowRange(k), tx = player.x + Math.sin(dir) * range, tz = player.z + Math.cos(dir) * range, ty = groundY(tx, tz) + 0.15;
+  const sx = player.x + Math.sin(dir) * 0.45, sy = player.y + 1.5, sz = player.z + Math.cos(dir) * 0.45, dist = Math.hypot(tx - sx, tz - sz);
+  const tf = clamp(dist / 16, 0.38, 1.4), v = [Math.sin(dir) * dist / tf, (ty - sy) / tf + 0.5 * SNOW.G * tf, Math.cos(dir) * dist / tf];
   const id = ME.id + ':' + (++SNOW.seq);
-  SNOW.balls.push({ id, from: ME.id, own: true, tm: SNOW.team, x: sx, y: sy, z: sz, vx: v[0], vy: v[1], vz: v[2], t: 0 });
+  SNOW.balls.push({ id, from: ME.id, own: true, tag: tg, tm: tg ? 0 : SNOW.team, x: sx, y: sy, z: sz, vx: v[0], vy: v[1], vz: v[2], t: 0 });
   player.throwT = T; snowSound('throw');
-  netSend({ k: 'snb', b: id, tm: SNOW.team, s: [+sx.toFixed(2), +sy.toFixed(2), +sz.toFixed(2)], v: [+v[0].toFixed(2), +v[1].toFixed(2), +v[2].toFixed(2)] });
+  netSend({ k: 'snb', b: id, tg, tm: tg ? 0 : SNOW.team, s: [+sx.toFixed(2), +sy.toFixed(2), +sz.toFixed(2)], v: [+v[0].toFixed(2), +v[1].toFixed(2), +v[2].toFixed(2)] });
+}
+function updateSnowAim(dt) {   // 힘 모으기, 몸 돌리기, 게이지
+  const g = $('#snowGauge');
+  { const vx = (player.x - (SNOW.lx === undefined ? player.x : SNOW.lx)) / Math.max(dt, 1e-3), vz = (player.z - (SNOW.lz === undefined ? player.z : SNOW.lz)) / Math.max(dt, 1e-3), k = 1 - Math.exp(-dt * 6);
+    SNOW.pvx = lerp(SNOW.pvx || 0, clamp(vx, -4, 4), k); SNOW.pvz = lerp(SNOW.pvz || 0, clamp(vz, -4, 4), k); SNOW.lx = player.x; SNOW.lz = player.z; }   // 내 걸음 빠르기 (산책객이 앞을 겨누는 데 쓴다)
+  if (!snowCan()) { SNOW.chg = null; SNOW.press = null; if (player.windK) player.windK = 0; if (g._w) { g._w = 0; g.firstChild.style.width = '0%'; g.classList.remove('on'); $('#tagGauge').firstChild.style.width = '0%'; $('#tagGauge').classList.remove('on'); } return; }
+  if (SNOW.press && !SNOW.chg && !dragMoved && ptrs.size === 1 && performance.now() - SNOW.press.t > 230) snowCharge('ptr');   // 꾹 누르고 있으면 힘을 모으기 시작한다
+  if (SNOW.chg && (T < SNOW.restUntil || player.act)) SNOW.chg = null;
+  const k = snowPower();
+  if (SNOW.chg) { SNOW.aimDir = snowAimDir(); player.heading = angLerp(player.heading, SNOW.aimDir, 1 - Math.exp(-dt * 14)); player.windK = Math.min(1, k * 3 + 0.25); }
+  else if (player.windK) player.windK = 0;
+  const w = Math.round(k * 100); if (g._w !== w) { g._w = w; for (const e of [g, $('#tagGauge')]) { e.firstChild.style.width = w + '%'; e.classList.toggle('on', !!SNOW.chg); } }
+}
+function drawSnowAim() {   // 떨어질 자리와 날아갈 길
+  if (!SNOW.chg) return;
+  const k = snowPower(), dir = SNOW.aimDir === undefined ? player.heading : SNOW.aimDir, range = snowRange(k), tx = player.x + Math.sin(dir) * range, tz = player.z + Math.cos(dir) * range, col = mix3([1, 1, 1], [1, 0.55, 0.2], k);
+  draw(W.uRing, { model: M.chain(M.T(tx, groundY(tx, tz) + 0.09, tz), M.S(0.55 + 0.1 * Math.sin(T * 9))), tint: col, alpha: 0.95, emissive: 0.9, flat: 0, snowable: 0 });
+  const sx = player.x + Math.sin(dir) * 0.45, sy = player.y + 1.5, sz = player.z + Math.cos(dir) * 0.45, dist = Math.hypot(tx - sx, tz - sz), tf = clamp(dist / 16, 0.38, 1.4), vy = (groundY(tx, tz) + 0.15 - sy) / tf + 0.5 * SNOW.G * tf;
+  for (let i = 1; i <= 6; i++) { const t = tf * i / 7; draw(W.uSphere, { model: M.chain(M.T(sx + (tx - sx) * i / 7, sy + vy * t - 0.5 * SNOW.G * t * t, sz + (tz - sz) * i / 7), M.S(0.05)), tint: col, alpha: 0.75, emissive: 0.8, flat: 0, snowable: 0 }); }
 }
 function snowNet(p, m) {   // 다른 사람이 보낸 눈 놀이 소식
   if (m.k === 'snj') { p.snowOn = m.on ? T + 20 : 0; p.snowTeam = m.tm === 1 || m.tm === 2 ? m.tm : 0; p.snowMh = clamp(m.mh | 0, 0, 999); p.snowMid = +m.mid || 0; if (m.on && +m.mid > 0) snowAdopt(+m.mid, +m.ms, clamp(+m.ml || SNOW_LEN, 30, 600)); return; }
@@ -6172,7 +6260,7 @@ function snowNet(p, m) {   // 다른 사람이 보낸 눈 놀이 소식
     if (p.hidden || !Array.isArray(s2) || !Array.isArray(v) || s2.length < 3 || v.length < 3 || ![...s2, ...v].every(n => isFinite(+n)) || Math.hypot(+v[0], +v[1], +v[2]) > 45) return;
     if (Math.hypot(+s2[0] - player.x, +s2[2] - player.z) > 90 || SNOW.balls.filter(b => b.from === p.id).length >= 6) return;
     const lat = clamp((Date.now() - (+m.t || Date.now())) / 1000, 0, 0.5);
-    SNOW.balls.push({ id: String(m.b || '').slice(0, 40), from: p.id, own: false, tm: m.tm === 1 || m.tm === 2 ? m.tm : 0, x: +s2[0] + +v[0] * lat, y: +s2[1] + +v[1] * lat - 0.5 * SNOW.G * lat * lat, z: +s2[2] + +v[2] * lat, vx: +v[0], vy: +v[1] - SNOW.G * lat, vz: +v[2], t: lat });
+    SNOW.balls.push({ id: String(m.b || '').slice(0, 40), from: p.id, own: false, tag: m.tg ? 1 : 0, tm: m.tm === 1 || m.tm === 2 ? m.tm : 0, x: +s2[0] + +v[0] * lat, y: +s2[1] + +v[1] * lat - 0.5 * SNOW.G * lat * lat, z: +s2[2] + +v[2] * lat, vx: +v[0], vy: +v[1] - SNOW.G * lat, vz: +v[2], t: lat });
     p.throwT = T; p.snowOn = T + 20; p.heading = Math.atan2(+v[0], +v[2]); if (Math.hypot(p.x - player.x, p.z - player.z) < 30) snowSound('throw');
     return;
   }
@@ -6185,7 +6273,7 @@ function snowNet(p, m) {   // 다른 사람이 보낸 눈 놀이 소식
   }
 }
 function updateSnow(dt) {
-  updateSnowBots(dt);
+  updateSnowAim(dt); updateSnowBots(dt);
   if (!SNOW.playChecked && S.started) { SNOW.playChecked = true; if (store.get('goPlay', '')) { const k = store.get('goPlay', ''); store.set('goPlay', ''); setTimeout(() => goPlay(k), 1800); } }
   if (SNOW.on) {
     if (!S.started || (player.act && !GREETS.includes(player.act.type))) snowLeave(true);
@@ -6214,7 +6302,15 @@ function updateSnow(dt) {
     const b = SNOW.balls[i], px = b.x, py = b.y, pz = b.z; b.t += dt; b.x += b.vx * dt; b.y += b.vy * dt; b.z += b.vz * dt; b.vy -= SNOW.G * dt;
     // 화면이 느려 한 번에 멀리 움직여도 지나치지 않게, 이번에 지나온 길에서 나와 가장 가까운 점으로 판정한다
     const dx = b.x - px, dz = b.z - pz, l2 = dx * dx + dz * dz, u = l2 > 1e-6 ? clamp(((player.x - px) * dx + (player.z - pz) * dz) / l2, 0, 1) : 1, hx = px + dx * u, hy = py + (b.y - py) * u, hz = pz + dz * u;
-    if (!b.own && SNOW.on && T >= SNOW.restUntil && !(SNOW.team && (b.tm === SNOW.team || (snowLive() && !b.tm))) && Math.hypot(hx - player.x, hz - player.z) < 0.6 && hy > player.y + 0.05 && hy < player.y + 2.0) {   // 내가 맞았다
+    if (!b.own && b.tag && TAG.on && TAG.role === 2 && !TAG.jail && tagPhase() === 'chase' && T >= TAG.frozenUntil && T >= TAG.safeUntil && Math.hypot(hx - player.x, hz - player.z) < 0.65 && hy > player.y + 0.05 && hy < player.y + 2.0) {   // 경찰의 눈에 맞았다: 3초 얼어붙는다
+      SNOW.balls.splice(i, 1); snowSplat(hx, hy, hz, 8); snowSound('hit'); tagCamo(''); TAG.frozenUntil = T + 3; TAG.shown = ''; player.target = null;
+      if (!b.bot) netSend({ k: 'tgf', b: b.id, by: b.from, x: +hx.toFixed(2), y: +hy.toFixed(2), z: +hz.toFixed(2) });
+      toast(i18n('눈에 맞아 3초 동안 얼어붙었어요!')); showBubble(player, i18n('앗, 차가워!'), 1.6, true); continue;
+    }
+    if (b.bot && b.tag && b.botTarget && !b.botTarget.jail && T >= (b.botTarget.frozen || 0) && Math.hypot(b.x - b.botTarget.x, b.z - b.botTarget.z) < 1.0 && b.y < b.botTarget.y + 2.0) { const q = b.botTarget; SNOW.balls.splice(i, 1); snowSplat(b.x, b.y, b.z, 6); q.frozen = T + 3; if (q.camo) poofAt(q); q.camo = ''; showBubble(q, i18n('앗, 차가워!'), 1.6, true); continue; }
+    if (b.own && b.tag && TAG.bots.length) { let hb = null; for (const q of TAG.bots) { if (q.role !== 2 || q.jail || T < q.frozen) continue; const u2 = l2 > 1e-6 ? clamp(((q.x - px) * dx + (q.z - pz) * dz) / l2, 0, 1) : 1, qx = px + dx * u2, qy = py + (b.y - py) * u2, qz = pz + dz * u2; if (Math.hypot(qx - q.x, qz - q.z) < 0.7 && qy > q.y + 0.05 && qy < q.y + 2.0) { hb = q; b.x = qx; b.y = qy; b.z = qz; break; } }
+      if (hb) { SNOW.balls.splice(i, 1); snowSplat(b.x, b.y, b.z, 8); snowSound('hit'); if (hb.camo) poofAt(hb); hb.camo = ''; hb.frozen = T + 3; showBubble(hb, i18n('앗, 차가워!'), 1.6, true); toast(i18n('{0}님이 3초 동안 얼어붙었어요. 어서 가서 잡아요', hb.name)); continue; } }
+    if (!b.own && !b.tag && SNOW.on && T >= SNOW.restUntil && !(SNOW.team && (b.tm === SNOW.team || (snowLive() && !b.tm))) && Math.hypot(hx - player.x, hz - player.z) < 0.6 && hy > player.y + 0.05 && hy < player.y + 2.0) {   // 내가 맞았다
       b.x = hx; b.y = hy; b.z = hz;
       SNOW.balls.splice(i, 1); SNOW.got++; SNOW.strikes++; snowSplat(b.x, b.y, b.z, 8); snowSound('hit'); showBubble(player, i18n('앗!'), 1.1, true);
       if (b.bot) { if (snowLive() && SNOW.team) SNOW.botMh++; } else netSend({ k: 'snh', b: b.id, by: b.from, x: +b.x.toFixed(2), y: +b.y.toFixed(2), z: +b.z.toFixed(2), n: SNOW.strikes });
@@ -6234,24 +6330,115 @@ function drawSnowTeams() {   // 발밑의 팀 색 동그라미
   if (SNOW.on && SNOW.team) { ring(player, SNOW.team); for (const q of SNOW.bots) ring(q, snowBotTeam()); }
   for (const q of NET.peers.values()) if (q.ready && !q.hidden && snowPlaying(q) && (q.snowTeam | 0) && Math.hypot(q.x - eye[0], q.z - eye[2]) < 80) ring(q, q.snowTeam);
 }
-function drawSnowballs() { drawSnowTeams(); for (const b of SNOW.balls) draw(W.uSphere, { model: M.chain(M.T(b.x, b.y, b.z), M.S(0.13)), tint: [1, 1, 1], emissive: 0.3, flat: 0, snowable: 0 }); }
+function drawSnowballs() { drawSnowTeams(); drawSnowAim(); for (const b of SNOW.balls) if (Math.hypot(b.x - eye[0], b.z - eye[2]) < 45) draw(W.uDisc, { model: M.chain(M.T(b.x, groundY(b.x, b.z) + 0.07, b.z), M.S(0.16)), tint: [0, 0, 0], alpha: 0.22, flat: 0, snowable: 0 });   // 눈덩이 그림자: 어디쯤 날아가는지 보인다
+  for (const b of SNOW.balls) draw(W.uSphere, { model: M.chain(M.T(b.x, b.y, b.z), M.S(0.13)), tint: [1, 1, 1], emissive: 0.3, flat: 0, snowable: 0 }); }
 /* ================= 경도: 경찰과 도둑 =================
    센트럴파크 쉽 메도우와 그 둘레 숲에서 한다. 들어올 때 경찰이나 도둑을 고르고, 양쪽에 한 사람씩 있으면 누구든 경기를 연다.
    처음 20초는 도둑이 달아나 숨는 시간(경찰은 제자리), 그 뒤 4분 동안 쫓는다. 도둑이 모두 감옥에 갇히면 경찰 승, 시간이 다 되면 도둑 승.
    도둑은 '숨기'를 누르면 덤불이나 바위로 바뀌고 눈만 깜빡인다 (움직이면 풀린다). 공원에는 똑같이 생긴 진짜 덤불과 바위가 흩어져 있다.
    경찰은 가까이 가서 '잡기'를 눌러야 잡는다. 잡혔는지는 도둑 쪽에서 판정해 알린다. 갇히지 않은 도둑이 감옥에 닿아 '구출'을 누르면 모두 풀려난다. */
-const TAG = { on: false, role: 0, camo: '', jail: false, match: null, caught: 0, pingAt: -99, shown: '', lastTry: -9, safeUntil: -1, seed: Math.random(), decoys: null,
-  zone: IS_PARK ? { x: -8, z: -160, rx: 44, rz: 52 } : null, jx: -12, jz: -166, HIDE: 20, LEN: 240 };
+const TAG = { on: false, role: 0, camo: '', jail: false, bots: [], match: null, caught: 0, pingAt: -99, shown: '', lastTry: -9, safeUntil: -1, seed: Math.random(), decoys: null,
+  zone: IS_PARK ? { x: -8, z: -160, rx: 44, rz: 52 } : null, jx: -12, jz: -166, HIDE: 30, LEN: 99, frozenUntil: -1, outT: -9 };
 const tagZone = (x, z, k = 1) => !!TAG.zone && Math.hypot((x - TAG.zone.x) / TAG.zone.rx, (z - TAG.zone.z) / TAG.zone.rz) < k;
 const tagPlaying = q => (q.tagOn || 0) > T;
 function tagPhase() { const M2 = TAG.match; if (!M2 || M2.done) return ''; const n = Date.now(); return n < M2.at ? 'wait' : n < M2.at + TAG.HIDE * 1000 ? 'hide' : n < M2.end ? 'chase' : ''; }
-function tagN(role, jailed) { let n = TAG.on && TAG.role === role && (!jailed || TAG.jail) ? 1 : 0; for (const q of NET.peers.values()) if (q.ready && !q.hidden && tagPlaying(q) && q.tagRole === role && (!jailed || q.tagJail)) n++; return n; }
+function tagN(role, jailed) { let n = TAG.on && TAG.role === role && (!jailed || TAG.jail) ? 1 : 0; for (const q of TAG.bots) if (q.role === role && (!jailed || q.jail)) n++; for (const q of NET.peers.values()) if (q.ready && !q.hidden && tagPlaying(q) && q.tagRole === role && (!jailed || q.tagJail)) n++; return n; }
 function tagPing() { TAG.pingAt = T; const M2 = TAG.match; netSend({ k: 'tgp', on: TAG.on ? 1 : 0, r: TAG.role, j: TAG.jail ? 1 : 0, c: TAG.camo === 'bush' ? 'b' : TAG.camo === 'rock' ? 'r' : '', sd: +TAG.seed.toFixed(3), mid: M2 ? M2.id : 0, ms: M2 ? M2.at : 0, ml: M2 ? Math.round((M2.end - M2.at) / 1000) : 0 }); }
+/* 혼자 왔을 때 함께 해 주는 산책객. 경도를 하는 진짜 사람이 한 명이라도 있으면 나타나지 않는다.
+   내가 경찰이면 도둑 넷, 내가 도둑이면 경찰 둘과 같은 편 도둑 둘.
+   가짜 도둑은 달아나 덤불이나 바위로 숨고, 경찰이 다가오면 버티거나 튄다. 가끔 감옥에 가서 갇힌 도둑을 구한다.
+   가짜 경찰은 구역을 돌다가 숨지 않은 도둑을 보면 쫓고, 수상한 덤불 곁에서는 가끔 눈치를 챈다. */
+const tagRealN = () => { let n = 0; for (const q of NET.peers.values()) if (q.ready && !q.hidden && tagPlaying(q)) n++; return n; };
+function tagBotsSet(on) {
+  if (!on) { TAG.bots.length = 0; return; }
+  if (TAG.bots.length) return;
+  const Z = TAG.zone, mk = (i, role, name) => { const a = i * 1.3 + 0.4, x = player.x + Math.sin(a) * 4.5, z = player.z + Math.cos(a) * 4.5;
+    return { bot: true, id: 'tb' + i, role, name, nick: name, frozen: -1, x, z, y: groundY(x, z), heading: a, phase: Math.random() * 6, moveAmt: 0, sit: 0, act: null, tx: x, tz: z, think: 0, camo: '', jail: false, plan: 'idle', hold: 0, look: 0, safe: -1, tagSeed: Math.random(), stuck: 0,
+      jacket: role === 1 ? [0.20, 0.30, 0.55] : JACKETS[(i * 2) % JACKETS.length], pants: [0.24, 0.26, 0.30], hat: role === 1 ? [0.16, 0.22, 0.40] : HATS[(i + 1) % HATS.length], pack: [0.30, 0.28, 0.25], cushion: [0.30, 0.42, 0.36], skin: SKINS[(i * 3 + 1) % SKINS.length], face: [0, 1, 3, 2][i % 4], g: i % 2 }; };
+  const R = [i18n('살금살금 너구리'), i18n('재빠른 다람쥐'), i18n('몰래몰래 고양이'), i18n('날랜 족제비')], C = [i18n('부지런한 순경'), i18n('눈 밝은 경위')];
+  if (TAG.role === 1) for (let i = 0; i < 4; i++) TAG.bots.push(mk(i, 2, R[i]));
+  else { for (let i = 0; i < 2; i++) TAG.bots.push(mk(i, 1, C[i])); for (let i = 0; i < 2; i++) TAG.bots.push(mk(i + 2, 2, R[i])); }
+  toast(TAG.role === 1 ? i18n("혼자여도 괜찮아요. 산책객 넷이 도둑이 되어 줘요. '경기 시작'을 눌러 보세요") : i18n("혼자여도 괜찮아요. 산책객 둘이 경찰, 둘이 같은 편 도둑이 되어 줘요. '경기 시작'을 눌러 보세요"));
+}
+function tagJailBot(b) { b.jail = true; b.camo = ''; const a = Math.random() * TAU; b.x = TAG.jx + Math.cos(a) * 1.4; b.z = TAG.jz + Math.sin(a) * 1.4; b.y = groundY(b.x, b.z); b.plan = 'idle'; poofAt(b); showBubble(b, i18n('잡혔다!'), 2, true); }
+function tagJailMe(by) {
+  tagCamo(''); TAG.jail = true; TAG.shown = ''; const a = Math.random() * TAU; player.x = TAG.jx + Math.cos(a) * 1.3; player.z = TAG.jz + Math.sin(a) * 1.3; player.y = groundY(player.x, player.z); player.target = null; S.auto = false; updateWalkBtn();
+  toast(i18n('{0}님에게 잡혔어요. 친구가 감옥에 와서 구해 줄 때까지 기다려요', by)); showBubble(player, i18n('잡혔다!'), 2, true);
+}
+function updateTagBots(dt) {
+  const want = TAG.on && tagRealN() === 0 && !SNOW.on;
+  if (want !== (TAG.bots.length > 0)) tagBotsSet(want);
+  if (TAG.botLabels) TAG.botLabels.forEach((L, i) => { const b = TAG.bots[i]; if (!b) return; const sp = L.el.querySelector('span'), em = L.el.querySelector('em'), r = b.role === 1 ? i18n('경찰') : i18n('도둑'); if (sp.textContent !== b.name) sp.textContent = b.name; if (em.textContent !== r) em.textContent = r; });
+  if (!TAG.bots.length) return;
+  const ph = tagPhase(), live = ph === 'chase', Z = TAG.zone, dec = tagDecoys();
+  const cops = [], robbers = [];   // 지금 뛰는 사람들 (나 포함)
+  if (TAG.role === 1) cops.push({ me: true, x: player.x, z: player.z }); else if (!TAG.jail) robbers.push({ me: true, x: player.x, z: player.z, camo: TAG.camo });
+  for (const b of TAG.bots) { if (b.role === 1) cops.push(b); else if (!b.jail) robbers.push(b); }
+  const step = (b, sp) => {   // 목표 쪽으로 한 걸음. 막히면 새 계획을 세우게 한다
+    const mx = b.tx - b.x, mz = b.tz - b.z, l = Math.hypot(mx, mz); if (l < 0.35) { b.moveAmt = lerp(b.moveAmt, 0, 1 - Math.exp(-dt * 8)); return true; }
+    const st = Math.min(l, sp * dt), nx = b.x + mx / l * st, nz = b.z + mz / l * st;
+    if (walkable(nx, nz) && tagZone(nx, nz, 1.04) && !hitObstacle(nx, nz, 0.25)) { b.x = nx; b.z = nz; b.phase += st * 2.4; b.stuck = 0; b.heading = angLerp(b.heading, Math.atan2(mx, mz), 1 - Math.exp(-dt * 8)); b.moveAmt = lerp(b.moveAmt, 1, 1 - Math.exp(-dt * 8)); }
+    else { b.stuck += dt; const a = Math.atan2(mx, mz) + (b.id.charCodeAt(2) % 2 ? 1.2 : -1.2), sx = b.x + Math.sin(a) * st, sz = b.z + Math.cos(a) * st; if (walkable(sx, sz) && !hitObstacle(sx, sz, 0.25)) { b.x = sx; b.z = sz; b.phase += st * 2.4; } if (b.stuck > 1.2) { b.stuck = 0; return true; } }
+    b.y = groundY(b.x, b.z); return false;
+  };
+  const pickSpot = (b, away) => { for (let k = 0; k < 14; k++) { const d = dec[Math.floor(Math.random() * dec.length)], a = Math.random() * TAU, x = d.x + Math.sin(a) * 2.4, z = d.z + Math.cos(a) * 2.4; if (!walkable(x, z) || !tagZone(x, z, 0.98) || hitObstacle(x, z, 0.4)) continue; if (away && away.some(c => Math.hypot(c.x - x, c.z - z) < 13)) continue; b.tx = x; b.tz = z; b.kindWant = d.kind; return true; } return false; };
+  for (const b of TAG.bots) {
+    b.y = groundY(b.x, b.z);
+    if (b.jail || ph === '' || ph === 'wait') { b.moveAmt = lerp(b.moveAmt, 0, 1 - Math.exp(-dt * 8)); if (ph === '') { b.jail = false; b.camo = ''; b.plan = 'idle'; } continue; }
+    if (b.role === 2 && T < b.frozen) { b.moveAmt = lerp(b.moveAmt, 0, 1 - Math.exp(-dt * 10)); b.plan = 'flee'; b.think = 0; continue; }
+    if (b.role === 2) {   // ---- 가짜 도둑
+      let nc = null, nd = 1e9; for (const c of cops) { const d = Math.hypot(c.x - b.x, c.z - b.z); if (d < nd) { nd = d; nc = c; } }
+      if (b.camo) {
+        b.moveAmt = lerp(b.moveAmt, 0, 1 - Math.exp(-dt * 8)); b.hold -= dt;
+        if (live && nd < 3.4 && !b.bluffed) { b.bluffed = true; if (Math.random() < 0.45) { b.camo = ''; poofAt(b); b.plan = 'flee'; b.think = 0; } }   // 코앞까지 오면 버티거나 튄다
+        if (nd > 6) b.bluffed = false;
+        if (b.hold <= 0 && nd > 14) { b.camo = ''; poofAt(b); b.plan = 'idle'; }
+        continue;
+      }
+      b.think -= dt;
+      if (live && nd < 7.5 && b.plan !== 'flee') { b.plan = 'flee'; b.think = 0; }
+      if (b.think <= 0 || b.plan === 'idle') {
+        b.think = 2.5 + Math.random() * 2;
+        if (b.plan === 'flee' && nc && nd < 11) { const ax = b.x - nc.x, az = b.z - nc.z, l = Math.hypot(ax, az) || 1, sw = (Math.random() - 0.5) * 1.2, x = b.x + (ax / l * Math.cos(sw) - az / l * Math.sin(sw)) * 12, z = b.z + (az / l * Math.cos(sw) + ax / l * Math.sin(sw)) * 12; if (tagZone(x, z, 0.95) && walkable(x, z)) { b.tx = x; b.tz = z; } else pickSpot(b, cops); }
+        else if (live && tagN(2, true) > 0 && Math.random() < 0.3 && nd > 12) { b.plan = 'rescue'; b.tx = TAG.jx + 2.2; b.tz = TAG.jz; }
+        else { b.plan = 'hide'; pickSpot(b, cops); }
+      }
+      const arrived = step(b, b.plan === 'flee' ? 2.25 : 1.95);
+      if (arrived && b.plan === 'hide' && nd > 9) { b.camo = b.kindWant === 'rock' ? 'rock' : 'bush'; b.hold = 14 + Math.random() * 16; b.bluffed = false; poofAt(b); }
+      else if (arrived && b.plan === 'rescue') {
+        if (tagNearJail(b, 3.6) && tagN(2, true) > 0) { for (const q of TAG.bots) if (q.jail) { q.jail = false; q.safe = T + 3; q.plan = 'flee'; q.think = 0; } if (TAG.jail) { TAG.jail = false; TAG.safeUntil = T + 3; TAG.shown = ''; toast(i18n('{0}님이 구해 줬어요! 어서 달아나요', b.name)); showBubble(player, i18n('고마워요'), 2, true); } showBubble(b, i18n('어서 나와요!'), 2, true); if (canSound()) sfx.bowl(0.4); }
+        b.plan = 'flee'; b.think = 0;
+      } else if (arrived) b.plan = 'idle';
+    } else {   // ---- 가짜 경찰
+      if (!live) { b.moveAmt = lerp(b.moveAmt, 0, 1 - Math.exp(-dt * 8)); continue; }
+      let tgt = null, td = 13;   // 숨지 않은 도둑이 보이면 쫓는다
+      for (const r of robbers) { if (r.me) r.y = player.y; if (r.camo || (r.me ? T < TAG.safeUntil : T < r.safe)) continue; const d = Math.hypot(r.x - b.x, r.z - b.z); if (d < td) { td = d; tgt = r; } }
+      b.look -= dt;
+      if (!tgt && b.look <= 0) {   // 수상한 덤불 곁에서는 가끔 눈치를 챈다
+        b.look = 1.6;
+        for (const r of robbers) { if (!r.camo) continue; const d = Math.hypot(r.x - b.x, r.z - b.z); if (d < 3.6) { showBubble(b, i18n('수상한데…?'), 1.6, true); if (Math.random() < 0.24) { tgt = r; td = d; b.sure = r; } } }
+      }
+      if (b.sure && (b.sure.jail || (b.sure.me && TAG.jail))) b.sure = null;
+      if (!tgt && b.sure) { tgt = b.sure; td = Math.hypot(tgt.x - b.x, tgt.z - b.z); if (td > 8) { b.sure = null; tgt = null; } }
+      if (tgt) {
+        b.tx = tgt.x; b.tz = tgt.z; step(b, 1.9);
+        if (td > 3 && td < 16 && T >= (b.nextThrow || 0) && !(tgt.me ? T < TAG.frozenUntil : T < tgt.frozen)) {   // 달아나는 도둑에게 눈을 던진다 (가는 쪽 앞을 겨눈다)
+          b.nextThrow = T + 2.4 + Math.random() * 1.8; const lead = clamp(td / 14, 0.4, 1.3) * 0.8;
+          const ax = tgt.x + (tgt.me ? (SNOW.pvx || 0) * lead : 0) + (Math.random() - 0.5) * 1.8, az = tgt.z + (tgt.me ? (SNOW.pvz || 0) * lead : 0) + (Math.random() - 0.5) * 1.8, hd = Math.atan2(ax - b.x, az - b.z);
+          const sx = b.x + Math.sin(hd) * 0.45, sy = b.y + 1.45, sz = b.z + Math.cos(hd) * 0.45, dist = Math.hypot(ax - sx, az - sz), tf = clamp(dist / 14, 0.4, 1.4);
+          const ball = { id: b.id + ':' + (++SNOW.seq), from: b.id, own: false, bot: true, tag: 1, tm: 0, x: sx, y: sy, z: sz, vx: Math.sin(hd) * dist / tf, vy: (tgt.y === undefined ? player.y : tgt.y) + 1.0 - sy, vz: Math.cos(hd) * dist / tf, t: 0 }; ball.vy = ball.vy / tf + 0.5 * SNOW.G * tf;
+          if (!tgt.me) ball.botTarget = tgt; SNOW.balls.push(ball); b.throwT = T; snowSound('throw');
+        }
+        if (td < 1.5) { b.throwT = T; b.sure = null; if (tgt.me) tagJailMe(b.name); else tagJailBot(tgt); }
+      } else { b.think -= dt; if (b.think <= 0 || step(b, 1.7)) { b.think = 5 + Math.random() * 4; pickSpot(b, null); } }
+    }
+  }
+}
 function tagAdopt(id, at, len) {
   if (!(id > 0) || !isFinite(at) || at + len * 1000 < Date.now() || at > Date.now() + 60000) return;
   if (TAG.match && (TAG.match.id === id || (!TAG.match.done && TAG.match.at <= at))) return;
   TAG.match = { id, at, end: at + len * 1000, done: false }; TAG.jail = false; TAG.caught = 0; TAG.shown = ''; tagCamo('');
-  if (TAG.on) { toast(TAG.role === 1 ? i18n('곧 경도 시작! 도둑이 숨는 20초 동안은 움직일 수 없어요') : i18n('곧 경도 시작! 20초 안에 달아나 숨으세요')); if (canSound()) sfx.bowl(0.4); tagPing(); }
+  if (TAG.on) { toast(TAG.role === 1 ? i18n('곧 경도 시작! 도둑이 숨는 30초 동안은 움직일 수 없어요. 그 뒤 99초 안에 모두 찾아야 해요') : i18n('곧 경도 시작! 30초 안에 달아나 숨으세요. 99초만 버티면 이겨요')); if (canSound()) sfx.bowl(0.4); tagPing(); }
 }
 function tagStart() {
   if (!TAG.on || (TAG.match && !TAG.match.done)) return;
@@ -6261,13 +6448,14 @@ function tagStart() {
 function tagJoin(role) {
   if (!TAG.zone || TAG.on) return;
   $('#snowPick').hidden = true; if (SNOW.on) snowLeave(true); closeMenus(); if (S.breath) stopBreath();
-  TAG.on = true; TAG.role = role === 1 ? 1 : 2; TAG.jail = false; TAG.camo = ''; TAG.caught = 0; TAG.shown = ''; TAG.seed = Math.random();
+  if (!S.season) setSeason(1, false);   // 경찰이 눈을 던지므로 겨울로
+  TAG.on = true; TAG.frozenUntil = -1; TAG.role = role === 1 ? 1 : 2; TAG.jail = false; TAG.camo = ''; TAG.caught = 0; TAG.shown = ''; TAG.seed = Math.random();
   audioInit(); $('#tagBar').hidden = false; tagPing();
-  toast(TAG.role === 1 ? i18n('경찰이 되었어요. 도둑 가까이 가서 잡기를 눌러요. 수상한 덤불과 바위도 살펴보세요') : i18n('도둑이 되었어요. 숨기를 누르면 덤불이나 바위로 변해요. 움직이면 풀려요'));
+  toast(TAG.role === 1 ? i18n('경찰이 되었어요. 달아나는 도둑은 눈을 던져 맞히면 3초 얼어붙어요. 가까이 가서 잡기를 눌러요') : i18n('도둑이 되었어요. 숨기를 누르면 덤불이나 바위로 변해요. 움직이면 풀려요'));
 }
 function tagLeave(quiet) {
   if (!TAG.on) return;
-  tagCamo(''); TAG.on = false; TAG.jail = false; $('#tagBar').hidden = true; tagPing(); if (!tagPhase()) TAG.match = null;
+  tagCamo(''); TAG.on = false; TAG.jail = false; TAG.bots.length = 0; $('#tagBar').hidden = true; tagPing(); if (!tagPhase()) TAG.match = null;
   if (!quiet) toast(i18n('경도를 마쳤어요'));
 }
 function tagCamo(kind) { if (TAG.camo === kind) return; TAG.camo = kind; TAG.shown = ''; if (TAG.on) { poofAt(player); tagPing(); } }
@@ -6295,7 +6483,9 @@ function tagAction() {
   if (T - TAG.lastTry < 1.2) return; TAG.lastTry = T; player.throwT = T;
   let best = null, bd = 2.3;
   for (const q of NET.peers.values()) { if (!q.ready || q.hidden || !tagPlaying(q) || q.tagRole !== 2 || q.tagJail) continue; const d = Math.hypot(q.x - player.x, q.z - player.z); if (d < bd) { bd = d; best = q; } }
-  if (best) netSend({ k: 'tgc', to: best.id }); else toast(i18n('손이 닿는 곳에 도둑이 없어요'));
+  let bb = null; for (const q of TAG.bots) { if (q.role !== 2 || q.jail || T < q.safe) continue; const d = Math.hypot(q.x - player.x, q.z - player.z); if (d < bd) { bd = d; bb = q; } }
+  if (bb) { tagJailBot(bb); TAG.caught++; toast(i18n('{0}님을 잡았어요!', bb.name)); if (canSound()) sfx.bowl(0.45); }
+  else if (best) netSend({ k: 'tgc', to: best.id }); else toast(i18n('손이 닿는 곳에 도둑이 없어요'));
 }
 function tagNet(q, m) {
   if (m.k === 'tgp') {
@@ -6310,6 +6500,12 @@ function tagNet(q, m) {
     netSend({ k: 'tgx', by: q.id }); tagPing(); netState(true); toast(i18n('{0}님에게 잡혔어요. 친구가 감옥에 와서 구해 줄 때까지 기다려요', q.nick)); showBubble(player, i18n('잡혔다!'), 2, true); return;
   }
   if (m.k === 'tgx') { q.tagJail = true; q.tagCamo = ''; if (!q.hidden) showBubble(q, i18n('잡혔다!'), 2, true); if (m.by === ME.id && TAG.on) { TAG.caught++; toast(i18n('{0}님을 잡았어요!', q.nick)); if (canSound()) sfx.bowl(0.45); } return; }
+  if (m.k === 'tgf') {   // 도둑이 눈에 맞아 얼어붙었다
+    const i = SNOW.balls.findIndex(b => b.id === m.b); if (i >= 0) SNOW.balls.splice(i, 1);
+    q.tagFrozenUntil = T + 3; q.tagCamo = ''; if (q.hidden) return;
+    if (isFinite(+m.x) && isFinite(+m.z)) snowSplat(+m.x, isFinite(+m.y) ? +m.y : q.y + 1.1, +m.z, 7); showBubble(q, i18n('앗, 차가워!'), 1.6, true);
+    if (m.by === ME.id) { snowSound('hit'); toast(i18n('{0}님이 3초 동안 얼어붙었어요. 어서 가서 잡아요', q.nick)); } return;
+  }
   if (m.k === 'tgr') {   // 누가 감옥 문을 열었다
     if (!TAG.on || !TAG.jail || q.tagRole !== 2 || q.tagJail || !tagNearJail(q, 6)) return;
     TAG.jail = false; TAG.safeUntil = T + 3; TAG.shown = ''; tagPing(); toast(i18n('{0}님이 구해 줬어요! 어서 달아나요', q.nick)); showBubble(player, i18n('고마워요'), 2, true);
@@ -6317,14 +6513,19 @@ function tagNet(q, m) {
 }
 function tagEnd(winner) {
   const M2 = TAG.match; if (!M2 || M2.done) return; M2.done = true; M2.end = Math.min(M2.end, Date.now());
-  if (TAG.on) { toast(winner === 1 ? i18n('경도 끝! 도둑을 모두 잡았어요 · 경찰 승리') : i18n('경도 끝! 끝까지 달아났어요 · 도둑 승리')); if (canSound()) sfx.bowl(0.7); showBubble(player, winner === TAG.role ? i18n('이겼다!') : i18n('다음엔 꼭!'), 3, true); }
+  if (TAG.on) { toast(winner === 1 ? i18n('경도 끝! 도둑을 모두 잡았어요 · 경찰 승리') : i18n('경도 끝! 99초 안에 다 찾지 못했어요 · 도둑 승리')); if (canSound()) sfx.bowl(0.7); showBubble(player, winner === TAG.role ? i18n('이겼다!') : i18n('다음엔 꼭!'), 3, true); }
   tagCamo(''); TAG.jail = false; TAG.shown = ''; if (TAG.on) tagPing();
+  for (const q of TAG.bots) { if (q.camo) poofAt(q); q.camo = ''; q.jail = false; q.plan = 'idle'; q.sure = null; }
   setTimeout(() => { if (TAG.match === M2) { TAG.match = null; TAG.shown = ''; } }, 8000);
 }
 function updateTag(dt) {
+  updateTagBots(dt);
   if (!TAG.on) { if (TAG.match && Date.now() > TAG.match.end + 15000) TAG.match = null; return; }
   if (!S.started || (player.act && !GREETS.includes(player.act.type))) { tagLeave(true); return; }
-  if (!tagZone(player.x, player.z, 1.12)) { tagLeave(true); toast(i18n('놀이 구역을 벗어나 경도를 마쳤어요')); return; }
+  if (!tagZone(player.x, player.z, 1.0)) {   // 경기장 밖으로는 나가지 못한다
+    const Z = TAG.zone, ex = (player.x - Z.x) / Z.rx, ez = (player.z - Z.z) / Z.rz, l = Math.hypot(ex, ez) || 1; player.x = Z.x + ex / l * Z.rx * 0.985; player.z = Z.z + ez / l * Z.rz * 0.985; player.y = groundY(player.x, player.z); player.target = null; if (S.auto) { S.auto = false; updateWalkBtn(); }
+    if (T - TAG.outT > 4) { TAG.outT = T; toast(i18n('경기장 밖이에요. 주황색 선 안에서만 움직일 수 있어요')); }
+  }
   if (TAG.camo && (keys.w || keys.a || keys.s || keys.d || player.target || S.auto)) tagCamo('');   // 움직이면 위장이 풀린다
   if (T - TAG.pingAt > 3) tagPing();
   const ph = tagPhase(), M2 = TAG.match, now = Date.now();
@@ -6337,12 +6538,13 @@ function updateTag(dt) {
   const txt = !M2 || M2.done ? i18n('경도 · 경찰 {0}명, 도둑 {1}명', tagN(1), tagN(2))
     : ph === 'wait' ? i18n('경도 시작까지 {0}초', Math.ceil((M2.at - now) / 1000))
     : ph === 'hide' ? (TAG.role === 1 ? i18n('도둑이 숨는 중 · {0}초', Math.ceil((M2.at + TAG.HIDE * 1000 - now) / 1000)) : i18n('어서 숨어요 · {0}초', Math.ceil((M2.at + TAG.HIDE * 1000 - now) / 1000)))
-    : TAG.jail ? i18n('감옥 · 구해 주길 기다려요 · {0}', left)
-    : i18n('{0} · 잡힌 도둑 {1}/{2} · {3}', TAG.role === 1 ? i18n('경찰') : TAG.camo ? i18n('숨는 중') : i18n('도둑'), tagN(2, true), tagN(2), left);
-  const canStart = !M2 || M2.done, ready = canStart && tagN(1) > 0 && tagN(2) > 0, sig = txt + '|' + mode + canStart + ready;
-  if (sig !== TAG.shown) { TAG.shown = sig; $('#tagTxt').textContent = txt; $('#tagAct').textContent = mode === 'catch' ? i18n('잡기') : mode === 'jail' ? i18n('갇힘') : mode === 'out' ? i18n('나오기') : mode === 'rescue' ? i18n('구출') : i18n('숨기'); $('#tagAct').disabled = mode === 'jail'; $('#tagStart').hidden = !canStart; $('#tagStart').disabled = !ready; }
+    : TAG.jail ? i18n('감옥 · 구해 주길 기다려요 · {0}초', Math.max(0, Math.ceil((M2.end - now) / 1000)))
+    : T < TAG.frozenUntil ? i18n('얼어붙었어요 · {0}초', Math.ceil(TAG.frozenUntil - T))
+    : i18n('{0} · 잡힌 도둑 {1}/{2} · {3}초', TAG.role === 1 ? i18n('경찰') : TAG.camo ? i18n('숨는 중') : i18n('도둑'), tagN(2, true), tagN(2), Math.max(0, Math.ceil((M2.end - now) / 1000)));
+  const canStart = !M2 || M2.done, ready = canStart && tagN(1) > 0 && tagN(2) > 0, thr = TAG.role === 1 && ph === 'chase', sig = txt + '|' + mode + canStart + ready + thr;
+  if (sig !== TAG.shown) { TAG.shown = sig; $('#tagThrow').hidden = !thr; $('#tagGauge').hidden = !thr; $('#tagTxt').textContent = txt; $('#tagAct').textContent = mode === 'catch' ? i18n('잡기') : mode === 'jail' ? i18n('갇힘') : mode === 'out' ? i18n('나오기') : mode === 'rescue' ? i18n('구출') : i18n('숨기'); $('#tagAct').disabled = mode === 'jail'; $('#tagStart').hidden = !canStart; $('#tagStart').disabled = !ready; }
 }
-const tagFrozen = () => TAG.on && (TAG.jail || (TAG.role === 1 && (tagPhase() === 'hide' || tagPhase() === 'wait')));
+const tagFrozen = () => TAG.on && (TAG.jail || T < TAG.frozenUntil || (TAG.role === 1 && (tagPhase() === 'hide' || tagPhase() === 'wait')));
 /* 공원에 흩어진 덤불과 바위. 도둑이 변한 모습과 똑같이 생겼다 (눈이 없다는 것만 다르다) */
 function tagDecoys() {
   if (TAG.decoys) return TAG.decoys;
@@ -6377,7 +6579,21 @@ function drawTagWorld() {   // 덤불과 바위, 감옥
   const jy = groundY(TAG.jx, TAG.jz);
   for (let k = 0; k < 10; k++) { const a = k / 10 * TAU; draw(W.uCyl, { model: M.chain(M.T(TAG.jx + Math.cos(a) * 2.6, jy + 0.55, TAG.jz + Math.sin(a) * 2.6), M.S(0.07, 1.1, 0.07)), tint: [0.20, 0.20, 0.22], flat: 0, snowable: 0 }); }
 }
-function drawTagMarks() { if (TAG.zone && (TAG.on || tagN(1) || tagN(2))) draw(W.uRing, { model: M.chain(M.T(TAG.jx, groundY(TAG.jx, TAG.jz) + 0.08, TAG.jz), M.S(2.7)), tint: [1, 0.78, 0.3], alpha: 0.85, emissive: 0.6, flat: 0, snowable: 0 }); }
+function drawTagRings() {
+  if (!TAG.zone) return;
+  const ring = (c, role) => draw(W.uRing, { model: M.chain(M.T(c.x, c.y + 0.07, c.z), M.S(0.6)), tint: role === 1 ? [0.30, 0.52, 1.0] : [1.0, 0.62, 0.25], alpha: 0.85, emissive: 0.6, flat: 0, snowable: 0 });
+  if (TAG.on && !TAG.camo) ring(player, TAG.role);
+  for (const q of TAG.bots) if (!q.camo) ring(q, q.role);
+  for (const q of NET.peers.values()) if (q.ready && !q.hidden && tagPlaying(q) && !q.tagCamo && Math.hypot(q.x - eye[0], q.z - eye[2]) < 80) ring(q, q.tagRole);
+}
+function drawTagBound() {   // 경기장 테두리: 주황색 점선과 드문드문 선 깃대
+  if (!TAG.zone || !(TAG.on || tagN(1) || tagN(2))) return;
+  const Z = TAG.zone, n = 84;
+  for (let i = 0; i < n; i++) { const a = i / n * TAU, x = Z.x + Math.cos(a) * Z.rx, z = Z.z + Math.sin(a) * Z.rz; if (Math.hypot(x - eye[0], z - eye[2]) > 75) continue; const y = groundY(x, z);
+    draw(W.uDisc, { model: M.chain(M.T(x, y + 0.08, z), M.Ry(-a), M.S(0.16, 1, 0.9)), tint: [1.0, 0.55, 0.15], alpha: 0.9, emissive: 0.8, flat: 0, snowable: 0 });
+    if (i % 4 === 0) { draw(W.uCyl, { model: M.chain(M.T(x, y + 0.5, z), M.S(0.035, 1.0, 0.035)), tint: [0.25, 0.22, 0.2], flat: 0, snowable: 0 }); draw(W.uSphere, { model: M.chain(M.T(x, y + 1.05, z), M.S(0.1)), tint: [1.0, 0.5, 0.12], emissive: 0.7, flat: 0, snowable: 0 }); } }
+}
+function drawTagMarks() { drawTagBound(); drawTagRings(); if (TAG.zone && (TAG.on || tagN(1) || tagN(2))) draw(W.uRing, { model: M.chain(M.T(TAG.jx, groundY(TAG.jx, TAG.jz) + 0.08, TAG.jz), M.S(2.7)), tint: [1, 0.78, 0.3], alpha: 0.85, emissive: 0.6, flat: 0, snowable: 0 }); }
 /* ================= 공지와 모임 =================
    산지기·불지기가 알림 글이나 모임(눈싸움, 경도, 명상, 산책)을 올리고, 로그인한 사람이 참여 신청을 한다. 읽기는 누구나.
    서버 함수 sangil_event_list, sangil_event_create, sangil_event_cancel, sangil_event_rsvp_toggle 를 쓴다.
@@ -8082,7 +8298,7 @@ function onNet(m) {
     H5.out = null; dropBubble(player);
     if (m.ok) { if (Math.hypot(p.x - player.x, p.z - player.z) < 7) { H5.with = p; greet('hi5', null, true); H5.with = null; } else toast(i18n('{0}님이 좋대요. 조금 더 가까이 가서 다시 해 보세요', p.nick)); }
     else toast(i18n('{0}님은 다음에 하자고 하네요', p.nick));
-  } else if (m.k === 'tgp' || m.k === 'tgm' || m.k === 'tgc' || m.k === 'tgx' || m.k === 'tgr') { tagNet(p, m); return;
+  } else if (m.k === 'tgp' || m.k === 'tgm' || m.k === 'tgc' || m.k === 'tgx' || m.k === 'tgr' || m.k === 'tgf') { tagNet(p, m); return;
   } else if (m.k === 'snb' || m.k === 'snh' || m.k === 'snj' || m.k === 'snr' || m.k === 'snm') { snowNet(p, m); return;
   } else if (m.k === 'note') { recvNote(p, m); return;
   } else if (m.k === 'nthx') {   // 내가 건넨 쪽지에 고마워요
@@ -8501,12 +8717,16 @@ function bindUI() {
   document.querySelectorAll('#radioSeg button').forEach(b => b.onclick = () => setRadio(b.dataset.r === '1')); setRadio(RADIO.on);
   addEventListener('pointerdown', radioKick, true);
   $('#medGo').onclick = beginMeditate; $('#medCancel').onclick = () => { $('#medCard').hidden = true; S.hallPref = null; };
-  $('#snowThrow').onclick = e => { e.stopPropagation(); snowThrow(); }; $('#snowQuit').onclick = e => { e.stopPropagation(); snowLeave(false); }; $('#snowStart').onclick = e => { e.stopPropagation(); snowMatchStart(); };
+  { const tb = $('#snowThrow'); tb.onclick = e => e.stopPropagation(); tb.addEventListener('pointerdown', e => { e.stopPropagation(); e.preventDefault(); try { tb.setPointerCapture(e.pointerId); } catch (err) {} snowCharge('btn'); });
+    for (const ev of ['pointerup', 'pointercancel']) tb.addEventListener(ev, e => { e.stopPropagation(); if (SNOW.chg && SNOW.chg.src === 'btn') { if (ev === 'pointerup') snowRelease(); else SNOW.chg = null; } }); } $('#snowQuit').onclick = e => { e.stopPropagation(); snowLeave(false); }; $('#snowStart').onclick = e => { e.stopPropagation(); snowMatchStart(); };
   document.querySelectorAll('#snowPick [data-t]').forEach(b => b.onclick = e => { e.stopPropagation(); snowJoin(+b.dataset.t); });
   document.querySelectorAll('#snowPick [data-g]').forEach(b => b.onclick = e => { e.stopPropagation(); tagJoin(+b.dataset.g); });
+  { const tb = $('#tagThrow'); tb.onclick = e => e.stopPropagation(); tb.addEventListener('pointerdown', e => { e.stopPropagation(); e.preventDefault(); try { tb.setPointerCapture(e.pointerId); } catch (err) {} snowCharge('btn'); });
+    for (const ev of ['pointerup', 'pointercancel']) tb.addEventListener(ev, e => { e.stopPropagation(); if (SNOW.chg && SNOW.chg.src === 'btn') { if (ev === 'pointerup') snowRelease(); else SNOW.chg = null; } }); }
   $('#tagAct').onclick = e => { e.stopPropagation(); tagAction(); }; $('#tagQuit').onclick = e => { e.stopPropagation(); tagLeave(false); }; $('#tagStart').onclick = e => { e.stopPropagation(); tagStart(); };
   addEventListener('keydown', e => { if (e.code === 'Space' && TAG.on && !(e.target.closest && e.target.closest('input,select,textarea,button'))) { e.preventDefault(); tagAction(); return; }
-    if (e.code === 'Space' && SNOW.on && !(e.target.closest && e.target.closest('input,select,textarea,button'))) { e.preventDefault(); snowThrow(); } });
+    if (e.code === 'Space' && SNOW.on && !(e.target.closest && e.target.closest('input,select,textarea,button'))) { e.preventDefault(); if (!e.repeat) snowCharge('key'); } });
+  addEventListener('keyup', e => { if (e.code === 'Space' && SNOW.chg && SNOW.chg.src === 'key') snowRelease(); });
   $('#evPost').onclick = evPost; $('#evClose').onclick = () => { $('#evCard').hidden = true; }; $('#evStart').onclick = openEvents;
   for (const id of ['evName', 'evBody', 'evWhen']) $('#' + id).addEventListener('keydown', e => e.stopPropagation());
   $('#bookSend').onclick = bookSend; $('#bookClose').onclick = () => { $('#bookCard').hidden = true; };
@@ -8597,7 +8817,7 @@ function boot() {
   $('#start').hidden = false; $('#enterBtn').disabled = false; $('#enterMed').disabled = false; $('#enterFocus').disabled = false; $('#enterFire').disabled = false; fireLoad(true); evLoad(true);
   if (store.get('autoEnter', false)) { store.set('autoEnter', false); $('#enterBtn').focus(); }
   const ld = $('#loading'); ld.style.opacity = 0; setTimeout(() => { ld.hidden = true; }, 600);
-  window.__sangil = { keys, setRain, hitObstacle, OBS, CIRCLE, sitCircle, goCircle, sendChat, inCircle, S, player, TN, getH, CPS, startAct, cam, NET, NPCS, greet, sendChat, W, netState, startCamp, wakeCamp, openCampCard, goCafe, startCafe, DRINKS, CAFE, H5, answerHi5, showHi5Ask, MED, TX, TZ, IS_PARK, HALL, RINK, MELT, PRINTS, SNOW, snowJoin, snowThrow, ME, TAG, tagJoin, tagAction, tagStart, tagDecoys, goPlay, proj: (x, y, z) => { const v = M.xf(VP, x, y, z); return [v[0] / v[3], v[1] / v[3], v[3]]; }, startCampNow: () => { S.campFire = true; startCamp(); } };
+  window.__sangil = { keys, setRain, hitObstacle, OBS, CIRCLE, sitCircle, goCircle, sendChat, inCircle, S, player, TN, getH, CPS, startAct, cam, NET, NPCS, greet, sendChat, W, netState, startCamp, wakeCamp, openCampCard, goCafe, startCafe, DRINKS, CAFE, H5, answerHi5, showHi5Ask, MED, TX, TZ, IS_PARK, HALL, RINK, MELT, PRINTS, SNOW, snowJoin, snowThrow, ME, TAG, tagJoin, tagAction, tagStart, tagDecoys, goPlay, HALL_NPCS, snowCharge, snowRelease, proj: (x, y, z) => { const v = M.xf(VP, x, y, z); return [v[0] / v[3], v[1] / v[3], v[3]]; }, startCampNow: () => { S.campFire = true; startCamp(); } };
   requestAnimationFrame(t => { lastNow = t; frame(t); });
 }
 setTimeout(boot, 30);
