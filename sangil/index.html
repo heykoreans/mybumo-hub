@@ -279,6 +279,15 @@ body.focusing #trailCard,body.focusing #hint{opacity:0;pointer-events:none}
 #snowThrow{padding:10px 20px;border-radius:999px;background:#f4f8ff;color:#22302a;font-weight:700;font-size:15px}
 #snowThrow:disabled{opacity:.45}
 #snowQuit{padding:8px 12px;border-radius:999px;color:var(--on-glass-soft);font-size:13px}
+#tagBar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(98px + env(safe-area-inset-bottom,0px));z-index:19;border-radius:999px;padding:7px 8px 7px 16px;display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--on-glass);white-space:nowrap}
+#tagBar b{font-variant-numeric:tabular-nums;font-weight:600}
+#tagAct{padding:10px 18px;border-radius:999px;background:#f4f8ff;color:#22302a;font-weight:700;font-size:15px}
+#tagAct:disabled{opacity:.45}
+#tagQuit{padding:8px 12px;border-radius:999px;color:var(--on-glass-soft);font-size:13px}
+#tagStart{padding:8px 13px;border-radius:999px;background:rgba(255,255,255,.16);color:var(--on-glass);font-size:13px;font-weight:600}
+#tagStart:disabled{opacity:.4}
+@media (max-width:520px){#tagBar{gap:5px;padding-left:12px;font-size:12px} #tagAct{padding:10px 13px} #tagStart,#tagQuit{padding:8px 8px}}
+#snowPick .tc{background:#2c4f8f;color:#fff} #snowPick .tr{background:#3a3f45;color:#fff}
 #snowStart{padding:8px 13px;border-radius:999px;background:rgba(255,255,255,.16);color:var(--on-glass);font-size:13px;font-weight:600}
 #snowStart:disabled{opacity:.4}
 #snowPick{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(98px + env(safe-area-inset-bottom,0px));z-index:19;border-radius:22px;padding:10px 12px;display:grid;gap:8px;justify-items:center;font-size:13.5px;color:var(--on-glass);white-space:nowrap}
@@ -544,7 +553,8 @@ body.calm #trailCard,body.calm #hint{opacity:0;pointer-events:none}
   <div id="askBar" class="glass" hidden><span id="askTxt"></span><div><button id="askYes">하이파이브</button><button id="askNo">다음에</button></div></div>
   <div id="zoomBox" class="glass"><button id="zoomIn" aria-label="가까이 보기">+</button><button id="zoomOut" aria-label="멀리 보기">−</button></div>
   <div id="snowBar" class="glass" hidden><b id="snowScore"></b><button id="snowThrow">던지기</button><button id="snowStart" hidden>경기 시작</button><button id="snowQuit">그만</button></div>
-  <div id="snowPick" class="glass" hidden><span id="snowPickTxt">어느 팀으로 놀까요?</span><div><button class="tb" data-t="1">청팀<small id="snowNb"></small></button><button class="tw" data-t="2">백팀<small id="snowNw"></small></button><button class="tf" data-t="0">그냥 놀기</button></div></div>
+  <div id="snowPick" class="glass" hidden><span id="snowPickTxt">어느 팀으로 놀까요?</span><div><button class="tb" data-t="1">청팀<small id="snowNb"></small></button><button class="tw" data-t="2">백팀<small id="snowNw"></small></button><button class="tf" data-t="0">그냥 놀기</button></div><span>경도 (경찰과 도둑)</span><div><button class="tc" data-g="1">경찰<small id="tagNc"></small></button><button class="tr" data-g="2">도둑<small id="tagNr"></small></button></div></div>
+  <div id="tagBar" class="glass" hidden><b id="tagTxt"></b><button id="tagAct"></button><button id="tagStart" hidden>경기 시작</button><button id="tagQuit">그만</button></div>
   <button id="nearSit" class="glass" hidden><svg class="ico" viewBox="0 0 24 24"><path d="M12 4c2 2.5 3 4 3 6a3 3 0 0 1-6 0c0-1 .5-2 1.2-2.8.3 1 .9 1.6 1.8 1.6C12 7.5 12 6 12 4zM5 19.5l14-4M19 19.5l-14-4"/></svg><span id="nearSitTxt">모닥불에 앉기</span></button>
   <div id="actPill" class="glass" hidden><div><b id="actTitle"></b><small id="actSub"></small></div><button id="actAlt" hidden>숨 고르기</button><button id="actStop">일어나기</button></div>
   <div id="toast" class="glass" hidden></div>
@@ -1262,6 +1272,40 @@ const EN = {"센트럴파크":"Central Park",
 "{0}분 명상을 마쳤어요. 이 고요함을 안고 다시 걸어요":"{0}-minute meditation done. Carry this calm with you",
 "스트레스를 후~ 날려 보냈어요. 숨이 한결 고르네요":"Stress, blown away. Your breath feels steadier",
 "내 정보":"My profile",
+"경도 (경찰과 도둑)":"Cops and robbers",
+"경찰":"Cop",
+"도둑":"Robber",
+"눈 놀이 · 경도 하기":"Snow play · Cops and robbers",
+"곧 경도 시작! 도둑이 숨는 20초 동안은 움직일 수 없어요":"Starting soon! You can't move for 20 seconds while the robbers hide.",
+"곧 경도 시작! 20초 안에 달아나 숨으세요":"Starting soon! Run and hide within 20 seconds.",
+"경찰과 도둑이 한 사람씩은 있어야 시작할 수 있어요":"You need at least one cop and one robber to start",
+"경찰이 되었어요. 도둑 가까이 가서 잡기를 눌러요. 수상한 덤불과 바위도 살펴보세요":"You're a cop. Get close to a robber and press Catch. Check suspicious bushes and rocks too.",
+"도둑이 되었어요. 숨기를 누르면 덤불이나 바위로 변해요. 움직이면 풀려요":"You're a robber. Press Hide to turn into a bush or a rock. Moving breaks the disguise.",
+"경도를 마쳤어요":"You left the game",
+"숨었어요. 움직이면 풀려요":"Hidden. Moving breaks the disguise.",
+"감옥 문을 열었어요! 모두 달아나요":"You opened the jail! Everyone run!",
+"경기가 시작되면 잡을 수 있어요":"You can catch once the game starts",
+"손이 닿는 곳에 도둑이 없어요":"No robber within reach",
+"{0}님에게 잡혔어요. 친구가 감옥에 와서 구해 줄 때까지 기다려요":"{0} caught you. Wait until a friend comes to the jail to free you.",
+"잡혔다!":"Caught!",
+"{0}님을 잡았어요!":"You caught {0}!",
+"{0}님이 구해 줬어요! 어서 달아나요":"{0} freed you! Run!",
+"경도 끝! 도둑을 모두 잡았어요 · 경찰 승리":"Game over! Every robber is caught · Cops win",
+"경도 끝! 끝까지 달아났어요 · 도둑 승리":"Game over! The robbers got away · Robbers win",
+"놀이 구역을 벗어나 경도를 마쳤어요":"You left the play area, so the game ended for you",
+"경도 · 경찰 {0}명, 도둑 {1}명":"Cops {0}, robbers {1}",
+"경도 시작까지 {0}초":"Starts in {0}s",
+"도둑이 숨는 중 · {0}초":"Robbers hiding · {0}s",
+"어서 숨어요 · {0}초":"Hide now · {0}s",
+"감옥 · 구해 주길 기다려요 · {0}":"In jail · waiting for rescue · {0}",
+"{0} · 잡힌 도둑 {1}/{2} · {3}":"{0} · caught {1}/{2} · {3}",
+"숨는 중":"Hidden",
+"잡기":"Catch",
+"갇힘":"Jailed",
+"나오기":"Come out",
+"구출":"Rescue",
+"숨기":"Hide",
+"<i></i><span>경도 감옥</span>":"<i></i><span>Jail</span>",
 "경기 시작":"Start match",
 "어느 팀으로 놀까요?":"Which team?",
 "청팀":"Blue",
@@ -3255,6 +3299,7 @@ function initLabels() {
   for (const n of NPCS) { const L = addLabel(`<em>${NPC_TAG}</em><span></span>`, 'npc', () => [n.x, n.y + 2.4 - 0.47 * n.sit, n.z], 38); L.el.querySelector('span').textContent = n.name; L.hideIf = () => !showNpcs(); n.label = L; }
   if (!IS_PARK) addLabel(i18n('<i></i><span>구름폭포</span>'), 'place', () => [W.fallLip[0], W.fallLip[1] + 3.2, W.fallLip[2]], 110);
   else for (const [nm, x, z] of [[i18n('더 레이크'), -14, -86], [i18n('저수지'), 0, 50], [i18n('그레이트 론'), 0, -2], [i18n('쉽 메도우'), -24, -168]]) addLabel(`<i></i><span>${nm}</span>`, 'place', () => [x, 6, z], 120);
+  if (TAG.zone) { const L = addLabel(i18n('<i></i><span>경도 감옥</span>'), 'place', () => [TAG.jx, groundY(TAG.jx, TAG.jz) + 3, TAG.jz], 90); L.hideIf = () => !TAG.on && !tagN(1) && !tagN(2); }
   if (RINK) addLabel(i18n('<i></i><span>울먼 링크</span>'), 'place', () => [RINK.x, RINK.y + 5.5, RINK.z], 110);
   if (IS_PARK) for (const [nm, x, y, z] of CITY_MARKS) { const L = addLabel('<i></i><span></span>', 'place', () => [x, y, z], 210); L.el.querySelector('span').textContent = nm; }   // 이름난 건물
   W.circleLabel = addLabel('<i></i><span></span>', 'place tap', () => [CIRCLE.x, CIRCLE.h + 5.2, CIRCLE.z], 120);
@@ -3992,6 +4037,7 @@ function clickMove(cx, cy) {
 /* ---------------- simulation ---------------- */
 function movePlayer(dt) {
   S.movedNow = false;
+  if (tagFrozen()) { player.target = null; S.auto = false; player.moveAmt = lerp(player.moveAmt, 0, 1 - Math.exp(-dt * 8)); player.y = groundY(player.x, player.z); return; }   // 감옥에 갇혔거나, 도둑이 숨는 동안의 경찰
   if (SNOW.on && T < SNOW.restUntil) { player.target = null; player.moveAmt = lerp(player.moveAmt, 0, 1 - Math.exp(-dt * 8)); player.y = groundY(player.x, player.z); return; }   // 눈을 세 번 맞고 쉬는 중
   let mx = 0, mz = 0, dist = Infinity;
   const kx = (keys.d ? 1 : 0) - (keys.a ? 1 : 0), kz = (keys.w ? 1 : 0) - (keys.s ? 1 : 0);
@@ -4017,7 +4063,7 @@ function movePlayer(dt) {
     mx = player.target.x - player.x; mz = player.target.z - player.z; dist = Math.hypot(mx, mz);
     if (dist < 0.3) { player.target = null; mx = mz = 0; }
   }
-  let l = Math.hypot(mx, mz), moving = false, speedK = 1;
+  let l = Math.hypot(mx, mz), moving = false, speedK = TAG.on && TAG.role === 1 && tagPhase() === 'chase' ? 1.12 : 1;   // 쫓는 경찰은 조금 빠르다
   const ice = onRink(player.x, player.z);
   if (ice) {   // 얼음 위: 미는 쪽으로 서서히 방향이 꺾이고, 손을 떼도 한참 미끄러진다
     const G = S.glide || (S.glide = { x: 0, z: 0, v: 0 });
@@ -5270,8 +5316,8 @@ function updateHud(dt) {
     if (gSoon && GROUP.told !== gOpen.at && gOpen.left > 30) { GROUP.told = gOpen.at; toast(i18n('{0}분 뒤 함께 명상이 시작돼요', Math.max(1, Math.round(gOpen.left / 60)))); if (canSound()) sfx.bowl(0.3); }
     evLoad(false); evAlerts(); const evS = free ? evSoon() : null;
     if (!$('#snowPick').hidden && !(free && snowZone(player.x, player.z, 1.1))) $('#snowPick').hidden = true;
-    const kind = SNOW.on || !$('#snowPick').hidden ? '' : free && SNOW.zone && snowZone(player.x, player.z, 0.95) && db > 2.6 ? 'snow' : free && T < S.fireAsk && TALK.lives.length ? 'fireAsk' : evS ? 'event' : free && T < S.bookAsk ? 'bookAsk' : gSoon ? 'group' : free && db < 2.6 ? 'book' : free && ds < 5 ? 'spring' : free && dh < (HALL ? HALL.r + 4 : 0) ? 'hall' : free && dc < 14 ? 'circle' : free && dk < 15 ? 'cafe' : '';
-    if ($('#nearSit').dataset.k !== kind) { $('#nearSit').dataset.k = kind; $('#nearSitTxt').textContent = kind === 'snow' ? i18n('눈 놀이 하기') : kind === 'fireAsk' ? i18n('모닥불에서 이야기 나누기') : kind === 'event' ? i18n('곧 모임 · {0}', bookText(evS.title).slice(0, 18)) : kind === 'group' ? i18n('곧 함께 명상 · 참여하기') : kind === 'bookAsk' ? i18n('방명록에 한 줄 남기기') : kind === 'book' ? i18n('방명록 보기') : kind === 'hall' ? i18n('명상원에서 명상하기') : kind === 'cafe' ? i18n('카페 들어가기') : kind === 'spring' ? (IS_PARK ? i18n('음수대에서 물 마시기') : i18n('약수 마시기')) : i18n('모닥불에 앉기'); }
+    const kind = SNOW.on || TAG.on || !$('#snowPick').hidden ? '' : free && SNOW.zone && snowZone(player.x, player.z, 0.95) && db > 2.6 ? 'snow' : free && T < S.fireAsk && TALK.lives.length ? 'fireAsk' : evS ? 'event' : free && T < S.bookAsk ? 'bookAsk' : gSoon ? 'group' : free && db < 2.6 ? 'book' : free && ds < 5 ? 'spring' : free && dh < (HALL ? HALL.r + 4 : 0) ? 'hall' : free && dc < 14 ? 'circle' : free && dk < 15 ? 'cafe' : '';
+    if ($('#nearSit').dataset.k !== kind) { $('#nearSit').dataset.k = kind; $('#nearSitTxt').textContent = kind === 'snow' ? i18n('눈 놀이 · 경도 하기') : kind === 'fireAsk' ? i18n('모닥불에서 이야기 나누기') : kind === 'event' ? i18n('곧 모임 · {0}', bookText(evS.title).slice(0, 18)) : kind === 'group' ? i18n('곧 함께 명상 · 참여하기') : kind === 'bookAsk' ? i18n('방명록에 한 줄 남기기') : kind === 'book' ? i18n('방명록 보기') : kind === 'hall' ? i18n('명상원에서 명상하기') : kind === 'cafe' ? i18n('카페 들어가기') : kind === 'spring' ? (IS_PARK ? i18n('음수대에서 물 마시기') : i18n('약수 마시기')) : i18n('모닥불에 앉기'); }
     if ($('#nearSit').hidden === !!kind) $('#nearSit').hidden = !kind;
   }
   $('#greetBtn').classList.toggle('near', !!nearestOther(5));
@@ -5626,6 +5672,8 @@ function drawShadow(x, z, s) {
   draw(W.uDisc, { model: m, tint: [0, 0, 0], alpha: SHADOW.on ? 0.12 : 0.26, flat: 0, snowable: 0 });
 }
 function drawChar(c, isMe, shadowPass) {
+  const cm = isMe ? (TAG.on ? TAG.camo : '') : (tagPlaying(c) ? c.tagCamo : '');   // 숨은 도둑은 덤불이나 바위로 보인다
+  if (cm) { SHADOW_DRAW = !!shadowPass; drawCamo(c, cm, !shadowPass); return; }
   const d = isDeer(c);
   if (!shadowPass) { if (c._deer !== undefined && c._deer !== d) poofAt(c); c._deer = d; }
   SHADOW_DRAW = !!shadowPass;
@@ -5635,6 +5683,7 @@ function drawOpaque(shadowPass) {   // 땅, 나무, 바위, 사람, 강아지 (�
   draw(W.terrain, { mode: 0, detail: 1, flat: 0 });
   draw(W.props, { mode: 1, detail: 0.45 });
   if (IS_PARK) {
+    drawTagWorld();
     draw(W.city, { mode: 1, emissive: 0.04 * S.night });
     const lit = Math.max(S.tb * 0.75, S.night);
     if (!shadowPass) {   // 창: 낮에는 어두운 유리, 해가 지면 불이 켜진다. 에식스 하우스 간판은 늘 빨갛다
@@ -5705,7 +5754,7 @@ function render() {
     const sw = SPRING.water; draw(W.water, { model: M.chain(M.T(sw.x, sw.y, sw.z), M.S(sw.r, 1, sw.r)), tint: wTintS(), alpha: 0.85, emissive: 0.2, flat: 0, snowable: 0, water: S.sb > 0.5 ? 0.2 : 1.4 });
     if (SPRING.spout && S.sb < 0.7) { const sp = SPRING.spout, h = sp[1] - sw.y; draw(W.uCyl, { model: M.chain(M.T(sp[0], sw.y + h / 2, sp[2]), M.S(0.03, h, 0.03)), tint: [0.8, 0.9, 1], alpha: 0.6, emissive: 0.5, flat: 0, snowable: 0, flow: 1, flowSpeed: 2.2 }); }
   }
-  drawPrints(); drawSnowballs(); drawPuffs(); drawPoof();
+  drawPrints(); drawTagMarks(); drawSnowballs(); drawPuffs(); drawPoof();
   for (const w of WATERS) draw(W.water, { model: M.chain(M.T(w.x, w.level, w.z), M.S(w.rx * 1.12, 1, w.rz * 1.12)), tint: wTint, alpha: wAlpha, emissive: 0.18, flat: 0, snowable: 0, water: 1 - 0.85 * ice });
   if (W.basin) draw(W.water, { model: M.chain(M.T(W.basin.x, W.basin.y, W.basin.z), M.S(W.basin.r, 1, W.basin.r)), tint: wTint, alpha: wAlpha, emissive: 0.2, flat: 0, snowable: 0, water: 1.3 - 1.1 * ice });
   const fountainOff = IS_PARK && ice > 0.5;   // 겨울에는 분수를 잠근다
@@ -6005,6 +6054,7 @@ function snowMatchStart() {
   const at = Date.now() + 5000; netSend({ k: 'snm', id: at, at, len: SNOW_LEN }); snowAdopt(at, at, SNOW_LEN);
 }
 function snowPickOpen() {
+  $('#tagNc').textContent = tagN(1) ? i18n('{0}명', tagN(1)) : ''; $('#tagNr').textContent = tagN(2) ? i18n('{0}명', tagN(2)) : '';
   $('#snowNb').textContent = snowTeamN(1) ? i18n('{0}명', snowTeamN(1)) : ''; $('#snowNw').textContent = snowTeamN(2) ? i18n('{0}명', snowTeamN(2)) : '';
   $('#snowPick').hidden = false;
 }
@@ -6110,6 +6160,149 @@ function drawSnowTeams() {   // 발밑의 팀 색 동그라미
   for (const q of NET.peers.values()) if (q.ready && !q.hidden && snowPlaying(q) && (q.snowTeam | 0) && Math.hypot(q.x - eye[0], q.z - eye[2]) < 80) ring(q, q.snowTeam);
 }
 function drawSnowballs() { drawSnowTeams(); for (const b of SNOW.balls) draw(W.uSphere, { model: M.chain(M.T(b.x, b.y, b.z), M.S(0.13)), tint: [1, 1, 1], emissive: 0.3, flat: 0, snowable: 0 }); }
+/* ================= 경도: 경찰과 도둑 =================
+   센트럴파크 쉽 메도우와 그 둘레 숲에서 한다. 들어올 때 경찰이나 도둑을 고르고, 양쪽에 한 사람씩 있으면 누구든 경기를 연다.
+   처음 20초는 도둑이 달아나 숨는 시간(경찰은 제자리), 그 뒤 4분 동안 쫓는다. 도둑이 모두 감옥에 갇히면 경찰 승, 시간이 다 되면 도둑 승.
+   도둑은 '숨기'를 누르면 덤불이나 바위로 바뀌고 눈만 깜빡인다 (움직이면 풀린다). 공원에는 똑같이 생긴 진짜 덤불과 바위가 흩어져 있다.
+   경찰은 가까이 가서 '잡기'를 눌러야 잡는다. 잡혔는지는 도둑 쪽에서 판정해 알린다. 갇히지 않은 도둑이 감옥에 닿아 '구출'을 누르면 모두 풀려난다. */
+const TAG = { on: false, role: 0, camo: '', jail: false, match: null, caught: 0, pingAt: -99, shown: '', lastTry: -9, safeUntil: -1, seed: Math.random(), decoys: null,
+  zone: IS_PARK ? { x: -8, z: -160, rx: 44, rz: 52 } : null, jx: -12, jz: -166, HIDE: 20, LEN: 240 };
+const tagZone = (x, z, k = 1) => !!TAG.zone && Math.hypot((x - TAG.zone.x) / TAG.zone.rx, (z - TAG.zone.z) / TAG.zone.rz) < k;
+const tagPlaying = q => (q.tagOn || 0) > T;
+function tagPhase() { const M2 = TAG.match; if (!M2 || M2.done) return ''; const n = Date.now(); return n < M2.at ? 'wait' : n < M2.at + TAG.HIDE * 1000 ? 'hide' : n < M2.end ? 'chase' : ''; }
+function tagN(role, jailed) { let n = TAG.on && TAG.role === role && (!jailed || TAG.jail) ? 1 : 0; for (const q of NET.peers.values()) if (q.ready && !q.hidden && tagPlaying(q) && q.tagRole === role && (!jailed || q.tagJail)) n++; return n; }
+function tagPing() { TAG.pingAt = T; const M2 = TAG.match; netSend({ k: 'tgp', on: TAG.on ? 1 : 0, r: TAG.role, j: TAG.jail ? 1 : 0, c: TAG.camo === 'bush' ? 'b' : TAG.camo === 'rock' ? 'r' : '', sd: +TAG.seed.toFixed(3), mid: M2 ? M2.id : 0, ms: M2 ? M2.at : 0, ml: M2 ? Math.round((M2.end - M2.at) / 1000) : 0 }); }
+function tagAdopt(id, at, len) {
+  if (!(id > 0) || !isFinite(at) || at + len * 1000 < Date.now() || at > Date.now() + 60000) return;
+  if (TAG.match && (TAG.match.id === id || (!TAG.match.done && TAG.match.at <= at))) return;
+  TAG.match = { id, at, end: at + len * 1000, done: false }; TAG.jail = false; TAG.caught = 0; TAG.shown = ''; tagCamo('');
+  if (TAG.on) { toast(TAG.role === 1 ? i18n('곧 경도 시작! 도둑이 숨는 20초 동안은 움직일 수 없어요') : i18n('곧 경도 시작! 20초 안에 달아나 숨으세요')); if (canSound()) sfx.bowl(0.4); tagPing(); }
+}
+function tagStart() {
+  if (!TAG.on || (TAG.match && !TAG.match.done)) return;
+  if (!tagN(1) || !tagN(2)) { toast(i18n('경찰과 도둑이 한 사람씩은 있어야 시작할 수 있어요')); return; }
+  const at = Date.now() + 4000, len = TAG.HIDE + TAG.LEN; TAG.match = null; netSend({ k: 'tgm', id: at, at, len }); tagAdopt(at, at, len);
+}
+function tagJoin(role) {
+  if (!TAG.zone || TAG.on) return;
+  $('#snowPick').hidden = true; if (SNOW.on) snowLeave(true); closeMenus(); if (S.breath) stopBreath();
+  TAG.on = true; TAG.role = role === 1 ? 1 : 2; TAG.jail = false; TAG.camo = ''; TAG.caught = 0; TAG.shown = ''; TAG.seed = Math.random();
+  audioInit(); $('#tagBar').hidden = false; tagPing();
+  toast(TAG.role === 1 ? i18n('경찰이 되었어요. 도둑 가까이 가서 잡기를 눌러요. 수상한 덤불과 바위도 살펴보세요') : i18n('도둑이 되었어요. 숨기를 누르면 덤불이나 바위로 변해요. 움직이면 풀려요'));
+}
+function tagLeave(quiet) {
+  if (!TAG.on) return;
+  tagCamo(''); TAG.on = false; TAG.jail = false; $('#tagBar').hidden = true; tagPing(); if (!tagPhase()) TAG.match = null;
+  if (!quiet) toast(i18n('경도를 마쳤어요'));
+}
+function tagCamo(kind) { if (TAG.camo === kind) return; TAG.camo = kind; TAG.shown = ''; if (TAG.on) { poofAt(player); tagPing(); } }
+function tagNearJail(c, r) { return Math.hypot(c.x - TAG.jx, c.z - TAG.jz) < r; }
+function tagMode() {   // 지금 단추가 하는 일
+  if (TAG.role === 1) return 'catch';
+  if (TAG.jail) return 'jail';
+  if (TAG.camo) return 'out';
+  if (tagPhase() === 'chase' && tagNearJail(player, 3.6) && tagN(2, true) > 0) return 'rescue';
+  return 'hide';
+}
+function tagAction() {
+  if (!TAG.on || player.act) return;
+  const mode = tagMode();
+  if (mode === 'jail') return;
+  if (mode === 'out') { tagCamo(''); return; }
+  if (mode === 'hide') {   // 바위 곁이면 바위로, 아니면 덤불로
+    const dec = tagDecoys(); let rock = false; for (const d of dec) if (d.kind === 'rock' && Math.hypot(d.x - player.x, d.z - player.z) < 12) rock = true;
+    for (const r of PARK_ROCKS) if (Math.hypot(r.x - player.x, r.z - player.z) < r.r + 10) rock = true;
+    player.target = null; S.auto = false; updateWalkBtn(); tagCamo(rock ? 'rock' : 'bush'); toast(i18n('숨었어요. 움직이면 풀려요')); return;
+  }
+  if (mode === 'rescue') { netSend({ k: 'tgr' }); toast(i18n('감옥 문을 열었어요! 모두 달아나요')); if (canSound()) sfx.bowl(0.5); return; }
+  // 잡기
+  if (tagPhase() !== 'chase') { toast(i18n('경기가 시작되면 잡을 수 있어요')); return; }
+  if (T - TAG.lastTry < 1.2) return; TAG.lastTry = T; player.throwT = T;
+  let best = null, bd = 2.3;
+  for (const q of NET.peers.values()) { if (!q.ready || q.hidden || !tagPlaying(q) || q.tagRole !== 2 || q.tagJail) continue; const d = Math.hypot(q.x - player.x, q.z - player.z); if (d < bd) { bd = d; best = q; } }
+  if (best) netSend({ k: 'tgc', to: best.id }); else toast(i18n('손이 닿는 곳에 도둑이 없어요'));
+}
+function tagNet(q, m) {
+  if (m.k === 'tgp') {
+    q.tagOn = m.on ? T + 12 : 0; q.tagRole = m.r === 1 ? 1 : 2; q.tagJail = !!m.j; const c = m.c === 'b' ? 'bush' : m.c === 'r' ? 'rock' : ''; if (!q.hidden && (q.tagCamo || '') !== c && q.ready) poofAt(q); q.tagCamo = m.on ? c : ''; q.tagSeed = clamp(+m.sd || 0, 0, 1);
+    if (m.on && +m.mid > 0) tagAdopt(+m.mid, +m.ms, clamp(+m.ml || 260, 30, 900)); return;
+  }
+  if (m.k === 'tgm') { tagAdopt(+m.id, +m.at, clamp(+m.len || 260, 30, 900)); return; }
+  if (m.k === 'tgc') {   // 경찰이 나를 잡으려 한다: 정말 가까이 있을 때만 잡힌다
+    if (m.to !== ME.id || !TAG.on || TAG.role !== 2 || TAG.jail || tagPhase() !== 'chase' || T < TAG.safeUntil || q.tagRole !== 1) return;
+    if (Math.hypot(q.x - player.x, q.z - player.z) > 3.4) return;
+    tagCamo(''); TAG.jail = true; TAG.shown = ''; const a = Math.random() * TAU; player.x = TAG.jx + Math.cos(a) * 1.3; player.z = TAG.jz + Math.sin(a) * 1.3; player.y = groundY(player.x, player.z); player.target = null; S.auto = false; updateWalkBtn();
+    netSend({ k: 'tgx', by: q.id }); tagPing(); netState(true); toast(i18n('{0}님에게 잡혔어요. 친구가 감옥에 와서 구해 줄 때까지 기다려요', q.nick)); showBubble(player, i18n('잡혔다!'), 2, true); return;
+  }
+  if (m.k === 'tgx') { q.tagJail = true; q.tagCamo = ''; if (!q.hidden) showBubble(q, i18n('잡혔다!'), 2, true); if (m.by === ME.id && TAG.on) { TAG.caught++; toast(i18n('{0}님을 잡았어요!', q.nick)); if (canSound()) sfx.bowl(0.45); } return; }
+  if (m.k === 'tgr') {   // 누가 감옥 문을 열었다
+    if (!TAG.on || !TAG.jail || q.tagRole !== 2 || q.tagJail || !tagNearJail(q, 6)) return;
+    TAG.jail = false; TAG.safeUntil = T + 3; TAG.shown = ''; tagPing(); toast(i18n('{0}님이 구해 줬어요! 어서 달아나요', q.nick)); showBubble(player, i18n('고마워요'), 2, true);
+  }
+}
+function tagEnd(winner) {
+  const M2 = TAG.match; if (!M2 || M2.done) return; M2.done = true; M2.end = Math.min(M2.end, Date.now());
+  if (TAG.on) { toast(winner === 1 ? i18n('경도 끝! 도둑을 모두 잡았어요 · 경찰 승리') : i18n('경도 끝! 끝까지 달아났어요 · 도둑 승리')); if (canSound()) sfx.bowl(0.7); showBubble(player, winner === TAG.role ? i18n('이겼다!') : i18n('다음엔 꼭!'), 3, true); }
+  tagCamo(''); TAG.jail = false; TAG.shown = ''; if (TAG.on) tagPing();
+  setTimeout(() => { if (TAG.match === M2) { TAG.match = null; TAG.shown = ''; } }, 8000);
+}
+function updateTag(dt) {
+  if (!TAG.on) { if (TAG.match && Date.now() > TAG.match.end + 15000) TAG.match = null; return; }
+  if (!S.started || (player.act && !GREETS.includes(player.act.type))) { tagLeave(true); return; }
+  if (!tagZone(player.x, player.z, 1.12)) { tagLeave(true); toast(i18n('놀이 구역을 벗어나 경도를 마쳤어요')); return; }
+  if (TAG.camo && (keys.w || keys.a || keys.s || keys.d || player.target || S.auto)) tagCamo('');   // 움직이면 위장이 풀린다
+  if (T - TAG.pingAt > 3) tagPing();
+  const ph = tagPhase(), M2 = TAG.match, now = Date.now();
+  if (M2 && !M2.done) {
+    if (now >= M2.end) tagEnd(2);
+    else if (ph === 'chase' && tagN(2) > 0 && tagN(2, true) === tagN(2)) { if (!M2.allAt) M2.allAt = now; else if (now - M2.allAt > 1500) tagEnd(1); }   // 소식이 엇갈릴 수 있어 잠깐 지켜본 뒤 끝낸다
+    else M2.allAt = 0;
+  }
+  const left = M2 ? fmtDur(Math.max(0, Math.ceil((M2.end - now) / 1000))) : '', mode = tagMode();
+  const txt = !M2 || M2.done ? i18n('경도 · 경찰 {0}명, 도둑 {1}명', tagN(1), tagN(2))
+    : ph === 'wait' ? i18n('경도 시작까지 {0}초', Math.ceil((M2.at - now) / 1000))
+    : ph === 'hide' ? (TAG.role === 1 ? i18n('도둑이 숨는 중 · {0}초', Math.ceil((M2.at + TAG.HIDE * 1000 - now) / 1000)) : i18n('어서 숨어요 · {0}초', Math.ceil((M2.at + TAG.HIDE * 1000 - now) / 1000)))
+    : TAG.jail ? i18n('감옥 · 구해 주길 기다려요 · {0}', left)
+    : i18n('{0} · 잡힌 도둑 {1}/{2} · {3}', TAG.role === 1 ? i18n('경찰') : TAG.camo ? i18n('숨는 중') : i18n('도둑'), tagN(2, true), tagN(2), left);
+  const canStart = !M2 || M2.done, ready = canStart && tagN(1) > 0 && tagN(2) > 0, sig = txt + '|' + mode + canStart + ready;
+  if (sig !== TAG.shown) { TAG.shown = sig; $('#tagTxt').textContent = txt; $('#tagAct').textContent = mode === 'catch' ? i18n('잡기') : mode === 'jail' ? i18n('갇힘') : mode === 'out' ? i18n('나오기') : mode === 'rescue' ? i18n('구출') : i18n('숨기'); $('#tagAct').disabled = mode === 'jail'; $('#tagStart').hidden = !canStart; $('#tagStart').disabled = !ready; }
+}
+const tagFrozen = () => TAG.on && (TAG.jail || (TAG.role === 1 && (tagPhase() === 'hide' || tagPhase() === 'wait')));
+/* 공원에 흩어진 덤불과 바위. 도둑이 변한 모습과 똑같이 생겼다 (눈이 없다는 것만 다르다) */
+function tagDecoys() {
+  if (TAG.decoys) return TAG.decoys;
+  const out = [], R = rng(9127), Z = TAG.zone;
+  for (let t = 0; t < 900 && out.length < 38; t++) {
+    const a = R() * TAU, k = Math.sqrt(R()) * 1.02, x = Z.x + Math.cos(a) * Z.rx * k, z = Z.z + Math.sin(a) * Z.rz * k;
+    if (!walkable(x, z) || inWater(x, z, 1.2) || trailDist(x, z)[0] < 3.2 || parkPathNear(x, z) || hitObstacle(x, z, 0.9) || Math.hypot(x - CIRCLE.x, z - CIRCLE.z) < 11 || Math.hypot(x - CAFE.x, z - CAFE.z) < 13 || Math.hypot(x - TAG.jx, z - TAG.jz) < 6) continue;
+    if (snowZone(x, z, 0.8) && R() < 0.75) continue;   // 잔디밭 한가운데는 비워 둔다
+    if (out.some(d => Math.hypot(d.x - x, d.z - z) < 4)) continue;
+    out.push({ x, z, y: groundY(x, z), kind: R() < 0.3 ? 'rock' : 'bush', yaw: R() * TAU, s: 0.85 + R() * 0.4 });
+  }
+  { const bg = new Geo(), cs = [[0.34, 0.40, 0.18], [0.44, 0.42, 0.17], [0.50, 0.36, 0.16], [0.30, 0.36, 0.17], [0.46, 0.40, 0.18]], gr = rng(77);
+    [[0, 0.44, 0, 0.62, 0.5, 0.58], [0.42, 0.34, 0.1, 0.42, 0.38, 0.4], [-0.4, 0.36, -0.08, 0.44, 0.4, 0.42], [0.05, 0.3, 0.4, 0.4, 0.34, 0.38], [-0.1, 0.66, -0.2, 0.38, 0.34, 0.36]].forEach(([x, y, z, rx, ry, rz], i) => sphere(bg, x, y, z, rx, ry, rz, 6, 4, cs[i], 0, false, 0.3, gr));
+    W.bush = upload(bg);
+    const rg = new Geo(); sphere(rg, 0, 0.36, 0, 0.8, 0.56, 0.7, 6, 4, [0.56, 0.55, 0.52], 0, false, 0.35, gr); sphere(rg, 0.5, 0.2, 0.3, 0.38, 0.3, 0.34, 5, 3, [0.50, 0.49, 0.47], 0, false, 0.3, gr); W.rock1 = upload(rg); }
+  return (TAG.decoys = out);
+}
+function drawCamo(c, kind, eyes) {
+  const sc = 0.92 + 0.3 * (c === player ? TAG.seed : (c.tagSeed || 0)), root = M.chain(M.T(c.x + (c.ox || 0), c.y, c.z + (c.oz || 0)), M.Ry(c.heading), M.S(sc));
+  draw(kind === 'rock' ? W.rock1 : W.bush, { model: root, mode: 1 });
+  if (!eyes) return;
+  const sd = c === player ? TAG.seed : (c.tagSeed || 0), blink = ((T + sd * 7) % 3.4) < 0.16 ? 0.12 : 1, ey = kind === 'rock' ? 0.5 : 0.52, ez = kind === 'rock' ? 0.63 : 0.6;
+  for (const sx of [-0.12, 0.12]) {
+    draw(W.uSphere, { model: M.mul(root, M.chain(M.T(sx, ey, ez), M.S(0.06, 0.06 * blink, 0.03))), tint: [1, 1, 1], flat: 0, snowable: 0, emissive: 0.25 });
+    draw(W.uSphere, { model: M.mul(root, M.chain(M.T(sx, ey, ez + 0.025), M.S(0.03, 0.03 * blink, 0.02))), tint: [0.08, 0.08, 0.1], flat: 0, snowable: 0 });
+  }
+}
+function drawTagWorld() {   // 덤불과 바위, 감옥
+  if (!TAG.zone || !W.treeGrid) return;
+  for (const d of tagDecoys()) if (Math.hypot(d.x - eye[0], d.z - eye[2]) < 95) draw(d.kind === 'rock' ? W.rock1 : W.bush, { model: M.chain(M.T(d.x, d.y, d.z), M.Ry(d.yaw), M.S(d.s)), mode: 1 });
+  if (!TAG.on && !tagN(1) && !tagN(2)) return;
+  const jy = groundY(TAG.jx, TAG.jz);
+  for (let k = 0; k < 10; k++) { const a = k / 10 * TAU; draw(W.uCyl, { model: M.chain(M.T(TAG.jx + Math.cos(a) * 2.6, jy + 0.55, TAG.jz + Math.sin(a) * 2.6), M.S(0.07, 1.1, 0.07)), tint: [0.20, 0.20, 0.22], flat: 0, snowable: 0 }); }
+}
+function drawTagMarks() { if (TAG.zone && (TAG.on || tagN(1) || tagN(2))) draw(W.uRing, { model: M.chain(M.T(TAG.jx, groundY(TAG.jx, TAG.jz) + 0.08, TAG.jz), M.S(2.7)), tint: [1, 0.78, 0.3], alpha: 0.85, emissive: 0.6, flat: 0, snowable: 0 }); }
 /* ================= 공지와 모임 =================
    산지기·불지기가 알림 글이나 모임(눈싸움, 경도, 명상, 산책)을 올리고, 로그인한 사람이 참여 신청을 한다. 읽기는 누구나.
    서버 함수 sangil_event_list, sangil_event_create, sangil_event_cancel, sangil_event_rsvp_toggle 를 쓴다.
@@ -6441,8 +6634,8 @@ function updateDogs(dt) {
   for (const p of NET.peers.values()) if (p.ready && p.dogCoat) { p.dogS = p.dogS || { phase: 0, move: 0, idle: 0, sit: 0, lie: 0, sniff: 0, sniffT: 0, placed: false }; updateDog(p.dogS, p, p.dogLeash, dt); }
 }
 function drawDogs() {
-  if (S.started && myDog() && !inTent(player)) drawDog(DOG, DOG.coat, DOG.leash ? leashHand(player) : null);
-  for (const p of NET.peers.values()) if (p.ready && !p.hidden && p.dogCoat && p.dogS && Math.hypot(p.x - eye[0], p.z - eye[2]) < 120) drawDog(p.dogS, p.dogCoat, p.dogLeash ? leashHand(p) : null);
+  if (S.started && myDog() && !inTent(player) && !(TAG.on && TAG.camo)) drawDog(DOG, DOG.coat, DOG.leash ? leashHand(player) : null);
+  for (const p of NET.peers.values()) if (p.ready && !p.hidden && !(tagPlaying(p) && p.tagCamo) && p.dogCoat && p.dogS && Math.hypot(p.x - eye[0], p.z - eye[2]) < 120) drawDog(p.dogS, p.dogCoat, p.dogLeash ? leashHand(p) : null);
 }
 
 /* ================= 집중 모드 (일할 때 켜 두는 자연의 소리) =================
@@ -7746,7 +7939,7 @@ function ensurePeer(id, pres) {
       jacket: [0.5, 0.5, 0.55], hat: [0.9, 0.88, 0.82], pants: [0.24, 0.26, 0.30], pack: [0.30, 0.28, 0.25], cushion: [0.42, 0.34, 0.52],
       mode: 'stop', tx: 0, tz: 0, sp: 1.8, dir: 1, idx: 0, heard: performance.now(), seen: performance.now(), ox: 0, oz: 0, hidden: MUTED.has(id) };
     p.label = addLabel('<span></span>', 'real', () => [p.x + p.ox, p.y + (isDeer(p) ? 2.2 : 2.45) - 0.47 * p.sit, p.z + p.oz], 60);
-    p.label.hideIf = () => !p.ready || p.hidden;
+    p.label.hideIf = () => !p.ready || p.hidden || (tagPlaying(p) && !!p.tagCamo);   // 숨은 도둑은 이름표도 숨긴다
     p.label.el.addEventListener('click', e => { e.stopPropagation(); openMute(p, e.clientX, e.clientY); });
     NET.peers.set(id, p);
     setTimeout(() => netState(true), 250 + Math.random() * 500);   // 새로 온 사람에게 내 위치를 알려준다
@@ -7813,6 +8006,7 @@ function onNet(m) {
     H5.out = null; dropBubble(player);
     if (m.ok) { if (Math.hypot(p.x - player.x, p.z - player.z) < 7) { H5.with = p; greet('hi5', null, true); H5.with = null; } else toast(i18n('{0}님이 좋대요. 조금 더 가까이 가서 다시 해 보세요', p.nick)); }
     else toast(i18n('{0}님은 다음에 하자고 하네요', p.nick));
+  } else if (m.k === 'tgp' || m.k === 'tgm' || m.k === 'tgc' || m.k === 'tgx' || m.k === 'tgr') { tagNet(p, m); return;
   } else if (m.k === 'snb' || m.k === 'snh' || m.k === 'snj' || m.k === 'snr' || m.k === 'snm') { snowNet(p, m); return;
   } else if (m.k === 'note') { recvNote(p, m); return;
   } else if (m.k === 'nthx') {   // 내가 건넨 쪽지에 고마워요
@@ -7936,7 +8130,7 @@ function frameStep(now) {
   updateCamp(dt);
   updateMedGuide();
   if (S.started && !S.breath) movePlayer(dt); else S.movedNow = false;
-  updatePuffs(dt); updateMelt(dt); updatePrints(dt); updateSnow(dt);
+  updatePuffs(dt); updateMelt(dt); updatePrints(dt); updateSnow(dt); updateTag(dt);
   moveNpcs(dt);
   updateDogs(dt);
   netTick(dt);
@@ -8232,8 +8426,11 @@ function bindUI() {
   addEventListener('pointerdown', radioKick, true);
   $('#medGo').onclick = beginMeditate; $('#medCancel').onclick = () => { $('#medCard').hidden = true; S.hallPref = null; };
   $('#snowThrow').onclick = e => { e.stopPropagation(); snowThrow(); }; $('#snowQuit').onclick = e => { e.stopPropagation(); snowLeave(false); }; $('#snowStart').onclick = e => { e.stopPropagation(); snowMatchStart(); };
-  document.querySelectorAll('#snowPick button').forEach(b => b.onclick = e => { e.stopPropagation(); snowJoin(+b.dataset.t); });
-  addEventListener('keydown', e => { if (e.code === 'Space' && SNOW.on && !(e.target.closest && e.target.closest('input,select,textarea,button'))) { e.preventDefault(); snowThrow(); } });
+  document.querySelectorAll('#snowPick [data-t]').forEach(b => b.onclick = e => { e.stopPropagation(); snowJoin(+b.dataset.t); });
+  document.querySelectorAll('#snowPick [data-g]').forEach(b => b.onclick = e => { e.stopPropagation(); tagJoin(+b.dataset.g); });
+  $('#tagAct').onclick = e => { e.stopPropagation(); tagAction(); }; $('#tagQuit').onclick = e => { e.stopPropagation(); tagLeave(false); }; $('#tagStart').onclick = e => { e.stopPropagation(); tagStart(); };
+  addEventListener('keydown', e => { if (e.code === 'Space' && TAG.on && !(e.target.closest && e.target.closest('input,select,textarea,button'))) { e.preventDefault(); tagAction(); return; }
+    if (e.code === 'Space' && SNOW.on && !(e.target.closest && e.target.closest('input,select,textarea,button'))) { e.preventDefault(); snowThrow(); } });
   $('#evPost').onclick = evPost; $('#evClose').onclick = () => { $('#evCard').hidden = true; }; $('#evStart').onclick = openEvents;
   for (const id of ['evName', 'evBody', 'evWhen']) $('#' + id).addEventListener('keydown', e => e.stopPropagation());
   $('#bookSend').onclick = bookSend; $('#bookClose').onclick = () => { $('#bookCard').hidden = true; };
@@ -8324,7 +8521,7 @@ function boot() {
   $('#start').hidden = false; $('#enterBtn').disabled = false; $('#enterMed').disabled = false; $('#enterFocus').disabled = false; $('#enterFire').disabled = false; fireLoad(true); evLoad(true);
   if (store.get('autoEnter', false)) { store.set('autoEnter', false); $('#enterBtn').focus(); }
   const ld = $('#loading'); ld.style.opacity = 0; setTimeout(() => { ld.hidden = true; }, 600);
-  window.__sangil = { keys, setRain, hitObstacle, OBS, CIRCLE, sitCircle, goCircle, sendChat, inCircle, S, player, TN, getH, CPS, startAct, cam, NET, NPCS, greet, sendChat, W, netState, startCamp, wakeCamp, openCampCard, goCafe, startCafe, DRINKS, CAFE, H5, answerHi5, showHi5Ask, MED, TX, TZ, IS_PARK, HALL, RINK, MELT, PRINTS, SNOW, snowJoin, snowThrow, ME, proj: (x, y, z) => { const v = M.xf(VP, x, y, z); return [v[0] / v[3], v[1] / v[3], v[3]]; }, startCampNow: () => { S.campFire = true; startCamp(); } };
+  window.__sangil = { keys, setRain, hitObstacle, OBS, CIRCLE, sitCircle, goCircle, sendChat, inCircle, S, player, TN, getH, CPS, startAct, cam, NET, NPCS, greet, sendChat, W, netState, startCamp, wakeCamp, openCampCard, goCafe, startCafe, DRINKS, CAFE, H5, answerHi5, showHi5Ask, MED, TX, TZ, IS_PARK, HALL, RINK, MELT, PRINTS, SNOW, snowJoin, snowThrow, ME, TAG, tagJoin, tagAction, tagStart, tagDecoys, proj: (x, y, z) => { const v = M.xf(VP, x, y, z); return [v[0] / v[3], v[1] / v[3], v[3]]; }, startCampNow: () => { S.campFire = true; startCamp(); } };
   requestAnimationFrame(t => { lastNow = t; frame(t); });
 }
 setTimeout(boot, 30);
