@@ -1278,6 +1278,22 @@ const EN = {"센트럴파크":"Central Park",
 "{0}분 명상을 마쳤어요. 이 고요함을 안고 다시 걸어요":"{0}-minute meditation done. Carry this calm with you",
 "스트레스를 후~ 날려 보냈어요. 숨이 한결 고르네요":"Stress, blown away. Your breath feels steadier",
 "내 정보":"My profile",
+"보름달":"full moon",
+"그믐":"new moon",
+"초승달":"a crescent",
+"상현달":"a first quarter",
+"차오르는 달":"a waxing moon",
+"기우는 달":"a waning moon",
+"하현달":"a last quarter",
+"그믐달":"a thin old moon",
+"오늘은 보름달 밤이에요. 달빛에 그림자가 져요":"Tonight is a full moon. The moonlight casts shadows.",
+"달이 없는 밤이에요. 별이 가득해요":"A moonless night. The sky is full of stars.",
+"밤이 되었어요. 오늘 달은 {0} · 다음 보름달까지 {1}일":"Night has fallen. Tonight's moon is {0} · {1} days to the next full moon",
+"보름달이 떠올랐어요. 달빛 아래에서 명상해요":"The full moon is up. Meditate in the moonlight.",
+"보름달 명상 {0}번째 · 달빛을 가득 담았어요":"Full moon meditation #{0} · filled with moonlight",
+"보름달 명상 {0}번":"{0} full moon meditations",
+"보름달 밤 함께 하는 명상":"Full moon meditation together",
+"오늘은 보름달이에요. 풍경에서 '밤'을 고르거나 명상을 시작하면 달이 떠요":"Tonight is a full moon. Choose Night under Scenery or start a meditation to see it rise.",
 "곧 경도 시작! 도둑이 숨는 30초 동안은 움직일 수 없어요. 그 뒤 99초 안에 모두 찾아야 해요":"Starting soon! You can't move for 30 seconds while the robbers hide. Then you have 99 seconds to find them all.",
 "곧 경도 시작! 30초 안에 달아나 숨으세요. 99초만 버티면 이겨요":"Starting soon! Run and hide within 30 seconds. Last 99 seconds and you win.",
 "얼어붙었어요 · {0}초":"Frozen · {0}s",
@@ -2396,7 +2412,7 @@ layout(location=0) in vec2 aPos; out vec2 vNdc;
 void main(){ vNdc = aPos; gl_Position = vec4(aPos, 0.0, 1.0); }`;
 const SKY_FS = `#version 300 es
 precision highp float;
-in vec2 vNdc; uniform mat4 uInvVP; uniform vec3 uCam, uZen, uHor, uSunDir, uGlow, uCloud; uniform float uTime, uNight, uRain;
+in vec2 vNdc; uniform mat4 uInvVP; uniform vec3 uCam, uZen, uHor, uSunDir, uGlow, uCloud, uMoon; uniform float uTime, uNight, uRain;   // uMoon: (달의 차고 기움 0~1, 크기, 밝은 면의 넓이)
 out vec4 o;
 float h21(vec2 p){ p = fract(p*vec2(123.34, 456.21)); p += dot(p, p+45.32); return fract(p.x*p.y); }
 float vn(vec2 p){ vec2 i = floor(p), f = fract(p); f = f*f*(3.0-2.0*f); return mix(mix(h21(i), h21(i+vec2(1,0)), f.x), mix(h21(i+vec2(0,1)), h21(i+vec2(1,1)), f.x), f.y); }
@@ -2407,7 +2423,20 @@ void main(){
   float h = dir.y;
   vec3 col = mix(uHor, uZen, pow(clamp(h, 0.0, 1.0), 0.55));
   float s = max(dot(dir, uSunDir), 0.0);
-  col += uGlow * (pow(s, 6.0) * 0.28 + pow(s, 60.0) * 0.35) * (1.0 - 0.7 * uNight) + mix(vec3(1.0, 0.97, 0.9), vec3(0.95, 0.96, 1.0), uNight) * smoothstep(mix(0.9993, 0.99955, uNight), mix(0.9997, 0.99972, uNight), s);
+  col += uGlow * (pow(s, 6.0) * 0.28 + pow(s, 60.0) * 0.35) * (1.0 - 0.7 * uNight) + vec3(1.0, 0.97, 0.9) * smoothstep(0.9993, 0.9997, s) * (1.0 - uNight);
+  float moonMask = 0.0;
+  if (uNight > 0.01) {   // 달: 오늘 날짜의 모양 그대로. 밝은 면이 넓을수록 달무리도 넓다
+    vec3 m = uSunDir, rt = normalize(cross(m, vec3(0.0, 1.0, 0.0))), up2 = cross(rt, m), dd = dir - m * dot(dir, m);
+    vec2 q = vec2(dot(dd, rt), dot(dd, up2)) / uMoon.y; float r2 = dot(q, q);
+    col += vec3(0.62, 0.70, 0.95) * (pow(s, 26.0) * 0.10 + pow(s, 260.0) * 0.40) * uMoon.z * uNight;
+    if (r2 < 1.0 && dot(dir, m) > 0.0) {
+      float z = sqrt(1.0 - r2), a = uMoon.x * 6.2831853; vec3 n = vec3(q, z), L = vec3(sin(a), 0.0, -cos(a));
+      float lit = smoothstep(-0.03, 0.10, dot(n, L)), sea = fb(q * 2.1 + 7.3), spot = fb(q * 7.0 + 3.1);
+      float tone = mix(0.60, 1.0, smoothstep(0.36, 0.60, sea)) * (0.92 + 0.16 * spot) * (0.72 + 0.28 * z);
+      vec3 mc = vec3(1.0, 0.97, 0.88) * tone * lit * 1.15 + vec3(0.05, 0.06, 0.09) * (1.0 - lit);
+      moonMask = smoothstep(1.0, 0.93, r2) * uNight; col = mix(col, mc, moonMask);
+    }
+  }
   if (h > 0.0) {
     vec2 uv = dir.xz / (h + 0.12) * 1.1 + vec2(uTime * 0.006, uTime * 0.002);
     float c = smoothstep(0.50 - 0.42 * uRain, 0.82 - 0.3 * uRain, fb(uv)) * (1.0 - 0.55 * uNight);
@@ -2416,9 +2445,9 @@ void main(){
       vec2 cell = floor(sp); float r = h21(cell), r2 = h21(cell + 17.3);
       float star = step(0.982, r) * smoothstep(0.42, 0.05, length(fract(sp) - vec2(0.5) - (vec2(r2, r) - 0.5) * 0.5));
       float tw = 0.55 + 0.45 * sin(uTime * (1.5 + r2 * 2.0) + r * 60.0);
-      col += vec3(0.88, 0.92, 1.0) * star * tw * (0.5 + r2) * uNight * smoothstep(0.03, 0.25, h) * (1.0 - c);
+      col += vec3(0.88, 0.92, 1.0) * star * tw * (0.5 + r2) * uNight * smoothstep(0.03, 0.25, h) * (1.0 - c) * (1.0 - moonMask) * (1.0 - 0.45 * uMoon.z);   // 달이 밝으면 별이 덜 보인다
     }
-    col = mix(col, uCloud, c * smoothstep(0.0, 0.22, h) * 0.85);
+    col = mix(col, uCloud, c * smoothstep(0.0, 0.22, h) * (0.85 - 0.45 * moonMask));   // 달 앞의 구름은 엷게
   }
   o = vec4(col, 1.0);
 }`;
@@ -2429,7 +2458,7 @@ function program(vs, fs, names) {
   const u = {}; for (const n of names) u[n] = gl.getUniformLocation(p, n); return { p, u };
 }
 const P = program(VS, FS, ['uVP','uModel','uTime','uWind','uMode','uSunDir','uSunCol','uSkyCol','uGndCol','uFogCol','uCam','uSnowCol','uFogD','uSnow','uSnowLine','uAlpha','uEmissive','uFlat','uSnowable','uFlow','uFlowSpeed','uFire','uMelt','uDetail','uShadowOn','uShadowTex','uLVP','uShadow','uMoss','uWater']);
-const PS = program(SKY_VS, SKY_FS, ['uInvVP','uCam','uZen','uHor','uSunDir','uGlow','uCloud','uTime','uNight','uRain']);
+const PS = program(SKY_VS, SKY_FS, ['uInvVP','uCam','uZen','uHor','uSunDir','uGlow','uCloud','uMoon','uTime','uNight','uRain']);
 const PD = program(VS, `#version 300 es
 precision mediump float; out vec4 o; void main(){ o = vec4(1.0); }`, ['uVP','uModel','uTime','uWind','uMode']);
 
@@ -3245,12 +3274,27 @@ const ENV = {
 };
 /* 밤: 달빛과 별. 공원은 도시 불빛에 지평선이 살짝 붉다 */
 ENV.night = { zen:[0.015,0.025,0.07], hor: IS_PARK ? [0.17,0.13,0.15] : [0.06,0.08,0.15], sun:[0.30,0.36,0.52], sky:[0.13,0.16,0.27], gnd:[0.05,0.05,0.07], cloud: IS_PARK ? [0.22,0.17,0.19] : [0.10,0.11,0.16], glow:[0.45,0.5,0.7], dir:[-0.35,0.62,0.55], fog:0.0055 };
+/* 달: 실제 날짜의 차고 기움을 따른다 (삭망월 29.53일, 2000년 1월 6일의 삭을 기준으로 센다).
+   보름 앞뒤 하루는 '보름달 밤': 달이 크게 뜨고, 달빛이 밝아 그림자가 지고, 눈밭이 환하다. 주소 끝에 ?moon=full 을 붙이면 미리 볼 수 있다. */
+const MOON = { p: 0.5, ill: 1, full: false, r: 0.03, at: -1e9, name: '', forced: /[?&]moon=full/.test(location.search) };
+function moonUpdate() {
+  if (T - MOON.at < 60) return; MOON.at = T;
+  const p = MOON.forced ? 0.5 : ((((Date.now() - Date.UTC(2000, 0, 6, 18, 14)) / 864e5 / 29.530588853) % 1) + 1) % 1;
+  MOON.p = p; MOON.ill = (1 - Math.cos(TAU * p)) / 2; MOON.full = Math.abs(p - 0.5) < 0.036; MOON.r = MOON.full ? 0.072 : 0.034;
+  MOON.name = MOON.full ? '보름달' : p < 0.03 || p > 0.97 ? '그믐' : p < 0.22 ? '초승달' : p < 0.28 ? '상현달' : p < 0.5 ? '차오르는 달' : p < 0.72 ? '기우는 달' : p < 0.78 ? '하현달' : '그믐달';
+}
+const ENV_MOONLIT = { zen: [0.03, 0.06, 0.15], hor: IS_PARK ? [0.20, 0.17, 0.21] : [0.10, 0.14, 0.25], sun: [0.62, 0.70, 0.95], sky: [0.22, 0.27, 0.42], gnd: [0.08, 0.09, 0.13], cloud: IS_PARK ? [0.30, 0.27, 0.31] : [0.20, 0.23, 0.32], glow: [0.6, 0.68, 0.9], dir: [-0.50, 0.40, 0.62], fog: 0.0042 };
+function nightEnv(k) {   // 달이 밝을수록 밤이 환하다. 보름달은 조금 낮게 떠서 더 크게 보인다
+  const m = Math.pow(MOON.ill, 1.3); if (k === 'fog') return lerp(ENV.night.fog, ENV_MOONLIT.fog, m);
+  if (k === 'dir') return MOON.full ? ENV_MOONLIT.dir : ENV.night.dir;
+  return mix3(ENV.night[k], ENV_MOONLIT[k], m);
+}
 function envMix(sb, tb) {
-  const o = {};
+  const o = {}; moonUpdate();
   const tbx = Math.max(tb, S.dawn * 0.85);
   for (const k of Object.keys(ENV.aDay)) {
-    if (k === 'fog') o.fog = lerp(lerp(lerp(ENV.aDay.fog, ENV.aDusk.fog, tbx), lerp(ENV.wDay.fog, ENV.wDusk.fog, tbx), sb), ENV.night.fog, S.night);
-    else o[k] = mix3(mix3(mix3(ENV.aDay[k], ENV.aDusk[k], tbx), mix3(ENV.wDay[k], ENV.wDusk[k], tbx), sb), ENV.night[k], S.night);
+    if (k === 'fog') o.fog = lerp(lerp(lerp(ENV.aDay.fog, ENV.aDusk.fog, tbx), lerp(ENV.wDay.fog, ENV.wDusk.fog, tbx), sb), nightEnv('fog'), S.night);
+    else o[k] = mix3(mix3(mix3(ENV.aDay[k], ENV.aDusk[k], tbx), mix3(ENV.wDay[k], ENV.wDusk[k], tbx), sb), nightEnv(k), S.night);
   }
   if (S.rainK > 0.001) {   // 비: 흐린 회색 하늘과 짙은 안개 (밤이면 밤 쪽이 더 이긴다)
     const k = S.rainK * (1 - 0.6 * S.night), RAIN = { zen: [0.40, 0.44, 0.48], hor: [0.60, 0.63, 0.66], sun: [0.42, 0.44, 0.47], sky: [0.52, 0.55, 0.6], gnd: [0.28, 0.28, 0.28], cloud: [0.52, 0.54, 0.57], glow: [0.25, 0.25, 0.27] };
@@ -3269,7 +3313,7 @@ const NOUN = [i18n('다람쥐'),i18n('구름'),i18n('도토리'),i18n('단풍잎
 const nickRand = () => ADJ[Math.floor(Math.random()*ADJ.length)] + ' ' + NOUN[Math.floor(Math.random()*NOUN.length)];
 const SPEEDS = [1.25, 1.8, 2.7];
 const S = {
-  started: false, season: store.get('season', 0), sb: 0, dusk: 0, tb: 0, auto: false, autoDir: 1, breath: false,
+  started: false, season: store.get('season', 0), sb: 0, dusk: 0, nightWant: false, tb: 0, auto: false, autoDir: 1, breath: false,
   mute: store.get('mute', false), amb: store.get('amb', 0.7), sfx: store.get('sfx', 0.7), steps: store.get('stepVol', 0.8) > 0, stepVol: store.get('stepVol', 0.8),
   medPlace: store.get('medPlace', 'hall'), goHall: null, hallPref: null, bookAsk: 0, fireAsk: 0, groupJoin: 0,
   speedIdx: store.get('speed', 1), quality: store.get('quality', 1), bubbles: store.get('bubbles', true), lost: false,
@@ -4360,9 +4404,11 @@ function startAct(type, go) {
   if (type === 'meditate') {
     const min = S.medMin || 5; player.act.min = min; player.act.total = min === 5 ? MED.total : min * 60;
     player.act.theme = min === 5 ? medThemeNow() : 'med';
+    moonUpdate(); if (MOON.full && (moonEvening() || MOON.forced || S.nightWant)) { player.act.moon = true; if (!S.nightWant && !S.camp) setNight(true, true); }   // 보름달 밤의 명상
     if (S.groupJoin) { const left = (S.groupJoin - Date.now()) / 1000; if (left > -GROUP.late && left < GROUP.early + 30) { player.act.groupAt = S.groupJoin; player.act.min = 5; player.act.total = MED.total; player.act.theme = medThemeNow(); } S.groupJoin = 0; }
     audioInit(); loadVoice(player.act.theme); if (S.medAwake) keepAwake(true);
-    if (player.act.groupAt) toast(Date.now() < player.act.groupAt ? i18n('자리에 앉아 기다려요. 종이 울리면 함께 시작해요') : i18n('함께 명상에 들어왔어요. 동그라미를 따라 숨 쉬어 보세요'));
+    if (player.act.moon && !player.act.groupAt) toast(i18n('보름달이 떠올랐어요. 달빛 아래에서 명상해요'));
+    else if (player.act.groupAt) toast(Date.now() < player.act.groupAt ? i18n('자리에 앉아 기다려요. 종이 울리면 함께 시작해요') : i18n('함께 명상에 들어왔어요. 동그라미를 따라 숨 쉬어 보세요'));
     else toast(min === 5 ? i18n('5분 호흡 명상을 시작해요. 동그라미를 따라 숨 쉬어 보세요') : i18n('{0}분 명상을 시작해요. 싱잉볼이 울리면 눈을 감아 보세요', min));
   }
   $('#actPill').hidden = false; updatePill(); netState(true);
@@ -4435,7 +4481,7 @@ function standUp() {
   const a = player.act; if (!a || a.type !== 'meditate' || a.leaving) return;
   a.leaving = true; hush(); clearTimeout(medLineTimer); if (!S.camp) keepAwake(false);
   if (!a.done) { if (canSound()) sfx.bowl(0.6); const mt = a.medStart ? medTime(a) : a.t; if (mt > 20) toast(i18n('{0} 동안 명상했어요', fmtDur(Math.min(mt, a.total || MED.total)))); }
-  { const mt = a.medStart ? medTime(a) : 0; if (a.done || mt >= Math.min(180, (a.total || MED.total) - 1)) medRecord(mt); }   // 3분 넘게 앉았거나 끝까지 하면 한 번
+  { const mt = a.medStart ? medTime(a) : 0; if (a.done || mt >= Math.min(180, (a.total || MED.total) - 1)) { medRecord(mt); if (a.moon) { const n = (store.get('moonMed', 0) | 0) + 1; store.set('moonMed', n); setTimeout(() => { toast(i18n('보름달 명상 {0}번째 · 달빛을 가득 담았어요', n)); if (canSound()) sfx.bowl(0.5); }, 5600); } } }   // 3분 넘게 앉았거나 끝까지 하면 한 번
   updatePill();
 }
 function cancelAct() {
@@ -4701,7 +4747,7 @@ function renderMedGroup() {
   const box = $('#medGroup'), g = groupLeft(); if (!g) { box.hidden = true; return; }
   box.hidden = false; box.textContent = '';
   const b = document.createElement('b'), sm = document.createElement('small'), open = g.left <= GROUP.early && g.left > -GROUP.late;
-  b.textContent = i18n('함께 하는 명상'); box.appendChild(b);
+  moonUpdate(); b.textContent = MOON.full ? i18n('보름달 밤 함께 하는 명상') : i18n('함께 하는 명상'); box.appendChild(b);
   sm.textContent = i18n('매일 아침 7시, 밤 9시 30분 (미 동부 시간)') + ' · ' + (g.left <= 0 ? i18n('방금 시작했어요') : open ? i18n('{0}분 뒤 시작해요', Math.max(1, Math.ceil(g.left / 60))) : i18n('다음은 {0}', groupWhen(g.at)));
   box.appendChild(sm);
   if (open) { const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'secondary'; btn.style.marginTop = '8px'; btn.textContent = g.left <= 0 ? i18n('지금 함께 하기') : i18n('자리에 앉아 기다리기'); btn.onclick = beginGroup; box.appendChild(btn); }
@@ -5368,6 +5414,7 @@ function updateHud(dt) {
     const dh = HALL ? Math.hypot(player.x - HALL.x, player.z - HALL.z) : 99, db = HALL ? Math.hypot(player.x - HALL.book[0], player.z - HALL.book[1]) : 99;
     const gOpen = free && S.started ? groupOpen() : null, gSoon = gOpen && gOpen.left <= 300;
     if (gSoon && GROUP.told !== gOpen.at && gOpen.left > 30) { GROUP.told = gOpen.at; toast(i18n('{0}분 뒤 함께 명상이 시작돼요', Math.max(1, Math.round(gOpen.left / 60)))); if (canSound()) sfx.bowl(0.3); }
+    if (!S.moonTold && S.started && T > 6) { S.moonTold = true; moonUpdate(); if (MOON.full && (moonEvening() || MOON.forced) && store.get('moonSeen', '') !== todayKey()) { store.set('moonSeen', todayKey()); setTimeout(() => toast(i18n("오늘은 보름달이에요. 풍경에서 '밤'을 고르거나 명상을 시작하면 달이 떠요")), 7000); } }
     evLoad(false); evAlerts(); const evS = free ? evSoon() : null;
     if (!$('#snowPick').hidden && !(free && snowZone(player.x, player.z, 1.1))) $('#snowPick').hidden = true;
     const kind = SNOW.on || TAG.on || !$('#snowPick').hidden ? '' : free && SNOW.zone && snowZone(player.x, player.z, 0.95) && db > 2.6 ? 'snow' : free && T < S.fireAsk && TALK.lives.length ? 'fireAsk' : evS ? 'event' : free && T < S.bookAsk ? 'bookAsk' : gSoon ? 'group' : free && db < 2.6 ? 'book' : free && ds < 5 ? 'spring' : free && dh < (HALL ? HALL.r + 4 : 0) ? 'hall' : free && dc < 14 ? 'circle' : free && dk < 15 ? 'cafe' : '';
@@ -5489,7 +5536,7 @@ function shadowTrees() {   // 그림자 범위 안의 나무만 골라 담는다
 function ortho(l, r, b, t, n, f) { return new Float32Array([2 / (r - l), 0, 0, 0, 0, 2 / (t - b), 0, 0, 0, 0, -2 / (f - n), 0, -(r + l) / (r - l), -(t + b) / (t - b), -(f + n) / (f - n), 1]); }
 function renderShadow(env) {
   SHADOW.on = false;
-  if (!S.started || !S.quality || S.night > 0.5 || !SHADOW.ok || env.dir[1] < 0.06) return;
+  if (!S.started || !S.quality || (S.night > 0.5 && MOON.ill < 0.75) || (S.night > 0.02 && S.night < 0.98) || !SHADOW.ok || env.dir[1] < 0.06) return;   // 밤에는 달이 밝을 때만 그림자가 진다 (해와 달이 바뀌는 사이에는 쉰다)
   if (!SHADOW.tex) { shadowInit(); if (!SHADOW.ok) return; }
   const R = SHADOW.R, d = env.dir, up = Math.abs(d[1]) > 0.97 ? [0, 0, 1] : [0, 1, 0];
   const L = M.lookAt([d[0] * 300, d[1] * 300, d[2] * 300], [0, 0, 0], up);
@@ -5786,7 +5833,7 @@ function render() {
   gl.disable(gl.DEPTH_TEST); gl.depthMask(false);
   gl.useProgram(PS.p);
   gl.uniformMatrix4fv(PS.u.uInvVP, false, invVP); gl.uniform3fv(PS.u.uCam, eye); gl.uniform3fv(PS.u.uZen, env.zen); gl.uniform3fv(PS.u.uHor, env.hor);
-  gl.uniform3fv(PS.u.uSunDir, env.dir); gl.uniform3fv(PS.u.uGlow, env.glow); gl.uniform3fv(PS.u.uCloud, env.cloud); gl.uniform1f(PS.u.uTime, T); gl.uniform1f(PS.u.uNight, S.night); gl.uniform1f(PS.u.uRain, S.rainK);
+  gl.uniform3fv(PS.u.uSunDir, env.dir); gl.uniform3fv(PS.u.uGlow, env.glow); gl.uniform3fv(PS.u.uCloud, env.cloud); gl.uniform1f(PS.u.uTime, T); gl.uniform1f(PS.u.uNight, S.night); gl.uniform1f(PS.u.uRain, S.rainK); gl.uniform3f(PS.u.uMoon, MOON.p, MOON.r, MOON.ill);
   gl.bindVertexArray(W.sky); gl.drawArrays(gl.TRIANGLES, 0, 3);
   gl.enable(gl.DEPTH_TEST); gl.depthMask(true); gl.disable(gl.BLEND);
   setCommon(env);
@@ -8015,7 +8062,7 @@ function renderGb() {
   { const n = medN(), t = medTierOf(n), next = MED_TIERS[t], box = $('#gbMed');
     box.innerHTML = '<b></b><small></small>';
     box.querySelector('b').textContent = t ? i18n('명상 {0}번 · {1}', n, i18n(MED_TIERS[t - 1].name)) : i18n('명상 {0}번', n);
-    box.querySelector('small').textContent = (next ? i18n('{0}번 더 하면 {1}', next.n - n, i18n(next.gift)) : i18n('산의 모든 모습을 얻었어요')) + (inn ? '' : ' · ' + i18n('로그인하면 어느 기기에서든 이어져요'));
+    box.querySelector('small').textContent = (next ? i18n('{0}번 더 하면 {1}', next.n - n, i18n(next.gift)) : i18n('산의 모든 모습을 얻었어요')) + (inn ? '' : ' · ' + i18n('로그인하면 어느 기기에서든 이어져요')) + ((store.get('moonMed', 0) | 0) ? ' · ' + i18n('보름달 명상 {0}번', store.get('moonMed', 0) | 0) : '');
     wearChips(box, MED_TIERS, t, medHideMask(), 'medHide2');
     setLvBadge($('#meLv'), t); renderMedCal(); }
   { const m = focusMinN(), t = focusTierOf(m), next = FOCUS_TIERS[t], box = $('#gbFocus');
@@ -8412,7 +8459,7 @@ function frameStep(now) {
   else slowFor = Math.max(0, slowFor - dt);
   S.sb = lerp(S.sb, S.season, 1 - Math.exp(-dt * 1.6)); if (Math.abs(S.sb - S.season) < 0.001) S.sb = S.season;
   S.tb = lerp(S.tb, S.dusk, 1 - Math.exp(-dt * 1.2)); if (Math.abs(S.tb - S.dusk) < 0.001) S.tb = S.dusk;
-  const nightTgt = S.camp && S.camp.phase !== 'wake' && S.camp.t > 1.5 ? 1 : 0;
+  const nightTgt = (S.camp && S.camp.phase !== 'wake' && S.camp.t > 1.5) || (S.nightWant && !S.camp) ? 1 : 0;
   S.night = lerp(S.night, nightTgt, 1 - Math.exp(-dt * (nightTgt ? 0.32 : 0.55))); if (S.night < 0.001) S.night = 0;
   if (S.dawn > 0) S.dawn = Math.max(0, S.dawn - dt / 14);
   S.rainK = lerp(S.rainK, S.rain && !S.season ? 1 : 0, 1 - Math.exp(-dt * 0.5)); if (S.rainK < 0.001) S.rainK = 0;
@@ -8513,7 +8560,15 @@ function setSeason(s, announce) {
   $('#pickAutumn').setAttribute('aria-pressed', s ? 'false' : 'true'); $('#pickWinter').setAttribute('aria-pressed', s ? 'true' : 'false');
   if (announce) toast(IS_PARK ? (s ? i18n('눈이 내려요. 잔디밭이 하얗게 덮이고 분수는 잠시 쉬어요') : i18n('노란 느릅나무 잎이 흩날리는 가을 공원이에요')) : (s ? i18n('눈이 내립니다. 능선에 상고대가 피었어요') : i18n('다시 단풍 든 가을 산이에요')));
 }
-function setDusk(d) { S.dusk = d; $('#timeBtn').setAttribute('aria-pressed', d ? 'true' : 'false'); $('#timeLbl').textContent = d ? i18n('낮') : i18n('노을'); }
+function setDusk(d) { S.dusk = d; if (d) S.nightWant = false; timeLabel(); }
+function timeLabel() { $('#timeBtn').setAttribute('aria-pressed', S.dusk || S.nightWant ? 'true' : 'false'); $('#timeLbl').textContent = S.nightWant ? i18n('낮') : S.dusk ? i18n('밤') : i18n('노을'); }
+function setNight(on, quiet) {   // 밤으로 (달은 오늘 날짜의 모양)
+  S.nightWant = !!on; if (on) S.dusk = 0; timeLabel(); if (!on || quiet) return;
+  MOON.at = -1e9; moonUpdate();
+  toast(MOON.full ? i18n('오늘은 보름달 밤이에요. 달빛에 그림자가 져요') : MOON.ill < 0.04 ? i18n('달이 없는 밤이에요. 별이 가득해요') : i18n('밤이 되었어요. 오늘 달은 {0} · 다음 보름달까지 {1}일', i18n(MOON.name), moonDaysToFull()));
+}
+function moonDaysToFull() { const d = ((0.5 - MOON.p + 1) % 1) * 29.530588853; return Math.max(1, Math.round(d)); }
+const moonEvening = () => { const h = new Date().getHours(); return h >= 18 || h < 6; };
 function closeMenus() { $('#courseMenu').hidden = true; $('#settings').hidden = true; $('#restMenu').hidden = true; $('#restBtn').setAttribute('aria-expanded', 'false');
   for (const id of ['greet', 'scene']) { $(`#${id}Menu`).hidden = true; $(`#${id}Btn`).setAttribute('aria-expanded', 'false'); } $('#muteMenu').hidden = true; $('#courseBtn').setAttribute('aria-expanded', 'false'); $('#settingsBtn').setAttribute('aria-expanded', 'false'); }
 function setMute(m) { S.mute = m; store.set('mute', m); if (A.master) A.master.gain.setTargetAtTime(m ? 0 : 1, A.ctx.currentTime, 0.1); $('#soundBtn').setAttribute('aria-pressed', m ? 'true' : 'false'); $('#soundBtn').setAttribute('aria-label', m ? i18n('소리 켜기') : i18n('소리 끄기')); $('#soundWave').style.display = m ? 'none' : ''; $('#soundX').style.display = m ? '' : 'none'; }
@@ -8624,7 +8679,7 @@ function bindUI() {
   $('#photoClose').onclick = () => { $('#photo').hidden = true; };
   $('#seasonBtn').onclick = () => { closeMenus(); setSeason(S.season ? 0 : 1, true); };
   $('#rainBtn').onclick = () => { closeMenus(); setRain(!S.rain, true); };
-  $('#timeBtn').onclick = () => { closeMenus(); setDusk(S.dusk ? 0 : 1); toast(S.dusk ? i18n('해가 능선 너머로 기웁니다') : i18n('다시 맑은 낮이에요')); };
+  $('#timeBtn').onclick = () => { closeMenus(); if (S.nightWant) { setNight(false); setDusk(0); toast(i18n('다시 맑은 낮이에요')); } else if (S.dusk) setNight(true); else { setDusk(1); toast(i18n('해가 능선 너머로 기웁니다')); } };   // 낮 → 노을 → 밤 → 낮
   for (const id of ['greet', 'scene']) $(`#${id}Btn`).onclick = e => { e.stopPropagation(); const m = $(`#${id}Menu`), open = m.hidden; closeMenus(); $('#chatBar').hidden = true; m.hidden = !open; $(`#${id}Btn`).setAttribute('aria-expanded', open ? 'true' : 'false'); };
   document.querySelectorAll('#greetMenu [data-greet]').forEach(b => b.onclick = () => greet(b.dataset.greet));
   // 말하기: 말풍선 채팅
@@ -8817,7 +8872,7 @@ function boot() {
   $('#start').hidden = false; $('#enterBtn').disabled = false; $('#enterMed').disabled = false; $('#enterFocus').disabled = false; $('#enterFire').disabled = false; fireLoad(true); evLoad(true);
   if (store.get('autoEnter', false)) { store.set('autoEnter', false); $('#enterBtn').focus(); }
   const ld = $('#loading'); ld.style.opacity = 0; setTimeout(() => { ld.hidden = true; }, 600);
-  window.__sangil = { keys, setRain, hitObstacle, OBS, CIRCLE, sitCircle, goCircle, sendChat, inCircle, S, player, TN, getH, CPS, startAct, cam, NET, NPCS, greet, sendChat, W, netState, startCamp, wakeCamp, openCampCard, goCafe, startCafe, DRINKS, CAFE, H5, answerHi5, showHi5Ask, MED, TX, TZ, IS_PARK, HALL, RINK, MELT, PRINTS, SNOW, snowJoin, snowThrow, ME, TAG, tagJoin, tagAction, tagStart, tagDecoys, goPlay, HALL_NPCS, snowCharge, snowRelease, proj: (x, y, z) => { const v = M.xf(VP, x, y, z); return [v[0] / v[3], v[1] / v[3], v[3]]; }, startCampNow: () => { S.campFire = true; startCamp(); } };
+  window.__sangil = { keys, setRain, hitObstacle, OBS, CIRCLE, sitCircle, goCircle, sendChat, inCircle, S, player, TN, getH, CPS, startAct, cam, NET, NPCS, greet, sendChat, W, netState, startCamp, wakeCamp, openCampCard, goCafe, startCafe, DRINKS, CAFE, H5, answerHi5, showHi5Ask, MED, TX, TZ, IS_PARK, HALL, RINK, MELT, PRINTS, SNOW, snowJoin, snowThrow, ME, TAG, tagJoin, tagAction, tagStart, tagDecoys, goPlay, HALL_NPCS, snowCharge, snowRelease, MOON, setNight, proj: (x, y, z) => { const v = M.xf(VP, x, y, z); return [v[0] / v[3], v[1] / v[3], v[3]]; }, startCampNow: () => { S.campFire = true; startCamp(); } };
   requestAnimationFrame(t => { lastNow = t; frame(t); });
 }
 setTimeout(boot, 30);
