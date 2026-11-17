@@ -369,6 +369,20 @@ body.calm #trailCard,body.calm #hint{opacity:0;pointer-events:none}
 #noteChip svg{width:24px;height:24px;flex:none}
 #noteChip b{font-weight:600;color:#ffe7b3}
 @keyframes nchip{from{opacity:0;transform:translate(-50%,-8px)}}
+.evList{display:grid;gap:8px;max-height:44vh;overflow:auto}
+.evList .row{padding:12px 14px;border-radius:14px;border:1px solid var(--paper-line);background:#fffdf8;display:grid;gap:4px}
+.evList .row.soon{border-color:#5f8f72;background:#eef4ee}
+.evList .row b{font-family:var(--font-display);font-size:17px;color:var(--ink);overflow-wrap:anywhere}
+.evList .row em{font-style:normal;font-size:11.5px;color:var(--pine);background:#e3ede4;border-radius:99px;padding:2px 8px;margin-right:6px;vertical-align:2px}
+.evList .row .when{font-size:13.5px;color:var(--ink)}
+.evList .row p{font-size:14px;line-height:1.5;color:#3a463e;overflow-wrap:anywhere}
+.evList .row small{font-size:12px;color:var(--ink-soft)}
+.evList .row .acts{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:4px}
+.evList .row .acts .secondary{width:auto;padding:8px 14px;font-size:13.5px}
+.evList .row .acts .secondary[aria-pressed="true"]{background:var(--pine);color:#f4eee2;border-color:var(--pine)}
+.evList .row .acts .linkbtn{color:var(--ink-soft)}
+.evIn{width:100%;font:inherit;font-size:16px;color:var(--ink);background:#f7f2e8;border:0;border-radius:12px;padding:12px;-webkit-user-select:text;user-select:text}
+#evDot{display:inline-block;min-width:18px;padding:0 5px;margin-left:5px;border-radius:99px;background:var(--pine);color:#f4eee2;font-size:11.5px;line-height:18px;text-align:center;text-decoration:none}
 .bookIn{display:flex;gap:8px}
 .bookIn input{flex:1;min-width:0;font:inherit;font-size:16px;color:var(--ink);background:#f7f2e8;border:0;border-radius:12px;padding:12px;-webkit-user-select:text;user-select:text}
 .bookIn input[hidden]{display:none}
@@ -511,6 +525,7 @@ body.calm #trailCard,body.calm #hint{opacity:0;pointer-events:none}
     <button data-act="cafe"><svg class="ico" viewBox="0 0 24 24"><path d="M5 9h11v5a5 5 0 0 1-5 5h-1a5 5 0 0 1-5-5zM16 10.5h1.5a2.5 2.5 0 0 1 0 5H16M8 3.5c-.6.8-.6 1.7 0 2.5M11.5 3.5c-.6.8-.6 1.7 0 2.5M4 21h14"/></svg><span>카페</span></button>
     <button data-act="circle"><svg class="ico" viewBox="0 0 24 24"><path d="M12 4c2 2.5 3 4 3 6a3 3 0 0 1-6 0c0-1 .5-2 1.2-2.8.3 1 .9 1.6 1.8 1.6C12 7.5 12 6 12 4zM5 19.5l14-4M19 19.5l-14-4"/></svg><span>모닥불 쉼터</span></button>
     <button data-act="camp"><svg class="ico" viewBox="0 0 24 24"><path d="M3 20 12 5l9 15M12 5v15M9.5 20 12 15l2.5 5M2 20h20"/></svg><span>야영하기</span></button>
+    <button data-act="events"><svg class="ico" viewBox="0 0 24 24"><path d="M4 10v4l3 .6V9.4zM7 9.4 18 5v14L7 14.6M9.5 15.4l1.2 4h2.6l-1-3.2M20.5 10.5v3"/></svg><span>공지·모임</span></button>
     <button data-act="book"><svg class="ico" viewBox="0 0 24 24"><path d="M12 6.5C10 5 7.5 4.5 4 5v13c3.5-.5 6 0 8 1.5 2-1.5 4.5-2 8-1.5V5c-3.5-.5-6 0-8 1.5zM12 6.5v13"/></svg><span>방명록</span></button>
   </div>
   <div id="askBar" class="glass" hidden><span id="askTxt"></span><div><button id="askYes">하이파이브</button><button id="askNo">다음에</button></div></div>
@@ -686,6 +701,26 @@ body.calm #trailCard,body.calm #hint{opacity:0;pointer-events:none}
   </div>
 </section>
 
+<section id="evCard" class="scrim" hidden>
+  <div class="card" role="dialog" aria-labelledby="evTitle">
+    <div class="eyebrow">공지와 모임</div>
+    <h2 class="title" id="evTitle"><b style="font-size:30px">산길 소식</b></h2>
+    <div class="evList" id="evList"></div>
+    <div id="evForm" hidden style="display:none;gap:10px">
+      <span class="lab">새 글 올리기 (산지기·불지기)</span>
+      <div class="chips" id="evKind"><button data-k="notice" aria-pressed="true">알림</button><button data-k="snow">눈싸움</button><button data-k="tag">경도</button><button data-k="med">명상</button><button data-k="walk">산책</button></div>
+      <div class="chips" id="evCourse"><button data-c="mountain">솔바람산</button><button data-c="park">센트럴파크</button></div>
+      <input class="evIn" id="evName" type="text" maxlength="40" autocomplete="off" aria-label="제목">
+      <input class="evIn" id="evBody" type="text" maxlength="200" autocomplete="off" aria-label="내용">
+      <label class="lab" for="evWhen">모이는 때 (알림 글이면 비워 두세요)</label>
+      <input class="evIn" id="evWhen" type="datetime-local">
+      <button class="primary" id="evPost">올리기</button>
+    </div>
+    <small class="lab" id="evTip"></small>
+    <button class="secondary" id="evClose">닫기</button>
+  </div>
+</section>
+
 <section id="bookCard" class="scrim" hidden>
   <div class="card" role="dialog" aria-labelledby="bookTitle">
     <div class="eyebrow">방명록 · 다녀간 마음</div>
@@ -741,6 +776,7 @@ body.calm #trailCard,body.calm #hint{opacity:0;pointer-events:none}
     <button class="primary" id="enterBtn" disabled>입산하기</button>
     <div class="enter2"><button class="secondary" id="enterMed" disabled>바로 명상하기</button><button class="secondary" id="enterFocus" disabled>일하며 켜 두기</button><button class="secondary fireStart" id="enterFire" disabled>모닥불 이야기</button></div>
     <button class="linkbtn" id="gbStart">로그인하기</button>
+    <button class="linkbtn" id="evStart" hidden><span>공지와 모임</span><i id="evDot" style="font-style:normal"></i></button>
     <p class="fine">PC: 바닥 클릭 이동 · 드래그로 둘러보기 · 휠 확대, 방향키/WASD도 됩니다.<br>휴대폰: 탭으로 이동 · 드래그로 둘러보기 · 두 손가락으로 확대.</p>
   </div>
 </section>
@@ -1211,6 +1247,45 @@ const EN = {"센트럴파크":"Central Park",
 "{0}분 명상을 마쳤어요. 이 고요함을 안고 다시 걸어요":"{0}-minute meditation done. Carry this calm with you",
 "스트레스를 후~ 날려 보냈어요. 숨이 한결 고르네요":"Stress, blown away. Your breath feels steadier",
 "내 정보":"My profile",
+"공지와 모임":"News and meetups",
+"산길 소식":"Sangil news",
+"새 글 올리기 (산지기·불지기)":"Post something new (wardens and firekeepers)",
+"알림":"Notice",
+"눈싸움":"Snowball fight",
+"경도":"Cops and robbers",
+"명상":"Meditation",
+"산책":"Walk",
+"모이는 때 (알림 글이면 비워 두세요)":"When to meet (leave empty for a notice)",
+"올리기":"Post",
+"공지·모임":"News",
+"소식을 불러오는 중…":"Loading news…",
+"소식을 불러오지 못했어요":"Couldn't load the news",
+"아직 올라온 소식이 없어요":"Nothing posted yet",
+"지금 진행 중":"Happening now",
+"{0}명 참여":"{0} going",
+"참여 신청함":"You're going",
+"참여 신청":"I'm in",
+"로그인하고 참여":"Sign in to join",
+"제목 (40자)":"Title (40 characters)",
+"내용 (200자, 비워도 돼요)":"Details (200 characters, optional)",
+"참여 신청을 하려면 로그인이 필요해요":"Sign in to join a meetup",
+"참여 신청을 했어요. 이 사이트를 열어 두면 시작 10분 전에 알려 드려요":"You're in. Keep this site open and we'll remind you 10 minutes before.",
+"참여 신청을 취소했어요":"You're no longer signed up",
+"이미 끝났거나 내려간 모임이에요":"This meetup has ended or was taken down",
+"지금은 하지 못했어요. 잠시 뒤에 다시 해 주세요":"That didn't work. Please try again in a moment.",
+"글을 내렸어요":"Taken down",
+"제목을 적어 주세요":"Please add a title",
+"모이는 때는 지금보다 뒤여야 해요":"The time must be in the future",
+"모임은 모이는 때를 정해 주세요":"Please set a time for the meetup",
+"올렸어요":"Posted",
+"열려 있는 글이 너무 많아요. 지난 글을 내려 주세요":"Too many open posts. Please take an old one down.",
+"산지기와 불지기만 올릴 수 있어요":"Only wardens and firekeepers can post",
+"올리지 못했어요. 내용을 확인해 주세요":"Couldn't post. Please check the details.",
+"올리지 못했어요. 잠시 뒤에 다시 해 주세요":"Couldn't post. Please try again in a moment.",
+"{0}분 뒤 \"{1}\" 시작해요":"\"{1}\" starts in {0} min",
+"\"{0}\" 지금 시작해요":"\"{0}\" is starting now",
+"{0} · \"{1}\" 모임이 있어요":"{0} · meetup: \"{1}\"",
+"곧 모임 · {0}":"Meetup soon · {0}",
 "<i></i><span>울먼 링크</span>":"<i></i><span>Wollman Rink</span>",
 "얼음 위에서는 미끄러져요. 한 번 밀고 방향을 미리 틀어 보세요":"Ice is slippery. Push once and start turning early.",
 "더 센추리":"The Century",
@@ -4115,6 +4190,7 @@ function startAct(type, go) {
   if (type === 'focus') { openFocusCard(); return; }
   if (type === 'fire') { openFireCard(); return; }
   if (type === 'book') { openBook(); return; }
+  if (type === 'events') { openEvents(); return; }
   if (S.breath) stopBreath();
   if (player.act && GREETS.includes(player.act.type)) player.act = null;
   if (player.act) { if (player.act.type === 'meditate' && type === 'meditate') standUp(); else toast(i18n('하던 걸 마저 하고 할게요')); return; }
@@ -5130,8 +5206,9 @@ function updateHud(dt) {
     const dh = HALL ? Math.hypot(player.x - HALL.x, player.z - HALL.z) : 99, db = HALL ? Math.hypot(player.x - HALL.book[0], player.z - HALL.book[1]) : 99;
     const gOpen = free && S.started ? groupOpen() : null, gSoon = gOpen && gOpen.left <= 300;
     if (gSoon && GROUP.told !== gOpen.at && gOpen.left > 30) { GROUP.told = gOpen.at; toast(i18n('{0}분 뒤 함께 명상이 시작돼요', Math.max(1, Math.round(gOpen.left / 60)))); if (canSound()) sfx.bowl(0.3); }
-    const kind = free && T < S.fireAsk && TALK.lives.length ? 'fireAsk' : free && T < S.bookAsk ? 'bookAsk' : gSoon ? 'group' : free && db < 2.6 ? 'book' : free && ds < 5 ? 'spring' : free && dh < 10 ? 'hall' : free && dc < 14 ? 'circle' : free && dk < 15 ? 'cafe' : '';
-    if ($('#nearSit').dataset.k !== kind) { $('#nearSit').dataset.k = kind; $('#nearSitTxt').textContent = kind === 'fireAsk' ? i18n('모닥불에서 이야기 나누기') : kind === 'group' ? i18n('곧 함께 명상 · 참여하기') : kind === 'bookAsk' ? i18n('방명록에 한 줄 남기기') : kind === 'book' ? i18n('방명록 보기') : kind === 'hall' ? i18n('명상원에서 명상하기') : kind === 'cafe' ? i18n('카페 들어가기') : kind === 'spring' ? (IS_PARK ? i18n('음수대에서 물 마시기') : i18n('약수 마시기')) : i18n('모닥불에 앉기'); }
+    evLoad(false); evAlerts(); const evS = free ? evSoon() : null;
+    const kind = free && T < S.fireAsk && TALK.lives.length ? 'fireAsk' : evS ? 'event' : free && T < S.bookAsk ? 'bookAsk' : gSoon ? 'group' : free && db < 2.6 ? 'book' : free && ds < 5 ? 'spring' : free && dh < 10 ? 'hall' : free && dc < 14 ? 'circle' : free && dk < 15 ? 'cafe' : '';
+    if ($('#nearSit').dataset.k !== kind) { $('#nearSit').dataset.k = kind; $('#nearSitTxt').textContent = kind === 'fireAsk' ? i18n('모닥불에서 이야기 나누기') : kind === 'event' ? i18n('곧 모임 · {0}', bookText(evS.title).slice(0, 18)) : kind === 'group' ? i18n('곧 함께 명상 · 참여하기') : kind === 'bookAsk' ? i18n('방명록에 한 줄 남기기') : kind === 'book' ? i18n('방명록 보기') : kind === 'hall' ? i18n('명상원에서 명상하기') : kind === 'cafe' ? i18n('카페 들어가기') : kind === 'spring' ? (IS_PARK ? i18n('음수대에서 물 마시기') : i18n('약수 마시기')) : i18n('모닥불에 앉기'); }
     if ($('#nearSit').hidden === !!kind) $('#nearSit').hidden = !kind;
   }
   $('#greetBtn').classList.toggle('near', !!nearestOther(5));
@@ -5836,6 +5913,99 @@ function medRecord(mt) {
   if (after > b4) { const t = MED_TIERS[after - 1]; setTimeout(() => { toast(i18n('명상 {0}번! {1}을(를) 얻었어요 · {2}', n, i18n(t.gift), i18n(t.name))); showBubble(player, i18n(t.name), 3.5); if (canSound()) sfx.bowl(0.7); }, 2400); }
   else setTimeout(() => { const st = medServer() ? (AUTH.profile.med_streak | 0) : 0; toast(st >= 2 ? i18n('{0}번째 명상이었어요 · 연속 {1}일', n, st) : i18n('{0}번째 명상이었어요', n)); }, 2600);
   retrack(); renderGb();
+}
+/* ================= 공지와 모임 =================
+   산지기·불지기가 알림 글이나 모임(눈싸움, 경도, 명상, 산책)을 올리고, 로그인한 사람이 참여 신청을 한다. 읽기는 누구나.
+   서버 함수 sangil_event_list, sangil_event_create, sangil_event_cancel, sangil_event_rsvp_toggle 를 쓴다.
+   알림은 사이트 안에서만: 들어올 때 오늘 모임을 알려 주고, 참여 신청한 모임은 10분 전과 시작할 때 종과 함께 알려 준다. */
+const EVT = { list: [], canPost: false, at: -1e9, busy: false, ok: false, kind: 'notice', course: COURSE, told: {} };
+const EV_KIND = { notice: '알림', snow: '눈싸움', tag: '경도', med: '명상', walk: '산책' };
+const evCourseName = c => c === 'park' ? i18n('센트럴파크') : i18n('솔바람산');
+async function evLoad(force) {
+  if (EVT.busy || !SANGIL_SUPABASE_URL || (!force && T - EVT.at < 300)) return;
+  EVT.busy = true; EVT.at = T;
+  try {
+    const sb = await getSB(), { data, error } = await sb.rpc('sangil_event_list');
+    if (error) throw error;
+    EVT.list = data && Array.isArray(data.events) ? data.events : []; EVT.canPost = !!(data && data.can_post); EVT.ok = true;
+  } catch (e) { EVT.ok = false; }
+  EVT.busy = false; evBadge(); if (!$('#evCard').hidden) renderEvents();
+}
+const evUpcoming = () => EVT.list.filter(e => e.starts_at && Date.parse(e.starts_at) > Date.now() - 30 * 60000);
+function evBadge() {
+  const n = evUpcoming().length, b = $('#evStart'); b.hidden = !EVT.ok || !EVT.list.length;
+  $('#evDot').textContent = n ? String(n) : ''; $('#evDot').hidden = !n;
+}
+function evTip(t) { $('#evTip').textContent = t || ''; }
+function renderEvents() {
+  const box = $('#evList'); box.textContent = '';
+  const el = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt !== undefined) e.textContent = txt; return e; };
+  if (!EVT.ok) box.appendChild(el('small', 'lab', EVT.busy ? i18n('소식을 불러오는 중…') : i18n('소식을 불러오지 못했어요')));
+  else if (!EVT.list.length) box.appendChild(el('small', 'lab', i18n('아직 올라온 소식이 없어요')));
+  for (const e of EVT.list) {
+    const row = el('div', 'row'), head = el('b'), at = e.starts_at ? Date.parse(e.starts_at) : NaN, left = (at - Date.now()) / 60000;
+    if (isFinite(at) && left < 60 && left > -120) row.classList.add('soon');
+    head.appendChild(el('em', '', i18n(EV_KIND[e.kind] || '알림'))); head.appendChild(document.createTextNode(bookText(e.title))); row.appendChild(head);
+    if (isFinite(at)) row.appendChild(el('span', 'when', (left <= 0 ? i18n('지금 진행 중') : fmtWhen(e.starts_at)) + ' · ' + evCourseName(e.course)));
+    if (e.body) row.appendChild(el('p', '', String(e.body).replace(/[\u0000-\u001f\u007f]/g, ' ').slice(0, 200)));
+    const acts = el('div', 'acts'), who = el('small', '', cleanNick(e.host_nick) + (isFinite(at) ? ' · ' + i18n('{0}명 참여', e.rsvp | 0) : ''));
+    acts.appendChild(who);
+    const right = el('span');
+    if (e.mine) { const x = el('button', 'linkbtn', i18n('내리기')); x.type = 'button'; x.onclick = () => evCancel(e.id); right.appendChild(x); }
+    if (isFinite(at)) { const b = el('button', 'secondary', e.my_rsvp ? i18n('참여 신청함') : AUTH.user ? i18n('참여 신청') : i18n('로그인하고 참여')); b.type = 'button'; b.setAttribute('aria-pressed', String(!!e.my_rsvp)); b.onclick = () => evRsvp(e); right.appendChild(b); }
+    acts.appendChild(right); row.appendChild(acts); box.appendChild(row);
+  }
+  const f = $('#evForm'), can = EVT.canPost && !!AUTH.user; f.hidden = !can; f.style.display = can ? 'grid' : 'none';
+  if (can) {
+    document.querySelectorAll('#evKind button').forEach(b => { b.setAttribute('aria-pressed', String(b.dataset.k === EVT.kind)); b.onclick = () => { EVT.kind = b.dataset.k; renderEvents(); }; });
+    document.querySelectorAll('#evCourse button').forEach(b => { b.setAttribute('aria-pressed', String(b.dataset.c === EVT.course)); b.onclick = () => { EVT.course = b.dataset.c; renderEvents(); }; });
+    $('#evName').placeholder = i18n('제목 (40자)'); $('#evBody').placeholder = i18n('내용 (200자, 비워도 돼요)');
+  }
+}
+function openEvents() { closeMenus(); evTip(''); $('#evCard').hidden = false; renderEvents(); evLoad(true); }
+async function evRsvp(e) {
+  if (!AUTH.user) { $('#evCard').hidden = true; openGb(i18n('참여 신청을 하려면 로그인이 필요해요')); return; }
+  try {
+    const sb = await getSB(), { data, error } = await sb.rpc('sangil_event_rsvp_toggle', { p_id: e.id });
+    if (error) throw error;
+    if (data && data.ok) { e.my_rsvp = !!data.on; e.rsvp = data.count | 0; evTip(data.on ? i18n('참여 신청을 했어요. 이 사이트를 열어 두면 시작 10분 전에 알려 드려요') : i18n('참여 신청을 취소했어요')); renderEvents(); }
+    else evTip(i18n('이미 끝났거나 내려간 모임이에요'));
+  } catch (err) { evTip(i18n('지금은 하지 못했어요. 잠시 뒤에 다시 해 주세요')); }
+}
+async function evCancel(id) {
+  try { const sb = await getSB(), { data, error } = await sb.rpc('sangil_event_cancel', { p_id: id }); if (!error && data && data.ok) { EVT.list = EVT.list.filter(e => e.id !== id); evBadge(); renderEvents(); evTip(i18n('글을 내렸어요')); } }
+  catch (err) { evTip(i18n('지금은 하지 못했어요. 잠시 뒤에 다시 해 주세요')); }
+}
+async function evPost() {
+  const title = $('#evName').value.replace(/\s+/g, ' ').trim().slice(0, 40), body = $('#evBody').value.replace(/\s+/g, ' ').trim().slice(0, 200), w = $('#evWhen').value;
+  if (!title) { evTip(i18n('제목을 적어 주세요')); return; }
+  let when = null;
+  if (w) { const d = new Date(w); if (!isFinite(d.getTime()) || d.getTime() < Date.now() - 600000) { evTip(i18n('모이는 때는 지금보다 뒤여야 해요')); return; } when = d.toISOString(); }
+  else if (EVT.kind !== 'notice') { evTip(i18n('모임은 모이는 때를 정해 주세요')); return; }
+  $('#evPost').disabled = true;
+  try {
+    const sb = await getSB(), { data, error } = await sb.rpc('sangil_event_create', { p_course: EVT.course, p_kind: EVT.kind, p_title: title, p_body: body, p_starts_at: when });
+    if (error) throw error;
+    if (data && data.ok) { $('#evName').value = ''; $('#evBody').value = ''; $('#evWhen').value = ''; evTip(i18n('올렸어요')); await evLoad(true); }
+    else evTip(data && data.reason === 'too many' ? i18n('열려 있는 글이 너무 많아요. 지난 글을 내려 주세요') : data && data.reason === 'not allowed' ? i18n('산지기와 불지기만 올릴 수 있어요') : i18n('올리지 못했어요. 내용을 확인해 주세요'));
+  } catch (err) { evTip(i18n('올리지 못했어요. 잠시 뒤에 다시 해 주세요')); }
+  $('#evPost').disabled = false;
+}
+function evSoon() {   // 이 코스에서 곧 시작하거나 방금 시작한 모임 (15분 전부터 시작 뒤 20분까지)
+  let best = null;
+  for (const e of EVT.list) { if (!e.starts_at || e.course !== COURSE) continue; const left = (Date.parse(e.starts_at) - Date.now()) / 60000; if (left <= 15 && left > -20 && (!best || e.my_rsvp > best.my_rsvp)) best = e; }
+  return best;
+}
+function evAlerts() {   // 사이트 안 알림
+  if (!S.started || !EVT.ok) return;
+  const once = k => { if (EVT.told[k]) return false; EVT.told[k] = 1; return true; };
+  for (const e of EVT.list) {
+    if (!e.starts_at) continue;
+    const left = (Date.parse(e.starts_at) - Date.now()) / 60000, here = e.course === COURSE, title = bookText(e.title);
+    if (e.my_rsvp && left <= 10 && left > 1 && once('t' + e.id)) { toast(i18n('{0}분 뒤 "{1}" 시작해요', Math.round(left), title) + (here ? '' : ' · ' + evCourseName(e.course))); if (canSound()) sfx.bowl(0.35); }
+    else if (e.my_rsvp && left <= 0 && left > -3 && once('s' + e.id)) { toast(i18n('"{0}" 지금 시작해요', title) + (here ? '' : ' · ' + evCourseName(e.course))); if (canSound()) sfx.bowl(0.6); }
+    else if (left > 10 && left < 720 && once('d' + e.id) && store.get('evSeen', '') !== e.id + ':' + todayKey()) { store.set('evSeen', e.id + ':' + todayKey()); setTimeout(() => toast(i18n('{0} · "{1}" 모임이 있어요', fmtWhen(e.starts_at), title)), 5200); }
+  }
 }
 /* ================= 방명록 =================
    명상원에 놓인 방명록 (코스마다 하나). 읽기는 누구나, 남기기는 로그인한 사람이 60자까지 하루에 한 번.
@@ -7855,7 +8025,7 @@ function bindUI() {
   $('#gbExt').onclick = () => { location.href = 'kakaotalk://web/openExternal?url=' + encodeURIComponent(location.href); };
   W.meLabel.el.addEventListener('click', e => { e.stopPropagation(); openGb(); });   // 내 이름표를 누르면 내 정보
   authInit(false); renderGb();
-  $('#nearSit').onclick = e => { e.stopPropagation(); const k = $('#nearSit').dataset.k; if (k === 'fireAsk') { S.fireAsk = 0; openFireCard(); } else if (k === 'group') beginGroup(); else if (k === 'book' || k === 'bookAsk') openBook(); else if (k === 'hall') { S.medPlace = 'hall'; openMedCard(); } else if (k === 'cafe') goCafe(); else if (k === 'spring') drinkSpring(); else goCircle(); };
+  $('#nearSit').onclick = e => { e.stopPropagation(); const k = $('#nearSit').dataset.k; if (k === 'fireAsk') { S.fireAsk = 0; openFireCard(); } else if (k === 'event') openEvents(); else if (k === 'group') beginGroup(); else if (k === 'book' || k === 'bookAsk') openBook(); else if (k === 'hall') { S.medPlace = 'hall'; openMedCard(); } else if (k === 'cafe') goCafe(); else if (k === 'spring') drinkSpring(); else goCircle(); };
   $('#actAlt').onclick = e => { e.stopPropagation(); if (player.act && player.act.type === 'focus' && FOCUS.phase !== 'break') { openFocusCard(); return; } $('#actAlt').hidden = true; startBreath(); };
   $('#focusGo').onclick = beginFocus; $('#focusCancel').onclick = () => { $('#focusCard').hidden = true; };
   $('#focusVol').oninput = () => { FOCUS.vol = +$('#focusVol').value; store.set('focusVol', FOCUS.vol); focusVolume(0.2); };
@@ -7864,6 +8034,8 @@ function bindUI() {
   document.querySelectorAll('#radioSeg button').forEach(b => b.onclick = () => setRadio(b.dataset.r === '1')); setRadio(RADIO.on);
   addEventListener('pointerdown', radioKick, true);
   $('#medGo').onclick = beginMeditate; $('#medCancel').onclick = () => { $('#medCard').hidden = true; };
+  $('#evPost').onclick = evPost; $('#evClose').onclick = () => { $('#evCard').hidden = true; }; $('#evStart').onclick = openEvents;
+  for (const id of ['evName', 'evBody', 'evWhen']) $('#' + id).addEventListener('keydown', e => e.stopPropagation());
   $('#bookSend').onclick = bookSend; $('#bookClose').onclick = () => { $('#bookCard').hidden = true; };
   $('#bookInput').addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter') bookSend(); });   // 글을 쓰는 동안 걷지 않게
   S.medMin = store.get('medMin', 5); S.medBell = store.get('medBell', true); S.medAwake = store.get('medAwake', true);
@@ -7949,7 +8121,7 @@ function boot() {
   if (coarse) $('#photoHint').textContent = i18n('사진을 길게 눌러 저장하세요.');
   initState(); addCafeCp(); addHallCp(); initLabels(); buildProfiles(); bindUI(); courseTexts();
   setSeason(S.season); setMute(S.mute); updateWalkBtn(); setRain(S.rain && !S.season, false);
-  $('#start').hidden = false; $('#enterBtn').disabled = false; $('#enterMed').disabled = false; $('#enterFocus').disabled = false; $('#enterFire').disabled = false; fireLoad(true);
+  $('#start').hidden = false; $('#enterBtn').disabled = false; $('#enterMed').disabled = false; $('#enterFocus').disabled = false; $('#enterFire').disabled = false; fireLoad(true); evLoad(true);
   if (store.get('autoEnter', false)) { store.set('autoEnter', false); $('#enterBtn').focus(); }
   const ld = $('#loading'); ld.style.opacity = 0; setTimeout(() => { ld.hidden = true; }, 600);
   window.__sangil = { keys, setRain, hitObstacle, OBS, CIRCLE, sitCircle, goCircle, sendChat, inCircle, S, player, TN, getH, CPS, startAct, cam, NET, NPCS, greet, sendChat, W, netState, startCamp, wakeCamp, openCampCard, goCafe, startCafe, DRINKS, CAFE, H5, answerHi5, showHi5Ask, MED, TX, TZ, IS_PARK, HALL, RINK, MELT, PRINTS, startCampNow: () => { S.campFire = true; startCamp(); } };
