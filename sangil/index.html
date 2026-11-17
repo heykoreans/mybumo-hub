@@ -369,6 +369,16 @@ body.calm #trailCard,body.calm #hint{opacity:0;pointer-events:none}
 #noteChip svg{width:24px;height:24px;flex:none}
 #noteChip b{font-weight:600;color:#ffe7b3}
 @keyframes nchip{from{opacity:0;transform:translate(-50%,-8px)}}
+.bookIn{display:flex;gap:8px}
+.bookIn input{flex:1;min-width:0;font:inherit;font-size:16px;color:var(--ink);background:#f7f2e8;border:0;border-radius:12px;padding:12px;-webkit-user-select:text;user-select:text}
+.bookIn input[hidden]{display:none}
+.bookIn .primary{width:auto;flex:none;padding:12px 18px;font-size:15px}
+.bookIn input[hidden]+.primary{flex:1}
+.bookList{display:grid;gap:8px;max-height:40vh;overflow:auto}
+.bookList .row{padding:10px 12px;border-radius:12px;border:1px solid var(--paper-line);background:#fffdf8}
+.bookList .row p{font-family:"Nanum Pen Script",var(--font-display);font-size:22px;line-height:1.2;color:var(--ink);overflow-wrap:anywhere}
+.bookList .row small{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--ink-soft);margin-top:4px}
+.bookList .row button{font-size:12px;color:var(--ink-soft);text-decoration:underline;text-underline-offset:2px}
 .gbNotes{display:grid;gap:6px}
 /* 모닥불 이야기 */
 .vdot{width:8px;height:8px;border-radius:50%;background:#ff7a4d;box-shadow:0 0 0 3px rgba(255,122,77,.25);display:inline-block;flex:none;animation:vpulse 1.6s ease-in-out infinite}
@@ -447,7 +457,7 @@ body.calm #trailCard,body.calm #hint{opacity:0;pointer-events:none}
   </div>
   <div id="settings" class="glass" hidden>
     <h3>설정</h3>
-    <div class="row"><span>길벗 카드</span><div class="seg"><button id="gbSet">로그인하기</button></div></div>
+    <div class="row"><span>내 정보</span><div class="seg"><button id="gbSet">로그인하기</button></div></div>
     <div class="row"><label for="ambVol"><span>환경음 (바람·새·계곡)</span><span id="ambOut">70</span></label><input id="ambVol" type="range" min="0" max="100" value="70"></div>
     <div class="row"><label for="sfxVol"><span>효과음 (발소리·풍경)</span><span id="sfxOut">70</span></label><input id="sfxVol" type="range" min="0" max="100" value="70"></div>
     <div class="row"><label for="stepVol"><span>발소리 (눈·낙엽 밟는 소리)</span><span id="stepOut">80</span></label><input id="stepVol" type="range" min="0" max="100" value="80"></div>
@@ -501,6 +511,7 @@ body.calm #trailCard,body.calm #hint{opacity:0;pointer-events:none}
     <button data-act="cafe"><svg class="ico" viewBox="0 0 24 24"><path d="M5 9h11v5a5 5 0 0 1-5 5h-1a5 5 0 0 1-5-5zM16 10.5h1.5a2.5 2.5 0 0 1 0 5H16M8 3.5c-.6.8-.6 1.7 0 2.5M11.5 3.5c-.6.8-.6 1.7 0 2.5M4 21h14"/></svg><span>카페</span></button>
     <button data-act="circle"><svg class="ico" viewBox="0 0 24 24"><path d="M12 4c2 2.5 3 4 3 6a3 3 0 0 1-6 0c0-1 .5-2 1.2-2.8.3 1 .9 1.6 1.8 1.6C12 7.5 12 6 12 4zM5 19.5l14-4M19 19.5l-14-4"/></svg><span>모닥불 쉼터</span></button>
     <button data-act="camp"><svg class="ico" viewBox="0 0 24 24"><path d="M3 20 12 5l9 15M12 5v15M9.5 20 12 15l2.5 5M2 20h20"/></svg><span>야영하기</span></button>
+    <button data-act="book"><svg class="ico" viewBox="0 0 24 24"><path d="M12 6.5C10 5 7.5 4.5 4 5v13c3.5-.5 6 0 8 1.5 2-1.5 4.5-2 8-1.5V5c-3.5-.5-6 0-8 1.5zM12 6.5v13"/></svg><span>방명록</span></button>
   </div>
   <div id="askBar" class="glass" hidden><span id="askTxt"></span><div><button id="askYes">하이파이브</button><button id="askNo">다음에</button></div></div>
   <div id="zoomBox" class="glass"><button id="zoomIn" aria-label="가까이 보기">+</button><button id="zoomOut" aria-label="멀리 보기">−</button></div>
@@ -532,11 +543,11 @@ body.calm #trailCard,body.calm #hint{opacity:0;pointer-events:none}
 
 <section id="gbCard" class="scrim" hidden>
   <div class="card" role="dialog" aria-labelledby="gbNick">
-    <div class="eyebrow">길벗 카드</div>
+    <div class="eyebrow">내 정보</div>
     <div class="gbHead"><canvas id="gbAvatar" width="152" height="152" aria-hidden="true"></canvas><div class="t"><b id="gbNick"></b><button class="linkbtn" id="gbNickBtn" style="justify-self:start;padding-left:0">다른 이름</button></div></div>
     <form class="gbRow" id="gbNickRow" hidden autocomplete="off"><input id="gbNickIn" maxlength="12" enterkeyhint="done" placeholder="2~12자 이름" aria-label="내 이름"><button class="authbtn email" type="submit" style="width:auto;padding:0 18px">저장</button></form>
     <p class="fine" id="gbNickTip"></p>
-    <label class="pcheck" id="gbPhotoRow" hidden><input type="checkbox" id="gbPhoto"><span>다른 길벗에게 내 사진 보이기<small>이름표 옆에 작은 동그라미로 보여요</small></span></label>
+    <label class="pcheck" id="gbPhotoRow" hidden><input type="checkbox" id="gbPhoto"><span>다른 사람에게 내 사진 보이기<small>이름표 옆에 작은 동그라미로 보여요</small></span></label>
     <button class="authbtn email" id="gbForm" hidden></button>
     <div style="display:grid;gap:8px"><span class="lab">피부색</span><div class="swatches" id="gbSkin"></div></div>
     <div style="display:grid;gap:8px"><span class="lab">모습</span><div class="chips" id="gbGender"><button data-g="0">남자</button><button data-g="1">여자</button></div></div>
@@ -664,10 +675,25 @@ body.calm #trailCard,body.calm #hint{opacity:0;pointer-events:none}
     <p>5분은 목소리가 호흡을 함께 이끌어 줘요. 더 오래 앉고 싶다면 타이머를 고르세요. 시작과 끝은 싱잉볼이 알려 주고, 그 사이에는 자연 소리만 남아요.</p>
     <div style="display:grid;gap:8px"><span class="lab">명상 시간</span>
       <div class="chips" id="medTimer"><button data-m="5" aria-pressed="true">5분<small>목소리 안내</small></button><button data-m="10">10분<small>타이머</small></button><button data-m="20">20분<small>타이머</small></button><button data-m="30">30분<small>타이머</small></button></div></div>
+    <div style="display:grid;gap:8px" id="medPlaceRow"><span class="lab">명상 자리</span>
+      <div class="chips" id="medPlace"><button data-p="hall" aria-pressed="true">명상원<small>방석에 함께 앉기</small></button><button data-p="here">지금 이 자리<small>여기서 바로</small></button></div></div>
     <label class="pcheck" id="medBellRow"><input type="checkbox" id="medBell" checked><span>5분마다 작은 종소리<small>시간이 얼마나 흘렀는지 눈을 감은 채로 알 수 있어요</small></span></label>
     <label class="pcheck"><input type="checkbox" id="medAwake" checked><span>화면 켜 두기<small>휴대폰은 화면이 꺼지면 소리와 타이머도 멈춰요</small></span></label>
     <button class="primary" id="medGo">자리에 앉기</button>
     <button class="secondary" id="medCancel">다음에 할게요</button>
+  </div>
+</section>
+
+<section id="bookCard" class="scrim" hidden>
+  <div class="card" role="dialog" aria-labelledby="bookTitle">
+    <div class="eyebrow">방명록 · 다녀간 마음</div>
+    <h2 class="title" id="bookTitle"><b style="font-size:30px">한 줄 남기고 가세요</b></h2>
+    <div style="display:grid;gap:8px">
+      <div class="bookIn"><input id="bookInput" type="text" maxlength="60" autocomplete="off" aria-label="방명록"><button class="primary" id="bookSend">남기기</button></div>
+      <small class="lab" id="bookTip"></small>
+    </div>
+    <div class="bookList" id="bookList"></div>
+    <button class="secondary" id="bookClose">닫기</button>
   </div>
 </section>
 
@@ -1182,7 +1208,37 @@ const EN = {"센트럴파크":"Central Park",
 "명상 · {0} / {1}:00":"Meditation · {0} / {1}:00",
 "{0}분 명상을 마쳤어요. 이 고요함을 안고 다시 걸어요":"{0}-minute meditation done. Carry this calm with you",
 "스트레스를 후~ 날려 보냈어요. 숨이 한결 고르네요":"Stress, blown away. Your breath feels steadier",
-"길벗 카드":"Hiker card",
+"내 정보":"My profile",
+"명상원":"Meditation Hall",
+"명상 자리":"Where to sit",
+"방석에 함께 앉기":"Sit with others",
+"지금 이 자리":"Right here",
+"여기서 바로":"Stay where you are",
+"명상원 자리가 다 찼어요. 지금 자리에서 명상해요":"The hall is full. Meditating right here instead.",
+"명상원으로 옮겨 왔어요":"Moved to the Meditation Hall",
+"명상원에서 명상하기":"Meditate in the hall",
+"방명록 보기":"Read the guestbook",
+"방명록에 한 줄 남기기":"Leave a line in the guestbook",
+"방명록":"Guestbook",
+"방명록 · 다녀간 마음":"Guestbook · words left behind",
+"한 줄 남기고 가세요":"Leave a line before you go",
+"남기기":"Leave it",
+"방금":"just now",
+"{0}시간 전":"{0}h ago",
+"{0}일 전":"{0}d ago",
+"방명록을 불러오지 못했어요":"Couldn't load the guestbook",
+"방명록을 펼치는 중…":"Opening the guestbook…",
+"아직 아무도 남기지 않았어요. 첫 줄을 남겨 보세요":"No one has written yet. Leave the first line.",
+"지우기":"Remove",
+"명상 잘 하고 갑니다":"Thank you for the quiet",
+"로그인하고 남기기":"Sign in to write",
+"60자까지, 하루에 한 번 남길 수 있어요":"Up to 60 characters, once a day",
+"읽는 건 누구나, 남기는 건 로그인한 분만 할 수 있어요":"Anyone can read. Sign in to write.",
+"방명록을 남기려면 로그인이 필요해요":"Sign in to write in the guestbook",
+"한 줄 적어 주세요":"Please write a line",
+"방명록에 남겼어요. 고맙습니다":"Written in the guestbook. Thank you.",
+"오늘은 이미 남기셨어요. 내일 또 남겨 주세요":"You already wrote today. Come back tomorrow.",
+"남기지 못했어요. 잠시 뒤에 다시 해 주세요":"Couldn't save it. Please try again in a moment.",
 "연속 {0}일":"{0}-day streak",
 "아직 연속 기록이 없어요":"No streak yet",
 "오늘 명상을 했어요":"You meditated today",
@@ -1193,7 +1249,7 @@ const EN = {"센트럴파크":"Central Park",
 "{0}번째 명상이었어요 · 연속 {1}일":"That was meditation #{0} · {1}-day streak",
 "이전 달":"Previous month",
 "다음 달":"Next month",
-"길벗 카드 보기":"Open hiker card",
+"내 정보 보기":"Open my profile",
 "피부색":"Skin tone",
 "얼굴":"Face",
 "기본":"Classic",
@@ -1375,7 +1431,7 @@ const EN = {"센트럴파크":"Central Park",
 "{0}님에게 쪽지를 건넸어요":"You gave {0} a note",
 "오늘 쪽지를 다 썼어요":"You've used today's notes",
 "쪽지를 놓지 못했어요. 잠시 뒤에 다시 해 보세요":"Couldn't leave the note. Please try again soon.",
-"이 자리에 쪽지를 놓았어요. 고마워요를 받으면 길벗 카드에서 볼 수 있어요":"Note left here. Thanks you receive will show on your hiker card.",
+"이 자리에 쪽지를 놓았어요. 고마워요를 받으면 내 정보에서 볼 수 있어요":"Note left here. Thanks you receive will show in your profile.",
 "{0}님께":"Dear {0}",
 "이 길을 걷는 분께":"To whoever walks this way",
 "{0} 드림":"From {0}",
@@ -1447,7 +1503,7 @@ const EN = {"센트럴파크":"Central Park",
 "지금은 바꿀 수 없어요":"Can't change that right now",
 "모닥불 이야기를 취소했어요":"Campfire talk canceled",
 "다시 들어가기":"Rejoin",
-"다른 길벗에게 내 사진 보이기":"Show my photo to other hikers",
+"다른 사람에게 내 사진 보이기":"Show my photo to other hikers",
 "이름표 옆에 작은 동그라미로 보여요":"A small circle next to your name tag",
 "글로 말하기":"Type to speak",
 "보내기":"Send",
@@ -1516,10 +1572,10 @@ const EN = {"센트럴파크":"Central Park",
 "말하게 하기":"Invite to speak",
 "모닥불 약속: 서로 존중해요 · 녹음하지 않아요 · 광고하지 않아요":"Campfire promise: be kind · no recording · no advertising",
 "마이크를 쓸 수 없어요. 브라우저에서 마이크를 허용해 주세요":"Can't use the mic. Please allow microphone access in your browser.",
-"말하려면 로그인이 필요해요. 길벗 카드에서 로그인할 수 있어요":"Sign in to speak. You can sign in from your hiker card.",
+"말하려면 로그인이 필요해요. 내 정보에서 로그인할 수 있어요":"Sign in to speak. You can sign in from your profile.",
 "손을 들었어요. 불지기가 마이크를 건네면 말할 수 있어요":"Hand raised. You can speak once the fire keeper passes you the mic.",
 "손을 내렸어요":"Hand lowered",
-"로그인한 길벗만 말할 수 있어요":"Only signed-in hikers can speak",
+"로그인한 분만 말할 수 있어요":"Only signed-in hikers can speak",
 "그분은 이미 나갔어요":"They have already left",
 "지금은 하지 못했어요":"Couldn't do that right now",
 "이야기 중":"live talk",
@@ -1570,7 +1626,7 @@ const EN = {"센트럴파크":"Central Park",
 "남자":"Man",
 "여자":"Woman",
 "이름을 확인하는 중…":"Checking the name…",
-"이미 다른 길벗이 쓰는 이름이에요. 다른 이름을 골라 주세요":"Another hiker already uses this name. Please pick a different one.",
+"이미 다른 분이 쓰는 이름이에요. 다른 이름을 골라 주세요":"Another hiker already uses this name. Please pick a different one.",
 "지금은 이름을 정하지 못했어요. 잠시 뒤에 다시 해 보세요":"Couldn't set your name right now. Please try again soon.",
 "몰티즈":"Maltese",
 "푸들":"Poodle",
@@ -1589,7 +1645,7 @@ const EN = {"센트럴파크":"Central Park",
 "저장":"Save",
 "내 이름":"My name",
 "로그인하면 이름을 직접 정하고, 진돗개와 함께 걸을 수 있어요. 다른 기기에서도 내 이름과 모습이 그대로 이어져요.":"Sign in to choose your own name and walk with a Jindo dog. Your name and look follow you to every device.",
-"강아지는 로그인한 길벗과 함께 걸어요. 아래에서 로그인하면 바로 곁에 나타나요":"Dogs walk with signed-in hikers. Sign in below and yours appears right beside you.",
+"강아지는 로그인한 분과 함께 걸어요. 아래에서 로그인하면 바로 곁에 나타나요":"Dogs walk with signed-in hikers. Sign in below and yours appears right beside you.",
 "이름은 2~12자로 정해 주세요":"Names need 2 to 12 characters",
 "한글, 영문, 숫자와 . _ - ~ 만 쓸 수 있어요":"Use letters, numbers, Korean, and . _ - ~ only",
 "숫자만으로는 정할 수 없어요":"A name can't be only numbers",
@@ -1832,6 +1888,30 @@ const CIRCLE = (() => {
   return c;
 })();
 const CIRCLE_NAME = i18n('모닥불 쉼터');
+/* 명상원: 산 중턱, 길에서 조금 비켜난 자리에 벽 없이 기둥과 지붕만 있는 넓은 마루. 방석들이 골짜기 쪽을 보고 놓여 있다 (솔바람산에만) */
+const HALL = (() => {
+  if (IS_PARK) return null;
+  const far = (x, z) => [[PV.x, PV.z, 26], [DK.x, DK.z, 24], [CAFE.x, CAFE.z, 28], [CIRCLE.x, CIRCLE.z, 28], [POND.x, POND.z, POND.r + 16], [CLIFF.x, CLIFF.z, 22], [TX[TN - 1], TZ[TN - 1], 26]].every(([a, b, r]) => Math.hypot(x - a, z - b) > r);
+  let best = null;
+  for (const f of [0.72, 0.78, 0.66, 0.84, 0.6, 0.54, 0.9]) for (const sd of [1, -1]) {
+    const i = Math.floor(TN * f), a = Math.max(0, i - 3), b = Math.min(TN - 1, i + 3), tx = TX[b] - TX[a], tz = TZ[b] - TZ[a], l = Math.hypot(tx, tz), nx = tz / l * sd, nz = -tx / l * sd;
+    const x = TX[i] + nx * 15, z = TZ[i] + nz * 15; if (!far(x, z) || Math.hypot(x, z) > 185) continue;
+    let near = 1e9; for (let k = 0; k < TN; k += 2) near = Math.min(near, Math.hypot(x - TX[k], z - TZ[k]));   // 굽이진 길의 다른 구간과 겹치지 않게
+    if (near < 12) continue;
+    const drop = TH[i] - baseH(x + nx * 24, z + nz * 24);   // 앞이 아래로 트여 있을수록 좋다
+    const score = Math.abs(baseH(x, z) - TH[i]) - clamp(drop, -6, 12) * 0.5;
+    if (!best || score < best.score) best = { x, z, h: TH[i] + 0.1, fx: nx, fz: nz, idx: i, score };
+  }
+  if (!best) return null;
+  const c = best; c.yaw = Math.atan2(c.fx, c.fz); c.hw = 6.5; c.hd = 4.5; c.floor = 0.45;
+  const cs = Math.cos(c.yaw), sn = Math.sin(c.yaw);
+  c.L = (lx, lz) => [c.x + cs * lx + sn * lz, c.z - sn * lx + cs * lz];   // 명상원 기준 좌표 (lz 가 앞, 골짜기 쪽) → 세상 좌표
+  c.seats = []; let k = 0;
+  for (const lz of [2.0, 0.1, -1.8]) for (const lx of [0, -2.1, 2.1, -4.2, 4.2]) { const [x, z] = c.L(lx, lz); c.seats.push({ k: k++, x, z, heading: c.yaw }); }
+  c.book = c.L(5.3, -3.5);
+  return c;
+})();
+const HALL_NAME = i18n('명상원');
 const pads = IS_PARK ? [
   { x: TX[1], z: TZ[1], r: 5, h: TH[1] },
   { x: 6, z: -118, r: 8.5, h: TH[nearIdx(6, -118)] },
@@ -1843,7 +1923,8 @@ const pads = IS_PARK ? [
   { x: DK.x, z: DK.z, r: 6, h: TH[nearIdx(DK.x, DK.z)] + 0.1 },
   { x: TX[TN-1], z: TZ[TN-1], r: 9, h: TH[TN-1] }
 ];
-pads.push({ x: CAFE.x, z: CAFE.z, r: 7.5, h: CAFE.h }, { x: CIRCLE.x, z: CIRCLE.z, r: 8, h: CIRCLE.h });   // 카페와 모닥불 자리는 평평하게
+pads.push({ x: CAFE.x, z: CAFE.z, r: 7.5, h: CAFE.h }, { x: CIRCLE.x, z: CIRCLE.z, r: 8, h: CIRCLE.h });
+if (HALL) pads.push({ x: HALL.x, z: HALL.z, r: 9.5, h: HALL.h });   // 카페와 모닥불 자리는 평평하게
 const PV_YAW = Math.atan2(POND.x - PV.x, POND.z - PV.z);
 const DK_YAW = (() => { const i = nearIdx(DK.x, DK.z); return Math.atan2(DK.x - TX[i], DK.z - TZ[i]); })();
 function propFloor(x, z) {
@@ -1851,6 +1932,7 @@ function propFloor(x, z) {
   const inBox = (cx, cz, yaw, hw, hd) => { const dx = x - cx, dz = z - cz, c = Math.cos(yaw), s = Math.sin(yaw); const lx = c * dx - s * dz, lz = s * dx + c * dz; return Math.abs(lx) < hw && Math.abs(lz) < hd; };
   if (inBox(PV.x, PV.z, PV_YAW, 3.0, 3.0)) return 0.77;
   if (inBox(DK.x, DK.z, DK_YAW, 3.75, 2.6)) return 0.15;
+  if (HALL && inBox(HALL.x, HALL.z, HALL.yaw, HALL.hw, HALL.hd)) return HALL.floor;
   return 0;
 }
 const groundY = IS_PARK ? (x, z) => { const b = bridgeFloor(x, z); const h = getH(x, z); return b === null ? h : Math.max(h, b); } : (x, z) => getH(x, z) + propFloor(x, z);
@@ -2504,6 +2586,35 @@ function buildWorld() {
   { const CUSH = [[0.70, 0.22, 0.18], [0.20, 0.30, 0.48], [0.86, 0.62, 0.20], [0.30, 0.48, 0.34], [0.55, 0.32, 0.52]];   // 자리마다 방석
     for (const st of CIRCLE.seats) cyl(g, st.x, CIRCLE.h + 0.4, st.z, 0.3, 0.28, 0.07, 12, CUSH[(st.k * 7) % CUSH.length]); }
   for (let k = 0; k < 14; k++) { const a = k / 14 * TAU; sphere(g, CIRCLE.x + Math.sin(a) * 1.7, CIRCLE.h + 0.1, CIRCLE.z + Math.cos(a) * 1.7, 0.3, 0.2, 0.26, 6, 3, mix3([0.42, 0.41, 0.4], [0.58, 0.56, 0.52], (k * 37 % 10) / 10), 0, false, 0.25); }   // 큰 돌 테두리
+  if (HALL) {   // 명상원: 돌 기단, 나무 마루, 기둥 여덟, 기와지붕, 낮은 난간, 방석 열다섯, 앞에는 작은 상과 싱잉볼, 뒤쪽 구석에 방명록
+    const H = HALL, y = H.h, fl = y + H.floor, yaw = H.yaw, L = H.L, wood = [0.62, 0.46, 0.30], dark = COL.woodDark;
+    const bx = (lx, lz, yy, w, h, d, col) => { const [px, pz] = L(lx, lz); box(g, px, yy, pz, w, h, d, col, 0, yaw); };
+    bx(0, 0, y + 0.08, H.hw * 2 + 0.9, 0.5, H.hd * 2 + 0.9, COL.stone);
+    bx(0, 0, fl - 0.07, H.hw * 2, 0.14, H.hd * 2, wood);
+    for (let k = -6; k <= 6; k++) bx(k, 0, fl + 0.004, 0.035, 0.008, H.hd * 2, mix3(wood, [0.28, 0.19, 0.12], 0.55));   // 마루 널 사이
+    bx(0, -H.hd - 0.6, y + 0.08, 3.4, 0.34, 0.8, COL.stone);   // 디딤돌
+    for (const lx of [-6.1, -2.05, 2.05, 6.1]) for (const lz of [-4.1, 4.1]) { const [px, pz] = L(lx, lz); cyl(g, px, fl, pz, 0.2, 0.18, 3.3, 8, dark); addObstacle(px, pz, 0.3); }
+    for (const lz of [-4.1, 4.1]) bx(0, lz, fl + 3.42, 12.9, 0.3, 0.3, dark);
+    for (const lx of [-6.1, 6.1]) bx(lx, 0, fl + 3.42, 0.3, 0.3, 8.5, dark);
+    for (const lx of [-2.05, 2.05]) bx(lx, 0, fl + 3.42, 0.22, 0.22, 8.2, dark);
+    { const eave = fl + 3.62, top = fl + 5.75, ox = 8.0, oz = 6.0, rh = 4.2, lift = 0.4;
+      const P = (lx, lz, yy) => { const [px, pz] = L(lx, lz); return [px, yy, pz]; };
+      const c1 = P(-ox, -oz, eave + lift), c2 = P(ox, -oz, eave + lift), c3 = P(ox, oz, eave + lift), c4 = P(-ox, oz, eave + lift);
+      const m1 = P(0, -oz, eave), m3 = P(0, oz, eave), aA = P(-rh, 0, top), aB = P(rh, 0, top), rc = [H.x, eave - 1, H.z], up = [H.x, top + 5, H.z];
+      g.tri(c1, m1, aA, COL.tile, 0, rc); g.tri(m1, aB, aA, COL.tile, 0, rc); g.tri(m1, c2, aB, COL.tile, 0, rc);
+      g.tri(c3, m3, aB, COL.tile, 0, rc); g.tri(m3, aA, aB, COL.tile, 0, rc); g.tri(m3, c4, aA, COL.tile, 0, rc);
+      g.tri(c2, c3, aB, COL.tile, 0, rc); g.tri(c4, c1, aA, COL.tile, 0, rc);
+      g.tri(c1, c2, c3, [0.36, 0.27, 0.2], 0, up); g.tri(c1, c3, c4, [0.36, 0.27, 0.2], 0, up);
+      bx(0, 0, top + 0.1, rh * 2 + 0.5, 0.3, 0.42, [0.18, 0.18, 0.2]); }
+    for (const [lx, lz, w, d] of [[0, 4.38, 12.6, 0.09], [-6.38, 0, 0.09, 8.7], [6.38, 0, 0.09, 8.7]]) { bx(lx, lz, fl + 0.78, w, 0.09, d, dark); bx(lx, lz, fl + 0.42, w, 0.06, d, dark); }   // 앞과 옆의 낮은 난간
+    for (let k = -3; k <= 3; k++) bx(k * 2.05, 4.38, fl + 0.4, 0.1, 0.8, 0.1, dark);
+    for (const lx of [-6.38, 6.38]) for (const lz of [-4.2, -2.1, 0, 2.1]) bx(lx, lz, fl + 0.4, 0.1, 0.8, 0.1, dark);
+    { const CUSH = [[0.62, 0.24, 0.20], [0.24, 0.33, 0.48], [0.78, 0.60, 0.26], [0.32, 0.46, 0.36], [0.50, 0.34, 0.50]];
+      for (const st of H.seats) cyl(g, st.x, fl, st.z, 0.46, 0.43, 0.1, 14, CUSH[(st.k * 3) % CUSH.length]); }
+    bx(0, 3.5, fl + 0.2, 1.0, 0.06, 0.46, dark); for (const e of [-0.42, 0.42]) bx(e, 3.5, fl + 0.09, 0.06, 0.18, 0.4, dark);   // 작은 상
+    { const [px, pz] = L(0, 3.5); cyl(g, px, fl + 0.23, pz, 0.11, 0.17, 0.13, 12, [0.74, 0.60, 0.26]); }   // 싱잉볼
+    { const [px, pz] = H.book; box(g, px, fl + 0.45, pz, 0.12, 0.9, 0.12, dark, 0, yaw); box(g, px, fl + 0.93, pz, 0.78, 0.06, 0.56, wood, 0, yaw); box(g, px, fl + 0.98, pz, 0.56, 0.05, 0.4, [0.96, 0.94, 0.88], 0, yaw); addObstacle(px, pz, 0.35); }   // 방명록
+  }
   buildSpring(g);
   W.props = upload(g);
 
@@ -2740,6 +2851,7 @@ const SPEEDS = [1.25, 1.8, 2.7];
 const S = {
   started: false, season: store.get('season', 0), sb: 0, dusk: 0, tb: 0, auto: false, autoDir: 1, breath: false,
   mute: store.get('mute', false), amb: store.get('amb', 0.7), sfx: store.get('sfx', 0.7), steps: store.get('stepVol', 0.8) > 0, stepVol: store.get('stepVol', 0.8),
+  medPlace: store.get('medPlace', 'hall'), goHall: null, bookAsk: 0,
   speedIdx: store.get('speed', 1), quality: store.get('quality', 1), bubbles: store.get('bubbles', true), lost: false,
   walked: 0, startT: 0, reached: new Set(), summitShown: false, lastDrag: -10, wantPhoto: false, nick: store.get('nick', null) || nickRand(), climbMax: 0,
   breathK: 0, breathSnd: null,
@@ -2795,6 +2907,11 @@ function addCafeCp() {
   const idx = nearIdx(CAFE.x, CAFE.z), cp = { key: 'cafe', name: CAFE_NAME, x: CAFE.x, z: CAFE.z, idx, r: 9, ly: CAFE.h + 5.4 };
   const at = CPS.findIndex(c => c.key !== 'summit' && c.idx > idx); CPS.splice(at < 0 ? CPS.length - 1 : at, 0, cp);
 }
+function addHallCp() {
+  if (!HALL) return;
+  const cp = { key: 'hall', name: HALL_NAME, x: HALL.x, z: HALL.z, idx: HALL.idx, r: 10, ly: HALL.h + 7.4 };
+  const at = CPS.findIndex(c => c.key !== 'summit' && c.idx > cp.idx); CPS.splice(at < 0 ? CPS.length - 1 : at, 0, cp);
+}
 /* ---------------- labels ---------------- */
 const labelsEl = $('#labels');
 const labels = [];
@@ -2814,6 +2931,7 @@ function initLabels() {
     cp.label = addLabel('<i></i><span></span>', 'place', () => [cp.x, cp.ly, cp.z], 95);
     cp.label.el.querySelector('span').textContent = cp.key === 'summit' && !IS_PARK ? `${cp.name} ${fmtAlt(SUMMIT_H)}m` : cp.key === 'cafe' ? i18n('{0} · 영업 중', cp.name) : cp.name;
     if (cp.key === 'cafe') { cp.label.el.classList.add('tap'); cp.label.el.addEventListener('click', e => { e.stopPropagation(); goCafe(); }); }
+    if (cp.key === 'hall') { cp.label.el.classList.add('tap'); cp.label.el.addEventListener('click', e => { e.stopPropagation(); S.medPlace = 'hall'; openMedCard(); }); }
   }
 }
 function updateLabels(cssW, cssH) {
@@ -3720,6 +3838,7 @@ function startAct(type, go) {
   if (type === 'meditate' && !go && !(player.act && player.act.type === 'meditate')) { openMedCard(); return; }
   if (type === 'focus') { openFocusCard(); return; }
   if (type === 'fire') { openFireCard(); return; }
+  if (type === 'book') { openBook(); return; }
   if (S.breath) stopBreath();
   if (player.act && GREETS.includes(player.act.type)) player.act = null;
   if (player.act) { if (player.act.type === 'meditate' && type === 'meditate') standUp(); else toast(i18n('하던 걸 마저 하고 할게요')); return; }
@@ -3982,13 +4101,42 @@ function openMedCard() {
   const pick = m => { S.medMin = m; document.querySelectorAll('#medTimer button').forEach(b => b.setAttribute('aria-pressed', +b.dataset.m === m ? 'true' : 'false')); $('#medBellRow').style.display = m === 5 ? 'none' : ''; };
   document.querySelectorAll('#medTimer button').forEach(b => b.onclick = () => pick(+b.dataset.m));
   pick(S.medMin || 5); $('#medBell').checked = S.medBell; $('#medAwake').checked = S.medAwake;
+  $('#medPlaceRow').style.display = HALL ? 'grid' : 'none';
+  const place = v => { S.medPlace = v; document.querySelectorAll('#medPlace button').forEach(b => b.setAttribute('aria-pressed', b.dataset.p === v ? 'true' : 'false')); };
+  document.querySelectorAll('#medPlace button').forEach(b => b.onclick = () => place(b.dataset.p));
+  place(S.medPlace === 'here' ? 'here' : 'hall');
   $('#medCard').hidden = false;
 }
 function beginMeditate() {
   $('#medCard').hidden = true;
   S.medBell = $('#medBell').checked; S.medAwake = $('#medAwake').checked;
-  store.set('medMin', S.medMin); store.set('medBell', S.medBell); store.set('medAwake', S.medAwake);
+  store.set('medMin', S.medMin); store.set('medBell', S.medBell); store.set('medAwake', S.medAwake); store.set('medPlace', S.medPlace === 'here' ? 'here' : 'hall');
+  if (HALL && S.medPlace !== 'here' && goHall()) return;
   startAct('meditate', true);
+}
+/* 명상원 자리: 다른 사람이 앉지 않은 방석에 앉는다. 가까이 있으면 걸어가고, 멀리 있으면 바로 옮겨 간다 */
+function hallSeat() {
+  if (!HALL) return null;
+  const taken = st => [...NET.peers.values()].some(p => p.ready && !p.hidden && p.act && p.act.type === 'meditate' && Math.hypot(p.x - st.x, p.z - st.z) < 0.8);
+  const free = HALL.seats.filter(st => !taken(st));
+  if (Math.hypot(player.x - HALL.x, player.z - HALL.z) < 12) free.sort((a, b) => Math.hypot(a.x - player.x, a.z - player.z) - Math.hypot(b.x - player.x, b.z - player.z));
+  return free[0] || null;
+}
+function sitHall(st) {
+  S.goHall = null; player.x = st.x; player.z = st.z; player.y = groundY(st.x, st.z); player.heading = st.heading; player.target = null; marker = null;
+  startAct('meditate', true);
+  if (player.act && player.act.type === 'meditate') player.act.hall = true;
+}
+function goHall() {
+  if (player.act && !GREETS.includes(player.act.type)) return false;
+  const st = hallSeat();
+  if (!st) { toast(i18n('명상원 자리가 다 찼어요. 지금 자리에서 명상해요')); return false; }
+  if (S.breath) stopBreath();
+  S.auto = false; S.walkGoal = null; S.goCircle = false; updateWalkBtn();
+  if (Math.hypot(player.x - st.x, player.z - st.z) < 14) { player.target = { x: st.x, z: st.z }; marker = { x: st.x, z: st.z, t: 0 }; S.goHall = { st, until: T + 9 }; return true; }
+  sitHall(st); cam.yaw = st.heading; cam.dist = 7; cam.pitch = 0.2;
+  toast(i18n('명상원으로 옮겨 왔어요'));
+  return true;
 }
 let medLineTimer = 0;
 function showMedLine(text) {
@@ -4512,6 +4660,7 @@ function buildCamBlocks() {
     const gy = getH(TX[3], TZ[3]);   // 산길 입구 문의 들보와 지붕
     obox(TX[3], TZ[3], 3.5, 0.55, Math.atan2(TX[5] - TX[1], TZ[5] - TZ[1]), gy + 2.4, gy + 4.1);
     obox(PV.x, PV.z, 4.5, 4.5, PV_YAW, pads[1].h + 3.5, pads[1].h + 6.4);   // 솔숲 정자 지붕
+    if (HALL) obox(HALL.x, HALL.z, 8.0, 6.0, HALL.yaw, HALL.h + HALL.floor + 3.3, HALL.h + HALL.floor + 6.0);   // 명상원 지붕
   }
   return out;
 }
@@ -4526,7 +4675,7 @@ function updateCamera(dt) {
     }
     else if (act && !GREETS.includes(act.type) && T - S.lastDrag > 2.5) {
       const k = 1 - Math.exp(-dt * 1.4), med = act.type === 'meditate' || act.type === 'cafe' || act.type === 'circle' || act.type === 'focus';
-      cam.yaw = angLerp(cam.yaw, player.heading + Math.PI - (med ? 0.35 + 0.3 * Math.sin(act.t * 0.05) : 0.6), k);
+      cam.yaw = angLerp(cam.yaw, act.hall ? player.heading + 0.3 * Math.sin(act.t * 0.05) : player.heading + Math.PI - (med ? 0.35 + 0.3 * Math.sin(act.t * 0.05) : 0.6), k);   // 명상원에서는 내 어깨 너머로 골짜기를 본다
       if (!(T - (S.userZoomT || -1e9) < 120)) { cam.dist = lerp(cam.dist, med ? 6.5 : 4.6, k); cam.pitch = lerp(cam.pitch, med ? 0.22 : 0.1, k); }
     }
     else if (S.breath) cam.yaw += dt * 0.09;
@@ -4575,6 +4724,9 @@ function updateHud(dt) {
   updatePill();
   if (S.goCafe && !player.act && nearCafe(9)) { player.target = null; openCafeCard(); }
   if (S.goCircle && !player.act && Math.hypot(player.x - CIRCLE.x, player.z - CIRCLE.z) < 22) { player.target = null; sitCircle(); }
+  if (S.goHall) { const st = S.goHall.st, mine = player.target && player.target.x === st.x && player.target.z === st.z;
+    if (player.act || (player.target && !mine)) S.goHall = null;   // 그사이 다른 곳을 눌렀으면 그만둔다
+    else if (Math.hypot(player.x - st.x, player.z - st.z) < 0.9 || T > S.goHall.until) sitHall(st); }
   {   // 집중하는 사람 이름표에는 '집중 중' (말 걸기보다 쪽지가 어울리는 때)
     const mine = S.nick + (player.act && player.act.type === 'focus' && !player.act.leaving ? ' · ' + i18n('집중 중') : '');
     const me = $('#meName'); if (me && me.textContent !== mine) me.textContent = mine;
@@ -4593,8 +4745,9 @@ function updateHud(dt) {
   {   // 모닥불 가까이 오면 '모닥불에 앉기' 버튼
     const dc = Math.hypot(player.x - CIRCLE.x, player.z - CIRCLE.z), dk = Math.hypot(player.x - CAFE.x, player.z - CAFE.z), free = S.started && !player.act && !S.camp && !S.breath;
     const ds = SPRING ? Math.hypot(player.x - SPRING.x, player.z - SPRING.z) : 99;
-    const kind = free && ds < 5 ? 'spring' : free && dc < 14 ? 'circle' : free && dk < 15 ? 'cafe' : '';
-    if ($('#nearSit').dataset.k !== kind) { $('#nearSit').dataset.k = kind; $('#nearSitTxt').textContent = kind === 'cafe' ? i18n('카페 들어가기') : kind === 'spring' ? (IS_PARK ? i18n('음수대에서 물 마시기') : i18n('약수 마시기')) : i18n('모닥불에 앉기'); }
+    const dh = HALL ? Math.hypot(player.x - HALL.x, player.z - HALL.z) : 99, db = HALL ? Math.hypot(player.x - HALL.book[0], player.z - HALL.book[1]) : 99;
+    const kind = free && T < S.bookAsk ? 'bookAsk' : free && db < 2.6 ? 'book' : free && ds < 5 ? 'spring' : free && dh < 10 ? 'hall' : free && dc < 14 ? 'circle' : free && dk < 15 ? 'cafe' : '';
+    if ($('#nearSit').dataset.k !== kind) { $('#nearSit').dataset.k = kind; $('#nearSitTxt').textContent = kind === 'bookAsk' ? i18n('방명록에 한 줄 남기기') : kind === 'book' ? i18n('방명록 보기') : kind === 'hall' ? i18n('명상원에서 명상하기') : kind === 'cafe' ? i18n('카페 들어가기') : kind === 'spring' ? (IS_PARK ? i18n('음수대에서 물 마시기') : i18n('약수 마시기')) : i18n('모닥불에 앉기'); }
     if ($('#nearSit').hidden === !!kind) $('#nearSit').hidden = !kind;
   }
   $('#greetBtn').classList.toggle('near', !!nearestOther(5));
@@ -5169,7 +5322,7 @@ const MED_TIERS = [   // 처음에는 자주, 갈수록 띄엄띄엄. 108번은 
   { n: 108, id: 'beads108', name: '백팔 번의 고요', gift: '백팔 염주' },
 ];
 const medTierOf = n => MED_TIERS.filter(t => n >= t.n).length;
-/* 받은 선물은 생김새를 바꾸지 않는 물건이고, 길벗 카드에서 하나씩 빼거나 다시 찰 수 있다 (숨긴 단계 번호의 비트) */
+/* 받은 선물은 생김새를 바꾸지 않는 물건이고, 내 정보에서 하나씩 빼거나 다시 찰 수 있다 (숨긴 단계 번호의 비트) */
 if (store.get('medHide2', null) === null) { const o = store.get('medHide', 0) | 0; let m = 0; [[1, 2], [2, 4], [3, 6], [4, 8]].forEach(([a, b]) => { if (o & (1 << a)) m |= 1 << b; }); store.set('medHide2', m); }   // 예전 4단계에서 옮기기
 const medHideMask = () => (store.get('medHide2', 0) | 0) & 0x3FE;
 const tierHas = (list, tier, mask) => id => { const i = list.findIndex(t => t.id === id) + 1; return i > 0 && tier >= i && !(mask & (1 << i)); };
@@ -5288,10 +5441,64 @@ function medRecord(mt) {
     AUTH.profile.med_count = n;   // 화면은 바로 올리고, 서버 숫자로 맞춘다
     medPush(1, mins).then(() => { retrack(); renderGb(); }).catch(e => { console.warn('명상 기록 실패', e); AUTH.profile.med_count = before; medAnonAdd(1, mins); retrack(); renderGb(); });   // 실패하면 이 기기에 모아 두었다가 다음에 합친다
   } else medAnonAdd(1, mins);
+  S.bookAsk = T + 45;   // 일어나면 잠깐 '방명록에 한 줄 남기기'가 뜬다
   const b4 = medTierOf(before), after = medTierOf(n);
   if (after > b4) { const t = MED_TIERS[after - 1]; setTimeout(() => { toast(i18n('명상 {0}번! {1}을(를) 얻었어요 · {2}', n, i18n(t.gift), i18n(t.name))); showBubble(player, i18n(t.name), 3.5); if (canSound()) sfx.bowl(0.7); }, 2400); }
   else setTimeout(() => { const st = medServer() ? (AUTH.profile.med_streak | 0) : 0; toast(st >= 2 ? i18n('{0}번째 명상이었어요 · 연속 {1}일', n, st) : i18n('{0}번째 명상이었어요', n)); }, 2600);
   retrack(); renderGb();
+}
+/* ================= 방명록 =================
+   명상원에 놓인 방명록 (코스마다 하나). 읽기는 누구나, 남기기는 로그인한 사람이 60자까지 하루에 한 번.
+   쓴 사람 본인과 산지기는 지울 수 있다. 서버 함수 sangil_guest_list, sangil_guest_write, sangil_guest_remove 를 쓴다. */
+const BOOK = { rows: null, busy: false, err: false };
+function bookWhen(iso) {
+  const m = Math.max(0, (Date.now() - new Date(iso).getTime()) / 60000);
+  return m < 60 ? i18n('방금') : m < 1440 ? i18n('{0}시간 전', Math.floor(m / 60)) : m < 43200 ? i18n('{0}일 전', Math.floor(m / 1440)) : new Date(iso).toLocaleDateString(LANG === 'ko' ? 'ko-KR' : 'en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+}
+function bookText(v) { const t = String(v == null ? '' : v).replace(/[\u0000-\u001f\u007f]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 60); return t ? maskBad(t) : ''; }
+function renderBook() {
+  const box = $('#bookList'); box.textContent = '';
+  const note = t => { const e = document.createElement('small'); e.className = 'lab'; e.textContent = t; box.appendChild(e); };
+  if (!BOOK.rows) { note(BOOK.err ? i18n('방명록을 불러오지 못했어요') : i18n('방명록을 펼치는 중…')); return; }
+  if (!BOOK.rows.length) { note(i18n('아직 아무도 남기지 않았어요. 첫 줄을 남겨 보세요')); return; }
+  for (const r of BOOK.rows) {
+    const row = document.createElement('div'), p = document.createElement('p'), sm = document.createElement('small'), who = document.createElement('span');
+    row.className = 'row'; p.textContent = bookText(r.body); who.textContent = cleanNick(r.nick) + ' · ' + bookWhen(r.created_at); sm.appendChild(who);
+    if (r.mine || AUTH.master) { const b = document.createElement('button'); b.type = 'button'; b.textContent = i18n('지우기'); b.onclick = () => bookRemove(r.id); sm.appendChild(b); }
+    row.appendChild(p); row.appendChild(sm); box.appendChild(row);
+  }
+}
+async function bookLoad() {
+  if (BOOK.busy) return;
+  BOOK.busy = true; BOOK.err = false;
+  try { const sb = await getSB(), { data, error } = await sb.rpc('sangil_guest_list', { p_course: COURSE }); if (error) throw error; BOOK.rows = Array.isArray(data) ? data : []; }
+  catch (e) { BOOK.err = true; console.warn('방명록 불러오기 실패', e); }
+  BOOK.busy = false; renderBook();
+}
+function bookTip(t) { $('#bookTip').textContent = t || ''; }
+function openBook() {
+  closeMenus(); S.bookAsk = 0;
+  const inn = !!AUTH.user;
+  $('#bookInput').hidden = !inn; $('#bookInput').placeholder = i18n('명상 잘 하고 갑니다'); $('#bookSend').textContent = inn ? i18n('남기기') : i18n('로그인하고 남기기');
+  bookTip(inn ? i18n('60자까지, 하루에 한 번 남길 수 있어요') : i18n('읽는 건 누구나, 남기는 건 로그인한 분만 할 수 있어요'));
+  $('#bookCard').hidden = false; renderBook(); bookLoad();
+}
+async function bookSend() {
+  if (!AUTH.user) { $('#bookCard').hidden = true; openGb(i18n('방명록을 남기려면 로그인이 필요해요')); return; }
+  const v = $('#bookInput').value.replace(/\s+/g, ' ').trim().slice(0, 60);
+  if (!v) { bookTip(i18n('한 줄 적어 주세요')); return; }
+  $('#bookSend').disabled = true;
+  try {
+    const sb = await getSB(), { data, error } = await sb.rpc('sangil_guest_write', { p_course: COURSE, p_body: v });
+    if (error) throw error;
+    if (data && data.ok) { $('#bookInput').value = ''; bookTip(i18n('방명록에 남겼어요. 고맙습니다')); await bookLoad(); }
+    else bookTip(data && data.reason === 'too soon' ? i18n('오늘은 이미 남기셨어요. 내일 또 남겨 주세요') : i18n('남기지 못했어요. 잠시 뒤에 다시 해 주세요'));
+  } catch (e) { console.warn('방명록 남기기 실패', e); bookTip(i18n('남기지 못했어요. 잠시 뒤에 다시 해 주세요')); }
+  $('#bookSend').disabled = false;
+}
+async function bookRemove(id) {
+  try { const sb = await getSB(), { data, error } = await sb.rpc('sangil_guest_remove', { p_id: id }); if (!error && data && data.ok && BOOK.rows) { BOOK.rows = BOOK.rows.filter(r => r.id !== id); renderBook(); } }
+  catch (e) { console.warn('방명록 지우기 실패', e); }
 }
 function drawSage(c, p, P2, head, has, medSit) {   // 명상 선물: 염주, 싱잉볼, 가방 풍경, 향, 지팡이, 백팔 염주 (방석은 앉는 자리에서)
   if (has('beads') || has('beads108')) {   // 염주: 큰 머리에 가리지 않게 가슴 앞으로 늘어뜨린다. 108번이면 더 길고 알이 많은 백팔 염주
@@ -5594,7 +5801,7 @@ function drawSeatMarks() {
 
 /* ================= 숨은 것 찾기 =================
    날마다 코스마다 6가지가 바위 아래, 나무 밑에 숨는다. 같은 날 들어온 길벗은 모두 같은 곳에서 찾는다(날짜로 정한다).
-   가까이(9m) 가면 반짝이고, 누르거나 바로 옆을 지나가면 줍는다. 주운 것은 길벗 카드의 '주머니'에 모인다. */
+   가까이(9m) 가면 반짝이고, 누르거나 바로 옆을 지나가면 줍는다. 주운 것은 내 정보의 '주머니'에 모인다. */
 const FIND_KINDS = {
   acorn:   { n: '도토리', c: [0.55, 0.36, 0.18] },
   pinecone:{ n: '솔방울', c: [0.45, 0.30, 0.17] },
@@ -5839,7 +6046,7 @@ async function sendNote() {
     PAPER.trail.unshift(n); markRead(n.id); noteLabel(n);
     netSend({ k: 'tnote', id: +data.id, x: sp.x, z: sp.z, ph });
     stoop(sp.x, sp.z); paperSound(false);
-    $('#noteCard').hidden = true; toast(i18n('이 자리에 쪽지를 놓았어요. 고마워요를 받으면 길벗 카드에서 볼 수 있어요')); renderGbNotes();
+    $('#noteCard').hidden = true; toast(i18n('이 자리에 쪽지를 놓았어요. 고마워요를 받으면 내 정보에서 볼 수 있어요')); renderGbNotes();
   } catch (e) { console.warn('쪽지 놓기 실패', e); toast(i18n('쪽지를 놓지 못했어요. 잠시 뒤에 다시 해 보세요')); }
   finally { go.disabled = false; if (!$('#noteCard').hidden) renderCompose(); }
 }
@@ -6343,7 +6550,7 @@ function voiceHand() {
 async function voiceAdmin(action, target) {
   if (!TALK.fire) return;
   const r = await voiceCall({ action, fireId: TALK.fire.id, target }).catch(() => ({ ok: false }));
-  if (!r.ok) toast(r.reason === 'login' ? i18n('로그인한 길벗만 말할 수 있어요') : r.reason === 'gone' ? i18n('그분은 이미 나갔어요') : i18n('지금은 하지 못했어요'));
+  if (!r.ok) toast(r.reason === 'login' ? i18n('로그인한 분만 말할 수 있어요') : r.reason === 'gone' ? i18n('그분은 이미 나갔어요') : i18n('지금은 하지 못했어요'));
   else if (action === 'promote') TALK.hands.delete(target);
   renderVoice();
 }
@@ -6377,7 +6584,7 @@ async function authInit(force) {
     const { data } = await sb.auth.getSession();
     await onAuth(data && data.session);
   } catch (e) { console.warn('로그인 확인 실패', e); }
-  if (AUTH_RET && !AUTH.returned) {   // 카카오나 구글에서 돌아왔다: 주소를 원래대로 돌려놓고 길벗 카드를 보여 준다
+  if (AUTH_RET && !AUTH.returned) {   // 카카오나 구글에서 돌아왔다: 주소를 원래대로 돌려놓고 내 정보를 보여 준다
     AUTH.returned = true;
     const q = new URLSearchParams(location.search), err = q.get('error_description') || q.get('error');
     let h = ''; try { h = sessionStorage.getItem('sangil.authHash') || ''; sessionStorage.removeItem('sangil.authHash'); } catch (e) {}
@@ -6474,7 +6681,7 @@ async function submitNick(e) {   // 직접 정한 이름은 서버(sangil_set_ni
       if (/PGRST202|Could not find the function/i.test((error.code || '') + ' ' + (error.message || ''))) { $('#gbNickRow').hidden = true; setNick(v, true); nickTip(i18n('이제 {0}님이에요', v)); return; }   // 서버 준비 전에는 예전 방식으로
       throw error;
     }
-    if (!data || !data.ok) { nickTip(data && data.reason === 'taken' ? i18n('이미 다른 길벗이 쓰는 이름이에요. 다른 이름을 골라 주세요') : i18n('그 이름은 쓸 수 없어요'), true); return; }
+    if (!data || !data.ok) { nickTip(data && data.reason === 'taken' ? i18n('이미 다른 분이 쓰는 이름이에요. 다른 이름을 골라 주세요') : i18n('그 이름은 쓸 수 없어요'), true); return; }
     const nn = cleanNick(data.nick || v);
     if (AUTH.profile) { AUTH.profile.nick = nn; AUTH.profile.nick_set = true; }
     $('#gbNickRow').hidden = true; setNick(nn, false); nickTip(i18n('이제 {0}님이에요', nn));
@@ -6525,7 +6732,7 @@ function buildGb() {
   document.querySelectorAll('#gbFace button').forEach(b => b.onclick = () => setLook({ f: +b.dataset.f }, true));
   document.querySelectorAll('#gbGender button').forEach(b => b.onclick = () => setLook({ g: +b.dataset.g }, true));
   document.querySelectorAll('#gbKey button').forEach(b => b.onclick = () => setLook({ kr: +b.dataset.k }, true));
-  document.querySelectorAll('#gbDog button').forEach(b => b.onclick = () => { const c = +b.dataset.d; setLook({ dg: c }, true); if (c && !DOG.placed && S.started) placeDog(DOG, player); gbMsg(c && !AUTH.user ? i18n('강아지는 로그인한 길벗과 함께 걸어요. 아래에서 로그인하면 바로 곁에 나타나요') : ''); });
+  document.querySelectorAll('#gbDog button').forEach(b => b.onclick = () => { const c = +b.dataset.d; setLook({ dg: c }, true); if (c && !DOG.placed && S.started) placeDog(DOG, player); gbMsg(c && !AUTH.user ? i18n('강아지는 로그인한 분과 함께 걸어요. 아래에서 로그인하면 바로 곁에 나타나요') : ''); });
   $('#gbLeash').onchange = () => setLook({ ls: $('#gbLeash').checked ? 1 : 0 }, true);
 }
 const rgbCss = c => `rgb(${c.map(v => Math.round(clamp(v, 0, 1) * 255)).join(',')})`;
@@ -6538,8 +6745,8 @@ function renderGb() {
   renderForm();
   { const row = $('#gbPhotoRow'); if (row) { row.hidden = !(AUTH.user && myPhoto()); $('#gbPhoto').checked = !!store.get('photoShare', false); } }
   const inn = !!AUTH.user;
-  $('#gbSet').textContent = inn ? i18n('길벗 카드 보기') : i18n('로그인하기');
-  $('#gbStart').textContent = inn ? i18n('길벗 카드') : i18n('로그인하기');
+  $('#gbSet').textContent = inn ? i18n('내 정보 보기') : i18n('로그인하기');
+  $('#gbStart').textContent = inn ? i18n('내 정보') : i18n('로그인하기');
   $('#gbNick').textContent = S.nick;
   $('#gbNickBtn').textContent = inn ? i18n('이름 정하기') : i18n('다른 이름'); $('#nickBtn').textContent = inn ? i18n('이름 정하기') : i18n('다른 이름');
   if (!inn) nickTip(i18n('로그인하면 이름을 직접 정할 수 있어요')); else if (!$('#gbNickTip').classList.contains('err') && $('#gbNickRow').hidden && $('#gbNickTip').textContent === i18n('로그인하면 이름을 직접 정할 수 있어요')) nickTip('');
@@ -6577,7 +6784,7 @@ function renderGb() {
     wearChips(box, FOCUS_TIERS, t, focusHideMask(), 'focusHide'); }
   drawAvatar(); renderBag(); renderGbNotes();
 }
-// 카카오·구글 프로필 사진: 길벗 카드에 보이고, 원하면 이름표 옆에도 작게 보인다
+// 카카오·구글 프로필 사진: 내 정보에 보이고, 원하면 이름표 옆에도 작게 보인다
 function safePhoto(u) {
   if (typeof u !== 'string' || u.length > 400) return '';
   let url; try { url = new URL(u.replace(/^http:\/\//i, 'https://')); } catch (e) { return ''; }
@@ -6604,7 +6811,7 @@ function drawAvatar() {
   if (pu) { const im = photoImg(pu), cv0 = $('#gbAvatar'), x0 = cv0 && cv0.getContext('2d'); if (x0 && im.complete && im.naturalWidth) { x0.clearRect(0, 0, 152, 152); x0.save(); x0.beginPath(); x0.arc(76, 76, 76, 0, TAU); x0.clip(); const s0 = Math.min(im.naturalWidth, im.naturalHeight); x0.drawImage(im, (im.naturalWidth - s0) / 2, (im.naturalHeight - s0) / 2, s0, s0, 0, 0, 152, 152); x0.restore(); return; } }
   drawCharAvatar();
 }
-function drawCharAvatar() {   // 길벗 카드의 작은 얼굴 그림 (3D 캐릭터와 같은 색, 같은 얼굴)
+function drawCharAvatar() {   // 내 정보의 작은 얼굴 그림 (3D 캐릭터와 같은 색, 같은 얼굴)
   const cv = $('#gbAvatar'); if (!cv) return;
   const x = cv.getContext('2d'), f = player.face | 0; if (!x) return;
   x.clearRect(0, 0, 152, 152); x.save();
@@ -7256,9 +7463,9 @@ function bindUI() {
   $('#gbEmailBtn').onclick = () => { $('#gbEmailRow').hidden = false; $('#gbCodeRow').hidden = true; gbMsg(''); $('#gbEmail').focus(); };
   $('#gbEmailRow').onsubmit = gbSendCode; $('#gbCodeRow').onsubmit = gbVerify; $('#gbLogout').onclick = gbLogout;
   $('#gbExt').onclick = () => { location.href = 'kakaotalk://web/openExternal?url=' + encodeURIComponent(location.href); };
-  W.meLabel.el.addEventListener('click', e => { e.stopPropagation(); openGb(); });   // 내 이름표를 누르면 길벗 카드
+  W.meLabel.el.addEventListener('click', e => { e.stopPropagation(); openGb(); });   // 내 이름표를 누르면 내 정보
   authInit(false); renderGb();
-  $('#nearSit').onclick = e => { e.stopPropagation(); const k = $('#nearSit').dataset.k; if (k === 'cafe') goCafe(); else if (k === 'spring') drinkSpring(); else goCircle(); };
+  $('#nearSit').onclick = e => { e.stopPropagation(); const k = $('#nearSit').dataset.k; if (k === 'book' || k === 'bookAsk') openBook(); else if (k === 'hall') { S.medPlace = 'hall'; openMedCard(); } else if (k === 'cafe') goCafe(); else if (k === 'spring') drinkSpring(); else goCircle(); };
   $('#actAlt').onclick = e => { e.stopPropagation(); if (player.act && player.act.type === 'focus' && FOCUS.phase !== 'break') { openFocusCard(); return; } $('#actAlt').hidden = true; startBreath(); };
   $('#focusGo').onclick = beginFocus; $('#focusCancel').onclick = () => { $('#focusCard').hidden = true; };
   $('#focusVol').oninput = () => { FOCUS.vol = +$('#focusVol').value; store.set('focusVol', FOCUS.vol); focusVolume(0.2); };
@@ -7267,6 +7474,8 @@ function bindUI() {
   document.querySelectorAll('#radioSeg button').forEach(b => b.onclick = () => setRadio(b.dataset.r === '1')); setRadio(RADIO.on);
   addEventListener('pointerdown', radioKick, true);
   $('#medGo').onclick = beginMeditate; $('#medCancel').onclick = () => { $('#medCard').hidden = true; };
+  $('#bookSend').onclick = bookSend; $('#bookClose').onclick = () => { $('#bookCard').hidden = true; };
+  $('#bookInput').addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter') bookSend(); });   // 글을 쓰는 동안 걷지 않게
   S.medMin = store.get('medMin', 5); S.medBell = store.get('medBell', true); S.medAwake = store.get('medAwake', true);
   $('#cafeCancel').onclick = () => { $('#cafeCard').hidden = true; S.goCafe = false; }; $('#campCancel').onclick = () => { $('#campCard').hidden = true; };
   $('#wakeBtn').onclick = e => { e.stopPropagation(); wakeCamp(); };
@@ -7348,12 +7557,12 @@ function boot() {
   try { buildWorld(); } catch (err) { $('#loading').textContent = i18n('산길을 그리지 못했어요: ') + err.message; console.error(err); return; }
   translateDom();
   if (coarse) $('#photoHint').textContent = i18n('사진을 길게 눌러 저장하세요.');
-  initState(); addCafeCp(); initLabels(); buildProfiles(); bindUI(); courseTexts();
+  initState(); addCafeCp(); addHallCp(); initLabels(); buildProfiles(); bindUI(); courseTexts();
   setSeason(S.season); setMute(S.mute); updateWalkBtn(); setRain(S.rain && !S.season, false);
   $('#start').hidden = false; $('#enterBtn').disabled = false; $('#enterMed').disabled = false; $('#enterFocus').disabled = false; $('#enterFire').disabled = false; fireLoad(true);
   if (store.get('autoEnter', false)) { store.set('autoEnter', false); $('#enterBtn').focus(); }
   const ld = $('#loading'); ld.style.opacity = 0; setTimeout(() => { ld.hidden = true; }, 600);
-  window.__sangil = { keys, setRain, hitObstacle, OBS, CIRCLE, sitCircle, goCircle, sendChat, inCircle, S, player, TN, getH, CPS, startAct, cam, NET, NPCS, greet, sendChat, W, netState, startCamp, wakeCamp, openCampCard, goCafe, startCafe, DRINKS, CAFE, H5, answerHi5, showHi5Ask, MED, TX, TZ, IS_PARK };
+  window.__sangil = { keys, setRain, hitObstacle, OBS, CIRCLE, sitCircle, goCircle, sendChat, inCircle, S, player, TN, getH, CPS, startAct, cam, NET, NPCS, greet, sendChat, W, netState, startCamp, wakeCamp, openCampCard, goCafe, startCafe, DRINKS, CAFE, H5, answerHi5, showHi5Ask, MED, TX, TZ, IS_PARK, HALL };
   requestAnimationFrame(t => { lastNow = t; frame(t); });
 }
 setTimeout(boot, 30);
