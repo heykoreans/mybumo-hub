@@ -400,7 +400,7 @@ body.calm #trailCard,body.calm #hint{opacity:0;pointer-events:none}
 .evList .row p{font-size:14px;line-height:1.5;color:#3a463e;overflow-wrap:anywhere}
 .evList .row small{font-size:12px;color:var(--ink-soft)}
 .evList .row .acts{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:4px}
-.evList .row .acts .secondary{width:auto;padding:8px 14px;font-size:13.5px}
+.evList .row .acts .secondary{width:auto;padding:8px 14px;font-size:13.5px;margin-left:6px}
 .evList .row .acts .secondary[aria-pressed="true"]{background:var(--pine);color:#f4eee2;border-color:var(--pine)}
 .evList .row .acts .linkbtn{color:var(--ink-soft)}
 .evIn{width:100%;font:inherit;font-size:16px;color:var(--ink);background:#f7f2e8;border:0;border-radius:12px;padding:12px;-webkit-user-select:text;user-select:text}
@@ -547,6 +547,7 @@ body.calm #trailCard,body.calm #hint{opacity:0;pointer-events:none}
     <button data-act="cafe"><svg class="ico" viewBox="0 0 24 24"><path d="M5 9h11v5a5 5 0 0 1-5 5h-1a5 5 0 0 1-5-5zM16 10.5h1.5a2.5 2.5 0 0 1 0 5H16M8 3.5c-.6.8-.6 1.7 0 2.5M11.5 3.5c-.6.8-.6 1.7 0 2.5M4 21h14"/></svg><span>카페</span></button>
     <button data-act="circle"><svg class="ico" viewBox="0 0 24 24"><path d="M12 4c2 2.5 3 4 3 6a3 3 0 0 1-6 0c0-1 .5-2 1.2-2.8.3 1 .9 1.6 1.8 1.6C12 7.5 12 6 12 4zM5 19.5l14-4M19 19.5l-14-4"/></svg><span>모닥불 쉼터</span></button>
     <button data-act="camp"><svg class="ico" viewBox="0 0 24 24"><path d="M3 20 12 5l9 15M12 5v15M9.5 20 12 15l2.5 5M2 20h20"/></svg><span>야영하기</span></button>
+    <button data-act="play"><svg class="ico" viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><circle cx="16.5" cy="8" r="2.6"/><path d="M12.5 12.5 14.6 10M3 20h18"/></svg><span>눈싸움·경도</span></button>
     <button data-act="events"><svg class="ico" viewBox="0 0 24 24"><path d="M4 10v4l3 .6V9.4zM7 9.4 18 5v14L7 14.6M9.5 15.4l1.2 4h2.6l-1-3.2M20.5 10.5v3"/></svg><span>공지·모임</span></button>
     <button data-act="book"><svg class="ico" viewBox="0 0 24 24"><path d="M12 6.5C10 5 7.5 4.5 4 5v13c3.5-.5 6 0 8 1.5 2-1.5 4.5-2 8-1.5V5c-3.5-.5-6 0-8 1.5zM12 6.5v13"/></svg><span>방명록</span></button>
   </div>
@@ -1272,6 +1273,17 @@ const EN = {"센트럴파크":"Central Park",
 "{0}분 명상을 마쳤어요. 이 고요함을 안고 다시 걸어요":"{0}-minute meditation done. Carry this calm with you",
 "스트레스를 후~ 날려 보냈어요. 숨이 한결 고르네요":"Stress, blown away. Your breath feels steadier",
 "내 정보":"My profile",
+"눈덩이 대장":"Snowball Chief",
+"날쌘 청설모":"Quick Squirrel",
+"장난꾸러기 참새":"Cheeky Sparrow",
+"혼자여도 괜찮아요. 산책객 셋이 상대 팀이 되어 줘요. '경기 시작'을 누르면 3분 경기예요":"Playing alone is fine. Three strollers will be the other team. Press Start match for a 3-minute game.",
+"혼자여도 괜찮아요. 산책객 셋이 눈싸움 상대가 되어 줘요":"Playing alone is fine. Three strollers will throw snow with you.",
+"센트럴파크 쉽 메도우로 건너가요":"Heading over to Sheep Meadow in Central Park",
+"이미 놀이 중이에요. 화면 아래 단추를 써 보세요":"You're already playing. Use the buttons at the bottom.",
+"쉽 메도우에 왔어요. 경찰이나 도둑을 골라 주세요":"You're at Sheep Meadow. Pick cop or robber.",
+"쉽 메도우에 왔어요. 팀을 고르면 바로 눈싸움이 시작돼요":"You're at Sheep Meadow. Pick a team and the snowball fight begins.",
+"눈싸움·경도":"Snow games",
+"하러 가기":"Go play",
 "경도 (경찰과 도둑)":"Cops and robbers",
 "경찰":"Cop",
 "도둑":"Robber",
@@ -3299,6 +3311,7 @@ function initLabels() {
   for (const n of NPCS) { const L = addLabel(`<em>${NPC_TAG}</em><span></span>`, 'npc', () => [n.x, n.y + 2.4 - 0.47 * n.sit, n.z], 38); L.el.querySelector('span').textContent = n.name; L.hideIf = () => !showNpcs(); n.label = L; }
   if (!IS_PARK) addLabel(i18n('<i></i><span>구름폭포</span>'), 'place', () => [W.fallLip[0], W.fallLip[1] + 3.2, W.fallLip[2]], 110);
   else for (const [nm, x, z] of [[i18n('더 레이크'), -14, -86], [i18n('저수지'), 0, 50], [i18n('그레이트 론'), 0, -2], [i18n('쉽 메도우'), -24, -168]]) addLabel(`<i></i><span>${nm}</span>`, 'place', () => [x, 6, z], 120);
+  for (let i = 0; i < 3; i++) { const L = addLabel(`<em>${NPC_TAG}</em><span></span>`, 'npc', () => { const b = SNOW.bots[i]; return b ? [b.x, b.y + 2.4, b.z] : [0, -9999, 0]; }, 45); L.hideIf = () => !SNOW.bots[i]; L.botI = i; SNOW.botLabels = SNOW.botLabels || []; SNOW.botLabels.push(L); }
   if (TAG.zone) { const L = addLabel(i18n('<i></i><span>경도 감옥</span>'), 'place', () => [TAG.jx, groundY(TAG.jx, TAG.jz) + 3, TAG.jz], 90); L.hideIf = () => !TAG.on && !tagN(1) && !tagN(2); }
   if (RINK) addLabel(i18n('<i></i><span>울먼 링크</span>'), 'place', () => [RINK.x, RINK.y + 5.5, RINK.z], 110);
   if (IS_PARK) for (const [nm, x, y, z] of CITY_MARKS) { const L = addLabel('<i></i><span></span>', 'place', () => [x, y, z], 210); L.el.querySelector('span').textContent = nm; }   // 이름난 건물
@@ -4298,6 +4311,7 @@ function startAct(type, go) {
   if (type === 'fire') { openFireCard(); return; }
   if (type === 'book') { openBook(); return; }
   if (type === 'events') { openEvents(); return; }
+  if (type === 'play') { goPlay('snow'); return; }
   if (S.breath) stopBreath();
   if (player.act && GREETS.includes(player.act.type)) player.act = null;
   if (player.act) { if (player.act.type === 'meditate' && type === 'meditate') standUp(); else toast(i18n('하던 걸 마저 하고 할게요')); return; }
@@ -5700,6 +5714,7 @@ function drawOpaque(shadowPass) {   // 땅, 나무, 바위, 사람, 강아지 (�
   if (!shadowPass) drawGrass();
   const npcOn = showNpcs();
   if (npcOn) for (const n of NPCS) if (Math.hypot(n.x - eye[0], n.z - eye[2]) < 140) drawHiker(n, false);
+  for (const n of SNOW.bots) drawHiker(n, false);   // 눈싸움 상대가 되어 주는 산책객
   for (const p of NET.peers.values()) if (p.ready && !p.hidden && Math.hypot(p.x - eye[0], p.z - eye[2]) < 160) {
     if (p.act && p.act.type === 'camp' && p.act.spot) drawCamp(p.act.spot, smooth(0, 1.8, p.act.t), p.act.t > 2.4, p.jacket);
     if (!inTent(p)) drawChar(p, false, shadowPass);
@@ -5740,6 +5755,7 @@ function render() {
   if (S.started && !inTent(player)) drawShadow(player.x, player.z, 0.62);
   if (S.started && myDog() && DOG.placed && !inTent(player)) drawShadow(DOG.x, DOG.z, 0.42 * ((DOG_COATS[DOG.coat] || {}).s || 1));
   if (npcOn) for (const n of NPCS) if (Math.hypot(n.x - eye[0], n.z - eye[2]) < 80) drawShadow(n.x, n.z, 0.6);
+  for (const n of SNOW.bots) drawShadow(n.x, n.z, 0.6);
   for (const p of NET.peers.values()) if (p.ready && !p.hidden && Math.hypot(p.x - eye[0], p.z - eye[2]) < 80) drawShadow(p.x + (p.ox || 0), p.z + (p.oz || 0), 0.6);
   drawSeatMarks(); drawFindSparkles(); drawVoiceRings();
   if (marker) { const a = 1 - marker.t / 1.6, s = 0.5 + marker.t * 0.6; draw(W.uRing, { model: M.chain(M.T(marker.x, getH(marker.x, marker.z) + 0.1, marker.z), M.S(s)), tint: [1, 1, 1], alpha: a * 0.85, emissive: 0.8, flat: 0, snowable: 0 }); }
@@ -6032,19 +6048,58 @@ function medRecord(mt) {
    센트럴파크 쉽 메도우에서 "눈 놀이"에 들어온 사람끼리만 눈을 던지고 맞는다. 명상하거나 그냥 산책하는 사람은 맞지 않는다.
    던진 사람이 눈덩이의 출발점과 속도를 알리면 각자 화면에서 같은 길로 날아가고, 맞았는지는 맞은 사람 쪽에서 판정해 모두에게 알린다.
    세 번 맞으면 얼굴이 빨개져서 5초 쉰다 (그동안은 맞지 않는다). */
-const SNOW = { on: false, team: 0, match: null, mh: 0, balls: [], hits: 0, got: 0, strikes: 0, restUntil: -1, lastThrow: -9, seq: 0, pingAt: 0, zone: IS_PARK ? LAWNS[0] : null, G: 14, shown: '' };
+const SNOW = { on: false, team: 0, match: null, mh: 0, botMh: 0, bots: [], balls: [], hits: 0, got: 0, strikes: 0, restUntil: -1, lastThrow: -9, seq: 0, pingAt: 0, zone: IS_PARK ? LAWNS[0] : null, G: 14, shown: '' };
 const snowZone = (x, z, k = 1) => !!SNOW.zone && Math.hypot((x - SNOW.zone.x) / SNOW.zone.rx, (z - SNOW.zone.z) / SNOW.zone.rz) < k;
 const snowPlaying = p => (p.snowOn || 0) > T;
 /* 청백 눈싸움: 눈 놀이에 들어올 때 청팀·백팀을 고른다. 두 팀에 한 사람씩 있으면 누구든 '경기 시작'을 눌러 3분 경기를 연다.
    같은 팀끼리는 맞지 않는다. 각자 자기가 맞힌 횟수를 몇 초마다 알리고, 그것을 팀별로 더한 것이 점수다 (서버 없이 서로 알린 숫자로 센다). */
 const SNOW_TEAM = [null, { name: '청팀', col: [0.25, 0.50, 1.0] }, { name: '백팀', col: [1, 1, 1] }], SNOW_LEN = 180;
 const snowLive = () => !!SNOW.match && Date.now() >= SNOW.match.at && Date.now() < SNOW.match.end;
-function snowTeamN(t) { let n = SNOW.on && SNOW.team === t ? 1 : 0; for (const q of NET.peers.values()) if (q.ready && !q.hidden && snowPlaying(q) && (q.snowTeam | 0) === t) n++; return n; }
-function snowScore(t) { const id = SNOW.match ? SNOW.match.id : 0; let n = SNOW.team === t ? SNOW.mh : 0; for (const q of NET.peers.values()) if ((q.snowTeam | 0) === t && q.snowMid === id) n += q.snowMh | 0; return n; }
+function snowTeamN(t) { let n = (SNOW.on && SNOW.team === t ? 1 : 0) + (snowBotsOn() && snowBotTeam() === t ? SNOW.bots.length : 0); for (const q of NET.peers.values()) if (q.ready && !q.hidden && snowPlaying(q) && (q.snowTeam | 0) === t) n++; return n; }
+function snowScore(t) { const id = SNOW.match ? SNOW.match.id : 0; let n = (SNOW.team === t ? SNOW.mh : 0) + (snowBotTeam() === t ? SNOW.botMh : 0); for (const q of NET.peers.values()) if ((q.snowTeam | 0) === t && q.snowMid === id) n += q.snowMh | 0; return n; }
+/* 혼자 왔을 때 상대해 주는 산책객 셋. 눈 놀이를 하는 진짜 사람이 한 명이라도 있으면 나타나지 않는다 (가짜 사람은 사람이 없을 때만).
+   잔디밭을 돌아다니며 몇 초에 한 번 나에게 눈을 던지고, 내 눈에 맞으면 세 번째에 얼굴이 빨개져 5초 쉰다. 팀을 골랐으면 상대 팀이 된다. */
+const snowRealN = () => { let n = 0; for (const q of NET.peers.values()) if (q.ready && !q.hidden && snowPlaying(q)) n++; return n; };
+const snowBotsOn = () => SNOW.on && SNOW.bots.length > 0;
+const snowBotTeam = () => SNOW.team ? 3 - SNOW.team : 0;
+function snowBotsSet(on) {
+  if (!on) { SNOW.bots.length = 0; return; }
+  if (SNOW.bots.length) return;
+  const Z = SNOW.zone, names = [i18n('눈덩이 대장'), i18n('날쌘 청설모'), i18n('장난꾸러기 참새')];
+  for (let i = 0; i < 3; i++) {
+    const a = Math.atan2(player.x - Z.x, player.z - Z.z) + Math.PI + (i - 1) * 0.9, x = Z.x + Math.sin(a) * Z.rx * 0.5, z = Z.z + Math.cos(a) * Z.rz * 0.5;
+    SNOW.bots.push({ bot: true, id: 'bot' + i, name: names[i], nick: names[i], x, z, y: groundY(x, z), heading: 0, phase: Math.random() * 6, moveAmt: 0, sit: 0, act: null, tx: x, tz: z, think: 0, nextThrow: T + 2 + i * 0.9, strikes: 0, snowRedUntil: -1, throwT: 0,
+      jacket: JACKETS[(i * 2 + 1) % JACKETS.length], pants: [0.24, 0.26, 0.30], hat: HATS[(i + 2) % HATS.length], pack: [0.30, 0.28, 0.25], cushion: [0.30, 0.42, 0.36], skin: SKINS[(i * 2 + 1) % SKINS.length], face: [1, 0, 2][i], g: i % 2 });
+  }
+  toast(SNOW.team ? i18n("혼자여도 괜찮아요. 산책객 셋이 상대 팀이 되어 줘요. '경기 시작'을 누르면 3분 경기예요") : i18n('혼자여도 괜찮아요. 산책객 셋이 눈싸움 상대가 되어 줘요'));
+}
+function updateSnowBots(dt) {
+  const want = SNOW.on && snowRealN() === 0 && !(TAG && TAG.on);
+  if (want !== (SNOW.bots.length > 0)) snowBotsSet(want);
+  if (SNOW.botLabels) SNOW.botLabels.forEach((L, i) => { const b = SNOW.bots[i], sp = L.el.querySelector('span'); if (b && sp.textContent !== b.name) sp.textContent = b.name; });
+  for (const b of SNOW.bots) {
+    const rest = T < b.snowRedUntil, dP = Math.hypot(player.x - b.x, player.z - b.z);
+    b.think -= dt;
+    if (b.think <= 0) {   // 나와 6~13 떨어진 잔디밭 안의 새 자리를 고른다
+      b.think = 1.6 + Math.random() * 2.2;
+      for (let k = 0; k < 8; k++) { const a = Math.random() * TAU, r = 6 + Math.random() * 7, x = player.x + Math.sin(a) * r, z = player.z + Math.cos(a) * r; if (snowZone(x, z, 0.92) && walkable(x, z)) { b.tx = x; b.tz = z; break; } }
+    }
+    const mx = b.tx - b.x, mz = b.tz - b.z, l = Math.hypot(mx, mz), go = !rest && l > 0.4;
+    if (go) { const st = Math.min(l, 2.0 * dt); b.x += mx / l * st; b.z += mz / l * st; b.phase += st * 2.4; b.heading = angLerp(b.heading, Math.atan2(mx, mz), 1 - Math.exp(-dt * 8)); }
+    b.moveAmt = lerp(b.moveAmt, go ? 1 : 0, 1 - Math.exp(-dt * 8)); b.y = groundY(b.x, b.z);
+    if (!rest && T >= b.nextThrow && dP < 24 && T >= SNOW.restUntil) {   // 내가 있는 곳 언저리로 던진다 (조금씩 빗나간다)
+      b.nextThrow = T + 2.2 + Math.random() * 2.4;
+      const tx = player.x + (Math.random() - 0.5) * 2.4, tz = player.z + (Math.random() - 0.5) * 2.4, hd = Math.atan2(tx - b.x, tz - b.z);
+      const sx = b.x + Math.sin(hd) * 0.45, sy = b.y + 1.45, sz = b.z + Math.cos(hd) * 0.45, dist = Math.hypot(tx - sx, tz - sz), tf = clamp(dist / 13, 0.4, 1.5);
+      SNOW.balls.push({ id: b.id + ':' + (++SNOW.seq), from: b.id, own: false, bot: true, tm: snowBotTeam(), x: sx, y: sy, z: sz, vx: Math.sin(hd) * dist / tf, vy: (player.y + 1.0 - sy) / tf + 0.5 * SNOW.G * tf, vz: Math.cos(hd) * dist / tf, t: 0 });
+      b.heading = hd; b.throwT = T; if (dP < 30) snowSound('throw');
+    }
+  }
+}
 function snowAdopt(id, at, len) {   // 경기를 받아들인다 (먼저 잡힌 경기가 이긴다)
   if (!(id > 0) || !isFinite(at) || at + len * 1000 < Date.now() || at > Date.now() + 60000) return;
   if (SNOW.match && (SNOW.match.id === id || SNOW.match.at <= at)) return;
-  SNOW.match = { id, at, end: at + len * 1000, done: false }; SNOW.mh = 0; SNOW.strikes = 0; SNOW.pingAt = -99; SNOW.shown = '';
+  SNOW.match = { id, at, end: at + len * 1000, done: false }; SNOW.mh = 0; SNOW.botMh = 0; SNOW.strikes = 0; SNOW.pingAt = -99; SNOW.shown = '';
   for (const q of NET.peers.values()) { q.snowMh = 0; q.snowMid = 0; }
   if (SNOW.on && SNOW.team) { toast(at > Date.now() + 1500 ? i18n('{0}초 뒤 눈싸움 시작! 3분 동안 더 많이 맞힌 팀이 이겨요', Math.ceil((at - Date.now()) / 1000)) : i18n('눈싸움이 한창이에요. 3분 동안 더 많이 맞힌 팀이 이겨요')); if (canSound()) sfx.bowl(0.4); }
 }
@@ -6052,6 +6107,19 @@ function snowMatchStart() {
   if (!SNOW.on || !SNOW.team || SNOW.match) return;
   if (!snowTeamN(1) || !snowTeamN(2)) { toast(i18n('상대 팀에 한 사람이 들어오면 시작할 수 있어요')); return; }
   const at = Date.now() + 5000; netSend({ k: 'snm', id: at, at, len: SNOW_LEN }); snowAdopt(at, at, SNOW_LEN);
+}
+function goPlay(kind) {   // 놀이터(쉽 메도우)로 바로 가서 팀 고르기를 연다. 솔바람산에 있으면 센트럴파크로 건너간다
+  if (!IS_PARK) { store.set('goPlay', kind || 'snow'); toast(i18n('센트럴파크 쉽 메도우로 건너가요')); setTimeout(() => switchCourse('park', true), 700); return; }
+  if (!S.started) { store.set('goPlay', kind || 'snow'); return; }
+  for (const id of ['evCard', 'medCard', 'bookCard']) $('#' + id).hidden = true; closeMenus();
+  if (player.act) { cancelAct(); if (player.act) { toast(i18n('하던 걸 마저 하고 할게요')); return; } }
+  if (S.breath) stopBreath();
+  if (!SNOW.on && !TAG.on && !snowZone(player.x, player.z, 0.8)) {
+    const Z = SNOW.zone, x = Z.x + 4, z = Z.z - Z.rz * 0.45; player.x = x; player.z = z; player.y = groundY(x, z); player.target = null; S.auto = false; S.walkGoal = null; updateWalkBtn(); marker = null;
+    player.heading = 0; cam.yaw = 0; cam.dist = 11; cam.pitch = 0.42; cam.look = 0; netState(true);
+  }
+  if (SNOW.on || TAG.on) { toast(i18n('이미 놀이 중이에요. 화면 아래 단추를 써 보세요')); return; }
+  snowPickOpen(); toast(kind === 'tag' ? i18n('쉽 메도우에 왔어요. 경찰이나 도둑을 골라 주세요') : i18n('쉽 메도우에 왔어요. 팀을 고르면 바로 눈싸움이 시작돼요'));
 }
 function snowPickOpen() {
   $('#tagNc').textContent = tagN(1) ? i18n('{0}명', tagN(1)) : ''; $('#tagNr').textContent = tagN(2) ? i18n('{0}명', tagN(2)) : '';
@@ -6077,7 +6145,7 @@ function snowJoin(team = 0) {
 }
 function snowLeave(quiet) {
   if (!SNOW.on) return;
-  SNOW.on = false; SNOW.restUntil = -1; $('#snowBar').hidden = true; netSend({ k: 'snj', on: 0 }); if (!snowLive()) SNOW.match = null;
+  SNOW.on = false; SNOW.restUntil = -1; SNOW.bots.length = 0; $('#snowBar').hidden = true; netSend({ k: 'snj', on: 0 }); if (!snowLive()) SNOW.match = null;
   if (!quiet) toast(i18n('눈 놀이를 마쳤어요 · 맞힘 {0}번, 맞음 {1}번', SNOW.hits, SNOW.got));
 }
 function snowThrow() {
@@ -6085,6 +6153,7 @@ function snowThrow() {
   SNOW.lastThrow = T;
   let tgt = null, bd = 26;   // 가까이 있는 놀이 상대를 향해 던지고, 없으면 보는 쪽으로 던진다
   for (const q of NET.peers.values()) { if (!q.ready || q.hidden || !snowPlaying(q) || T < (q.snowRedUntil || 0)) continue; if (SNOW.team && ((q.snowTeam | 0) === SNOW.team || (snowLive() && !(q.snowTeam | 0)))) continue; const d = Math.hypot(q.x - player.x, q.z - player.z); if (d < bd && d > 0.8) { bd = d; tgt = q; } }
+  for (const q of SNOW.bots) { if (T < q.snowRedUntil) continue; const d = Math.hypot(q.x - player.x, q.z - player.z); if (d < bd && d > 0.8) { bd = d; tgt = q; } }
   const tx = tgt ? tgt.x : player.x + Math.sin(cam.yaw) * 13, tz = tgt ? tgt.z : player.z + Math.cos(cam.yaw) * 13, ty = (tgt ? tgt.y : groundY(tx, tz)) + (tgt ? 1.0 : 0.2);
   const hd = Math.atan2(tx - player.x, tz - player.z) + (Math.random() - 0.5) * 0.09; player.heading = hd; player.target = null;
   const sx = player.x + Math.sin(hd) * 0.45, sy = player.y + 1.45, sz = player.z + Math.cos(hd) * 0.45, dist = Math.hypot(tx - sx, tz - sz) * (0.96 + Math.random() * 0.08);
@@ -6116,6 +6185,8 @@ function snowNet(p, m) {   // 다른 사람이 보낸 눈 놀이 소식
   }
 }
 function updateSnow(dt) {
+  updateSnowBots(dt);
+  if (!SNOW.playChecked && S.started) { SNOW.playChecked = true; if (store.get('goPlay', '')) { const k = store.get('goPlay', ''); store.set('goPlay', ''); setTimeout(() => goPlay(k), 1800); } }
   if (SNOW.on) {
     if (!S.started || (player.act && !GREETS.includes(player.act.type))) snowLeave(true);
     else if (!snowZone(player.x, player.z, 1.3)) { snowLeave(false); toast(i18n('잔디밭을 벗어나 눈 놀이를 마쳤어요')); }
@@ -6146,17 +6217,21 @@ function updateSnow(dt) {
     if (!b.own && SNOW.on && T >= SNOW.restUntil && !(SNOW.team && (b.tm === SNOW.team || (snowLive() && !b.tm))) && Math.hypot(hx - player.x, hz - player.z) < 0.6 && hy > player.y + 0.05 && hy < player.y + 2.0) {   // 내가 맞았다
       b.x = hx; b.y = hy; b.z = hz;
       SNOW.balls.splice(i, 1); SNOW.got++; SNOW.strikes++; snowSplat(b.x, b.y, b.z, 8); snowSound('hit'); showBubble(player, i18n('앗!'), 1.1, true);
-      netSend({ k: 'snh', b: b.id, by: b.from, x: +b.x.toFixed(2), y: +b.y.toFixed(2), z: +b.z.toFixed(2), n: SNOW.strikes });
+      if (b.bot) { if (snowLive() && SNOW.team) SNOW.botMh++; } else netSend({ k: 'snh', b: b.id, by: b.from, x: +b.x.toFixed(2), y: +b.y.toFixed(2), z: +b.z.toFixed(2), n: SNOW.strikes });
       if (SNOW.strikes >= 3) { SNOW.strikes = 0; SNOW.restUntil = T + 5; player.target = null; netSend({ k: 'snr' }); toast(i18n('눈을 세 번 맞았어요. 얼굴이 빨개져서 5초 쉬어요')); }
       continue;
     }
+    if (b.own && SNOW.bots.length) { let hitBot = null; for (const q of SNOW.bots) { if (T < q.snowRedUntil) continue; const u2 = l2 > 1e-6 ? clamp(((q.x - px) * dx + (q.z - pz) * dz) / l2, 0, 1) : 1, qx = px + dx * u2, qy = py + (b.y - py) * u2, qz = pz + dz * u2; if (Math.hypot(qx - q.x, qz - q.z) < 0.6 && qy > q.y + 0.05 && qy < q.y + 2.0) { hitBot = q; b.x = qx; b.y = qy; b.z = qz; break; } }
+      if (hitBot) { SNOW.balls.splice(i, 1); snowSplat(b.x, b.y, b.z, 8); snowSound('hit'); showBubble(hitBot, i18n('앗!'), 1.1, true); SNOW.hits++; if (snowLive() && SNOW.team) SNOW.mh++; hitBot.strikes++;
+        if (hitBot.strikes >= 3) { hitBot.strikes = 0; hitBot.snowRedUntil = T + 5; toast(i18n('{0}님을 세 번 맞혔어요! 5초 쉬러 갔어요', hitBot.name)); }
+        continue; } }
     if (b.y <= groundY(b.x, b.z) + 0.06) { if (Math.hypot(b.x - eye[0], b.z - eye[2]) < 60) snowSplat(b.x, b.y + 0.1, b.z, 4); SNOW.balls.splice(i, 1); continue; }
     if (b.t > 3.5) SNOW.balls.splice(i, 1);
   }
 }
 function drawSnowTeams() {   // 발밑의 팀 색 동그라미
   const ring = (c, t) => draw(W.uRing, { model: M.chain(M.T(c.x, c.y + 0.07, c.z), M.S(0.62)), tint: SNOW_TEAM[t].col, alpha: 0.9, emissive: 0.7, flat: 0, snowable: 0 });
-  if (SNOW.on && SNOW.team) ring(player, SNOW.team);
+  if (SNOW.on && SNOW.team) { ring(player, SNOW.team); for (const q of SNOW.bots) ring(q, snowBotTeam()); }
   for (const q of NET.peers.values()) if (q.ready && !q.hidden && snowPlaying(q) && (q.snowTeam | 0) && Math.hypot(q.x - eye[0], q.z - eye[2]) < 80) ring(q, q.snowTeam);
 }
 function drawSnowballs() { drawSnowTeams(); for (const b of SNOW.balls) draw(W.uSphere, { model: M.chain(M.T(b.x, b.y, b.z), M.S(0.13)), tint: [1, 1, 1], emissive: 0.3, flat: 0, snowable: 0 }); }
@@ -6341,6 +6416,7 @@ function renderEvents() {
     acts.appendChild(who);
     const right = el('span');
     if (e.mine) { const x = el('button', 'linkbtn', i18n('내리기')); x.type = 'button'; x.onclick = () => evCancel(e.id); right.appendChild(x); }
+    if (e.kind === 'snow' || e.kind === 'tag') { const gbtn = el('button', 'secondary', i18n('하러 가기')); gbtn.type = 'button'; gbtn.setAttribute('aria-pressed', String(isFinite(at) && left < 30 && left > -120)); gbtn.onclick = () => goPlay(e.kind); right.appendChild(gbtn); }
     if (isFinite(at)) { const b = el('button', 'secondary', e.my_rsvp ? i18n('참여 신청함') : AUTH.user ? i18n('참여 신청') : i18n('로그인하고 참여')); b.type = 'button'; b.setAttribute('aria-pressed', String(!!e.my_rsvp)); b.onclick = () => evRsvp(e); right.appendChild(b); }
     acts.appendChild(right); row.appendChild(acts); box.appendChild(row);
   }
@@ -8521,7 +8597,7 @@ function boot() {
   $('#start').hidden = false; $('#enterBtn').disabled = false; $('#enterMed').disabled = false; $('#enterFocus').disabled = false; $('#enterFire').disabled = false; fireLoad(true); evLoad(true);
   if (store.get('autoEnter', false)) { store.set('autoEnter', false); $('#enterBtn').focus(); }
   const ld = $('#loading'); ld.style.opacity = 0; setTimeout(() => { ld.hidden = true; }, 600);
-  window.__sangil = { keys, setRain, hitObstacle, OBS, CIRCLE, sitCircle, goCircle, sendChat, inCircle, S, player, TN, getH, CPS, startAct, cam, NET, NPCS, greet, sendChat, W, netState, startCamp, wakeCamp, openCampCard, goCafe, startCafe, DRINKS, CAFE, H5, answerHi5, showHi5Ask, MED, TX, TZ, IS_PARK, HALL, RINK, MELT, PRINTS, SNOW, snowJoin, snowThrow, ME, TAG, tagJoin, tagAction, tagStart, tagDecoys, proj: (x, y, z) => { const v = M.xf(VP, x, y, z); return [v[0] / v[3], v[1] / v[3], v[3]]; }, startCampNow: () => { S.campFire = true; startCamp(); } };
+  window.__sangil = { keys, setRain, hitObstacle, OBS, CIRCLE, sitCircle, goCircle, sendChat, inCircle, S, player, TN, getH, CPS, startAct, cam, NET, NPCS, greet, sendChat, W, netState, startCamp, wakeCamp, openCampCard, goCafe, startCafe, DRINKS, CAFE, H5, answerHi5, showHi5Ask, MED, TX, TZ, IS_PARK, HALL, RINK, MELT, PRINTS, SNOW, snowJoin, snowThrow, ME, TAG, tagJoin, tagAction, tagStart, tagDecoys, goPlay, proj: (x, y, z) => { const v = M.xf(VP, x, y, z); return [v[0] / v[3], v[1] / v[3], v[3]]; }, startCampNow: () => { S.campFire = true; startCamp(); } };
   requestAnimationFrame(t => { lastNow = t; frame(t); });
 }
 setTimeout(boot, 30);
