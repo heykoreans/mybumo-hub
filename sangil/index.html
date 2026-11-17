@@ -4500,6 +4500,21 @@ function recolorTrees() {
   syncInst(W.dec, lastSb < 0.0001 || !W.dec.offSynced); syncInst(W.con, !W.con.offSynced); W.dec.offSynced = W.con.offSynced = true;
   treeLOD(true); shTreeAt = null;
 }
+/* 카메라와 나 사이를 가릴 수 있는 건물들 (지붕과 벽). 가리면 카메라를 그 앞까지 당긴다 */
+function buildCamBlocks() {
+  const out = [], obox = (cx, cz, hw, hd, yaw, y0, y1) => { const c = Math.cos(yaw), s = Math.sin(yaw);
+    out.push({ x: cx, z: cz, r: Math.hypot(hw, hd), hit: (x, y, z) => { if (y < y0 || y > y1) return false; const dx = x - cx, dz = z - cz; return Math.abs(c * dx - s * dz) < hw && Math.abs(s * dx + c * dz) < hd; } }); };
+  out.push({ x: CAFE.x, z: CAFE.z, r: 8, hit: (x, y, z) => { if (y < CAFE.h - 0.5 || y > CAFE.h + 4.3) return false; const [lx, lz] = CAFE.local(x, z); return Math.abs(lx) < 4.1 && lz > -5.8 && lz < -1.0; } });
+  if (IS_PARK) {
+    const y = pads[2].h;   // 벨베데레 성: 본채, 네모 탑, 둥근 탑
+    obox(CASTLE.x + 1.4, CASTLE.z + 0.6, 3.5, 2.5, 0, y - 1, y + 5.1); obox(CASTLE.x - 2.1, CASTLE.z - 0.9, 1.7, 1.7, 0, y - 1, y + 10.3); obox(CASTLE.x + 3.9, CASTLE.z - 1.6, 1.4, 1.4, 0, y - 1, y + 9.4);
+  } else {
+    const gy = getH(TX[3], TZ[3]);   // 산길 입구 문의 들보와 지붕
+    obox(TX[3], TZ[3], 3.5, 0.55, Math.atan2(TX[5] - TX[1], TZ[5] - TZ[1]), gy + 2.4, gy + 4.1);
+    obox(PV.x, PV.z, 4.5, 4.5, PV_YAW, pads[1].h + 3.5, pads[1].h + 6.4);   // 솔숲 정자 지붕
+  }
+  return out;
+}
 function updateCamera(dt) {
   let tgt, desired;
   if (S.started) {
@@ -4525,14 +4540,24 @@ function updateCamera(dt) {
     if (IS_PARK) { tgt = [0, 6, -70 - Math.cos(a) * 60]; desired = [Math.sin(a) * 34, 62, -70 + Math.cos(a) * 165]; }
     else { tgt = [10, 34, -30]; desired = [tgt[0] + Math.cos(a) * 185, 118, tgt[2] + Math.sin(a) * 185]; }
   }
-  if (S.started) {   // 나무에 가리면 카메라를 앞으로 당긴다
+  if (S.started) {   // 언덕, 나무, 건물에 가리면 내 모습이 보이게 카메라를 옮긴다
+    if (!cam.blk) cam.blk = buildCamBlocks();
+    {   // 언덕이나 바위가 사이에 있으면 카메라를 들어 올려 그 위로 본다
+      const ex = desired[0] - tgt[0], ez = desired[2] - tgt[2], Lh = Math.hypot(ex, ez), n = Math.max(4, Math.ceil(Lh / 1.5));
+      let endY = desired[1];
+      for (let i = Math.ceil(n * 0.3); i <= n; i++) { const f = i / n, need = getH(tgt[0] + ex * f, tgt[2] + ez * f) + 0.5; if (tgt[1] + (desired[1] - tgt[1]) * f < need) endY = Math.max(endY, tgt[1] + (need - tgt[1]) / f); }
+      if (endY > desired[1]) desired[1] = Math.min(endY, tgt[1] + Lh * 1.6 + 2);
+    }
     const dx = desired[0] - tgt[0], dy = desired[1] - tgt[1], dz = desired[2] - tgt[2], L = Math.hypot(dx, dy, dz);
+    const blk = cam.blk.filter(o => Math.hypot(o.x - tgt[0], o.z - tgt[2]) < o.r + L + 2);
     let lim = L;
-    for (let s2 = 1.6; s2 < L; s2 += 0.6) {
+    for (let s2 = 1.6; s2 < L; s2 += 0.5) {
       const x = tgt[0] + dx * s2 / L, y = tgt[1] + dy * s2 / L, z = tgt[2] + dz * s2 / L, cell = W.treeGrid.get(Math.floor(x / 8) + ',' + Math.floor(z / 8));
       let hit = false;
       if (cell) for (const t of cell) if (y > t[2] && y < t[3] && Math.hypot(x - t[0], z - t[1]) < t[4]) { hit = true; break; }
       if (!hit) for (const [ox, oz] of [[8, 0], [-8, 0], [0, 8], [0, -8]]) { const c2 = W.treeGrid.get(Math.floor((x + ox * 0.35) / 8) + ',' + Math.floor((z + oz * 0.35) / 8)); if (c2 && c2 !== cell) for (const t of c2) if (y > t[2] && y < t[3] && Math.hypot(x - t[0], z - t[1]) < t[4]) { hit = true; break; } if (hit) break; }
+      if (!hit) for (const o of blk) if (o.hit(x, y, z)) { hit = true; break; }
+      if (!hit && IS_PARK && (Math.abs(x) > PARK.hw + 15 || Math.abs(z) > PARK.hl + 15)) hit = true;   // 공원 밖 건물 속으로 들어가지 않는다
       if (hit) { lim = Math.max(2.6, s2 - 0.8); break; }
     }
     cam.lim = lerp(cam.lim || L, lim, 1 - Math.exp(-dt * (lim < (cam.lim || L) ? 10 : 2)));
