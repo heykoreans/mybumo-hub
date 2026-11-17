@@ -245,6 +245,15 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{ou
 .gbMed{padding:12px 14px;border-radius:14px;background:#e9f0ea;color:var(--ink);font-size:14px;line-height:1.5}
 .gbMed b{font-family:var(--font-display);font-size:16px}
 .gbMed small{display:block;color:var(--ink-soft);font-size:12.5px}
+.mcNav{display:flex;align-items:center;justify-content:space-between;margin:10px 0 6px;font-family:var(--font-display);font-size:14px}
+.mcNav button{width:30px;height:30px;border-radius:99px;font-size:17px;line-height:1;color:var(--ink)}
+.mcNav button:disabled{opacity:.25}
+.mcGrid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;text-align:center;font-size:12px;font-variant-numeric:tabular-nums}
+.mcGrid i{font-style:normal;color:var(--ink-soft);font-size:11px;padding-bottom:2px}
+.mcGrid span{aspect-ratio:1;display:grid;place-items:center;border-radius:99px;color:var(--ink-soft)}
+.mcGrid span.on{background:#5f8f72;color:#fff;font-weight:700}
+.mcGrid span.today{box-shadow:inset 0 0 0 1.5px #5f8f72;color:var(--ink)}
+.mcGrid span.on.today{box-shadow:inset 0 0 0 1.5px #2f5a41;color:#fff}
 .gbWear{flex-wrap:wrap;margin-top:8px}
 .gbWear button{flex:none;padding:6px 11px;font-size:12.5px;background:#fbf8f1}
 .gbWear button[aria-pressed="false"]{opacity:.55;text-decoration:line-through}
@@ -537,6 +546,7 @@ body.calm #trailCard,body.calm #hint{opacity:0;pointer-events:none}
     <div style="display:grid;gap:8px"><span class="lab" id="gbDogLab">함께 걷는 강아지</span><div class="chips" id="gbDog"><button data-d="0">없이</button><button data-d="1">황구</button><button data-d="2">백구</button><button data-d="3">흑구</button><button data-d="4">몰티즈</button><button data-d="5">푸들</button><button data-d="6">포메라니안</button></div>
       <label class="pcheck" id="gbLeashRow"><input type="checkbox" id="gbLeash" checked><span>목줄 채우기<small>함께 걸을 때는 목줄을 해 주세요</small></span></label></div>
     <div class="gbMed" id="gbMed"></div>
+    <div class="gbMed" id="gbCal" hidden></div>
     <div class="gbMed" id="gbFocus"></div>
     <div style="display:grid;gap:8px"><span class="lab" id="gbNoteLab">쪽지</span><div class="gbNotes" id="gbNotes"></div></div>
     <div style="display:grid;gap:8px"><span class="lab" id="gbBagLab">주머니</span><div class="bag" id="gbBag"></div></div>
@@ -1173,6 +1183,16 @@ const EN = {"센트럴파크":"Central Park",
 "{0}분 명상을 마쳤어요. 이 고요함을 안고 다시 걸어요":"{0}-minute meditation done. Carry this calm with you",
 "스트레스를 후~ 날려 보냈어요. 숨이 한결 고르네요":"Stress, blown away. Your breath feels steadier",
 "길벗 카드":"Hiker card",
+"연속 {0}일":"{0}-day streak",
+"아직 연속 기록이 없어요":"No streak yet",
+"오늘 명상을 했어요":"You meditated today",
+"오늘은 아직 명상 전이에요":"No meditation yet today",
+"명상한 날 {0}일":"{0} days meditated",
+"하루 쉬어도 이어져요 (7일에 한 번)":"One rest day per week keeps your streak",
+"로그인하면 명상 달력과 연속 일수가 쌓여요":"Sign in to keep a meditation calendar and streak",
+"{0}번째 명상이었어요 · 연속 {1}일":"That was meditation #{0} · {1}-day streak",
+"이전 달":"Previous month",
+"다음 달":"Next month",
 "길벗 카드 보기":"Open hiker card",
 "피부색":"Skin tone",
 "얼굴":"Face",
@@ -5182,10 +5202,52 @@ const medServer = () => !!(AUTH.user && AUTH.profile && Number.isInteger(AUTH.pr
 function medN() { return medServer() ? AUTH.profile.med_count : (store.get('medAnon', 0) | 0); }
 function medAnonAdd(k, mins) { store.set('medAnon', (store.get('medAnon', 0) | 0) + k); store.set('medAnonMin', (store.get('medAnonMin', 0) | 0) + mins); }
 async function medPush(k, mins) {   // 서버에 k번 더한다. 돌려받은 숫자가 진짜 숫자
-  const sb = await getSB(), { data, error } = await sb.rpc('sangil_add_meditation', { p_n: k, p_minutes: mins });
+  const sb = await getSB(); let { data, error } = await sb.rpc('sangil_add_meditation', { p_n: k, p_minutes: mins, p_day: todayKey() });
+  if (error && /PGRST202|Could not find the function/i.test((error.code || '') + ' ' + (error.message || ''))) ({ data, error } = await sb.rpc('sangil_add_meditation', { p_n: k, p_minutes: mins }));   // 새 SQL을 아직 안 돌렸을 때
   if (error) throw error;
-  if (data && Number.isInteger(data.count) && AUTH.profile) { AUTH.profile.med_count = data.count; AUTH.profile.med_minutes = data.minutes | 0; }
+  if (data && Number.isInteger(data.count) && AUTH.profile) { AUTH.profile.med_count = data.count; AUTH.profile.med_minutes = data.minutes | 0; if (Number.isInteger(data.streak)) AUTH.profile.med_streak = data.streak; }
+  if (k === 1) medCalLoad(true);
   return data;
+}
+/* 명상 달력: 서버가 날짜별 기록과 연속 일수를 준다 (하루의 기준은 이 기기의 오늘). 로그인한 사람만 */
+const MEDCAL = { data: null, at: 0, ym: null, busy: false, uid: '' };
+async function medCalLoad(force) {
+  if (!medServer() || MEDCAL.busy) return;
+  if (MEDCAL.uid !== AUTH.user.id) { MEDCAL.data = null; MEDCAL.ym = null; MEDCAL.uid = AUTH.user.id; }
+  if (!force && MEDCAL.data && Date.now() - MEDCAL.at < 60000) return;
+  MEDCAL.busy = true;
+  try {
+    const sb = await getSB(), { data, error } = await sb.rpc('sangil_med_calendar', { p_today: todayKey(), p_from: '2000-01-01' });
+    if (!error && data && Array.isArray(data.days)) { MEDCAL.data = data; MEDCAL.at = Date.now(); if (AUTH.profile) AUTH.profile.med_streak = data.streak | 0; }
+  } catch (e) {}
+  MEDCAL.busy = false; renderMedCal();
+}
+function renderMedCal() {
+  const box = $('#gbCal'); if (!box) return;
+  const el = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt !== undefined) e.textContent = txt; return e; };
+  box.textContent = '';
+  if (!AUTH.user) { box.hidden = false; box.appendChild(el('small', '', i18n('로그인하면 명상 달력과 연속 일수가 쌓여요'))); return; }
+  const d = MEDCAL.uid === AUTH.user.id ? MEDCAL.data : null;
+  if (!d) { box.hidden = true; return; }
+  box.hidden = false;
+  const streak = d.streak | 0, today = String(d.today), on = new Map(d.days.map(r => [String(r[0]), r[1] | 0]));
+  box.appendChild(el('b', '', streak > 0 ? i18n('연속 {0}일', streak) : i18n('아직 연속 기록이 없어요')));
+  box.appendChild(el('small', '', (d.done_today ? i18n('오늘 명상을 했어요') : i18n('오늘은 아직 명상 전이에요')) + ' · ' + i18n('명상한 날 {0}일', d.total_days | 0) + ' · ' + i18n('하루 쉬어도 이어져요 (7일에 한 번)')));
+  const ymOf = k => k.slice(0, 7), nowYm = ymOf(today), firstYm = d.days.length ? ymOf(String(d.days[0][0])) : nowYm;
+  if (!MEDCAL.ym || MEDCAL.ym > nowYm || MEDCAL.ym < firstYm) MEDCAL.ym = nowYm;
+  const [y, m] = MEDCAL.ym.split('-').map(Number), shift = k => { const t = new Date(y, m - 1 + k, 1); return t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0'); };
+  const nav = el('div', 'mcNav'), prev = el('button', '', '‹'), next = el('button', '', '›');
+  prev.type = next.type = 'button'; prev.setAttribute('aria-label', i18n('이전 달')); next.setAttribute('aria-label', i18n('다음 달'));
+  prev.disabled = MEDCAL.ym <= firstYm; next.disabled = MEDCAL.ym >= nowYm;
+  prev.onclick = () => { MEDCAL.ym = shift(-1); renderMedCal(); }; next.onclick = () => { MEDCAL.ym = shift(1); renderMedCal(); };
+  nav.appendChild(prev); nav.appendChild(el('span', '', new Date(y, m - 1, 1).toLocaleDateString(LANG === 'ko' ? 'ko-KR' : 'en-US', { year: 'numeric', month: 'long' }))); nav.appendChild(next);
+  box.appendChild(nav);
+  const grid = el('div', 'mcGrid');
+  for (const w of (LANG === 'ko' ? '일월화수목금토' : 'SMTWTFS')) grid.appendChild(el('i', '', w));
+  const lead = new Date(y, m - 1, 1).getDay(), last = new Date(y, m, 0).getDate();
+  for (let i = 0; i < lead; i++) grid.appendChild(el('span', '', ''));
+  for (let day = 1; day <= last; day++) { const k = MEDCAL.ym + '-' + String(day).padStart(2, '0'), c = el('span', (on.get(k) ? 'on' : '') + (k === today ? ' today' : ''), day); grid.appendChild(c); }
+  box.appendChild(grid);
 }
 async function medMerge() {   // 로그인 전에 이 기기에서 한 명상을 계정 기록에 더한다
   const k = Math.min(50, store.get('medAnon', 0) | 0), mins = store.get('medAnonMin', 0) | 0;
@@ -5203,7 +5265,7 @@ function medRecord(mt) {
   } else medAnonAdd(1, mins);
   const b4 = medTierOf(before), after = medTierOf(n);
   if (after > b4) { const t = MED_TIERS[after - 1]; setTimeout(() => { toast(i18n('명상 {0}번! {1}을(를) 얻었어요 · {2}', n, i18n(t.gift), i18n(t.name))); showBubble(player, i18n(t.name), 3.5); if (canSound()) sfx.bowl(0.7); }, 2400); }
-  else setTimeout(() => toast(i18n('{0}번째 명상이었어요', n)), 2600);
+  else setTimeout(() => { const st = medServer() ? (AUTH.profile.med_streak | 0) : 0; toast(st >= 2 ? i18n('{0}번째 명상이었어요 · 연속 {1}일', n, st) : i18n('{0}번째 명상이었어요', n)); }, 2600);
   retrack(); renderGb();
 }
 function drawSage(c, p, P2, head, has, medSit) {   // 명상 선물: 염주, 싱잉볼, 가방 풍경, 향, 지팡이, 백팔 염주 (방석은 앉는 자리에서)
@@ -6427,7 +6489,7 @@ function openGb(msg) {
   closeMenus();
   if (!$('#gbSkin').children.length) buildGb();
   $('#gbEmailRow').hidden = true; $('#gbCodeRow').hidden = !AUTH.email || !!AUTH.user; $('#gbExt').hidden = true;
-  gbMsg(msg || ''); renderGb(); $('#gbCard').hidden = false;
+  gbMsg(msg || ''); renderGb(); $('#gbCard').hidden = false; medCalLoad();
   loadProviders().then(renderGb);
   authInit(true);
 }
@@ -6482,7 +6544,7 @@ function renderGb() {
     box.querySelector('b').textContent = t ? i18n('명상 {0}번 · {1}', n, i18n(MED_TIERS[t - 1].name)) : i18n('명상 {0}번', n);
     box.querySelector('small').textContent = (next ? i18n('{0}번 더 하면 {1}', next.n - n, i18n(next.gift)) : i18n('산의 모든 모습을 얻었어요')) + (inn ? '' : ' · ' + i18n('로그인하면 어느 기기에서든 이어져요'));
     wearChips(box, MED_TIERS, t, medHideMask(), 'medHide2');
-    setLvBadge($('#meLv'), t); }
+    setLvBadge($('#meLv'), t); renderMedCal(); }
   { const m = focusMinN(), t = focusTierOf(m), next = FOCUS_TIERS[t], box = $('#gbFocus');
     box.innerHTML = '<b></b><small></small>';
     box.querySelector('b').textContent = t ? i18n('집중 {0} · {1}', fmtHM(m), i18n(FOCUS_TIERS[t - 1].name)) : i18n('집중 {0}', fmtHM(m));
