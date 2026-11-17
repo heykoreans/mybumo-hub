@@ -1211,6 +1211,8 @@ const EN = {"센트럴파크":"Central Park",
 "{0}분 명상을 마쳤어요. 이 고요함을 안고 다시 걸어요":"{0}-minute meditation done. Carry this calm with you",
 "스트레스를 후~ 날려 보냈어요. 숨이 한결 고르네요":"Stress, blown away. Your breath feels steadier",
 "내 정보":"My profile",
+"<i></i><span>울먼 링크</span>":"<i></i><span>Wollman Rink</span>",
+"얼음 위에서는 미끄러져요. 한 번 밀고 방향을 미리 틀어 보세요":"Ice is slippery. Push once and start turning early.",
 "더 센추리":"The Century",
 "더 마제스틱":"The Majestic",
 "산 레모":"The San Remo",
@@ -1837,6 +1839,9 @@ const PARK_WATERS = [
 ];
 const PARK_ROCKS = [{ x: -4, z: -40, r: 8, h: 6 }, { x: -20, z: -205, r: 6, h: 3.5 }, { x: 32, z: -172, r: 5, h: 2.5 }, { x: -32, z: -126, r: 6, h: 3 },
   { x: 30, z: -76, r: 5, h: 3 }, { x: -36, z: -20, r: 5, h: 2.5 }];
+/* 울먼 링크: 더 폰드 북서쪽의 스케이트장. 얼음 위에서는 발이 미끄러져 한 번 밀면 한참 나아가고, 방향은 천천히 꺾인다 */
+const RINK = IS_PARK ? { x: -3, z: -219, hw: 12, hd: 7.5, y: 0 } : null;
+const onRink = (x, z) => !!RINK && Math.abs(x - RINK.x) < RINK.hw - 0.25 && Math.abs(z - RINK.z) < RINK.hd - 0.25;
 const LAWNS = IS_PARK ? [{ x: -24, z: -168, rx: 20, rz: 24 }, { x: 0, z: -2, rx: 24, rz: 22 }] : [];
 const BRIDGES = IS_PARK ? [
   { name: i18n('갭스토 브리지'), x: 30, z: -242, yaw: 0, len: 25, w: 4.2, base: 2.15, rise: 1.5, stone: true },
@@ -1991,7 +1996,8 @@ const pads = IS_PARK ? [
   { x: TX[TN-1], z: TZ[TN-1], r: 9, h: TH[TN-1] }
 ];
 pads.push({ x: CAFE.x, z: CAFE.z, r: 7.5, h: CAFE.h }, { x: CIRCLE.x, z: CIRCLE.z, r: 8, h: CIRCLE.h });
-if (HALL) pads.push({ x: HALL.x, z: HALL.z, r: 9.5, h: HALL.h });   // 카페와 모닥불 자리는 평평하게
+if (HALL) pads.push({ x: HALL.x, z: HALL.z, r: 9.5, h: HALL.h });
+if (RINK) { RINK.y = parkH(RINK.x, RINK.z) + 0.1; pads.push({ x: RINK.x, z: RINK.z, r: 16, h: RINK.y }); }   // 카페와 모닥불 자리는 평평하게
 const PV_YAW = Math.atan2(POND.x - PV.x, POND.z - PV.z);
 const DK_YAW = (() => { const i = nearIdx(DK.x, DK.z); return Math.atan2(DK.x - TX[i], DK.z - TZ[i]); })();
 function propFloor(x, z) {
@@ -2090,6 +2096,7 @@ in vec3 vNor; in vec3 vCol; in vec3 vWorld; in float vExtra;
 uniform vec3 uSunDir, uSunCol, uSkyCol, uGndCol, uFogCol, uCam, uSnowCol;
 uniform float uFogD, uSnow, uSnowLine, uAlpha, uEmissive, uFlat, uSnowable, uFlow, uFlowSpeed, uTime, uDetail, uShadowOn, uShadowTex, uMoss, uWater;
 uniform vec4 uFire;
+uniform vec3 uMelt[6];   // 불 둘레에 눈이 녹은 자리 (x, z, 반지름)
 uniform mat4 uLVP;
 uniform highp sampler2DShadow uShadow;
 out vec4 o;
@@ -2131,6 +2138,11 @@ void main(){
   }
   float alt = smoothstep(uSnowLine, uSnowLine + 14.0, vWorld.y);
   float snowAmt = max(uSnow, alt) * uSnowable;
+  if (snowAmt > 0.01) {
+    float melt = 0.0;
+    for (int i = 0; i < 6; i++) { vec3 q = uMelt[i]; if (q.z > 0.0) { float e = distance(vWorld.xz, q.xy) + (vn3(vWorld * 1.4) - 0.5) * 0.9; melt = max(melt, 1.0 - smoothstep(q.z * 0.7, q.z, e)); } }
+    snowAmt *= 1.0 - melt; base *= 1.0 - 0.2 * melt * uSnow * uSnowable;   // 녹은 자리는 젖어서 조금 어둡다
+  }
   float sm = snowAmt * smoothstep(0.30, 0.72, n.y) * (1.0 - 0.6 * vExtra);
   base = mix(base, uSnowCol, sm);
   float diff = max(dot(n, uSunDir), 0.0);
@@ -2201,7 +2213,7 @@ function program(vs, fs, names) {
   if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p));
   const u = {}; for (const n of names) u[n] = gl.getUniformLocation(p, n); return { p, u };
 }
-const P = program(VS, FS, ['uVP','uModel','uTime','uWind','uMode','uSunDir','uSunCol','uSkyCol','uGndCol','uFogCol','uCam','uSnowCol','uFogD','uSnow','uSnowLine','uAlpha','uEmissive','uFlat','uSnowable','uFlow','uFlowSpeed','uFire','uDetail','uShadowOn','uShadowTex','uLVP','uShadow','uMoss','uWater']);
+const P = program(VS, FS, ['uVP','uModel','uTime','uWind','uMode','uSunDir','uSunCol','uSkyCol','uGndCol','uFogCol','uCam','uSnowCol','uFogD','uSnow','uSnowLine','uAlpha','uEmissive','uFlat','uSnowable','uFlow','uFlowSpeed','uFire','uMelt','uDetail','uShadowOn','uShadowTex','uLVP','uShadow','uMoss','uWater']);
 const PS = program(SKY_VS, SKY_FS, ['uInvVP','uCam','uZen','uHor','uSunDir','uGlow','uCloud','uTime','uNight','uRain']);
 const PD = program(VS, `#version 300 es
 precision mediump float; out vec4 o; void main(){ o = vec4(1.0); }`, ['uVP','uModel','uTime','uWind','uMode']);
@@ -2435,7 +2447,25 @@ function fountainGeo(g) {
   W.mistS = Array.from({ length: MMAX }, () => ({ life: R() * 3, max: rr(1.6, 2.6), vx: rr(-0.4, 0.4), vz: rr(-0.4, 0.4), s: rr(0.2, 0.4) }));
   for (let i = 0; i < MMAX; i++) W.mist.col.set([1, 1, 1, 1], i * 4);
 }
+function buildRink(g) {   // 얼음판, 흰 펜스(동쪽에 드나드는 문), 대여소 오두막, 벤치
+  const R = RINK, y = R.y, ice = [0.86, 0.93, 0.99], board = [0.93, 0.94, 0.96], rail = [0.62, 0.16, 0.14];
+  box(g, R.x, y - 0.2, R.z, R.hw * 2 + 0.6, 0.4, R.hd * 2 + 0.6, [0.55, 0.56, 0.58], 0);
+  box(g, R.x, y + 0.045, R.z, R.hw * 2, 0.05, R.hd * 2, ice, 0);
+  for (const lx of [-6, 0, 6]) box(g, R.x + lx, y + 0.072, R.z, 0.12, 0.004, R.hd * 2 - 0.4, lx ? [0.35, 0.50, 0.85] : [0.85, 0.30, 0.28], 0);   // 얼음 위의 선
+  const wall = (x0, z0, x1, z1) => { const len = Math.hypot(x1 - x0, z1 - z0), yaw = Math.atan2(x1 - x0, z1 - z0), mx = (x0 + x1) / 2, mz = (z0 + z1) / 2;
+    box(g, mx, y + 0.5, mz, 0.16, 0.9, len, board, 0, yaw); box(g, mx, y + 0.98, mz, 0.22, 0.08, len, rail, 0, yaw);
+    for (let t = 0.3; t < len; t += 0.7) addObstacle(x0 + (x1 - x0) * t / len, z0 + (z1 - z0) * t / len, 0.34); };
+  const a = R.hw + 0.1, b = R.hd + 0.1, gate = 2.2;
+  wall(R.x - a, R.z - b, R.x + a, R.z - b); wall(R.x - a, R.z + b, R.x + a, R.z + b); wall(R.x - a, R.z - b, R.x - a, R.z + b);
+  wall(R.x + a, R.z - b, R.x + a, R.z - gate); wall(R.x + a, R.z + gate, R.x + a, R.z + b);
+  { const hx = R.x + a + 3.4, hz = R.z + b - 1.6;   // 스케이트 대여소
+    box(g, hx, y + 1.4, hz, 4.2, 2.8, 3.2, [0.55, 0.24, 0.20], 0); box(g, hx, y + 2.95, hz, 4.8, 0.3, 3.8, PCOL.roof, 0); box(g, hx - 2.12, y + 1.5, hz, 0.06, 1.1, 1.8, [0.20, 0.24, 0.28], 0);
+    for (const k of [-1, 0, 1]) box(g, hx - 2.3, y + 0.28 + (k + 1) * 0.02, hz + k * 0.5, 0.3, 0.16, 0.2, [[0.9, 0.9, 0.92], [0.2, 0.2, 0.22], [0.75, 0.2, 0.2]][k + 1], 0);
+    for (let k = 0; k < 6; k++) addObstacle(hx - 1.6 + (k % 3) * 1.6, hz - 1 + Math.floor(k / 3) * 2, 1.0); }
+  bench(g, R.x + a + 1.6, R.z - 4.6, -Math.PI / 2); bench(g, R.x - 4, R.z - b - 1.4, 0); bench(g, R.x + 4, R.z - b - 1.4, 0);
+}
 function buildParkProps(g) {
+  if (RINK) buildRink(g);
   const lg = new Geo();
   for (const b of BRIDGES) bridgeGeo(g, b);
   castleGeo(g); fountainGeo(g);
@@ -2852,7 +2882,7 @@ function buildWorld() {
     for (let z = -188; z <= -130; z += 5.5) for (const dx of [-6.4, -10.6, 6.4, 10.6]) {
       if (putTree(8 + dx + rr(-0.3, 0.3), z + rr(-0.4, 0.4), false, rr(1.35, 1.6))) { const c = ELM[Math.floor(R() * 3)]; W.decA[W.decA.length - 1] = c; }
     }
-    const blocked = (x, z, pad) => inWater(x, z, 1.12) || bridgeFloor(x, z) !== null || trailDist(x, z)[0] < pad
+    const blocked = (x, z, pad) => (RINK && Math.hypot(x - RINK.x, z - RINK.z) < 20) || inWater(x, z, 1.12) || bridgeFloor(x, z) !== null || trailDist(x, z)[0] < pad
       || LAWNS.some(lw => Math.hypot((x - lw.x) / lw.rx, (z - lw.z) / lw.rz) < 0.95)
       || Math.hypot(x - FOUNTAIN.x, z - FOUNTAIN.z) < 11 || Math.hypot(x - CASTLE.x, z - CASTLE.z) < 8
       || pads.some(p => Math.hypot(x - p.x, z - p.z) < p.r + 2) || parkPathNear(x, z);
@@ -3098,6 +3128,7 @@ function initLabels() {
   for (const n of NPCS) { const L = addLabel(`<em>${NPC_TAG}</em><span></span>`, 'npc', () => [n.x, n.y + 2.4 - 0.47 * n.sit, n.z], 38); L.el.querySelector('span').textContent = n.name; L.hideIf = () => !showNpcs(); n.label = L; }
   if (!IS_PARK) addLabel(i18n('<i></i><span>구름폭포</span>'), 'place', () => [W.fallLip[0], W.fallLip[1] + 3.2, W.fallLip[2]], 110);
   else for (const [nm, x, z] of [[i18n('더 레이크'), -14, -86], [i18n('저수지'), 0, 50], [i18n('그레이트 론'), 0, -2], [i18n('쉽 메도우'), -24, -168]]) addLabel(`<i></i><span>${nm}</span>`, 'place', () => [x, 6, z], 120);
+  if (RINK) addLabel(i18n('<i></i><span>울먼 링크</span>'), 'place', () => [RINK.x, RINK.y + 5.5, RINK.z], 110);
   if (IS_PARK) for (const [nm, x, y, z] of CITY_MARKS) { const L = addLabel('<i></i><span></span>', 'place', () => [x, y, z], 210); L.el.querySelector('span').textContent = nm; }   // 이름난 건물
   W.circleLabel = addLabel('<i></i><span></span>', 'place tap', () => [CIRCLE.x, CIRCLE.h + 5.2, CIRCLE.z], 120);
   W.circleLabel.el.addEventListener('click', e => { e.stopPropagation(); if (TALK.lives.some(f => !firePos(f).own) && !TALK.room) openFireCard(); else goCircle(); });
@@ -3556,6 +3587,13 @@ function stepBank() {
   for (let i = 0; i < 8; i++) { A.stepBank.snow.push(synthSnowStep()); A.stepBank.leaf.push(synthStep('leaf')); A.stepBank.wet.push(synthWetStep()); }
   return A.stepBank;
 }
+function skateSound() {   // 얼음을 긁고 나가는 날 소리
+  if (!A.ctx || !A.noise || !S.steps || S.mute) return;
+  const ctx = A.ctx, t = ctx.currentTime, src = ctx.createBufferSource(), bp = ctx.createBiquadFilter(), g = ctx.createGain();
+  src.buffer = A.noise; bp.type = 'bandpass'; bp.frequency.setValueAtTime(3200 + Math.random() * 900, t); bp.frequency.exponentialRampToValueAtTime(1700, t + 0.5); bp.Q.value = 1.4;
+  g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.11, t + 0.06); g.gain.exponentialRampToValueAtTime(0.001, t + 0.55);
+  src.connect(bp).connect(g).connect(A.sfx); src.start(t, Math.random() * 1.2, 0.6);
+}
 function footstep() {
   if (!A.ctx || !S.steps || S.mute) return;
   const ctx = A.ctx, t = ctx.currentTime, snow = S.sb > 0.5, wet = !snow && S.rainK > 0.45;
@@ -3843,12 +3881,21 @@ function movePlayer(dt) {
     mx = player.target.x - player.x; mz = player.target.z - player.z; dist = Math.hypot(mx, mz);
     if (dist < 0.3) { player.target = null; mx = mz = 0; }
   }
-  const l = Math.hypot(mx, mz); let moving = false;
+  let l = Math.hypot(mx, mz), moving = false, speedK = 1;
+  const ice = onRink(player.x, player.z);
+  if (ice) {   // 얼음 위: 미는 쪽으로 서서히 방향이 꺾이고, 손을 떼도 한참 미끄러진다
+    const G = S.glide || (S.glide = { x: 0, z: 0, v: 0 });
+    if (l > 1e-4) { const k = 1 - Math.exp(-dt * 2.6); G.x = lerp(G.x, mx / l, k); G.z = lerp(G.z, mz / l, k); G.v = lerp(G.v, 1.75, 1 - Math.exp(-dt * 1.1)); }
+    else { G.v *= Math.exp(-dt * 0.5); dist = Infinity; }
+    const gl2 = Math.hypot(G.x, G.z);
+    if (gl2 > 1e-3 && G.v > 0.07) { mx = G.x / gl2; mz = G.z / gl2; l = 1; speedK = G.v; } else { mx = mz = 0; l = 0; G.v = 0; }
+    if (!S.rinkTold) { S.rinkTold = true; toast(i18n('얼음 위에서는 미끄러져요. 한 번 밀고 방향을 미리 틀어 보세요')); }
+  } else if (S.glide) { S.glide.v = 0; S.glide.x = S.glide.z = 0; }
   if (l > 1e-4) {
     mx /= l; mz /= l;
     const ahead = groundY(player.x + mx * 0.8, player.z + mz * 0.8) - player.y;
     const sf = clamp(1 - ahead * 0.35, 0.6, 1.15);
-    const step = Math.min(SPEEDS[S.speedIdx] * sf * dt, dist);
+    const step = Math.min(SPEEDS[S.speedIdx] * sf * speedK * dt, dist);
     S.slopeNow = ahead / 0.8;
     // 앞이 막히면 조금씩 옆으로 틀어 보며 미끄러지듯 돌아간다 (나무, 바위, 물가, 다리 난간)
     const side = S.slideSign || 1; let fx = mx, fz = mz;
@@ -3857,7 +3904,7 @@ function movePlayer(dt) {
       const nx = player.x + dx * st, nz = player.z + dz * st;
       if (canStand(nx, nz) || (walkable(nx, nz) && hitObstacle(player.x, player.z) && !hitObstacle(nx, nz, 0.2))) {   // 이미 끼어 있으면 빠져나오는 쪽은 허용
         if (da) S.slideSign = Math.sign(a); else if (Math.random() < 0.02) S.slideSign = 1;
-        player.x = nx; player.z = nz; S.walked += st; player.phase += st * 2.4; moving = true; fx = dx; fz = dz; break;
+        player.x = nx; player.z = nz; S.walked += st; player.phase += st * (ice ? 0.95 : 2.4); moving = true; fx = dx; fz = dz; if (ice && da && S.glide) { S.glide.x = dx; S.glide.z = dz; S.glide.v *= 0.6; } break;   // 펜스에 닿으면 미끄러지며 느려진다
       }
     }
     if (moving) S.stuckT = 0;
@@ -3866,7 +3913,7 @@ function movePlayer(dt) {
   }
   player.moveAmt = lerp(player.moveAmt, moving ? 1 : 0, 1 - Math.exp(-dt * 8)); S.movedNow = moving;
   player.y = groundY(player.x, player.z);
-  const st = Math.floor(player.phase / Math.PI); if (st !== player.lastStep) { player.lastStep = st; if (moving) { footstep(); if (st % 4 === 0 && Math.random() < 0.6 && tierHas(MED_TIERS, medTierOf(medN()), medHideMask())('bell')) bagBell(); } }
+  const st = Math.floor(player.phase / Math.PI); if (st !== player.lastStep) { player.lastStep = st; if (moving) { if (ice) skateSound(); else footstep(); if (st % 4 === 0 && Math.random() < 0.6 && tierHas(MED_TIERS, medTierOf(medN()), medHideMask())('bell')) bagBell(); } }
   if (!S.auto) { const [d, i] = nearestTrail(player.x, player.z, Math.max(0, player.idx - 40), Math.min(TN - 1, player.idx + 40)); if (d < 12) player.idx = i; }
   S.climbMax = Math.max(S.climbMax, player.y);
 }
@@ -3874,6 +3921,54 @@ function movePlayer(dt) {
 const SNACK_BITES = [3.4, 4.9, 6.4];
 const ACT_DUR = { snack: 8.0, water: 7.0, bow: 1.6, wave: 2.1, hi5: 1.45 };
 const wTintS = () => mix3([1, 1, 1], [3.9, 2.4, 2.35], S.sb);
+/* 눈 녹기: 겨울에 불 둘레의 눈이 시간에 따라 둥글게 녹는다 (한두 분에 걸쳐 넓어진다). 불이 꺼지면 천천히 다시 덮인다.
+   늘 타는 모닥불 쉼터는 처음부터 녹아 있고, 야영 모닥불과 모닥불 이야기 불은 피운 지 얼마나 됐는지에 따라 넓이가 정해진다. */
+const MELT = [], MELT_U = new Float32Array(18);
+function updateMelt(dt) {
+  if (S.sb < 0.05) { MELT.length = 0; return; }
+  for (const m of MELT) m.live = false;
+  const feed = (id, x, z, want, age) => { let m = MELT.find(q => q.id === id); if (!m) { m = { id, x, z, r: 0 }; MELT.push(m); } m.x = x; m.z = z; m.live = true; m.r = Math.max(m.r - dt * 0.02, want * (1 - Math.exp(-Math.max(0, age) / 70))); };
+  feed('circle', CIRCLE.x, CIRCLE.z, CIRCLE.R + 2.4, 1e6);
+  if (S.camp && S.camp.fireOn) feed('me', S.camp.spot.fx, S.camp.spot.fz, 4.4, S.camp.t - 2.4 + (S.camp.phase !== 'pitch' ? CAMP_IN : 0) + (S.camp.melt || 0));
+  for (const p of NET.peers.values()) { const a = p.act; if (p.ready && !p.hidden && a && a.type === 'camp' && a.spot && a.t > 2.4) feed('p' + p.id, a.spot.fx, a.spot.fz, 4.4, a.t - 2.4); }
+  for (const f of TALK.ownLives) { const sp = fireSpot(f), t0 = Date.parse(f.starts_at || ''); feed('f' + f.id, sp.fx, sp.fz, 5.2, isFinite(t0) ? (Date.now() - t0) / 1000 : 600); }
+  for (let i = MELT.length - 1; i >= 0; i--) { const m = MELT[i]; if (!m.live) { m.r -= dt * 0.025; if (m.r < 0.05) MELT.splice(i, 1); } }
+  if (S.camp) S.camp.melt = (S.camp.melt || 0) + (S.camp.phase !== 'pitch' ? dt : 0);
+}
+function meltUniform() {
+  MELT_U.fill(0);
+  if (MELT.length) { const near = MELT.slice().sort((a, b) => Math.hypot(a.x - player.x, a.z - player.z) - Math.hypot(b.x - player.x, b.z - player.z)); for (let i = 0; i < Math.min(6, near.length); i++) { MELT_U[i * 3] = near[i].x; MELT_U[i * 3 + 1] = near[i].z; MELT_U[i * 3 + 2] = near[i].r; } }
+  return MELT_U;
+}
+const melted = (x, z) => MELT.some(m => Math.hypot(x - m.x, z - m.z) < m.r * 0.85);
+/* 눈 위 발자국과 얼음 위 스케이트 자국: 나와 다른 사람이 지나간 자리에 남았다가 천천히 사라진다 (이 기기에서 본 것만 그린다) */
+const PRINTS = [], PRINT_MAX = 150;
+function updatePrints(dt) {
+  for (const q of PRINTS) q.t += dt;
+  while (PRINTS.length && (PRINTS[0].t > PRINTS[0].life || PRINTS.length > PRINT_MAX)) PRINTS.shift();
+  const snow = S.sb > 0.5;
+  const walker = c => {
+    if (c.act || c.sit > 0.1 || isDeer(c)) { c._px = c.x; c._pz = c.z; return; }
+    if (c._px === undefined) { c._px = c.x; c._pz = c.z; c._side = 1; return; }
+    const d = Math.hypot(c.x - c._px, c.z - c._pz), ice = onRink(c.x, c.z);
+    if (d > 6) { c._px = c.x; c._pz = c.z; return; }   // 순간이동
+    if (d < (ice ? 0.75 : 0.62)) return;
+    const yaw = Math.atan2(c.x - c._px, c.z - c._pz); c._px = c.x; c._pz = c.z; c._side = -c._side;
+    if (ice) { PRINTS.push({ x: c.x - Math.cos(yaw) * 0.12 * c._side, z: c.z + Math.sin(yaw) * 0.12 * c._side, y: RINK.y + 0.075, yaw: yaw + 0.22 * c._side, t: 0, life: 50, ice: 1 }); return; }
+    if (!snow || melted(c.x, c.z) || (IS_PARK ? bridgeFloor(c.x, c.z) !== null : propFloor(c.x, c.z) > 0)) return;
+    const px = c.x - Math.cos(yaw) * 0.13 * c._side, pz = c.z + Math.sin(yaw) * 0.13 * c._side;
+    PRINTS.push({ x: px, z: pz, y: getH(px, pz) + 0.045, yaw, t: 0, life: 110, ice: 0 });
+  };
+  if (S.started) { walker(player); for (const p of NET.peers.values()) if (p.ready && !p.hidden && Math.hypot(p.x - player.x, p.z - player.z) < 70) walker(p); }
+}
+function drawPrints() {
+  for (const q of PRINTS) {
+    if (Math.hypot(q.x - eye[0], q.z - eye[2]) > 55) continue;
+    const a = Math.min(1, q.t * 4) * (1 - smooth(q.life * 0.6, q.life, q.t));
+    if (q.ice) draw(W.uDisc, { model: M.chain(M.T(q.x, q.y, q.z), M.Ry(q.yaw), M.S(0.028, 1, 0.42)), tint: [1, 1, 1], alpha: 0.55 * a, emissive: 0.35, flat: 0, snowable: 0 });
+    else draw(W.uDisc, { model: M.chain(M.T(q.x, q.y, q.z), M.Ry(q.yaw), M.S(0.1, 1, 0.19)), tint: [0.50, 0.57, 0.70], alpha: 0.5 * a, emissive: 0.1, flat: 0, snowable: 0 });
+  }
+}
 /* 겨울에는 걸을 때 하얀 입김 */
 const PUFFS = []; let puffT = 0;
 function updatePuffs(dt) {
@@ -5179,6 +5274,7 @@ function setCommon(env) {
   gl.uniform3fv(u.uFogCol, env.hor); gl.uniform3fv(u.uCam, eye); gl.uniform3fv(u.uSnowCol, [0.95, 0.97, 1.0]);
   gl.uniform1f(u.uFogD, env.fog); gl.uniform1f(u.uSnow, S.sb); gl.uniform1f(u.uSnowLine, lerp(122, 60, S.sb));
   const f = fireLight(); gl.uniform4f(u.uFire, f[0], f[1], f[2], f[3]);
+  gl.uniform3fv(u.uMelt, meltUniform());
   gl.uniform1f(u.uShadowOn, SHADOW.on ? 1 : 0); gl.uniform1f(u.uShadowTex, 1 / SHADOW.size); gl.uniformMatrix4fv(u.uLVP, false, SHADOW.lvp);
   gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, SHADOW.tex); gl.uniform1i(u.uShadow, 1); gl.activeTexture(gl.TEXTURE0);
 }
@@ -5211,6 +5307,7 @@ function computePose(c) {
   const sit = c.sit || 0, mv = c.moveAmt * (1 - sit);
   const chair = !!(c.act && (c.act.type === 'cafe' || c.act.type === 'circle')), bob = Math.abs(Math.sin(c.phase)) * 0.07 * mv, sw = Math.sin(c.phase) * 0.55 * mv, drop = (chair ? (c.act.type === 'circle' ? 0.25 : 0.14) : 0.47) * sit;
   const p = { chair, bob, sw, drop, sit, headPitch: 0, eyes: 1, chest: 1 + Math.sin(T * 2.1 + c.x) * 0.012 * (1 - c.moveAmt), arms: {}, item: null, lean: 0, lift: 0 };
+  if (RINK && !c.act && onRink(c.x, c.z)) { p.lean = 0.24 * mv; p.headPitch -= 0.14 * mv; }   // 스케이트: 몸을 앞으로 숙인다
   for (const side of [-1, 1]) {
     const sh = [0.37 * side, 1.12 + bob - drop, 0];
     let dir = angDir(-sw * side * 0.8, 0, 0.16 * side);
@@ -5466,7 +5563,7 @@ function render() {
     const sw = SPRING.water; draw(W.water, { model: M.chain(M.T(sw.x, sw.y, sw.z), M.S(sw.r, 1, sw.r)), tint: wTintS(), alpha: 0.85, emissive: 0.2, flat: 0, snowable: 0, water: S.sb > 0.5 ? 0.2 : 1.4 });
     if (SPRING.spout && S.sb < 0.7) { const sp = SPRING.spout, h = sp[1] - sw.y; draw(W.uCyl, { model: M.chain(M.T(sp[0], sw.y + h / 2, sp[2]), M.S(0.03, h, 0.03)), tint: [0.8, 0.9, 1], alpha: 0.6, emissive: 0.5, flat: 0, snowable: 0, flow: 1, flowSpeed: 2.2 }); }
   }
-  drawPuffs(); drawPoof();
+  drawPrints(); drawPuffs(); drawPoof();
   for (const w of WATERS) draw(W.water, { model: M.chain(M.T(w.x, w.level, w.z), M.S(w.rx * 1.12, 1, w.rz * 1.12)), tint: wTint, alpha: wAlpha, emissive: 0.18, flat: 0, snowable: 0, water: 1 - 0.85 * ice });
   if (W.basin) draw(W.water, { model: M.chain(M.T(W.basin.x, W.basin.y, W.basin.z), M.S(W.basin.r, 1, W.basin.r)), tint: wTint, alpha: wAlpha, emissive: 0.2, flat: 0, snowable: 0, water: 1.3 - 1.1 * ice });
   const fountainOff = IS_PARK && ice > 0.5;   // 겨울에는 분수를 잠근다
@@ -7472,7 +7569,7 @@ function frameStep(now) {
   updateCamp(dt);
   updateMedGuide();
   if (S.started && !S.breath) movePlayer(dt); else S.movedNow = false;
-  updatePuffs(dt);
+  updatePuffs(dt); updateMelt(dt); updatePrints(dt);
   moveNpcs(dt);
   updateDogs(dt);
   netTick(dt);
@@ -7855,7 +7952,7 @@ function boot() {
   $('#start').hidden = false; $('#enterBtn').disabled = false; $('#enterMed').disabled = false; $('#enterFocus').disabled = false; $('#enterFire').disabled = false; fireLoad(true);
   if (store.get('autoEnter', false)) { store.set('autoEnter', false); $('#enterBtn').focus(); }
   const ld = $('#loading'); ld.style.opacity = 0; setTimeout(() => { ld.hidden = true; }, 600);
-  window.__sangil = { keys, setRain, hitObstacle, OBS, CIRCLE, sitCircle, goCircle, sendChat, inCircle, S, player, TN, getH, CPS, startAct, cam, NET, NPCS, greet, sendChat, W, netState, startCamp, wakeCamp, openCampCard, goCafe, startCafe, DRINKS, CAFE, H5, answerHi5, showHi5Ask, MED, TX, TZ, IS_PARK, HALL };
+  window.__sangil = { keys, setRain, hitObstacle, OBS, CIRCLE, sitCircle, goCircle, sendChat, inCircle, S, player, TN, getH, CPS, startAct, cam, NET, NPCS, greet, sendChat, W, netState, startCamp, wakeCamp, openCampCard, goCafe, startCafe, DRINKS, CAFE, H5, answerHi5, showHi5Ask, MED, TX, TZ, IS_PARK, HALL, RINK, MELT, PRINTS, startCampNow: () => { S.campFire = true; startCamp(); } };
   requestAnimationFrame(t => { lastNow = t; frame(t); });
 }
 setTimeout(boot, 30);
