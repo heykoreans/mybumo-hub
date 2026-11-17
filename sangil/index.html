@@ -279,6 +279,14 @@ body.focusing #trailCard,body.focusing #hint{opacity:0;pointer-events:none}
 #snowThrow{padding:10px 20px;border-radius:999px;background:#f4f8ff;color:#22302a;font-weight:700;font-size:15px}
 #snowThrow:disabled{opacity:.45}
 #snowQuit{padding:8px 12px;border-radius:999px;color:var(--on-glass-soft);font-size:13px}
+#snowStart{padding:8px 13px;border-radius:999px;background:rgba(255,255,255,.16);color:var(--on-glass);font-size:13px;font-weight:600}
+#snowStart:disabled{opacity:.4}
+#snowPick{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(98px + env(safe-area-inset-bottom,0px));z-index:19;border-radius:22px;padding:10px 12px;display:grid;gap:8px;justify-items:center;font-size:13.5px;color:var(--on-glass);white-space:nowrap}
+#snowPick div{display:flex;gap:8px}
+#snowPick button{padding:9px 14px;border-radius:999px;font-weight:700;font-size:14px}
+#snowPick button small{font-weight:400;opacity:.75;margin-left:4px}
+#snowPick .tb{background:#3f7be0;color:#fff} #snowPick .tw{background:#f4f8ff;color:#22302a} #snowPick .tf{background:rgba(255,255,255,.14);color:var(--on-glass);font-weight:600}
+@media (max-width:520px){#snowBar{gap:6px;padding-left:12px;font-size:12.5px} #snowThrow{padding:10px 14px} #snowStart,#snowQuit{padding:8px 9px}}
 #zoomBox{position:fixed;right:max(12px,env(safe-area-inset-right,0px));top:46%;transform:translateY(-50%);z-index:18;border-radius:16px;display:grid;padding:4px;gap:2px}
 #zoomBox button{width:42px;height:42px;border-radius:12px;font-size:24px;line-height:1;color:var(--on-glass);display:grid;place-items:center}
 #zoomBox button:active{background:rgba(255,255,255,.14)}
@@ -535,7 +543,8 @@ body.calm #trailCard,body.calm #hint{opacity:0;pointer-events:none}
   </div>
   <div id="askBar" class="glass" hidden><span id="askTxt"></span><div><button id="askYes">하이파이브</button><button id="askNo">다음에</button></div></div>
   <div id="zoomBox" class="glass"><button id="zoomIn" aria-label="가까이 보기">+</button><button id="zoomOut" aria-label="멀리 보기">−</button></div>
-  <div id="snowBar" class="glass" hidden><b id="snowScore"></b><button id="snowThrow">던지기</button><button id="snowQuit">그만</button></div>
+  <div id="snowBar" class="glass" hidden><b id="snowScore"></b><button id="snowThrow">던지기</button><button id="snowStart" hidden>경기 시작</button><button id="snowQuit">그만</button></div>
+  <div id="snowPick" class="glass" hidden><span id="snowPickTxt">어느 팀으로 놀까요?</span><div><button class="tb" data-t="1">청팀<small id="snowNb"></small></button><button class="tw" data-t="2">백팀<small id="snowNw"></small></button><button class="tf" data-t="0">그냥 놀기</button></div></div>
   <button id="nearSit" class="glass" hidden><svg class="ico" viewBox="0 0 24 24"><path d="M12 4c2 2.5 3 4 3 6a3 3 0 0 1-6 0c0-1 .5-2 1.2-2.8.3 1 .9 1.6 1.8 1.6C12 7.5 12 6 12 4zM5 19.5l14-4M19 19.5l-14-4"/></svg><span id="nearSitTxt">모닥불에 앉기</span></button>
   <div id="actPill" class="glass" hidden><div><b id="actTitle"></b><small id="actSub"></small></div><button id="actAlt" hidden>숨 고르기</button><button id="actStop">일어나기</button></div>
   <div id="toast" class="glass" hidden></div>
@@ -1253,6 +1262,22 @@ const EN = {"센트럴파크":"Central Park",
 "{0}분 명상을 마쳤어요. 이 고요함을 안고 다시 걸어요":"{0}-minute meditation done. Carry this calm with you",
 "스트레스를 후~ 날려 보냈어요. 숨이 한결 고르네요":"Stress, blown away. Your breath feels steadier",
 "내 정보":"My profile",
+"경기 시작":"Start match",
+"어느 팀으로 놀까요?":"Which team?",
+"청팀":"Blue",
+"백팀":"White",
+"그냥 놀기":"Just play",
+"{0}명":"{0}",
+"{0}초 뒤 눈싸움 시작! 3분 동안 더 많이 맞힌 팀이 이겨요":"Snowball fight starts in {0}s! The team with more hits in 3 minutes wins.",
+"눈싸움이 한창이에요. 3분 동안 더 많이 맞힌 팀이 이겨요":"A snowball fight is on. The team with more hits in 3 minutes wins.",
+"상대 팀에 한 사람이 들어오면 시작할 수 있어요":"You can start once the other team has a player",
+"{0}으로 들어왔어요. 던지기 버튼이나 스페이스 키로 눈을 던져요":"You joined {0}. Throw with the button or the space bar.",
+"눈싸움 시작까지 {0}초":"Fight starts in {0}s",
+"청 {0} : {1} 백":"Blue {0} : {1} White",
+"눈싸움 끝! 청 {0} : {1} 백 · 비겼어요":"Fight over! Blue {0} : {1} White · a draw",
+"눈싸움 끝! 청 {0} : {1} 백 · {2} 승리":"Fight over! Blue {0} : {1} White · {2} wins",
+"이겼다!":"We won!",
+"다음엔 꼭!":"Next time!",
 "그 자리는 방금 다른 분이 앉았어요. 가까운 자리로 갈게요":"Someone just took that seat. Taking the nearest one.",
 "그 자리에는 다른 분이 앉아 있어요":"Someone is sitting there",
 "이 방석에 앉을게요. 얼마나 앉을지 골라 주세요":"This cushion it is. Choose how long to sit.",
@@ -5244,7 +5269,8 @@ function updateHud(dt) {
     const gOpen = free && S.started ? groupOpen() : null, gSoon = gOpen && gOpen.left <= 300;
     if (gSoon && GROUP.told !== gOpen.at && gOpen.left > 30) { GROUP.told = gOpen.at; toast(i18n('{0}분 뒤 함께 명상이 시작돼요', Math.max(1, Math.round(gOpen.left / 60)))); if (canSound()) sfx.bowl(0.3); }
     evLoad(false); evAlerts(); const evS = free ? evSoon() : null;
-    const kind = SNOW.on ? '' : free && SNOW.zone && snowZone(player.x, player.z, 0.95) && db > 2.6 ? 'snow' : free && T < S.fireAsk && TALK.lives.length ? 'fireAsk' : evS ? 'event' : free && T < S.bookAsk ? 'bookAsk' : gSoon ? 'group' : free && db < 2.6 ? 'book' : free && ds < 5 ? 'spring' : free && dh < (HALL ? HALL.r + 4 : 0) ? 'hall' : free && dc < 14 ? 'circle' : free && dk < 15 ? 'cafe' : '';
+    if (!$('#snowPick').hidden && !(free && snowZone(player.x, player.z, 1.1))) $('#snowPick').hidden = true;
+    const kind = SNOW.on || !$('#snowPick').hidden ? '' : free && SNOW.zone && snowZone(player.x, player.z, 0.95) && db > 2.6 ? 'snow' : free && T < S.fireAsk && TALK.lives.length ? 'fireAsk' : evS ? 'event' : free && T < S.bookAsk ? 'bookAsk' : gSoon ? 'group' : free && db < 2.6 ? 'book' : free && ds < 5 ? 'spring' : free && dh < (HALL ? HALL.r + 4 : 0) ? 'hall' : free && dc < 14 ? 'circle' : free && dk < 15 ? 'cafe' : '';
     if ($('#nearSit').dataset.k !== kind) { $('#nearSit').dataset.k = kind; $('#nearSitTxt').textContent = kind === 'snow' ? i18n('눈 놀이 하기') : kind === 'fireAsk' ? i18n('모닥불에서 이야기 나누기') : kind === 'event' ? i18n('곧 모임 · {0}', bookText(evS.title).slice(0, 18)) : kind === 'group' ? i18n('곧 함께 명상 · 참여하기') : kind === 'bookAsk' ? i18n('방명록에 한 줄 남기기') : kind === 'book' ? i18n('방명록 보기') : kind === 'hall' ? i18n('명상원에서 명상하기') : kind === 'cafe' ? i18n('카페 들어가기') : kind === 'spring' ? (IS_PARK ? i18n('음수대에서 물 마시기') : i18n('약수 마시기')) : i18n('모닥불에 앉기'); }
     if ($('#nearSit').hidden === !!kind) $('#nearSit').hidden = !kind;
   }
@@ -5957,9 +5983,31 @@ function medRecord(mt) {
    센트럴파크 쉽 메도우에서 "눈 놀이"에 들어온 사람끼리만 눈을 던지고 맞는다. 명상하거나 그냥 산책하는 사람은 맞지 않는다.
    던진 사람이 눈덩이의 출발점과 속도를 알리면 각자 화면에서 같은 길로 날아가고, 맞았는지는 맞은 사람 쪽에서 판정해 모두에게 알린다.
    세 번 맞으면 얼굴이 빨개져서 5초 쉰다 (그동안은 맞지 않는다). */
-const SNOW = { on: false, balls: [], hits: 0, got: 0, strikes: 0, restUntil: -1, lastThrow: -9, seq: 0, pingAt: 0, zone: IS_PARK ? LAWNS[0] : null, G: 14, shown: '' };
+const SNOW = { on: false, team: 0, match: null, mh: 0, balls: [], hits: 0, got: 0, strikes: 0, restUntil: -1, lastThrow: -9, seq: 0, pingAt: 0, zone: IS_PARK ? LAWNS[0] : null, G: 14, shown: '' };
 const snowZone = (x, z, k = 1) => !!SNOW.zone && Math.hypot((x - SNOW.zone.x) / SNOW.zone.rx, (z - SNOW.zone.z) / SNOW.zone.rz) < k;
 const snowPlaying = p => (p.snowOn || 0) > T;
+/* 청백 눈싸움: 눈 놀이에 들어올 때 청팀·백팀을 고른다. 두 팀에 한 사람씩 있으면 누구든 '경기 시작'을 눌러 3분 경기를 연다.
+   같은 팀끼리는 맞지 않는다. 각자 자기가 맞힌 횟수를 몇 초마다 알리고, 그것을 팀별로 더한 것이 점수다 (서버 없이 서로 알린 숫자로 센다). */
+const SNOW_TEAM = [null, { name: '청팀', col: [0.25, 0.50, 1.0] }, { name: '백팀', col: [1, 1, 1] }], SNOW_LEN = 180;
+const snowLive = () => !!SNOW.match && Date.now() >= SNOW.match.at && Date.now() < SNOW.match.end;
+function snowTeamN(t) { let n = SNOW.on && SNOW.team === t ? 1 : 0; for (const q of NET.peers.values()) if (q.ready && !q.hidden && snowPlaying(q) && (q.snowTeam | 0) === t) n++; return n; }
+function snowScore(t) { const id = SNOW.match ? SNOW.match.id : 0; let n = SNOW.team === t ? SNOW.mh : 0; for (const q of NET.peers.values()) if ((q.snowTeam | 0) === t && q.snowMid === id) n += q.snowMh | 0; return n; }
+function snowAdopt(id, at, len) {   // 경기를 받아들인다 (먼저 잡힌 경기가 이긴다)
+  if (!(id > 0) || !isFinite(at) || at + len * 1000 < Date.now() || at > Date.now() + 60000) return;
+  if (SNOW.match && (SNOW.match.id === id || SNOW.match.at <= at)) return;
+  SNOW.match = { id, at, end: at + len * 1000, done: false }; SNOW.mh = 0; SNOW.strikes = 0; SNOW.pingAt = -99; SNOW.shown = '';
+  for (const q of NET.peers.values()) { q.snowMh = 0; q.snowMid = 0; }
+  if (SNOW.on && SNOW.team) { toast(at > Date.now() + 1500 ? i18n('{0}초 뒤 눈싸움 시작! 3분 동안 더 많이 맞힌 팀이 이겨요', Math.ceil((at - Date.now()) / 1000)) : i18n('눈싸움이 한창이에요. 3분 동안 더 많이 맞힌 팀이 이겨요')); if (canSound()) sfx.bowl(0.4); }
+}
+function snowMatchStart() {
+  if (!SNOW.on || !SNOW.team || SNOW.match) return;
+  if (!snowTeamN(1) || !snowTeamN(2)) { toast(i18n('상대 팀에 한 사람이 들어오면 시작할 수 있어요')); return; }
+  const at = Date.now() + 5000; netSend({ k: 'snm', id: at, at, len: SNOW_LEN }); snowAdopt(at, at, SNOW_LEN);
+}
+function snowPickOpen() {
+  $('#snowNb').textContent = snowTeamN(1) ? i18n('{0}명', snowTeamN(1)) : ''; $('#snowNw').textContent = snowTeamN(2) ? i18n('{0}명', snowTeamN(2)) : '';
+  $('#snowPick').hidden = false;
+}
 function snowSplat(x, y, z, n = 6) { for (let i = 0; i < n; i++) { const a = Math.random() * TAU, v = 0.5 + Math.random() * 1.1; PUFFS.push({ x, y: y + (Math.random() - 0.5) * 0.2, z, vx: Math.cos(a) * v, vz: Math.sin(a) * v, t: 0.5 + Math.random() * 0.4 }); } }
 function snowSound(kind) {
   if (!A.ctx || !A.noise || S.mute) return;
@@ -5968,42 +6016,44 @@ function snowSound(kind) {
   g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(hit ? 0.5 : 0.13, t + 0.015); g.gain.exponentialRampToValueAtTime(0.001, t + (hit ? 0.2 : 0.26));
   src.connect(f).connect(g).connect(A.sfx); src.start(t, Math.random() * 1.4, 0.3);
 }
-function snowJoin() {
+function snowJoin(team = 0) {
   if (!SNOW.zone || SNOW.on) return;
+  $('#snowPick').hidden = true; SNOW.team = team === 1 || team === 2 ? team : 0; SNOW.mh = 0;
   closeMenus(); if (S.breath) stopBreath();
   if (!S.season) setSeason(1, false);   // 눈이 있어야 던질 수 있다
   SNOW.on = true; SNOW.hits = 0; SNOW.got = 0; SNOW.strikes = 0; SNOW.restUntil = -1; SNOW.pingAt = -99; SNOW.shown = '';
   audioInit(); $('#snowBar').hidden = false;
-  toast(i18n('눈 놀이를 시작해요. 던지기 버튼이나 스페이스 키로 눈을 던져요'));
+  toast(SNOW.team ? i18n('{0}으로 들어왔어요. 던지기 버튼이나 스페이스 키로 눈을 던져요', i18n(SNOW_TEAM[SNOW.team].name)) : i18n('눈 놀이를 시작해요. 던지기 버튼이나 스페이스 키로 눈을 던져요'));
 }
 function snowLeave(quiet) {
   if (!SNOW.on) return;
-  SNOW.on = false; SNOW.restUntil = -1; $('#snowBar').hidden = true; netSend({ k: 'snj', on: 0 });
+  SNOW.on = false; SNOW.restUntil = -1; $('#snowBar').hidden = true; netSend({ k: 'snj', on: 0 }); if (!snowLive()) SNOW.match = null;
   if (!quiet) toast(i18n('눈 놀이를 마쳤어요 · 맞힘 {0}번, 맞음 {1}번', SNOW.hits, SNOW.got));
 }
 function snowThrow() {
   if (!SNOW.on || T - SNOW.lastThrow < 0.7 || T < SNOW.restUntil || player.act) return;
   SNOW.lastThrow = T;
   let tgt = null, bd = 26;   // 가까이 있는 놀이 상대를 향해 던지고, 없으면 보는 쪽으로 던진다
-  for (const q of NET.peers.values()) { if (!q.ready || q.hidden || !snowPlaying(q) || T < (q.snowRedUntil || 0)) continue; const d = Math.hypot(q.x - player.x, q.z - player.z); if (d < bd && d > 0.8) { bd = d; tgt = q; } }
+  for (const q of NET.peers.values()) { if (!q.ready || q.hidden || !snowPlaying(q) || T < (q.snowRedUntil || 0)) continue; if (SNOW.team && ((q.snowTeam | 0) === SNOW.team || (snowLive() && !(q.snowTeam | 0)))) continue; const d = Math.hypot(q.x - player.x, q.z - player.z); if (d < bd && d > 0.8) { bd = d; tgt = q; } }
   const tx = tgt ? tgt.x : player.x + Math.sin(cam.yaw) * 13, tz = tgt ? tgt.z : player.z + Math.cos(cam.yaw) * 13, ty = (tgt ? tgt.y : groundY(tx, tz)) + (tgt ? 1.0 : 0.2);
   const hd = Math.atan2(tx - player.x, tz - player.z) + (Math.random() - 0.5) * 0.09; player.heading = hd; player.target = null;
   const sx = player.x + Math.sin(hd) * 0.45, sy = player.y + 1.45, sz = player.z + Math.cos(hd) * 0.45, dist = Math.hypot(tx - sx, tz - sz) * (0.96 + Math.random() * 0.08);
   const tf = clamp(dist / 15, 0.35, 1.35), v = [Math.sin(hd) * dist / tf, (ty - sy) / tf + 0.5 * SNOW.G * tf, Math.cos(hd) * dist / tf];
   const id = ME.id + ':' + (++SNOW.seq);
-  SNOW.balls.push({ id, from: ME.id, own: true, x: sx, y: sy, z: sz, vx: v[0], vy: v[1], vz: v[2], t: 0 });
+  SNOW.balls.push({ id, from: ME.id, own: true, tm: SNOW.team, x: sx, y: sy, z: sz, vx: v[0], vy: v[1], vz: v[2], t: 0 });
   player.throwT = T; snowSound('throw');
-  netSend({ k: 'snb', b: id, s: [+sx.toFixed(2), +sy.toFixed(2), +sz.toFixed(2)], v: [+v[0].toFixed(2), +v[1].toFixed(2), +v[2].toFixed(2)] });
+  netSend({ k: 'snb', b: id, tm: SNOW.team, s: [+sx.toFixed(2), +sy.toFixed(2), +sz.toFixed(2)], v: [+v[0].toFixed(2), +v[1].toFixed(2), +v[2].toFixed(2)] });
 }
 function snowNet(p, m) {   // 다른 사람이 보낸 눈 놀이 소식
-  if (m.k === 'snj') { p.snowOn = m.on ? T + 20 : 0; return; }
+  if (m.k === 'snj') { p.snowOn = m.on ? T + 20 : 0; p.snowTeam = m.tm === 1 || m.tm === 2 ? m.tm : 0; p.snowMh = clamp(m.mh | 0, 0, 999); p.snowMid = +m.mid || 0; if (m.on && +m.mid > 0) snowAdopt(+m.mid, +m.ms, clamp(+m.ml || SNOW_LEN, 30, 600)); return; }
+  if (m.k === 'snm') { snowAdopt(+m.id, +m.at, clamp(+m.len || SNOW_LEN, 30, 600)); return; }
   if (m.k === 'snr') { p.snowRedUntil = T + 5; return; }
   if (m.k === 'snb') {
     const s2 = m.s, v = m.v;
     if (p.hidden || !Array.isArray(s2) || !Array.isArray(v) || s2.length < 3 || v.length < 3 || ![...s2, ...v].every(n => isFinite(+n)) || Math.hypot(+v[0], +v[1], +v[2]) > 45) return;
     if (Math.hypot(+s2[0] - player.x, +s2[2] - player.z) > 90 || SNOW.balls.filter(b => b.from === p.id).length >= 6) return;
     const lat = clamp((Date.now() - (+m.t || Date.now())) / 1000, 0, 0.5);
-    SNOW.balls.push({ id: String(m.b || '').slice(0, 40), from: p.id, own: false, x: +s2[0] + +v[0] * lat, y: +s2[1] + +v[1] * lat - 0.5 * SNOW.G * lat * lat, z: +s2[2] + +v[2] * lat, vx: +v[0], vy: +v[1] - SNOW.G * lat, vz: +v[2], t: lat });
+    SNOW.balls.push({ id: String(m.b || '').slice(0, 40), from: p.id, own: false, tm: m.tm === 1 || m.tm === 2 ? m.tm : 0, x: +s2[0] + +v[0] * lat, y: +s2[1] + +v[1] * lat - 0.5 * SNOW.G * lat * lat, z: +s2[2] + +v[2] * lat, vx: +v[0], vy: +v[1] - SNOW.G * lat, vz: +v[2], t: lat });
     p.throwT = T; p.snowOn = T + 20; p.heading = Math.atan2(+v[0], +v[2]); if (Math.hypot(p.x - player.x, p.z - player.z) < 30) snowSound('throw');
     return;
   }
@@ -6012,24 +6062,38 @@ function snowNet(p, m) {   // 다른 사람이 보낸 눈 놀이 소식
     if (p.hidden) return;
     if (isFinite(+m.x) && isFinite(+m.z)) snowSplat(+m.x, isFinite(+m.y) ? +m.y : p.y + 1.1, +m.z, 7);
     showBubble(p, i18n('앗!'), 1.1, true);
-    if (m.by === ME.id) { SNOW.hits++; snowSound('hit'); toast((m.n | 0) >= 3 ? i18n('{0}님을 세 번 맞혔어요! 5초 쉬러 갔어요', p.nick) : i18n('{0}님을 맞혔어요', p.nick)); }
+    if (m.by === ME.id) { SNOW.hits++; if (snowLive() && SNOW.team) { SNOW.mh++; SNOW.pingAt = Math.min(SNOW.pingAt, T - 2.2); } snowSound('hit'); toast((m.n | 0) >= 3 ? i18n('{0}님을 세 번 맞혔어요! 5초 쉬러 갔어요', p.nick) : i18n('{0}님을 맞혔어요', p.nick)); }
   }
 }
 function updateSnow(dt) {
   if (SNOW.on) {
     if (!S.started || (player.act && !GREETS.includes(player.act.type))) snowLeave(true);
     else if (!snowZone(player.x, player.z, 1.3)) { snowLeave(false); toast(i18n('잔디밭을 벗어나 눈 놀이를 마쳤어요')); }
-    else if (T - SNOW.pingAt > 8) { SNOW.pingAt = T; netSend({ k: 'snj', on: 1 }); }   // 새로 온 사람도 누가 놀고 있는지 알게
+    else if (T - SNOW.pingAt > (SNOW.match ? 3 : 8)) { SNOW.pingAt = T; const M2 = SNOW.match; netSend({ k: 'snj', on: 1, tm: SNOW.team, mh: SNOW.mh, mid: M2 ? M2.id : 0, ms: M2 ? M2.at : 0, ml: M2 ? Math.round((M2.end - M2.at) / 1000) : 0 }); }   // 새로 온 사람도 누가 어느 팀인지, 경기가 열렸는지 알게
   }
   if (SNOW.on) {
-    const rest = T < SNOW.restUntil, txt = rest ? i18n('얼굴이 빨개졌어요 · {0}초 쉬기', Math.ceil(SNOW.restUntil - T)) : i18n('맞힘 {0} · 맞음 {1}', SNOW.hits, SNOW.got);
-    if (txt !== SNOW.shown) { SNOW.shown = txt; $('#snowScore').textContent = txt; $('#snowThrow').disabled = rest; }
+    const rest = T < SNOW.restUntil, M2 = SNOW.match, now = Date.now();
+    const txt = rest ? i18n('얼굴이 빨개졌어요 · {0}초 쉬기', Math.ceil(SNOW.restUntil - T))
+      : M2 && now < M2.at ? i18n('눈싸움 시작까지 {0}초', Math.ceil((M2.at - now) / 1000))
+      : M2 ? i18n('청 {0} : {1} 백', snowScore(1), snowScore(2)) + (now < M2.end ? ' · ' + fmtDur(Math.ceil((M2.end - now) / 1000)) : '')
+      : i18n('맞힘 {0} · 맞음 {1}', SNOW.hits, SNOW.got);
+    const canStart = !!SNOW.team && !M2, ready = canStart && snowTeamN(1) > 0 && snowTeamN(2) > 0, sig = txt + '|' + canStart + ready + rest;
+    if (sig !== SNOW.shown) { SNOW.shown = sig; $('#snowScore').textContent = txt; $('#snowThrow').disabled = rest; $('#snowStart').hidden = !canStart; $('#snowStart').disabled = !ready; }
+  }
+  if (SNOW.match) {   // 경기 끝: 마지막 점수를 한 번 더 알리고, 잠깐 기다렸다가 승패를 알린다
+    const M2 = SNOW.match, now = Date.now();
+    if (now >= M2.end && !M2.done) { M2.done = true; SNOW.pingAt = -99;
+      setTimeout(() => { if (SNOW.match !== M2) return; const a = snowScore(1), b = snowScore(2);
+        if (SNOW.on) { toast(a === b ? i18n('눈싸움 끝! 청 {0} : {1} 백 · 비겼어요', a, b) : i18n('눈싸움 끝! 청 {0} : {1} 백 · {2} 승리', a, b, i18n(SNOW_TEAM[a > b ? 1 : 2].name))); if (canSound()) sfx.bowl(0.7); if (SNOW.team && a !== b) showBubble(player, (a > b ? 1 : 2) === SNOW.team ? i18n('이겼다!') : i18n('다음엔 꼭!'), 3, true); }
+      }, 2200);
+      setTimeout(() => { if (SNOW.match === M2) { SNOW.match = null; SNOW.mh = 0; SNOW.shown = ''; } }, 9000); }
+    else if (now > M2.end + 20000) SNOW.match = null;
   }
   for (let i = SNOW.balls.length - 1; i >= 0; i--) {
     const b = SNOW.balls[i], px = b.x, py = b.y, pz = b.z; b.t += dt; b.x += b.vx * dt; b.y += b.vy * dt; b.z += b.vz * dt; b.vy -= SNOW.G * dt;
     // 화면이 느려 한 번에 멀리 움직여도 지나치지 않게, 이번에 지나온 길에서 나와 가장 가까운 점으로 판정한다
     const dx = b.x - px, dz = b.z - pz, l2 = dx * dx + dz * dz, u = l2 > 1e-6 ? clamp(((player.x - px) * dx + (player.z - pz) * dz) / l2, 0, 1) : 1, hx = px + dx * u, hy = py + (b.y - py) * u, hz = pz + dz * u;
-    if (!b.own && SNOW.on && T >= SNOW.restUntil && Math.hypot(hx - player.x, hz - player.z) < 0.6 && hy > player.y + 0.05 && hy < player.y + 2.0) {   // 내가 맞았다
+    if (!b.own && SNOW.on && T >= SNOW.restUntil && !(SNOW.team && (b.tm === SNOW.team || (snowLive() && !b.tm))) && Math.hypot(hx - player.x, hz - player.z) < 0.6 && hy > player.y + 0.05 && hy < player.y + 2.0) {   // 내가 맞았다
       b.x = hx; b.y = hy; b.z = hz;
       SNOW.balls.splice(i, 1); SNOW.got++; SNOW.strikes++; snowSplat(b.x, b.y, b.z, 8); snowSound('hit'); showBubble(player, i18n('앗!'), 1.1, true);
       netSend({ k: 'snh', b: b.id, by: b.from, x: +b.x.toFixed(2), y: +b.y.toFixed(2), z: +b.z.toFixed(2), n: SNOW.strikes });
@@ -6040,7 +6104,12 @@ function updateSnow(dt) {
     if (b.t > 3.5) SNOW.balls.splice(i, 1);
   }
 }
-function drawSnowballs() { for (const b of SNOW.balls) draw(W.uSphere, { model: M.chain(M.T(b.x, b.y, b.z), M.S(0.13)), tint: [1, 1, 1], emissive: 0.3, flat: 0, snowable: 0 }); }
+function drawSnowTeams() {   // 발밑의 팀 색 동그라미
+  const ring = (c, t) => draw(W.uRing, { model: M.chain(M.T(c.x, c.y + 0.07, c.z), M.S(0.62)), tint: SNOW_TEAM[t].col, alpha: 0.9, emissive: 0.7, flat: 0, snowable: 0 });
+  if (SNOW.on && SNOW.team) ring(player, SNOW.team);
+  for (const q of NET.peers.values()) if (q.ready && !q.hidden && snowPlaying(q) && (q.snowTeam | 0) && Math.hypot(q.x - eye[0], q.z - eye[2]) < 80) ring(q, q.snowTeam);
+}
+function drawSnowballs() { drawSnowTeams(); for (const b of SNOW.balls) draw(W.uSphere, { model: M.chain(M.T(b.x, b.y, b.z), M.S(0.13)), tint: [1, 1, 1], emissive: 0.3, flat: 0, snowable: 0 }); }
 /* ================= 공지와 모임 =================
    산지기·불지기가 알림 글이나 모임(눈싸움, 경도, 명상, 산책)을 올리고, 로그인한 사람이 참여 신청을 한다. 읽기는 누구나.
    서버 함수 sangil_event_list, sangil_event_create, sangil_event_cancel, sangil_event_rsvp_toggle 를 쓴다.
@@ -7744,7 +7813,7 @@ function onNet(m) {
     H5.out = null; dropBubble(player);
     if (m.ok) { if (Math.hypot(p.x - player.x, p.z - player.z) < 7) { H5.with = p; greet('hi5', null, true); H5.with = null; } else toast(i18n('{0}님이 좋대요. 조금 더 가까이 가서 다시 해 보세요', p.nick)); }
     else toast(i18n('{0}님은 다음에 하자고 하네요', p.nick));
-  } else if (m.k === 'snb' || m.k === 'snh' || m.k === 'snj' || m.k === 'snr') { snowNet(p, m); return;
+  } else if (m.k === 'snb' || m.k === 'snh' || m.k === 'snj' || m.k === 'snr' || m.k === 'snm') { snowNet(p, m); return;
   } else if (m.k === 'note') { recvNote(p, m); return;
   } else if (m.k === 'nthx') {   // 내가 건넨 쪽지에 고마워요
     if (m.to !== ME.id || p.hidden) return;
@@ -8153,7 +8222,7 @@ function bindUI() {
   $('#gbExt').onclick = () => { location.href = 'kakaotalk://web/openExternal?url=' + encodeURIComponent(location.href); };
   W.meLabel.el.addEventListener('click', e => { e.stopPropagation(); openGb(); });   // 내 이름표를 누르면 내 정보
   authInit(false); renderGb();
-  $('#nearSit').onclick = e => { e.stopPropagation(); const k = $('#nearSit').dataset.k; if (k === 'snow') snowJoin(); else if (k === 'fireAsk') { S.fireAsk = 0; openFireCard(); } else if (k === 'event') openEvents(); else if (k === 'group') beginGroup(); else if (k === 'book' || k === 'bookAsk') openBook(); else if (k === 'hall') { S.medPlace = 'hall'; openMedCard(); } else if (k === 'cafe') goCafe(); else if (k === 'spring') drinkSpring(); else goCircle(); };
+  $('#nearSit').onclick = e => { e.stopPropagation(); const k = $('#nearSit').dataset.k; if (k === 'snow') snowPickOpen(); else if (k === 'fireAsk') { S.fireAsk = 0; openFireCard(); } else if (k === 'event') openEvents(); else if (k === 'group') beginGroup(); else if (k === 'book' || k === 'bookAsk') openBook(); else if (k === 'hall') { S.medPlace = 'hall'; openMedCard(); } else if (k === 'cafe') goCafe(); else if (k === 'spring') drinkSpring(); else goCircle(); };
   $('#actAlt').onclick = e => { e.stopPropagation(); if (player.act && player.act.type === 'focus' && FOCUS.phase !== 'break') { openFocusCard(); return; } $('#actAlt').hidden = true; startBreath(); };
   $('#focusGo').onclick = beginFocus; $('#focusCancel').onclick = () => { $('#focusCard').hidden = true; };
   $('#focusVol').oninput = () => { FOCUS.vol = +$('#focusVol').value; store.set('focusVol', FOCUS.vol); focusVolume(0.2); };
@@ -8162,7 +8231,8 @@ function bindUI() {
   document.querySelectorAll('#radioSeg button').forEach(b => b.onclick = () => setRadio(b.dataset.r === '1')); setRadio(RADIO.on);
   addEventListener('pointerdown', radioKick, true);
   $('#medGo').onclick = beginMeditate; $('#medCancel').onclick = () => { $('#medCard').hidden = true; S.hallPref = null; };
-  $('#snowThrow').onclick = e => { e.stopPropagation(); snowThrow(); }; $('#snowQuit').onclick = e => { e.stopPropagation(); snowLeave(false); };
+  $('#snowThrow').onclick = e => { e.stopPropagation(); snowThrow(); }; $('#snowQuit').onclick = e => { e.stopPropagation(); snowLeave(false); }; $('#snowStart').onclick = e => { e.stopPropagation(); snowMatchStart(); };
+  document.querySelectorAll('#snowPick button').forEach(b => b.onclick = e => { e.stopPropagation(); snowJoin(+b.dataset.t); });
   addEventListener('keydown', e => { if (e.code === 'Space' && SNOW.on && !(e.target.closest && e.target.closest('input,select,textarea,button'))) { e.preventDefault(); snowThrow(); } });
   $('#evPost').onclick = evPost; $('#evClose').onclick = () => { $('#evCard').hidden = true; }; $('#evStart').onclick = openEvents;
   for (const id of ['evName', 'evBody', 'evWhen']) $('#' + id).addEventListener('keydown', e => e.stopPropagation());
